@@ -3,6 +3,7 @@ class GeneralObject
   LEFT  = 'left'
   RIGHT = 'right'
   SCROLLING_SPEED = 4
+  MAX_SPEED      = 5
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
@@ -58,9 +59,40 @@ class GeneralObject
   end
 
   protected
+  def self.get_max_speed
+    self::MAX_SPEED
+  end
 
   def is_on_screen? width, height
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
     @y > (0 - get_height) && @y < (height + get_height) && @x > (0 - get_width) && @x < (width + get_width)
   end
+
+
+  def point_is_between_the_ys_of_the_line_segment?(point, a_point_on_polygon, trailing_point_on_polygon)
+    (a_point_on_polygon.y <= point.y && point.y < trailing_point_on_polygon.y) || 
+    (trailing_point_on_polygon.y <= point.y && point.y < a_point_on_polygon.y)
+  end
+
+  def ray_crosses_through_line_segment?(point, a_point_on_polygon, trailing_point_on_polygon)
+    (point.x < (trailing_point_on_polygon.x - a_point_on_polygon.x) * (point.y - a_point_on_polygon.y) / 
+               (trailing_point_on_polygon.y - a_point_on_polygon.y) + a_point_on_polygon.x)
+  end
+
+  # def is_on_screen?
+  #   # @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Player)
+  #   @y > (0 - get_height) && @y < (HEIGHT + get_height) && @x > (0 - get_width) && @x < (WIDTH + get_width)
+  # end
+
+  def calc_angle(point1, point2)
+    bearing = (180/Math::PI)*Math.atan2(point1.y-point2.y, point2.x-point1.x)
+    return bearing
+  end
+
+  def calc_radian(point1, point2)
+    rdn = Math.atan2(point1.y-point2.y, point2.x-point1.x)
+    return rdn
+  end
+
+
 end

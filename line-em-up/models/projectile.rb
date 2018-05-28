@@ -4,7 +4,6 @@ class Projectile < GeneralObject
   attr_accessor :x, :y, :time_alive, :mouse_start_x, :mouse_start_y, :vector_x, :vector_y, :angle, :radian
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   COOLDOWN_DELAY = 50
-  MAX_SPEED      = 5
   STARTING_SPEED = 3.0
   INITIAL_DELAY  = 0
   SPEED_INCREASE_FACTOR = 0.0
@@ -54,6 +53,10 @@ class Projectile < GeneralObject
 
   def get_draw_ordering
     ZOrder::Projectile
+  end
+
+  def destructable?
+    false
   end
 
   def hit_object(object)
@@ -134,9 +137,6 @@ class Projectile < GeneralObject
   end
 
   protected
-  def self.get_max_speed
-    self::MAX_SPEED
-  end
   def self.get_damage
     self::DAMAGE
   end
@@ -202,7 +202,7 @@ class Projectile < GeneralObject
     #       [[2, 2], [3, 5]]
     #     ) == [[2, 2], [3, 4]]
 
-  private
+  # private
 
   def point_is_between_the_ys_of_the_line_segment?(point, a_point_on_polygon, trailing_point_on_polygon)
     (a_point_on_polygon.y <= point.y && point.y < trailing_point_on_polygon.y) || 

@@ -31,7 +31,7 @@ class EnemyHomingMissile < Projectile
       @y = object.y
     end
 
-    if homing_object
+    if homing_object && homing_object.is_alive
 
       start_point = OpenStruct.new(:x => @x - width / 2, :y => @y - height / 2)
       # start_point = GeoPoint.new(@x - WIDTH / 2, @y - HEIGHT / 2)
@@ -51,6 +51,10 @@ class EnemyHomingMissile < Projectile
 
   end
 
+  def destructable?
+    true
+  end
+
   def is_alive
     @health > 0
   end
@@ -63,7 +67,7 @@ class EnemyHomingMissile < Projectile
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/missile_reverse.png")
   end
-  
+
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
     if is_alive
       new_speed = 0

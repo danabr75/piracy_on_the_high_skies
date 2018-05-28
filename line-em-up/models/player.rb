@@ -24,7 +24,9 @@ class Player < GeneralObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @attack_speed = 1
+    # temp
     @health = 100
+    # @health = 100000
     @armor = 0
     @rockets = 25
     # @rocket_launcher = {}

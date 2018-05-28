@@ -79,7 +79,7 @@ class GameWindow < Gosu::Window
   end
 
   def self.reset(window)
-    window = GameWindow.new.show
+    window = GameWindow.new(window.width, window.height, window.fullscreen?, {block_controls_until_button_up: true}).show
   end
 
 
@@ -187,6 +187,7 @@ class GameWindow < Gosu::Window
     @buildings = Array.new
     @projectiles = Array.new
     @enemy_projectiles = Array.new
+    @enemy_destructable_projectiles = Array.new
     @pickups = Array.new
 
     @enemies = Array.new
@@ -304,7 +305,7 @@ class GameWindow < Gosu::Window
 
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil
-            @grappling_hook = GrapplingHook.new(@scale, @player)
+            @grappling_hook = GrapplingHook.new(@scale, @player, self.mouse_x, self.mouse_y)
           end
         end
 
@@ -331,6 +332,9 @@ class GameWindow < Gosu::Window
         @enemy_projectiles.each do |projectile|
           projectile.hit_object(@player)
         end
+        @enemy_destructable_projectiles.each do |projectile|
+          projectile.hit_object(@player)
+        end
 
 
         @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
@@ -339,7 +343,7 @@ class GameWindow < Gosu::Window
       if !@game_pause && !@menu_open
 
         @projectiles.each do |projectile|
-          results = projectile.hit_objects([@enemies, @buildings, @enemy_projectiles])
+          results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles])
           @pickups = @pickups + results[:drops]
           @player.score += results[:point_value]
         end
@@ -350,7 +354,7 @@ class GameWindow < Gosu::Window
         @buildings.reject! { |building| !building.update(@width, @height) }
 
         if @player.is_alive && @grappling_hook
-          grap_result = @grappling_hook.update(@width, @height, self.mouse_x, self.mouse_y, @player)
+          grap_result = @grappling_hook.update(@width, @height, @player)
           @grappling_hook = nil if !grap_result
         end
 
@@ -359,6 +363,7 @@ class GameWindow < Gosu::Window
         @projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
 
         @enemy_projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
+        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
         @enemies.reject! { |enemy| !enemy.update(@width, @height, nil, nil, @player) }
 
 
@@ -405,7 +410,11 @@ class GameWindow < Gosu::Window
             enemy.cooldown_wait = cooldown.to_f.fdiv(enemy.attack_speed)
 
             projectiles.each do |projectile|
-              @enemy_projectiles.push(projectile)
+              if projectile.destructable?
+                @enemy_projectiles.push(projectile)
+              else
+                @enemy_destructable_projectiles.push(projectile)
+              end
             end
           end
         end
@@ -419,13 +428,16 @@ class GameWindow < Gosu::Window
 
     @player.draw() if @player.is_alive
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
-    @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if !@player.is_alive
-    @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if !@player.is_alive
-    @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if !@player.is_alive
+    if !@menu && !@player.is_alive
+      @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     @enemies.each { |enemy| enemy.draw() }
     @projectiles.each { |projectile| projectile.draw() }
     @enemy_projectiles.each { |projectile| projectile.draw() }
+    @enemy_destructable_projectiles.each { |projectile| projectile.draw() }
     # @stars.each { |star| star.draw }
     @pickups.each { |pickup| pickup.draw() }
     @buildings.each { |building| building.draw() }
