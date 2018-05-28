@@ -339,7 +339,7 @@ class GameWindow < Gosu::Window
       if !@game_pause && !@menu_open
 
         @projectiles.each do |projectile|
-          results = projectile.hit_objects([@enemies, @buildings])
+          results = projectile.hit_objects([@enemies, @buildings, @enemy_projectiles])
           @pickups = @pickups + results[:drops]
           @player.score += results[:point_value]
         end
@@ -366,6 +366,8 @@ class GameWindow < Gosu::Window
         
         @buildings.push(Building.new(@scale)) if rand(100) == 0
 
+        # Temp
+        # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
 
         if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
           (0..@enemies_spawner_counter).each do |count|
@@ -377,6 +379,12 @@ class GameWindow < Gosu::Window
         end
         if @player.time_alive % 1000 == 0 && @enemies_random_spawn_timer > 5
           @enemies_random_spawn_timer -= 5
+        end
+        # temp
+        if @player.time_alive % 500 == 0
+          (0..1).each do |count|
+            @enemies.push(MissileBoat.new(@scale, @width, @height))
+          end
         end
         if @player.time_alive % 5000 == 0
           @enemies_spawner_counter += 1
@@ -391,7 +399,7 @@ class GameWindow < Gosu::Window
         @enemies.each do |enemy|
           enemy.cooldown_wait -= 1 if enemy.cooldown_wait > 0
           if enemy.cooldown_wait <= 0
-            results = enemy.attack(@width, @height)
+            results = enemy.attack(@width, @height, @player)
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             enemy.cooldown_wait = cooldown.to_f.fdiv(enemy.attack_speed)

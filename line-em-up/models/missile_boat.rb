@@ -1,12 +1,13 @@
 require_relative 'player.rb'
 require_relative 'enemy_bullet.rb'
+require_relative 'enemy_homing_missile.rb'
 require_relative 'small_explosion.rb'
 require_relative 'star.rb'
 
-class EnemyPlayer < Player
-  Speed = 3
+class MissileBoat < Player
+  Speed = 5
   MAX_ATTACK_SPEED = 3.0
-  POINT_VALUE_BASE = 10
+  POINT_VALUE_BASE = 50
   attr_accessor :cooldown_wait, :attack_speed, :health, :armor, :x, :y
 
   def initialize(scale, width, height, x = nil, y = nil)
@@ -14,7 +15,7 @@ class EnemyPlayer < Player
     # image = Magick::Image::read("#{MEDIA_DIRECTORY}/starfighterv4.png").first
     # @image = Gosu::Image.new(image, :tileable => true)
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/starfighterv4.png")
-    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/airship1_color1_reverse.png")
+    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/missile_boat_reverse.png")
     # @beep = Gosu::Sample.new("#{MEDIA_DIRECTORY}/beep.wav")
     @x = x || rand(width)
     @y = y || 0
@@ -39,8 +40,8 @@ class EnemyPlayer < Player
 
   def attack width, height, player
     return {
-      projectiles: [EnemyBullet.new(@scale, width, height, self)],
-      cooldown: EnemyBullet::COOLDOWN_DELAY
+      projectiles: [EnemyHomingMissile.new(@scale, width, height, self, nil, nil, player)],
+      cooldown: EnemyHomingMissile::COOLDOWN_DELAY
     }
   end
 
@@ -55,10 +56,6 @@ class EnemyPlayer < Player
   def get_draw_ordering
     ZOrder::Enemy
   end
-
-  # def draw
-  #   @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Enemy)
-  # end
 
   # SPEED = 1
   def get_speed
@@ -89,7 +86,6 @@ class EnemyPlayer < Player
         @x -= get_speed
         @x = 0 + (get_width / 2) if @x < 0 + (get_width / 2)
       end
-
 
       @y < height + (get_height / 2)
     else
