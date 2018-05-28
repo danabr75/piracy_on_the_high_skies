@@ -14,10 +14,12 @@ require "#{CURRENT_DIRECTORY}/line-em-up/game_window.rb"
 # @menu.add_item(Gosu::Image.new("#{MEDIA_DIRECTORY}question.png"), 100, 200, 1, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}question.png", false))
 # @menu.add_item(Gosu::Image.new("#{MEDIA_DIRECTORY}question.png"), 100, 250, 1, lambda { puts "something" }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}question.png", false))
 
+CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
 
 class Main < Gosu::Window
   def initialize
-    super(640, 480, false)
+    @width, @height = Settings::RESOLUTIONS[0].split('x').collect{|s| s.to_i}
+    super(@width, @height, false)
     @cursor = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/cursor.png", false)
     @gl_background = GLBackground.new
     # x = self.width / 2 - 100
@@ -26,6 +28,7 @@ class Main < Gosu::Window
     @center_ui_x = 0
     reset_center_font_ui_y
     lineHeight = 50
+    @font = Gosu::Font.new(20)
     self.caption = "A menu with Gosu"
     # items = Array["exit", "additem", "item"]
     # actions = Array[lambda { self.close }, lambda {
@@ -37,9 +40,26 @@ class Main < Gosu::Window
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}.png", false), x, y, 1, actions[i], Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}_hover.png", false))
     #   y += lineHeight
     # end
-    @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, 1, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit_hover.png", false))
-    @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/start.png", false), get_center_font_ui_x, get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(nil, nil, {block_controls_until_button_up: true}) }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/start.png", false))
-    # @back = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back.png", false)
+    exit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/exit.png")
+    puts "WIDTH HERE: #{exit_image.width}"
+    @menu.add_item(exit_image, (@width / 2) - (exit_image.width / 2), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
+    # resolution_x = get_center_font_ui_x
+    # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
+    Settings::LIST_OF_SETTINGS.each do |settings_name, value|
+      settings_y = get_center_font_ui_y
+      @menu.add_item(@font, 15, settings_y, 1, lambda { }, @font, {text: '<'})
+      @menu.add_item(@font, (@width / 2) - @font.text_width(Settings.get_setting(CONFIG_FILE, settings_name)) / 2, settings_y, 1, lambda { }, @font, {text: Settings.get_setting(CONFIG_FILE, settings_name) })
+      @menu.add_item(@font, @width - 15, settings_y, 1, lambda { }, @font, {text: '>'})
+    end
+
+    start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/start.png")
+    @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(nil, nil, {block_controls_until_button_up: true}) }, start_image)
+    # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
+    # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/start.png", false), get_center_font_ui_x, get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(nil, nil, {block_controls_until_button_up: true}) }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/start.png", false))
   end
 
   def update
@@ -50,6 +70,7 @@ class Main < Gosu::Window
   def draw
     @cursor.draw(self.mouse_x, self.mouse_y, 2)
     # @back.draw(0,0,0)
+    reset_center_font_ui_y
     @menu.draw
     @gl_background.draw(ZOrder::Background)
   end

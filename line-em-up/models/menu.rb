@@ -5,15 +5,15 @@ class Menu
         @items = Array.new
     end
 
-    def add_item (image, x, y, z, callback, hover_image = nil)
-        item = MenuItem.new(@window, image, x, y, z, callback, hover_image)
+    def add_item (object, x, y, z, callback, hover_image = nil, options = {})
+        item = MenuItem.new(@window, object, x, y, z, callback, hover_image, options)
         @items << item
         self
     end
 
     def draw
         @items.each do |i|
-            i.draw
+          i.draw
         end
     end
 
