@@ -4,10 +4,10 @@ class SmallExplosion < GeneralObject
   attr_reader :x, :y, :living_time
   TIME_TO_LIVE = 50
 
-  def initialize(scale, x = nil, y = nil)
+  def initialize(scale, x = nil, y = nil, image = nil)
     @scale = scale
     # @smoke = Gosu::Image.new("#{MEDIA_DIRECTORY}/smoke.png", :tileable => true)
-    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/starfighterv4.png", :tileable => true)
+    @image = image#Gosu::Image.new("#{MEDIA_DIRECTORY}/starfighterv4.png", :tileable => true)
 
     @x = x || 0
     @y = y || 0

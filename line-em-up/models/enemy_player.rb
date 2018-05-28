@@ -13,7 +13,8 @@ class EnemyPlayer < Player
     @scale = scale
     # image = Magick::Image::read("#{MEDIA_DIRECTORY}/starfighterv4.png").first
     # @image = Gosu::Image.new(image, :tileable => true)
-    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/starfighterv4.png")
+    # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/starfighterv4.png")
+    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/airship1_color1_reverse.png")
     # @beep = Gosu::Sample.new("#{MEDIA_DIRECTORY}/beep.wav")
     @x = x || rand(width)
     @y = y || 0
@@ -46,7 +47,7 @@ class EnemyPlayer < Player
 
   def drops
     [
-      SmallExplosion.new(@scale, @x, @y),
+      SmallExplosion.new(@scale, @x, @y, @image),
       Star.new(@scale, @x, @y)
     ]
   end
