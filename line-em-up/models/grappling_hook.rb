@@ -35,7 +35,8 @@ class GrapplingHook < GeneralObject
     start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
     end_point   = OpenStruct.new(:x => @end_point_x, :y => @end_point_y)
     @angle = calc_angle(start_point, end_point)
-    @radian = calc_radian(start_point, end_point)
+    # @radian = calc_radian(start_point, end_point)
+    @image_angle = @angle
     if @angle < 0
       @angle = 360 - @angle.abs
     end
@@ -47,7 +48,8 @@ class GrapplingHook < GeneralObject
   end
 
   def draw player
-    @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Cursor, @scale, @scale)
+    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @scale, @scale)
+    @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @scale, @scale)
 
     # chain_x = @x
     # chain_y = @y
@@ -117,12 +119,12 @@ class GrapplingHook < GeneralObject
       # Recalc back to player
       start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
       end_point   = OpenStruct.new(:x => player.x, :y => player.y)
-      @angle = calc_angle(start_point, end_point)
-      @radian = calc_radian(start_point, end_point)
-      if @angle < 0
-        @angle = 360 - @angle.abs
+      angle = calc_angle(start_point, end_point)
+      # radian = calc_radian(start_point, end_point)
+      if angle < 0
+        angle = 360 - angle.abs
       end
-      current_angle = @angle
+      current_angle = angle
     end
     # new_speed = 0
     # if @time_alive > self.class.get_initial_delay
