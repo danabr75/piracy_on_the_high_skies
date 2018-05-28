@@ -2,11 +2,12 @@ require_relative 'setting.rb'
 # require_relative "config_settings.rb"
 
 class ResolutionSetting < Setting
-  RESOLUTIONS = ["640x480", "800x600", "960x720", "1024x768", "1280x960", "1400x1050", "1440x1080", "1600x1200", "1856x1392", "1920x1440", "2048x1536"]
+  FULLSCREEN_NAME = "fullscreen"
+  RESOLUTIONS = ["640x480", "800x600", "960x720", "1024x768", "1280x960", "1400x1050", "1440x1080", "1600x1200", "1856x1392", "1920x1440", "2048x1536", FULLSCREEN_NAME]
   attr_accessor :x, :y, :font, :max_width, :max_height
 
 
-  def initialize max_width, max_height, height, config_file_path
+  def initialize fullscreen_height, max_width, max_height, height, config_file_path
     @font = Gosu::Font.new(20)
     # @x = width
     @y = height
@@ -17,10 +18,16 @@ class ResolutionSetting < Setting
     @config_file_path = config_file_path
     @name = 'resolution'
     @value = ConfigSetting.get_setting(@config_file_path, @name, RESOLUTIONS[0])
+    @fullscreen = false
+    @fullscreen_height = fullscreen_height
   end
 
   def get_resolution
-    if @value
+    if @value == FULLSCREEN_NAME
+      height = @fullscreen_height
+      width = (@fullscreen_height / 3) * 4
+      [width, height, true]
+    elsif @value
       @value.split('x').collect{|s| s.to_i }
     end
   end

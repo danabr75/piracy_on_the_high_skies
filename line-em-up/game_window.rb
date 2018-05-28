@@ -83,9 +83,9 @@ class GameWindow < Gosu::Window
   end
 
 
-  def self.start width = nil, height = nil, options = {}
+  def self.start width = nil, height = nil, fullscreen = false, options = {}
     # window = GameWindow.new.show
-    GameWindow.new(width, height, options).show
+    GameWindow.new(width, height, fullscreen, options).show
   end
 
 # When fullscreen, try to match window with screen resolution
@@ -143,9 +143,10 @@ class GameWindow < Gosu::Window
     end
   end
 
-  def initialize width = nil, height = nil, options = {}
+  def initialize width = nil, height = nil, fullscreen = false, options = {}
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
-
+    # GameWindow.fullscreen(self) if fullscreen
+    @start_fullscreen = fullscreen
     @center_ui_y = 0
     @center_ui_x = 0
 
@@ -243,6 +244,10 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    if @start_fullscreen
+      @start_fullscreen = false
+      GameWindow.fullscreen(self)
+    end
     reset_center_font_ui_y
     @menu.update if @menu
     if !@block_all_controls

@@ -44,22 +44,27 @@ class Main < Gosu::Window
     # puts "WIDTH HERE: #{exit_image.width}"
     # 8
     @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
-    @resolution_menu = ResolutionSetting.new(@width, @height, get_center_font_ui_y, CONFIG_FILE)
+    window_height = Gosu.screen_height
+    @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, CONFIG_FILE)
 
     start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/start.png")
-    @game_window_width, @game_window_height = [nil, nil]
-    @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(@game_window_width, @game_window_height, {block_controls_until_button_up: true}) }, start_image)
+    @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
+    @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) }, start_image)
     # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/start.png", false), get_center_font_ui_x, get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(nil, nil, {block_controls_until_button_up: true}) }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/start.png", false))
   end
 
+  def dynamic_get_resolution_fs
+    @fullscreen
+  end
+
   def update
     @menu.update
     @resolution_menu.update(self.mouse_x, self.mouse_y)
     
-    @game_window_width, @game_window_height = @resolution_menu.get_resolution
+    @game_window_width, @game_window_height, @fullscreen = @resolution_menu.get_resolution
     @gl_background.scroll
   end
 
