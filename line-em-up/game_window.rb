@@ -204,9 +204,10 @@ class GameWindow < Gosu::Window
 
   def button_up id
     @block_all_controls = false
-    if (id == Gosu::MS_RIGHT) && @player.is_alive
-      @grappling_hook.deactivate if @grappling_hook
-    end
+    # Grappling hook always active
+    # if (id == Gosu::MS_RIGHT) && @player.is_alive
+    #   @grappling_hook.deactivate if @grappling_hook
+    # end
 
     if (id == Gosu::KB_P)
       @can_pause = true
@@ -453,6 +454,14 @@ class GameWindow < Gosu::Window
     @font.draw("Bombs: #{@player.bombs}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.bombs > 0
     @font.draw("Time Alive: #{@player.time_alive}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("Enemy count: #{@enemies.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("enemy_projectiles: #{@enemy_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("destructable_proj: #{@enemy_destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("pickups count: #{@pickups.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("Object count: #{@enemies.count + @enemy_projectiles.count + @projectiles.count + @enemy_destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @gl_background.draw(ZOrder::Background)
     reset_font_ui_y
   end

@@ -21,7 +21,7 @@ class MissileBoat < Player
     @y = y || 0
     @cooldown_wait = 0
     @attack_speed = 0.5
-    @health = 15
+    @health = 10
     @armor = 0
   end
 

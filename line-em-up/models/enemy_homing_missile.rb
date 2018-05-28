@@ -1,16 +1,17 @@
 require_relative 'projectile.rb'
 class EnemyHomingMissile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y, :health
-  COOLDOWN_DELAY = 50
-  MAX_SPEED      = 25
+  COOLDOWN_DELAY = 75
+  MAX_SPEED      = 18
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 2
   SPEED_INCREASE_FACTOR = 0.5
-  DAMAGE = 50
+  DAMAGE = 15
   AOE = 0
   
   MAX_CURSOR_FOLLOW = 4
-  ADVANCED_HIT_BOX_DETECTION = true
+  # ADVANCED_HIT_BOX_DETECTION = true
+  ADVANCED_HIT_BOX_DETECTION = false
 
   def initialize(scale, width, height, object, mouse_x = nil, mouse_y = nil, homing_object = nil, options = {})
     @scale = scale
@@ -65,7 +66,7 @@ class EnemyHomingMissile < Projectile
   end
 
   def get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/missile_reverse.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile_reverse.png")
   end
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil

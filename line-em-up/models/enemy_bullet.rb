@@ -32,7 +32,7 @@ class EnemyBullet < Projectile
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
     @y += self.class.get_max_speed * @scale
     # Return false when out of screen (gets deleted then)
-    @y > 0
+    @y > 0 && @y < height
     # super(mouse_x, mouse_y)
   end
 end
