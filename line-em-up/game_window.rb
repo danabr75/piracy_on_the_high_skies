@@ -411,9 +411,9 @@ class GameWindow < Gosu::Window
 
             projectiles.each do |projectile|
               if projectile.destructable?
-                @enemy_projectiles.push(projectile)
-              else
                 @enemy_destructable_projectiles.push(projectile)
+              else
+                @enemy_projectiles.push(projectile)
               end
             end
           end

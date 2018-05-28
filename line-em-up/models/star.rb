@@ -26,15 +26,15 @@ class Star < Pickup
   end
 
   def get_height
-    25
+    25 * @scale
   end
 
   def get_width
-    25
+    25 * @scale
   end
 
   def get_radius
-    13
+    13 * @scale
   end  
 
 

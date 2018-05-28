@@ -39,9 +39,11 @@ class GrapplingHook < GeneralObject
     if @angle < 0
       @angle = 360 - @angle.abs
     end
-    @max_length = 100 * @scale
+    @max_length = 10 * @scale
+    @max_length_counter = 0
     @reached_end_point = false
     @reached_back_to_player = false
+    @reached_max_length = false
   end
 
   def draw player
@@ -107,11 +109,11 @@ class GrapplingHook < GeneralObject
   end
   
   def update width, height, player = nil
-    puts "GRAP UPDATE: #{@angle}"
+    # puts "GRAP UPDATE:#{@reached_max_length} and #{@max_length_counter}"
     if !@reached_end_point
       current_angle = @angle
     end
-    if @reached_end_point 
+    if @reached_end_point || @reached_max_length
       # Recalc back to player
       start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
       end_point   = OpenStruct.new(:x => player.x, :y => player.y)
@@ -143,9 +145,18 @@ class GrapplingHook < GeneralObject
     @x = @x + vx
     @y = @y + vy
 
-    @reached_end_point = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, @end_point_x, @end_point_y) < self.get_radius * @scale
-    if @reached_end_point
-      @reached_back_to_player = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, player.x, player.y) < self.get_radius * @scale
+    if !@reached_max_length
+      @reached_max_length = true if @max_length_counter >= @max_length
+    end
+
+    if !@reached_max_length
+      @max_length_counter += 1
+      # Not stopping on the mouse end_point
+      # @reached_end_point = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, @end_point_x, @end_point_y) < self.get_radius * @scale
+    end
+
+    if @reached_end_point || @reached_max_length
+      @reached_back_to_player = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, player.x, player.y) < (self.get_radius * @scale) * 1.2
     end
     # raise "HERE WE GO" if @reached_end_point
 
@@ -157,7 +168,8 @@ class GrapplingHook < GeneralObject
 
   def collect_pickups(player, pickups)
     pickups.reject! do |pickup|
-      if Gosu.distance(@x, @y, pickup.x, pickup.y) < 35 * @scale && pickup.respond_to?(:collected_by_player)
+      # puts "PICKUP GET RADIUS: #{pickup.get_radius}"
+      if Gosu.distance(@x, @y, pickup.x, pickup.y) < ((self.get_radius) + (pickup.get_radius)) * 1.2 && pickup.respond_to?(:collected_by_player)
 
         pickup.collected_by_player(player)
         if pickup.respond_to?(:get_points)
