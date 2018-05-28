@@ -18,7 +18,7 @@ CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
 
 class Main < Gosu::Window
   def initialize
-    @width, @height = Settings::RESOLUTIONS[0].split('x').collect{|s| s.to_i}
+    @width, @height = ResolutionSetting::RESOLUTIONS[0].split('x').collect{|s| s.to_i}
     super(@width, @height, false)
     @cursor = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/cursor.png", false)
     @gl_background = GLBackground.new
@@ -41,21 +41,14 @@ class Main < Gosu::Window
     #   y += lineHeight
     # end
     exit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/exit.png")
-    puts "WIDTH HERE: #{exit_image.width}"
-    @menu.add_item(exit_image, (@width / 2) - (exit_image.width / 2), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
-    # resolution_x = get_center_font_ui_x
-    # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
-    # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
-    # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
-    Settings::LIST_OF_SETTINGS.each do |settings_name, value|
-      settings_y = get_center_font_ui_y
-      @menu.add_item(@font, 15, settings_y, 1, lambda { }, @font, {text: '<'})
-      @menu.add_item(@font, (@width / 2) - @font.text_width(Settings.get_setting(CONFIG_FILE, settings_name)) / 2, settings_y, 1, lambda { }, @font, {text: Settings.get_setting(CONFIG_FILE, settings_name) })
-      @menu.add_item(@font, @width - 15, settings_y, 1, lambda { }, @font, {text: '>'})
-    end
+    # puts "WIDTH HERE: #{exit_image.width}"
+    # 8
+    @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
+    @resolution_menu = ResolutionSetting.new(@width, @height, get_center_font_ui_y, CONFIG_FILE)
 
     start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/start.png")
-    @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(nil, nil, {block_controls_until_button_up: true}) }, start_image)
+    @game_window_width, @game_window_height = [nil, nil]
+    @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda { self.close; GameWindow.start(@game_window_width, @game_window_height, {block_controls_until_button_up: true}) }, start_image)
     # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
@@ -64,6 +57,9 @@ class Main < Gosu::Window
 
   def update
     @menu.update
+    @resolution_menu.update(self.mouse_x, self.mouse_y)
+    
+    @game_window_width, @game_window_height = @resolution_menu.get_resolution
     @gl_background.scroll
   end
 
@@ -72,12 +68,14 @@ class Main < Gosu::Window
     # @back.draw(0,0,0)
     reset_center_font_ui_y
     @menu.draw
+    @resolution_menu.draw
     @gl_background.draw(ZOrder::Background)
   end
 
   def button_down id
     if id == Gosu::MsLeft then
       @menu.clicked
+      @resolution_menu.clicked(self.mouse_x, self.mouse_y)
     end
   end
 

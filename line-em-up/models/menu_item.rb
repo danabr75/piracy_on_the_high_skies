@@ -1,6 +1,7 @@
 class MenuItem
     HOVER_OFFSET = 3
     def initialize (window, image, x, y, z, callback, hover_image = nil, options = {})
+      puts "NEW OPTIONS : #{options}"
         @window = window
         @main_image = image
         @hover_image = hover_image
@@ -10,7 +11,11 @@ class MenuItem
         @callback = callback
         # Can also be a font object!
         @active_image = @main_image
-        @text = options[:text]
+        # @text = options[:text]
+        # @value = options[:value]
+        # @settings_name = options[:settings_name]
+        # @config_file = options[:config_file]
+        # @type = options[:type]
     end
 
     def draw
@@ -22,7 +27,8 @@ class MenuItem
     end
 
     def update
-        if is_mouse_hovering then
+        # @text = @get_value_callback.call(@config_file, @settings_name) if @get_value_callback && @config_file && @settings_name
+        if is_mouse_hovering
             if !@hover_image.nil? then
                 @active_image = @hover_image
             end
@@ -39,8 +45,7 @@ class MenuItem
     def is_mouse_hovering
       mx = @window.mouse_x
       my = @window.mouse_y
-
-      if @text
+      if @type && @type == 'font'
         local_width  = @main_image.text_width(@text)
         local_height = @main_image.height
       else
@@ -52,8 +57,19 @@ class MenuItem
     end
 
     def clicked
-        if is_mouse_hovering && @callback
-            @callback.call
-        end
+      # return_value = nil
+      # if is_mouse_hovering && @callback && @value && @config_file && @settings_name
+      #   return_value = @callback.call(@config_file, @settings_name, @value)
+      # end
+      if is_mouse_hovering && @callback
+        @callback.call
+      end
+      # if return_value
+      #   @text = return_value
+      # end
+      # if @save_callback && @settings_name && @config_file
+      #   puts "USING SAVE CALLBACK: #{@config_file} and #{@settings_name} and #{return_value}"
+      #   @save_callback.call(@config_file, @settings_name.to_s, return_value)
+      # end
     end
 end
