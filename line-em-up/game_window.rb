@@ -424,7 +424,8 @@ class GameWindow < Gosu::Window
 
   def draw
     @menu.draw if @menu
-    @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
+    # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
+    @pointer.draw(self.mouse_x, self.mouse_y)# if @grappling_hook.nil? || !@grappling_hook.active
 
     @player.draw() if @player.is_alive
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook

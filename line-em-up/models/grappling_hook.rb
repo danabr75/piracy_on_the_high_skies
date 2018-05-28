@@ -25,14 +25,14 @@ class GrapplingHook < GeneralObject
     # @chain = Gosu::Image.new(chain, :tileable => true)
     @chain = Gosu::Image.new("#{MEDIA_DIRECTORY}/chain.png")
 
-    @x = object.get_x - (object.get_width / 2)
-    @y = object.get_y
+    @x = object.x - (@image.width / 2 * @scale)
+    @y = object.y
     @end_point_x = mouse_x
     @end_point_y = mouse_y
 
     @active = true
     @acquired_items = 0
-    start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
+    start_point = OpenStruct.new(:x => @x, :y => @y)
     end_point   = OpenStruct.new(:x => @end_point_x, :y => @end_point_y)
     @angle = calc_angle(start_point, end_point)
     # @radian = calc_radian(start_point, end_point)
@@ -48,50 +48,40 @@ class GrapplingHook < GeneralObject
   end
 
   def draw player
+
+    start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
+    end_point   = OpenStruct.new(:x => player.x, :y => player.y)
+    chain_angle = calc_angle(start_point, end_point)
+    if chain_angle < 0
+      chain_angle = 360 - chain_angle.abs
+    end
+
     # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @scale, @scale)
-    @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @scale, @scale)
+    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @scale, @scale)
+    @image.draw_rot(@x, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @scale, @scale)
 
-    # chain_x = @x
-    # chain_y = @y
-    # counter = 0
+    chain_x = @x# - (get_width / 2)  - (@chain.width / 2)
+    chain_y = @y# - (get_height / 2)  - (@chain.height / 2)
+    puts "INIT CHAIN #{chain_x} x #{chain_y}"
+    puts "PLAYER     #{player.x} x #{player.y}"
+    loop_count = 0
+    max_loop_count = 200
+    while Gosu.distance(chain_x,  chain_y, player.x, player.y) > (((@chain.height + @chain.width)) * @scale) + (player.get_radius / 2) && loop_count < max_loop_count
+      vx = 0
+      vy = 0
+      vx = 5 * Math.cos(chain_angle * Math::PI / 180)
 
+      vy = 5 * Math.sin(chain_angle * Math::PI / 180)
+      vy = vy * -1
+        # Because our y is inverted
+        # vy = vy - ((new_speed / 3) * 2)
 
-
-    # puts "STARTING LOOP CHAIN #{chain_x} and #{chain_y}  vs   player: #{player.x} and #{player.y}"
-    # while Gosu.distance(chain_x, chain_y, player.x, player.y) > (1) && counter < max_chain_length
-    #   puts "DRAWING CHAIN: #{chain_x} and #{chain_y}"
-    #   new_speed = 1 * @scale
-
-    #   vx = 0
-    #   vy = 0
-    #   if new_speed > 0
-    #     vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
-
-    #     vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-    #     vy = vy * -1
-    #     # Because our y is inverted
-    #     vy = vy - ((new_speed / 3) * 2)
-    #   end
-
-    #   if chain_x > player.x
-    #     chain_x = chain_x - vx
-    #   else
-    #     chain_x = chain_x + vx
-    #   end
-    #   if chain_y > player.y
-    #     chain_y = chain_y - vy
-    #   else
-    #     chain_y = chain_y + vy
-    #   end
-
-
-
-    #   @chain.draw(chain_x - @chain.width / 2, chain_y - @chain.height / 2, ZOrder::Cursor, @scale, @scale)
-    #   counter += 1
-    # end
-    # puts "ENDING LOOP"
-
-    # img.draw_rect(@x, @y, 25, 25, @x + 25, @y + 25, :add)
+      chain_x = chain_x + vx
+      chain_y = chain_y + vy
+      @chain.draw(chain_x - @chain.width / 2, chain_y - @chain.height / 2, ZOrder::Cursor, @scale, @scale)
+      loop_count += 1
+    end
+    puts "WHILE LOOP: #{loop_count}"
   end
 
   def active
