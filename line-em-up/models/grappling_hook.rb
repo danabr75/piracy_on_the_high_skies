@@ -40,7 +40,7 @@ class GrapplingHook < GeneralObject
     if @angle < 0
       @angle = 360 - @angle.abs
     end
-    @max_length = 10 * @scale
+    @max_length = 7 * @scale
     @max_length_counter = 0
     @reached_end_point = false
     @reached_back_to_player = false
@@ -50,7 +50,7 @@ class GrapplingHook < GeneralObject
   def draw player
 
     start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
-    end_point   = OpenStruct.new(:x => player.x, :y => player.y)
+    end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2), :y => player.y - (player.get_height / 2))
     chain_angle = calc_angle(start_point, end_point)
     if chain_angle < 0
       chain_angle = 360 - chain_angle.abs
