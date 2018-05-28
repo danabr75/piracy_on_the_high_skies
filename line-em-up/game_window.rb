@@ -304,7 +304,7 @@ class GameWindow < Gosu::Window
         @player.brake(@height)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
         if Gosu.button_down?(Gosu::MS_RIGHT)
-          if @grappling_hook == nil
+          if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
             @grappling_hook = GrapplingHook.new(@scale, @player, self.mouse_x, self.mouse_y)
           end
         end

@@ -4,7 +4,7 @@ class GrapplingHook < GeneralObject
   attr_reader :x, :y, :time_alive, :active, :angle, :end_point_x, :end_point_y
   attr_accessor :active
 
-  COOLDOWN_DELAY = 30
+  COOLDOWN_DELAY = 45
   # MAX_SPEED      = 2
   # STARTING_SPEED = 0.0
   # INITIAL_DELAY  = 2
@@ -15,6 +15,7 @@ class GrapplingHook < GeneralObject
   MAX_SPEED      = 20
 
   def initialize(scale, object, mouse_x, mouse_y)
+    object.grapple_hook_cooldown_wait = COOLDOWN_DELAY
     @scale = scale
 
     # image = Magick::Image::read("#{MEDIA_DIRECTORY}/grappling_hook.png").first.resize(0.1)
@@ -50,7 +51,8 @@ class GrapplingHook < GeneralObject
   def draw player
 
     start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
-    end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2), :y => player.y - (player.get_height / 2))
+    # end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2) + @chain.width / 2, :y => player.y - (player.get_height / 2))
+    end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2) + @chain.width, :y => player.y - (player.get_height / 2))
     chain_angle = calc_angle(start_point, end_point)
     if chain_angle < 0
       chain_angle = 360 - chain_angle.abs
@@ -65,8 +67,9 @@ class GrapplingHook < GeneralObject
     puts "INIT CHAIN #{chain_x} x #{chain_y}"
     puts "PLAYER     #{player.x} x #{player.y}"
     loop_count = 0
-    max_loop_count = 200
-    while Gosu.distance(chain_x,  chain_y, player.x, player.y) > (((@chain.height + @chain.width)) * @scale) + (player.get_radius / 2) && loop_count < max_loop_count
+    max_loop_count = 250
+    # Subtracting 5, to get close to player coords
+    while Gosu.distance(chain_x,  chain_y, player.x, player.y) > (((@chain.height + @chain.width) / 2) * @scale) + (player.get_radius / 2) && loop_count < max_loop_count
       vx = 0
       vy = 0
       vx = 5 * Math.cos(chain_angle * Math::PI / 180)
@@ -108,7 +111,7 @@ class GrapplingHook < GeneralObject
     if @reached_end_point || @reached_max_length
       # Recalc back to player
       start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
-      end_point   = OpenStruct.new(:x => player.x, :y => player.y)
+      end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2), :y => player.y)
       angle = calc_angle(start_point, end_point)
       # radian = calc_radian(start_point, end_point)
       if angle < 0

@@ -3,7 +3,7 @@ require_relative 'general_object.rb'
 class Player < GeneralObject
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0
-  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive, :bombs, :secondary_weapon
+  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive, :bombs, :secondary_weapon, :grapple_hook_cooldown_wait
   MAX_HEALTH = 200
 
   SECONDARY_WEAPONS = %w[missile bomb]
@@ -23,6 +23,7 @@ class Player < GeneralObject
     @score = 0
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
+    @grapple_hook_cooldown_wait = 0
     @attack_speed = 1
     # temp
     @health = 100
@@ -169,8 +170,9 @@ class Player < GeneralObject
   
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
     # puts "TEST HERE: width: #{get_width} and height: #{get_height}"
-    self.cooldown_wait -= 1 if self.cooldown_wait > 0
-    self.secondary_cooldown_wait -= 1 if self.secondary_cooldown_wait > 0
+    @cooldown_wait -= 1              if @cooldown_wait > 0
+    @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
+    @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
   end
 
