@@ -6,6 +6,8 @@ CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
 
 Dir["#{CURRENT_DIRECTORY}/line-em-up/lib/*.rb"].each { |f| require f }
 # Shouldn't need models
+# Does need the GL BACKGROUND Model
+require "#{CURRENT_DIRECTORY}/line-em-up/gl_background.rb"
 # Dir["#{CURRENT_DIRECTORY}/line-em-up/models/*.rb"].each { |f| require f }
 
 require "#{CURRENT_DIRECTORY}/line-em-up/game_window.rb"
