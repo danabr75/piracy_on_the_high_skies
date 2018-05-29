@@ -207,6 +207,12 @@ class GameWindow < Gosu::Window
     @ui_y = 0
     @footer_bar = FooterBar.new(@scale, @width, @height)
     reset_font_ui_y
+
+    # @boss_active_at_enemies_killed = 500
+    @boss_active_at_enemies_killed = 500
+    @boss_active = false
+    @boss = nil
+    @boss_killed = false
   end
 
   def button_up id
@@ -351,8 +357,8 @@ class GameWindow < Gosu::Window
       if !@game_pause && !@menu_open
 
         @projectiles.each do |projectile|
-          results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles])
-          
+          results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
+
           @pickups = @pickups + results[:drops]
           @player.score += results[:point_value]
           @enemies_killed += results[:killed]
@@ -376,39 +382,63 @@ class GameWindow < Gosu::Window
         @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
         @enemies.reject! { |enemy| !enemy.update(@width, @height, nil, nil, @player) }
 
+        if @boss
+          result = @boss.update(@width, @height, nil, nil, @player)
+          if !result
+            @boss_killed = true
+            @boss = nil
+            @enemy_projectiles              = []
+            @enemy_destructable_projectiles = []
+          end
+        end
+
 
         @gl_background.scroll
         
-        @buildings.push(Building.new(@scale)) if rand(100) == 0
+
+        if !@boss_killed && !@boss_active
+          @buildings.push(Building.new(@scale)) if rand(100) == 0
+        end
 
         # Temp
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
+        if !@boss_active && !@boss && !@boss_killed
 
-        if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
-          (0..(@enemies_spawner_counter / 2).round).each do |count|
-            @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+          if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
+            (0..(@enemies_spawner_counter / 2).round).each do |count|
+              @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+            end
+          end
+          if @player.time_alive % 500 == 0
+            @max_enemies += 1
+          end
+          if @player.time_alive % 1000 == 0 && @enemies_random_spawn_timer > 5
+            @enemies_random_spawn_timer -= 5
+          end
+          # temp
+          if @player.time_alive % 200 == 0
+            (0..(@enemies_spawner_counter / 4).round).each do |count|
+              @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+            end
+          end
+          if @player.time_alive % 5000 == 0
+            @enemies_spawner_counter += 1
+          end
+
+          if @player.time_alive % 1000 == 0 && @player.time_alive > 0
+            @player.score += 100
           end
         end
-        if @player.time_alive % 500 == 0
-          @max_enemies += 1
-        end
-        if @player.time_alive % 1000 == 0 && @enemies_random_spawn_timer > 5
-          @enemies_random_spawn_timer -= 5
-        end
-        # temp
-        if @player.time_alive % 200 == 0
-          (0..(@enemies_spawner_counter / 4).round).each do |count|
-            @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-          end
-        end
-        if @player.time_alive % 5000 == 0
-          @enemies_spawner_counter += 1
+        if @boss_active_at_enemies_killed == @enemies_killed
+          @boss_active = true
         end
 
-        if @player.time_alive % 1000 == 0 && @player.time_alive > 0
-          @player.score += 100
+        if @boss_active && @boss.nil? && @enemies.count == 0 && @boss_killed == false
+          @boss_active = false
+          # Activate Boss
+          @boss = Mothership.new(@scale, @width, @height)
+          # @enemies.push(@boss)
         end
-
 
         # Move to enemy mehtods
         @enemies.each do |enemy|
@@ -428,13 +458,62 @@ class GameWindow < Gosu::Window
             end
           end
         end
+
+        if @boss
+          if @boss.cooldown_wait <= 0
+            results = @boss.attack(@width, @height, @player)
+            projectiles = results[:projectiles]
+            cooldown = results[:cooldown]
+            @boss.cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
+            projectiles.each do |projectile|
+              if projectile.destructable?
+                @enemy_destructable_projectiles.push(projectile)
+              else
+                @enemy_projectiles.push(projectile)
+              end
+            end
+          end
+          if @boss.secondary_cooldown_wait <= 0
+            results = @boss.secondary_attack(@width, @height, @player)
+
+            projectiles = results[:projectiles]
+            cooldown = results[:cooldown]
+            @boss.secondary_cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
+            projectiles.each do |projectile|
+              if projectile.destructable?
+                @enemy_destructable_projectiles.push(projectile)
+              else
+                @enemy_projectiles.push(projectile)
+              end
+            end
+          end
+
+          if @boss.tertiary_cooldown_wait <= 0
+            results = @boss.tertiary_attack(@width, @height, @player)
+
+            projectiles = results[:projectiles]
+            cooldown = results[:cooldown]
+            @boss.tertiary_cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
+            projectiles.each do |projectile|
+              if projectile.destructable?
+                @enemy_destructable_projectiles.push(projectile)
+              else
+                @enemy_projectiles.push(projectile)
+              end
+            end
+          end
+
+        end
+
+
       end
-    end
-  end
+    end # END if !@block_all_controls
+  end # END UPDATE FUNCTION
 
   def draw
     @menu.draw if @menu
     @footer_bar.draw(@player)
+    @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
     @pointer.draw(self.mouse_x, self.mouse_y)# if @grappling_hook.nil? || !@grappling_hook.active
 
@@ -444,6 +523,9 @@ class GameWindow < Gosu::Window
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    end
+    if @boss_killed
+      @font.draw("You won! Your score: #{@player.score}", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     @enemies.each { |enemy| enemy.draw() }
@@ -456,6 +538,7 @@ class GameWindow < Gosu::Window
     @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("Boss Health: #{@boss.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @boss
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

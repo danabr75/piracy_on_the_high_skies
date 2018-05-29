@@ -78,6 +78,7 @@ class Projectile < GeneralObject
     killed = 0
     object_groups.each do |group|
       group.each do |object|
+        next if object.nil?
         break if hit_object
         # don't hit a dead object
         if object.health <= 0
