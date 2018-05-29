@@ -24,10 +24,14 @@ module ConfigSetting
   def self.get_setting file_location, setting_name, default_value
     create_file_if_non_existent(file_location)
     test = File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^$]*)$/ }
-    if test
+    if test && test.first
       # puts "BEFORE SCAN: #{test}"
       # So many firstsss
-      test = test.first.scan(/^#{setting_name}: ([^$]*)$/).first.first.strip
+      test = test.first.scan(/^#{setting_name}: ([^$]*)$/).first
+      if test
+        test = test.first
+      end
+      test = test.strip
     end
     # test = nil
     # if File.readlines(file_location).grep(/#{setting_name}:/).size > 0
