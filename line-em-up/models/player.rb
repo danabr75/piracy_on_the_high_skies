@@ -144,7 +144,7 @@ class Player < GeneralObject
     second_weapon = case @secondary_weapon
     when 'bomb'
       {
-        projectiles: [Bomb.new(@scale, @screen_width, @screen_height, self)],
+        projectiles: [Bomb.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y)],
         cooldown: Bomb::COOLDOWN_DELAY
       }
     else

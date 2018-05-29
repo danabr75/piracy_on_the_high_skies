@@ -31,9 +31,25 @@ class Projectile < GeneralObject
     @radian = calc_radian(start_point, end_point)
 
 
+    @image_angle = @angle
     if @angle < 0
       @angle = 360 - @angle.abs
+      @image_angle = (@angle - 90) * -1
+    else
+      @image_angle = (@angle - 90) * -1
     end
+
+    # # Limit extreme angles 180 and 0 are the 
+    # image_angle = 0
+    # if @angle > 160 < 
+    # if @angle > 160 && @ange 
+
+
+  end
+
+  def draw
+    # limiting angle extreme by 2
+    @image.draw_rot(@x, @y, ZOrder::Projectile, @image_angle, 0.5, 0.5, @scale, @scale)
   end
 
   def get_draw_ordering
@@ -138,9 +154,6 @@ class Projectile < GeneralObject
   end
   def self.get_cooldown_delay
     self::COOLDOWN_DELAY
-  end
-  def self.get_starting_speed
-    self::STARTING_SPEED
   end
   def self.get_starting_speed
     self::STARTING_SPEED

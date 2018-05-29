@@ -2,7 +2,7 @@ require_relative 'projectile.rb'
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
   COOLDOWN_DELAY = 30
-  MAX_SPEED      = 25
+  MAX_SPEED      = 20
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 2
   SPEED_INCREASE_FACTOR = 0.5
@@ -16,6 +16,11 @@ class Missile < Projectile
   #   puts "HERE: #{self.class.get_damage}"
   #   super(object_groups)
   # end
+
+  def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, options)
+    super(scale, screen_width, screen_height, object, end_point_x, end_point_y, options)
+    # puts "MYYYY MISSILE ANGLE: #{@angle}"
+  end
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/missile.png")
@@ -47,16 +52,16 @@ class Missile < Projectile
       new_speed = new_speed * @scale
     end
 
+
+
     vx = 0
     vy = 0
-    if new_speed > 0
-      vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+  if new_speed != 0
+    vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
 
-      vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-      vy = vy * -1
-      # Because our y is inverted
-      vy = vy - ((new_speed / 3) * 2)
-    end
+    vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
+    vy = vy * -1
+  end
 
     @x = @x + vx
     @y = @y + vy
