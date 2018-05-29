@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'line-em-up'
-  s.version     = '0.3.4'
+  s.version     = '0.3.5'
   s.date        = '2018-05-24'
   s.summary     = "Vertical Scrolling Shooter"
   s.description = "A simple gosu test with a vertical-scrolling shooter"
@@ -10,7 +10,7 @@ Gem::Specification.new do |s|
   s.email       = 'benrdana@gmail.com'
   s.executables   = ["line-em-up.sh"]
   # s.files       = Dir['gosu-test/lib/**/*'] + Dir['gosu-test/media/**/*'] + Dir['gosu-test/*']
-  s.files       = Dir['line-em-up/lib/**/*'] + Dir['line-em-up/media/**/*'] + Dir['line-em-up/*'] + Dir['menu_launcher.rb']
+  s.files       = Dir['line-em-up/lib/**/*'] + Dir['line-em-up/media/**/*'] + Dir['line-em-up/models/**/*'] + Dir['line-em-up/*'] + Dir['menu_launcher.rb']
   s.homepage    = 'https://github.com/danabr75/line-em-up'
   s.license       = 'MIT'
   # s.add_development_dependency 'gosu', '0.13.3'
