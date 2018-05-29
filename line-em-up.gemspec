@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'line-em-up'
-  s.version     = '0.3.0'
+  s.version     = '0.3.1'
   s.date        = '2018-05-24'
   s.summary     = "Vertical Scrolling Shooter"
   s.description = "A simple gosu test with a vertical-scrolling shooter"
