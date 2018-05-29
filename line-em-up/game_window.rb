@@ -60,7 +60,7 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 # exit if Object.const_defined?(:Ocra) #allow ocra to create an exe without executing the entire script
 
 
-WIDTH, HEIGHT = 640, 480
+DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
 RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
 # RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768]]
@@ -68,6 +68,80 @@ RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [14
 
 class GameWindow < Gosu::Window
   attr_accessor :width, :height, :block_all_controls
+
+  def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
+    @debug = options[:debug]
+    # GameWindow.fullscreen(self) if fullscreen
+    @start_fullscreen = fullscreen
+    @center_ui_y = 0
+    @center_ui_x = 0
+
+    @width  = width || DEFAULT_WIDTH
+    @height = height || DEFAULT_HEIGHT
+
+    reset_center_font_ui_y
+
+    index = GameWindow.find_index_of_current_resolution(self.width, self.height)
+    if index == 0
+      @scale = 1
+    else
+      original_width, original_height = RESOLUTIONS[0]
+      width_scale = @width / original_width.to_f
+      height_scale = @height / original_height.to_f
+      @scale = (width_scale + height_scale) / 2
+    end
+    super(@width, @height)
+    
+    @game_pause = false
+    @game_pause = false
+    @menu_open = false
+    @menu = nil
+    @can_open_menu = true
+    @can_pause = true
+    @can_resize = !options[:block_resize].nil? && options[:block_resize] == true ? false : true
+    @can_toggle_secondary = true
+    @can_toggle_fullscreen_a = true
+    @can_toggle_fullscreen_b = true
+
+    self.caption = "OpenGL Integration"
+    
+    @gl_background = GLBackground.new
+    
+    @player = Player.new(@scale, @width / 2, @height / 2, @width, @height)
+    @grappling_hook = nil
+    
+    @buildings = Array.new
+    @projectiles = Array.new
+    @enemy_projectiles = Array.new
+    @enemy_destructable_projectiles = Array.new
+    @pickups = Array.new
+
+    @enemies = Array.new
+    @enemies_random_spawn_timer = 100
+    # @enemies_random_spawn_timer = 5
+    @enemies_spawner_counter = 0
+    # @enemies_spawner_counter = 5
+
+    @max_enemy_count = 30
+    @enemies_killed = 0
+    
+    @font = Gosu::Font.new(20)
+    @max_enemies = 4
+
+    @pointer = Cursor.new(@scale)
+    @ui_y = 0
+    @footer_bar = FooterBar.new(@scale, @width, @height)
+    reset_font_ui_y
+
+    # @boss_active_at_enemies_killed = 500
+    @boss_active_at_enemies_killed = 700
+    @boss_active_at_level          = 4
+    @boss_active = false
+    @boss = nil
+    @boss_killed = false
+  end
+
 
   # Switch button downs to this method
   def button_down(id)
@@ -141,79 +215,6 @@ class GameWindow < Gosu::Window
       height = RESOLUTIONS[index - 1][1]
       window = GameWindow.new(width, height, {block_resize: true}).show
     end
-  end
-
-  def initialize width = nil, height = nil, fullscreen = false, options = {}
-    @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
-    @debug = options[:debug]
-    # GameWindow.fullscreen(self) if fullscreen
-    @start_fullscreen = fullscreen
-    @center_ui_y = 0
-    @center_ui_x = 0
-
-    @width  = width || WIDTH
-    @height = height || HEIGHT
-
-    reset_center_font_ui_y
-
-    index = GameWindow.find_index_of_current_resolution(self.width, self.height)
-    if index == 0
-      @scale = 1
-    else
-      original_width, original_height = RESOLUTIONS[0]
-      width_scale = @width / original_width.to_f
-      height_scale = @height / original_height.to_f
-      @scale = (width_scale + height_scale) / 2
-    end
-    super(@width, @height)
-    
-    @game_pause = false
-    @game_pause = false
-    @menu_open = false
-    @menu = nil
-    @can_open_menu = true
-    @can_pause = true
-    @can_resize = !options[:block_resize].nil? && options[:block_resize] == true ? false : true
-    @can_toggle_secondary = true
-    @can_toggle_fullscreen_a = true
-    @can_toggle_fullscreen_b = true
-
-    self.caption = "OpenGL Integration"
-    
-    @gl_background = GLBackground.new
-    
-    @player = Player.new(@scale, @width / 2, @height / 2)
-    @grappling_hook = nil
-    
-    @buildings = Array.new
-    @projectiles = Array.new
-    @enemy_projectiles = Array.new
-    @enemy_destructable_projectiles = Array.new
-    @pickups = Array.new
-
-    @enemies = Array.new
-    @enemies_random_spawn_timer = 100
-    # @enemies_random_spawn_timer = 5
-    @enemies_spawner_counter = 0
-    # @enemies_spawner_counter = 5
-
-    @max_enemy_count = 30
-    @enemies_killed = 0
-    
-    @font = Gosu::Font.new(20)
-    @max_enemies = 4
-
-    @pointer = Cursor.new(@scale)
-    @ui_y = 0
-    @footer_bar = FooterBar.new(@scale, @width, @height)
-    reset_font_ui_y
-
-    # @boss_active_at_enemies_killed = 500
-    @boss_active_at_enemies_killed = 750
-    @boss_active_at_level          = 4
-    @boss_active = false
-    @boss = nil
-    @boss_killed = false
   end
 
   def button_up id
@@ -312,25 +313,26 @@ class GameWindow < Gosu::Window
       end
 
       if @player.is_alive && !@game_pause && !@menu_open
-        @player.update(@width, @height)
-        @player.move_left(@width)  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
-        @player.move_right(@width) if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)
-        @player.accelerate(@height) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
-        @player.brake(@height)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
+        @player.update()
+        @player.move_left()  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
+        @player.move_right() if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)
+        @player.accelerate() if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
+        @player.brake()      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
-            @grappling_hook = GrapplingHook.new(@scale, @player, self.mouse_x, self.mouse_y)
+            @grappling_hook = GrapplingHook.new(@scale, @width, @height, @player, self.mouse_x, self.mouse_y)
+            @player.grapple_hook_cooldown_wait = @grappling_hook.cooldown_delay
           end
         end
 
         if Gosu.button_down?(Gosu::MS_LEFT)
-          @projectiles = @projectiles + @player.trigger_secondary_attack(@width, @height, self.mouse_x, self.mouse_y)
+          @projectiles = @projectiles + @player.trigger_secondary_attack(self.mouse_x, self.mouse_y)
         end
 
         if Gosu.button_down?(Gosu::KB_SPACE)
           if @player.cooldown_wait <= 0
-            results = @player.attack(@width, @height, self.mouse_x, self.mouse_y)
+            results = @player.attack(self.mouse_x, self.mouse_y)
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
@@ -368,23 +370,23 @@ class GameWindow < Gosu::Window
 
         
         
-        @buildings.reject! { |building| !building.update(@width, @height) }
+        @buildings.reject! { |building| !building.update() }
 
         if @player.is_alive && @grappling_hook
-          grap_result = @grappling_hook.update(@width, @height, @player)
+          grap_result = @grappling_hook.update(@player)
           @grappling_hook = nil if !grap_result
         end
 
-        @pickups.reject! { |pickup| !pickup.update(@width, @height, self.mouse_x, self.mouse_y) }
+        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y) }
 
-        @projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
+        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y) }
 
-        @enemy_projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
-        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(@width, @height, self.mouse_x, self.mouse_y) }
-        @enemies.reject! { |enemy| !enemy.update(@width, @height, nil, nil, @player) }
+        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y) }
+        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y) }
+        @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
 
         if @boss
-          result = @boss.update(@width, @height, nil, nil, @player)
+          result = @boss.update(nil, nil, @player)
           if !result
             @boss_killed = true
             @boss = nil
@@ -398,7 +400,7 @@ class GameWindow < Gosu::Window
         
 
         if !@boss_killed && !@boss_active
-          @buildings.push(Building.new(@scale)) if rand(100) == 0
+          @buildings.push(Building.new(@scale, @width, @height)) if rand(100) == 0
         end
 
         # Temp
@@ -445,7 +447,7 @@ class GameWindow < Gosu::Window
         # Move to enemy mehtods
         @enemies.each do |enemy|
           if enemy.cooldown_wait <= 0
-            results = enemy.attack(@width, @height, @player)
+            results = enemy.attack(@player)
 
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
@@ -463,7 +465,7 @@ class GameWindow < Gosu::Window
 
         if @boss
           if @boss.cooldown_wait <= 0
-            results = @boss.attack(@width, @height, @player)
+            results = @boss.attack(@player)
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             @boss.cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
@@ -476,7 +478,7 @@ class GameWindow < Gosu::Window
             end
           end
           if @boss.secondary_cooldown_wait <= 0
-            results = @boss.secondary_attack(@width, @height, @player)
+            results = @boss.secondary_attack(@player)
 
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
@@ -491,7 +493,7 @@ class GameWindow < Gosu::Window
           end
 
           if @boss.tertiary_cooldown_wait <= 0
-            results = @boss.tertiary_attack(@width, @height, @player)
+            results = @boss.tertiary_attack(@player)
 
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]

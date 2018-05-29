@@ -9,11 +9,27 @@ class GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def initialize(scale, x = nil, y = nil)
+  def initialize(scale, x, y, screen_width, screen_height, options = {})
     @scale = scale
-    @image = get_image
-    @x = x
-    @y = y
+    @image = options[:image] || get_image
+
+
+    if options[:relative_object]
+      if LEFT == options[:side]
+        @x = options[:relative_object].x - (options[:relative_object].get_width / 2)
+        @y = options[:relative_object].y
+      elsif RIGHT == options[:side]
+        @x = (options[:relative_object].x + options[:relative_object].get_width / 2) - 4
+        @y = options[:relative_object].y
+      else
+        @x = options[:relative_object].x
+        @y = options[:relative_object].y
+      end
+    else
+      @x = x
+      @y = y
+    end
+
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     @health = 0
@@ -21,6 +37,15 @@ class GeneralObject
     @image_height = @image.height * @scale
     @image_size   = @image_width  * @image_height / 2
     @image_radius = (@image_width  + @image_height) / 4
+
+    @image_width_half  = @image_width  / 2
+    @image_height_half = @image_height / 2
+
+
+
+    @screen_width  = screen_width
+    @screen_height = screen_height
+    @off_screen = screen_height + screen_height
   end
 
   # If using a different class for ZOrder than it has for model name, or if using subclass (from subclass or parent)
@@ -57,21 +82,22 @@ class GeneralObject
     @image_radius
   end
 
-  def update width, height, mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     @time_alive += 1
-    return is_on_screen?(width, height)
+    return is_on_screen?
   end
 
   protected
+  
   def self.get_max_speed
     self::MAX_SPEED
   end
 
-  def is_on_screen? width, height
+  def is_on_screen?
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
-    @y > (0 - get_height) && @y < (height + get_height) && @x > (0 - get_width) && @x < (width + get_width)
+    @y > (0 - get_height) && @y < (@screen_height + get_height) && @x > (0 - get_width) && @x < (@screen_width + get_width)
   end
 
 

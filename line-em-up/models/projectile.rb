@@ -1,7 +1,7 @@
 require_relative 'general_object.rb'
 
 class Projectile < GeneralObject
-  attr_accessor :x, :y, :time_alive, :mouse_start_x, :mouse_start_y, :vector_x, :vector_y, :angle, :radian
+  attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   COOLDOWN_DELAY = 50
   STARTING_SPEED = 3.0
@@ -13,28 +13,19 @@ class Projectile < GeneralObject
   ADVANCED_HIT_BOX_DETECTION = false
 
 
-  def initialize(scale, width, height, object, mouse_x = nil, mouse_y = nil, options = {})
-    @scale = scale
-    @image = get_image
-    @time_alive = 0
-    @mouse_start_x = mouse_x
-    @mouse_start_y = mouse_y
+  def get_image
+    puts "override get_image!"
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
+  end
 
-    if LEFT == options[:side]
-      @x = object.x - (object.get_width / 2)
-      @y = object.y
-    elsif RIGHT == options[:side]
-      @x = (object.x + object.get_width / 2) - 4
-      @y = object.y
-    else
-      @x = object.x
-      @y = object.y
-    end
+  def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, options = {})
+    options[:relative_object] = object
+    super(scale, nil, nil, screen_width, screen_height, options)
 
-    start_point = OpenStruct.new(:x => @x - width / 2, :y => @y - height / 2)
+    start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
     # start_point = GeoPoint.new(@x - WIDTH / 2, @y - HEIGHT / 2)
     # end_point   =   OpenStruct.new(:x => @mouse_start_x, :y => @mouse_start_y)
-    end_point   = OpenStruct.new(:x => @mouse_start_x - width / 2, :y => @mouse_start_y - height / 2)
+    end_point   = OpenStruct.new(:x => end_point_x - screen_width / 2, :y => end_point_y - screen_height / 2)
     # end_point = GeoPoint.new(@mouse_start_x - WIDTH / 2, @mouse_start_y - HEIGHT / 2)
     @angle = calc_angle(start_point, end_point)
     @radian = calc_radian(start_point, end_point)
@@ -43,17 +34,7 @@ class Projectile < GeneralObject
     if @angle < 0
       @angle = 360 - @angle.abs
     end
-    @image_width  = @image.width  * @scale
-    @image_height = @image.height * @scale
-    @image_size   = @image_width  * @image_height / 2
-    @image_radius = (@image_width  + @image_height) / 4
-    # puts "INIT NEW ANGLE: #{@angle}"
   end
-
-  # def get_image
-  #   puts "override get_image!"
-  #   Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
-  # end
 
   def get_draw_ordering
     ZOrder::Projectile
@@ -69,7 +50,7 @@ class Projectile < GeneralObject
     # return test
   end
 
-  require 'benchmark'
+  # require 'benchmark'
 
   def hit_objects(object_groups)
     drops = []
@@ -144,7 +125,7 @@ class Projectile < GeneralObject
         end
       end
     end
-    @y = -HEIGHT if hit_object
+    @y = @off_screen if hit_object
     return {drops: drops, point_value: points, killed: killed}
   end
 

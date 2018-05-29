@@ -5,20 +5,17 @@ require_relative 'pickup.rb'
 class Star < Pickup
   POINT_VALUE_BASE = 2
   
-  def initialize(scale, x = nil, y = nil)
-    @scale = scale
-    @image = get_image
-    @time_alive = 0
+  def initialize(scale, screen_width, screen_height, x = nil, y = nil, options = {})
+    # @scale = scale
+    # @image = get_image
+    # @time_alive = 0
+    @x = x || rand * 800
+    @y = y || 0
+    super(scale, screen_width, screen_height, @x, @y, options)
     @color = Gosu::Color.new(0xff_000000)
     @color.red = rand(255 - 40) + 40
     @color.green = rand(255 - 40) + 40
     @color.blue = rand(255 - 40) + 40
-    @x = x || rand * 800
-    @y = y || 0
-    @image_width  = 25 * @scale
-    @image_height = 25 * @scale
-    @image_radius = 13 * @scale
-    @current_speed = SCROLLING_SPEED * @scale
   end
 
   def get_image

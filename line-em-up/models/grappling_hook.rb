@@ -14,8 +14,12 @@ class GrapplingHook < GeneralObject
   # MAX_CURSOR_FOLLOW = 15
   MAX_SPEED      = 20
 
-  def initialize(scale, object, mouse_x, mouse_y)
-    object.grapple_hook_cooldown_wait = COOLDOWN_DELAY
+  def cooldown_delay
+    COOLDOWN_DELAY
+  end
+
+  def initialize(scale, screen_width, screen_height, object, mouse_x, mouse_y, options = {})
+    # object.grapple_hook_cooldown_wait = COOLDOWN_DELAY
     @scale = scale
 
     # image = Magick::Image::read("#{MEDIA_DIRECTORY}/grappling_hook.png").first.resize(0.1)
@@ -56,6 +60,10 @@ class GrapplingHook < GeneralObject
     @chain_width  = @chain.height * @scale
     @chain_size   = @chain_width  * @chain_height / 2
     @chain_radius = ((@chain_height + @chain_width) / 4) * @scale
+
+    # @screen_width  = screen_width
+    # @screen_height = screen_height
+    # @off_screen = screen_height + screen_height
   end
 
   def draw player
@@ -127,7 +135,7 @@ class GrapplingHook < GeneralObject
     
   # end
   
-  def update width, height, player = nil
+  def update player = nil
     # puts "GRAP UPDATE:#{@reached_max_length} and #{@max_length_counter}"
     if !@reached_end_point
       current_angle = @angle
@@ -177,9 +185,7 @@ class GrapplingHook < GeneralObject
     if @reached_end_point || @reached_max_length
       @reached_back_to_player = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, player.x, player.y) < (self.get_radius * @scale) * 1.2
     end
-    # raise "HERE WE GO" if @reached_end_point
 
-    # After reached target, reverse the angle
 
     return !@reached_back_to_player
   end
@@ -202,8 +208,6 @@ class GrapplingHook < GeneralObject
     end
   end
 
-
-
   def hit_objects(objects)
     drops = []
     objects.each do |object|
@@ -225,18 +229,6 @@ class GrapplingHook < GeneralObject
     end
     return {drops: drops, point_value: 0}
   end
-
-
-  # def hit_object(object)
-  #   return_value = nil
-  #   if Gosu.distance(@x, @y, object.x, object.y) < 30
-  #     @y = -50
-  #     return_value = DAMAGE
-  #   else
-  #     return_value = 0
-  #   end
-  #   return return_value
-  # end
 
 
 end

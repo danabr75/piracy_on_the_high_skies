@@ -5,16 +5,8 @@ class HealthPack < Pickup
 
   HEALTH_BOOST = 25
 
-  def initialize(scale, x = nil, y = nil)
-    @scale = scale
-    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_pack_0.png", :tileable => true)
-    @x = x
-    @y = y
-    @image_width  = @image.width  * @scale
-    @image_height = @image.height * @scale
-    @image_size   = @image_width  * @image_height / 2
-    @image_radius = (@image_width  + @image_height) / 4
-    @current_speed = GLBackground::SCROLLING_SPEED * @scale
+  def get_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/health_pack_0.png", :tileable => true)
   end
 
   def draw
@@ -24,16 +16,10 @@ class HealthPack < Pickup
     end 
     image_rot = 12 if image_rot == 13
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_pack_#{image_rot}.png", :tileable => true)
-    # @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Pickup)
-    super
+    @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Pickups)
+    # super
   end
 
-
-  def update width, height, mouse_x = nil, mouse_y = nil, player = nil
-    @y += @current_speed
-
-    @y < height + get_height
-  end
 
   def collected_by_player player
     if player.health + HEALTH_BOOST > player.class::MAX_HEALTH 

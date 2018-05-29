@@ -39,7 +39,7 @@ class Missile < Projectile
   #   @mouse_start_y = mouse_y
   # end
   
-  def update width, height, mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil
     new_speed = 0
     if @time_alive > self.class.get_initial_delay
       new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)
@@ -61,6 +61,6 @@ class Missile < Projectile
     @x = @x + vx
     @y = @y + vy
 
-    super(width, height, mouse_x, mouse_y)
+    super(mouse_x, mouse_y)
   end
 end

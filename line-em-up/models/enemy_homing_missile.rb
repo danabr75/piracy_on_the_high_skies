@@ -13,46 +13,52 @@ class EnemyHomingMissile < Projectile
   # ADVANCED_HIT_BOX_DETECTION = true
   ADVANCED_HIT_BOX_DETECTION = false
 
-  def initialize(scale, width, height, object, mouse_x = nil, mouse_y = nil, homing_object = nil, options = {})
-    @scale = scale
-    @image = get_image
-    @time_alive = 0
+  def get_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile_reverse.png")
+  end
+
+  def initialize(scale, screen_width, screen_height, object, homing_object, options = {})
+    options[:relative_object] = object
+    super(scale, screen_width, screen_height, object, homing_object.x, homing_object.y, options)
+    # @scale = scale
+    # @image = get_image
+    # @time_alive = 0
     @health = 5
-    # @mouse_start_x = mouse_x
-    # @mouse_start_y = mouse_y
+    # # @mouse_start_x = mouse_x
+    # # @mouse_start_y = mouse_y
 
-    if LEFT == options[:side]
-      @x = object.x - (object.get_width / 2)
-      @y = object.y
-    elsif RIGHT == options[:side]
-      @x = (object.x + object.get_width / 2) - 4
-      @y = object.y
-    else
-      @x = object.x
-      @y = object.y
-    end
+    # if LEFT == options[:side]
+    #   @x = object.x - (object.get_width / 2)
+    #   @y = object.y
+    # elsif RIGHT == options[:side]
+    #   @x = (object.x + object.get_width / 2) - 4
+    #   @y = object.y
+    # else
+    #   @x = object.x
+    #   @y = object.y
+    # end
 
-    if homing_object && homing_object.is_alive
+    # if homing_object && homing_object.is_alive
 
-      start_point = OpenStruct.new(:x => @x - width / 2, :y => @y - height / 2)
-      # start_point = GeoPoint.new(@x - WIDTH / 2, @y - HEIGHT / 2)
-      # end_point   =   OpenStruct.new(:x => @mouse_start_x, :y => @mouse_start_y)
-      end_point   = OpenStruct.new(:x => homing_object.x - width / 2, :y => homing_object.y - height / 2)
-      # end_point = GeoPoint.new(@mouse_start_x - WIDTH / 2, @mouse_start_y - HEIGHT / 2)
-      @angle = calc_angle(start_point, end_point)
-      @radian = calc_radian(start_point, end_point)
+    #   start_point = OpenStruct.new(:x => @x - width / 2, :y => @y - height / 2)
+    #   # start_point = GeoPoint.new(@x - WIDTH / 2, @y - HEIGHT / 2)
+    #   # end_point   =   OpenStruct.new(:x => @mouse_start_x, :y => @mouse_start_y)
+    #   end_point   = OpenStruct.new(:x => homing_object.x - width / 2, :y => homing_object.y - height / 2)
+    #   # end_point = GeoPoint.new(@mouse_start_x - WIDTH / 2, @mouse_start_y - HEIGHT / 2)
+    #   @angle = calc_angle(start_point, end_point)
+    #   @radian = calc_radian(start_point, end_point)
 
 
-      if @angle < 0
-        @angle = 360 - @angle.abs
-      end
-    else
-      @angle = 280.0
-    end
-    @image_width  = @image.width  * @scale
-    @image_height = @image.height * @scale
-    @image_size   = @image_width  * @image_height / 2
-    @image_radius = (@image_width  + @image_height) / 4
+    #   if @angle < 0
+    #     @angle = 360 - @angle.abs
+    #   end
+    # else
+    #   @angle = 280.0
+    # end
+    # @image_width  = @image.width  * @scale
+    # @image_height = @image.height * @scale
+    # @image_size   = @image_width  * @image_height / 2
+    # @image_radius = (@image_width  + @image_height) / 4
   end
 
   def destructable?
@@ -68,11 +74,8 @@ class EnemyHomingMissile < Projectile
     @health -= damage
   end
 
-  def get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile_reverse.png")
-  end
 
-  def update width, height, mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil
     if is_alive
       new_speed = 0
       if @time_alive > self.class.get_initial_delay
@@ -95,7 +98,7 @@ class EnemyHomingMissile < Projectile
       @x = @x + vx
       @y = @y - vy
 
-      super(width, height, mouse_x, mouse_y)
+      super(mouse_x, mouse_y)
     else
       false
     end

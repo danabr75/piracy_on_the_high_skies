@@ -4,7 +4,7 @@ class SmallExplosion < GeneralObject
   attr_reader :x, :y, :living_time
   TIME_TO_LIVE = 50
 
-  def initialize(scale, x = nil, y = nil, image = nil)
+  def initialize(scale, screen_width, screen_height, x = nil, y = nil, image = nil, options = {})
     @scale = scale
     @smoke_scale = @scale * 1.2
     @smoke = Gosu::Image.new("#{MEDIA_DIRECTORY}/smoke.png")
@@ -18,6 +18,10 @@ class SmallExplosion < GeneralObject
     @image_size   = @image_width  * @image_height / 2
     @image_radius = (@image_width  + @image_height) / 4
     @current_speed = (SCROLLING_SPEED - 1) * @scale
+    
+    @screen_width  = screen_width
+    @screen_height = screen_height
+    @off_screen = screen_height + screen_height
   end
 
   def draw
@@ -33,12 +37,12 @@ class SmallExplosion < GeneralObject
   end
 
 
-  def update width, height, mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil
     # Remove even if hasn't gone offscreen
     if @time_alive <= TIME_TO_LIVE
       @time_alive += 1
       @y += @current_speed
-      super(width, height, mouse_x, mouse_y)
+      super(mouse_x, mouse_y)
     else
       false
     end
