@@ -6,7 +6,8 @@ class SmallExplosion < GeneralObject
 
   def initialize(scale, x = nil, y = nil, image = nil)
     @scale = scale
-    # @smoke = Gosu::Image.new("#{MEDIA_DIRECTORY}/smoke.png", :tileable => true)
+    @smoke_scale = @scale * 1.2
+    @smoke = Gosu::Image.new("#{MEDIA_DIRECTORY}/smoke.png")
     @image = image#Gosu::Image.new("#{MEDIA_DIRECTORY}/starfighterv4.png", :tileable => true)
 
     @x = x || 0
@@ -27,6 +28,7 @@ class SmallExplosion < GeneralObject
     if spin_down > (@time_alive * 10)
       spin_down = @time_alive * 10
     end
+    @smoke.draw_rot(@x, @y, ZOrder::SmallExplosions, (360 - spin_down), 0.5, 0.5, @smoke_scale, @smoke_scale)
     @image.draw_rot(@x, @y, ZOrder::SmallExplosions, (360 - spin_down), 0.5, 0.5, @scale, @scale)
   end
 
