@@ -124,6 +124,7 @@ class Projectile < GeneralObject
     if hit_object && self.class.get_aoe > 0
       object_groups.each do |group|
         group.each do |object|
+          next if object.nil?
           if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @scale
             if object.respond_to?(:health) && object.respond_to?(:take_damage)
               object.take_damage(self.class.get_damage)

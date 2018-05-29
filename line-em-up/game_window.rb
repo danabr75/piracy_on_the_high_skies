@@ -209,7 +209,8 @@ class GameWindow < Gosu::Window
     reset_font_ui_y
 
     # @boss_active_at_enemies_killed = 500
-    @boss_active_at_enemies_killed = 500
+    @boss_active_at_enemies_killed = 750
+    @boss_active_at_level          = 4
     @boss_active = false
     @boss = nil
     @boss_killed = false
@@ -429,7 +430,8 @@ class GameWindow < Gosu::Window
             @player.score += 100
           end
         end
-        if @boss_active_at_enemies_killed == @enemies_killed
+        if @boss_active_at_enemies_killed == @enemies_killed || @boss_active_at_level == @enemies_spawner_counter
+          # puts "HEREaagL #{@boss_active_at_enemies_killed} amd #{@enemies_killed} and #{@boss_active_at_level} and #{ @enemies_spawner_counter}"
           @boss_active = true
         end
 

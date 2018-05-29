@@ -25,7 +25,7 @@ class Mothership < GeneralObject
     @secondary_cooldown_wait = 0
     @tertiary_cooldown_wait = 0
     @attack_speed = 0.5
-    @health = 500
+    @health = 5000
     @armor = 0
     @image_width  = @image.width  * @scale
     @image_height = @image.height * @scale
