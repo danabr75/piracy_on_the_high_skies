@@ -26,17 +26,17 @@ class Player < GeneralObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    # @attack_speed = 1
-    @attack_speed = 3
+    @attack_speed = 1
+    # @attack_speed = 3
     # temp
     @health = 100
     # @health = 100000
     @armor = 0
-    # @rockets = 25
-    @rockets = 25000
+    @rockets = 25
+    # @rockets = 25000
     # @rocket_launcher = {}
-    # @bombs = 3
-    @bombs = 300
+    @bombs = 3
+    # @bombs = 300
     @time_alive = 0
     @secondary_weapon = "missile"
     @turn_right = false
@@ -49,8 +49,7 @@ class Player < GeneralObject
 
 
   def take_damage damage
-    # @health -= damage
-    @health
+    @health -= damage
   end
 
   def toggle_secondary

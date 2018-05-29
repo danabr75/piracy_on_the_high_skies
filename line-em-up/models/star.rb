@@ -8,6 +8,7 @@ class Star < Pickup
   def initialize(scale, x = nil, y = nil)
     @scale = scale
     @image = get_image
+    @time_alive = 0
     @color = Gosu::Color.new(0xff_000000)
     @color.red = rand(255 - 40) + 40
     @color.green = rand(255 - 40) + 40
@@ -17,10 +18,11 @@ class Star < Pickup
     @image_width  = 25 * @scale
     @image_height = 25 * @scale
     @image_radius = 13 * @scale
+    @current_speed = SCROLLING_SPEED * @scale
   end
 
   def get_image
-    Gosu::Image::load_tiles("#{MEDIA_DIRECTORY}/star.png", 25, 25)
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/single_star.png")
   end
 
 
@@ -42,8 +44,9 @@ class Star < Pickup
 
 
   def draw
-    img = @image[Gosu.milliseconds / 100 % @image.size];
-    img.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @scale, @scale, @color, :add)
+    # img = @image[Gosu.milliseconds / 100 % @image.size];
+    # img.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @scale, @scale, @color, :add)
+    @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @scale, @scale, @color, :add)
   end
   
   # def update mouse_x = nil, mouse_y = nil

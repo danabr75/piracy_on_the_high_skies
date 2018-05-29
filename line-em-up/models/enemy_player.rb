@@ -51,8 +51,8 @@ class EnemyPlayer < GeneralObject
 
   def drops
     [
-      # SmallExplosion.new(@scale, @x, @y, @image),
-      # Star.new(@scale, @x, @y)
+      SmallExplosion.new(@scale, @x, @y, @image),
+      Star.new(@scale, @x, @y)
     ]
   end
 

@@ -192,7 +192,11 @@ class GameWindow < Gosu::Window
 
     @enemies = Array.new
     @enemies_random_spawn_timer = 100
+    # @enemies_random_spawn_timer = 5
     @enemies_spawner_counter = 0
+    # @enemies_spawner_counter = 5
+
+    @max_enemy_count = 30
     
     @font = Gosu::Font.new(20)
     @max_enemies = 4
@@ -376,8 +380,8 @@ class GameWindow < Gosu::Window
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
 
         if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
-          (0..@enemies_spawner_counter).each do |count|
-            @enemies.push(EnemyPlayer.new(@scale, @width, @height))
+          (0..(@enemies_spawner_counter / 2).round).each do |count|
+            @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
           end
         end
         if @player.time_alive % 500 == 0
@@ -387,9 +391,9 @@ class GameWindow < Gosu::Window
           @enemies_random_spawn_timer -= 5
         end
         # temp
-        if @player.time_alive % 500 == 0
-          (0..1).each do |count|
-            @enemies.push(MissileBoat.new(@scale, @width, @height))
+        if @player.time_alive % 200 == 0
+          (0..(@enemies_spawner_counter / 4).round).each do |count|
+            @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
           end
         end
         if @player.time_alive % 5000 == 0
@@ -403,9 +407,9 @@ class GameWindow < Gosu::Window
 
         # Move to enemy mehtods
         @enemies.each do |enemy|
-          enemy.cooldown_wait -= 1 if enemy.cooldown_wait > 0
           if enemy.cooldown_wait <= 0
             results = enemy.attack(@width, @height, @player)
+
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             enemy.cooldown_wait = cooldown.to_f.fdiv(enemy.attack_speed)
