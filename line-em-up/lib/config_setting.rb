@@ -41,14 +41,18 @@ module ConfigSetting
     # puts "test2: #{test.inspect}"
     # puts "test2 - #{test.nil?}"
     # puts "test3 - #{test.inspect}"
-    if test.nil? #|| test.count == 0
-      # puts "TEST NIL HERE"
+    # if test.nil? #|| test.count == 0
+    #   # puts "TEST NIL HERE"
+    #   test = default_value
+    # end
+    if test == [] || test.nil? || test == ''
       test = default_value
     end
     return test
   end
 
   def self.create_file_if_non_existent file_location
+    # puts "CREATING FILE AT LOCATION: #{file_location}"
     if !File.exists?(file_location)
       FileUtils.touch(file_location)
     end

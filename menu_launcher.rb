@@ -2,6 +2,7 @@ require 'gosu'
 
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
+CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
 
 Dir["#{CURRENT_DIRECTORY}/line-em-up/lib/*.rb"].each { |f| require f }
 # Shouldn't need models
@@ -14,7 +15,6 @@ require "#{CURRENT_DIRECTORY}/line-em-up/game_window.rb"
 # @menu.add_item(Gosu::Image.new("#{MEDIA_DIRECTORY}question.png"), 100, 200, 1, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}question.png", false))
 # @menu.add_item(Gosu::Image.new("#{MEDIA_DIRECTORY}question.png"), 100, 250, 1, lambda { puts "something" }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}question.png", false))
 
-CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
 
 class Main < Gosu::Window
   def initialize
