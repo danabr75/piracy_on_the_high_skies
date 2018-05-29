@@ -26,6 +26,7 @@ class EnemyPlayer < GeneralObject
     @image_height = @image.height * @scale
     @image_size   = @image_width  * @image_height / 2
     @image_radius = (@image_width  + @image_height) / 4
+    @current_speed = (rand(5) * @scale).round + 1
   end
 
   def get_points
@@ -66,7 +67,7 @@ class EnemyPlayer < GeneralObject
 
   # SPEED = 1
   def get_speed
-    (rand(5) * @scale).round
+    @current_speed
   end
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil

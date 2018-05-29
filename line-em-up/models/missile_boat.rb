@@ -27,7 +27,7 @@ class MissileBoat < GeneralObject
     @image_height = @image.height * @scale
     @image_size   = @image_width  * @image_height / 2
     @image_radius = (@image_width  + @image_height) / 4
-    @current_speed = (rand(5) * @scale).round
+    @current_speed = (rand(5) * @scale).round + 1
   end
 
   def get_points

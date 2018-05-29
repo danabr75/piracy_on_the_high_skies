@@ -75,6 +75,7 @@ class Projectile < GeneralObject
     drops = []
     points = 0
     hit_object = false
+    killed = 0
     object_groups.each do |group|
       group.each do |object|
         break if hit_object
@@ -105,12 +106,14 @@ class Projectile < GeneralObject
             end
 
             if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+
               object.drops.each do |drop|
                 drops << drop
               end
             end
 
             if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
+              killed += 1
               points = points + object.get_points
             end
           end
@@ -132,6 +135,7 @@ class Projectile < GeneralObject
             end
 
             if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
+              killed += 1
               points = points + object.get_points
             end
           end
@@ -139,7 +143,7 @@ class Projectile < GeneralObject
       end
     end
     @y = -HEIGHT if hit_object
-    return {drops: drops, point_value: points}
+    return {drops: drops, point_value: points, killed: killed}
   end
 
   protected
