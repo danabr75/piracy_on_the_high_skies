@@ -203,6 +203,7 @@ class GameWindow < Gosu::Window
 
     @pointer = Cursor.new(@scale)
     @ui_y = 0
+    @health_bar = HealthBar.new(@scale, @width, @height)
     reset_font_ui_y
   end
 
@@ -429,6 +430,7 @@ class GameWindow < Gosu::Window
 
   def draw
     @menu.draw if @menu
+    @health_bar.draw(@player.health)
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
     @pointer.draw(self.mouse_x, self.mouse_y)# if @grappling_hook.nil? || !@grappling_hook.active
 
