@@ -3,9 +3,8 @@
 require 'rubygems'
 require 'gosu'
 require 'gl'
-# require 'rmagick'
-# require 'geometry'
-# require_relative 'star.rb'
-# require_relative 'bullet.rb'
-# require_relative 'player.rb'
-# require_relative 'enemy_player.rb'
+CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+
+Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
+Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
+

@@ -126,5 +126,102 @@ class GeneralObject
     return rdn
   end
 
+  def add_angles angle1, angle2
+    angle_sum = angle1 + angle2
+    if angle_sum > 360
+      angle_sum = angle_sum - 360
+    end
+  end
+  def subtract_angles angle1, angle2
+    angle_sum = angle1 - angle2
+    if angle_sum < 0
+      angle_sum = angle_sum + 360
+    end
+  end
+
+  def self.is_angle_between_two_angles?(angle, min_angle, max_angle)
+    value = false
+    if angle == min_angle
+      value = true
+    elsif angle == max_angle
+      value = true
+    elsif max_angle < min_angle
+      # if max angle is less than min, then it crossed the angle 0/360 barrier
+      if angle == 0
+        value =  true
+      elsif angle > 0 && angle < max_angle
+        value =  true
+      elsif angle > min_angle
+        value =  true
+      else
+        # return false
+      end
+    else
+      # max angle is greater than min, easy case.
+      value = angle < max_angle && angle > min_angle
+    end
+    return value
+  end
+
+  def is_angle_between_two_angles?(angle, min_angle, max_angle)
+    GeneralObject.is_angle_between_two_angles?(angle, min_angle, max_angle)
+  end
+
+  # Which angle is nearest
+  def self.nearest_angle angle, min_angle, max_angle
+    value = nil
+    min_angle_diff = angle - min_angle
+    max_angle_diff = angle - max_angle
+    first_diff = nil
+    if min_angle_diff.abs > max_angle_diff.abs
+      # puts "CASE 1"
+      first_diff = max_angle_diff.abs
+      value = max_angle
+    else
+      # puts "CASE 2"
+      first_diff = min_angle_diff.abs
+      value = min_angle
+    end
+    # puts "VALUE: #{value}"
+
+    alt_value = nil
+    alt_angle = (angle - 360).abs
+    min_angle_diff = alt_angle - min_angle
+    max_angle_diff = alt_angle - max_angle
+    second_diff = nil
+    if min_angle_diff.abs > max_angle_diff.abs
+      # puts "CASE 3"
+      second_diff = max_angle_diff.abs
+      alt_value = max_angle
+    else
+      # puts "CASE 4"
+      second_diff = min_angle_diff.abs
+      alt_value = min_angle
+    end
+    # puts "VALUE: #{value}"
+
+    if first_diff > second_diff
+      # puts "CASE 5"
+      value = alt_value
+    end
+    # puts "VALUE: #{value}"
+    return value
+  end
+
+  def nearest_angle angle, min_angle, max_angle
+    GeneralObject.nearest_angle(angle, min_angle, max_angle)
+  end
+
+
+
+
+
+
+
+
+
+
+
+
 
 end

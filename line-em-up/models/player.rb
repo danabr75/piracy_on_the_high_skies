@@ -7,6 +7,10 @@ class Player < GeneralObject
   MAX_HEALTH = 200
 
   SECONDARY_WEAPONS = %w[missile bomb]
+  # Range goes clockwise around the 0-360 angle
+  MISSILE_LAUNCHER_MIN_ANGLE = 75
+  MISSILE_LAUNCHER_MAX_ANGLE = 105
+  MISSILE_LAUNCHER_INIT_ANGLE = 90
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
@@ -23,7 +27,8 @@ class Player < GeneralObject
     @attack_speed = 1
     @health = 100
     @armor = 0
-    @rockets = 25
+    # @rockets = 25
+    @rockets = 250
     @bombs = 3
     @secondary_weapon = "missile"
     @turn_right = false
@@ -151,11 +156,17 @@ class Player < GeneralObject
       if get_secondary_ammo_count > 1
         {
           projectiles: [
-            Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, {side: 'left',  relative_object: self}),
-            Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, {side: 'right', relative_object: self})
+            Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self}),
+            Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self})
             ],
           cooldown: Missile::COOLDOWN_DELAY
         }
+        # {
+        #   projectiles: [
+        #     Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE)
+        #     ],
+        #   cooldown: Missile::COOLDOWN_DELAY
+        # }
       else get_secondary_ammo_count == 1
         {
           projectiles: [Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, {relative_object: self})],

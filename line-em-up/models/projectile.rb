@@ -18,7 +18,7 @@ class Projectile < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, options = {})
+  def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
     options[:relative_object] = object
     super(scale, nil, nil, screen_width, screen_height, options)
 
@@ -30,14 +30,39 @@ class Projectile < GeneralObject
     @angle = calc_angle(start_point, end_point)
     @radian = calc_radian(start_point, end_point)
 
+    # puts "PRE-ANGLE: #{@angle}"
 
     @image_angle = @angle
     if @angle < 0
       @angle = 360 - @angle.abs
-      @image_angle = (@angle - 90) * -1
-    else
-      @image_angle = (@angle - 90) * -1
     end
+
+    if angle_min.nil? && angle_max.nil?
+      # do nothing
+    else
+      # if @angle < angle_min
+      #   @angle = angle_max
+      # # elsif @angle < angle_min && @angle > add_angles(@angle, 180)
+      #   # @angle = angle_max
+      if is_angle_between_two_angles?(@angle, angle_min, angle_max)
+        # Do nothing, we're good
+        # puts "ANGLE WAS BETWEEN TWO POINTS: #{@angle} was between #{angle_min} and #{angle_max}"
+      else
+        # puts "ANGLE WAS CHOSEN TO BE NEAREST: #{@angle} with #{angle_min} and #{angle_max}"
+        @angle = nearest_angle(@angle, angle_min, angle_max)
+        # puts "ANGLE WAS CHSOEN: #{@angle}"
+      end
+    end
+
+
+    if angle_init
+      @current_image_angle = (angle_init - 90) * -1
+      @end_image_angle = (@angle - 90) * -1
+    else
+      @current_image_angle = (@angle - 90) * -1
+    end
+
+    # puts "POST-ANGLE: #{@angle}"
 
     # # Limit extreme angles 180 and 0 are the 
     # image_angle = 0
@@ -47,9 +72,54 @@ class Projectile < GeneralObject
 
   end
 
+  def update mouse_x = nil, mouse_y = nil
+    if @end_image_angle && @time_alive > 10
+      incrementing_amount = 0.5
+      angle_difference = (@current_image_angle - @end_image_angle)
+      if incrementing_amount > angle_difference.abs
+        # puts "ENDING IMAGE HERE!!!!!!"
+        @current_image_angle = @end_image_angle
+        @end_image_angle = nil
+      elsif angle_difference > 0
+        @current_image_angle -= incrementing_amount
+      elsif angle_difference < 0
+        @current_image_angle += incrementing_amount
+      else
+        # puts "ENDING IMAGE HERE!!!!!!"
+        @current_image_angle = @end_image_angle
+        @end_image_angle = nil
+      end
+    end
+
+
+
+    new_speed = 0
+    if @time_alive > self.class.get_initial_delay
+      new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)
+      new_speed = self.class.get_max_speed if new_speed > self.class.get_max_speed
+      new_speed = new_speed * @scale
+    end
+
+
+
+    vx = 0
+    vy = 0
+  if new_speed != 0
+    vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+
+    vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
+    vy = vy * -1
+  end
+
+    @x = @x + vx
+    @y = @y + vy
+
+    super(mouse_x, mouse_y)
+  end
+
   def draw
     # limiting angle extreme by 2
-    @image.draw_rot(@x, @y, ZOrder::Projectile, @image_angle, 0.5, 0.5, @scale, @scale)
+    @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @scale, @scale)
   end
 
   def get_draw_ordering
@@ -92,14 +162,9 @@ class Projectile < GeneralObject
           hit_object = Gosu.distance(@x, @y, object.x, object.y) < self.get_radius + object.get_radius
         end
         if hit_object
-          # puts "HIT OBJECT"
           # hit_object = true
           if self.class.get_aoe <= 0
-            # puts "shout be here"
-            # puts "1: #{object.respond_to?(:health)}"
-            # puts "2: #{object.respond_to?(:take_damage)}"
             if object.respond_to?(:health) && object.respond_to?(:take_damage)
-              # puts "OBJECT TALING DAMAGE: #{self.class.get_damage}"
               object.take_damage(self.class.get_damage)
             end
 

@@ -18,11 +18,10 @@ class EnemyHomingMissile < Projectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
   end
 
-  def initialize(scale, screen_width, screen_height, object, homing_object, options = {})
+  def initialize(scale, screen_width, screen_height, object, homing_object, angle_min, angle_max, angle_init, options = {})
     options[:relative_object] = object
-    super(scale, screen_width, screen_height, object, homing_object.x, homing_object.y, options)
+    super(scale, screen_width, screen_height, object, homing_object.x, homing_object.y, angle_min, angle_max, angle_init, options)
     @health = 5
-    # puts "ENEMY MISSILE ANGLE: #{@angle}"
   end
 
   def destructable?
@@ -39,35 +38,11 @@ class EnemyHomingMissile < Projectile
   end
 
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
-    new_speed = 0
-    if @time_alive > self.class.get_initial_delay
-      new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)
-      new_speed = self.class.get_max_speed if new_speed > self.class.get_max_speed
-      new_speed = new_speed * @scale
+  def update mouse_x = nil, mouse_y = nil
+    if is_alive
+      super(mouse_x, mouse_y)
+    else
+      false
     end
-
-
-
-    vx = 0
-    vy = 0
-      # vx = MAX_SPEED * Math.cos(@angle * Math::PI / 180)
-
-      # vy = MAX_SPEED * Math.sin(@angle * Math::PI / 180)
-
-      # vy = vy * -1
-    if new_speed != 0
-      vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
-
-      vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-      vy = vy * -1
-      # Because our y is inverted
-      # vy = vy - ((new_speed / 3) * 2)
-    end
-
-    @x = @x + vx
-    @y = @y + vy
-
-    super(mouse_x, mouse_y)
   end
 end
