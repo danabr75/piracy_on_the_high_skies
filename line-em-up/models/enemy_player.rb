@@ -3,7 +3,7 @@ require_relative 'enemy_bullet.rb'
 require_relative 'small_explosion.rb'
 require_relative 'star.rb'
 
-class EnemyPlayer < Player
+class EnemyPlayer < GeneralObject
   Speed = 3
   MAX_ATTACK_SPEED = 3.0
   POINT_VALUE_BASE = 10
@@ -22,6 +22,10 @@ class EnemyPlayer < Player
     @attack_speed = 0.5
     @health = 15
     @armor = 0
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
   end
 
   def get_points
@@ -47,8 +51,8 @@ class EnemyPlayer < Player
 
   def drops
     [
-      SmallExplosion.new(@scale, @x, @y, @image),
-      Star.new(@scale, @x, @y)
+      # SmallExplosion.new(@scale, @x, @y, @image),
+      # Star.new(@scale, @x, @y)
     ]
   end
 
@@ -66,10 +70,10 @@ class EnemyPlayer < Player
   end
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
-    # @y += 3
+    @cooldown_wait -= 1 if @cooldown_wait > 0
     if is_alive
       # Stay above the player
-      if player.is_alive && player.y < @y
+      if player.y < @y
           @y -= get_speed
       else
         if rand(2).even?

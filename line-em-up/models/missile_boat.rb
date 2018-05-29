@@ -4,7 +4,7 @@ require_relative 'enemy_homing_missile.rb'
 require_relative 'small_explosion.rb'
 require_relative 'star.rb'
 
-class MissileBoat < Player
+class MissileBoat < GeneralObject
   Speed = 5
   MAX_ATTACK_SPEED = 3.0
   POINT_VALUE_BASE = 50
@@ -23,6 +23,11 @@ class MissileBoat < Player
     @attack_speed = 0.5
     @health = 10
     @armor = 0
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
+    @current_speed = (rand(5) * @scale).round
   end
 
   def get_points
@@ -48,8 +53,8 @@ class MissileBoat < Player
 
   def drops
     [
-      SmallExplosion.new(@scale, @x, @y, @image),
-      Star.new(@scale, @x, @y)
+      # SmallExplosion.new(@scale, @x, @y, @image),
+      # Star.new(@scale, @x, @y)
     ]
   end
 
@@ -58,32 +63,32 @@ class MissileBoat < Player
   end
 
   # SPEED = 1
-  def get_speed
-    (rand(5) * @scale).round
-  end
+  # def get_speed
+    
+  # end
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
-    # @y += 3
+    @cooldown_wait -= 1 if @cooldown_wait > 0
     if is_alive
       # Stay above the player
       if player.is_alive && player.y < @y
-          @y -= get_speed
+          @y -= @current_speed
       else
         if rand(2).even?
-          @y += get_speed
+          @y += @current_speed
 
           @y = height / 2 if @y > height / 2
         else
-          @y -= get_speed
+          @y -= @current_speed
 
           @y = 0 + (get_height / 2) if @y < 0 + (get_height / 2)
         end
       end
       if rand(2).even?
-        @x += get_speed
+        @x += @current_speed
         @x = width if @x > width
       else
-        @x -= get_speed
+        @x -= @current_speed
         @x = 0 + (get_width / 2) if @x < 0 + (get_width / 2)
       end
 

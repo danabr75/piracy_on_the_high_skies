@@ -27,10 +27,15 @@ class Bullet < Projectile
       @x = object.x
       @y = object.y
     end
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
+    @current_speed = self.class.get_max_speed * @scale
   end
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
-    @y -= self.class.get_max_speed * @scale
+    @y -= @current_speed
     # Return false when out of screen (gets deleted then)
     @y > 0 && @y < height
     # super(mouse_x, mouse_y)

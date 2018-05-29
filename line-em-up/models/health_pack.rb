@@ -10,6 +10,11 @@ class HealthPack < Pickup
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_pack_0.png", :tileable => true)
     @x = x
     @y = y
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
+    @current_speed = GLBackground::SCROLLING_SPEED * @scale
   end
 
   def draw
@@ -25,7 +30,7 @@ class HealthPack < Pickup
 
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
-    @y += GLBackground::SCROLLING_SPEED * @scale
+    @y += @current_speed
 
     @y < height + get_height
   end

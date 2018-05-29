@@ -49,7 +49,10 @@ class EnemyHomingMissile < Projectile
     else
       @angle = 280.0
     end
-
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
   end
 
   def destructable?
@@ -81,9 +84,9 @@ class EnemyHomingMissile < Projectile
       vx = 0
       vy = 0
       if new_speed > 0
-        vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+        vx = ((new_speed / 3)) * Math.cos(@angle * Math::PI / 180)
 
-        vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
+        vy = ((new_speed / 3)) * Math.sin(@angle * Math::PI / 180)
         vy = vy * -1
         # Because our y is inverted
         vy = vy - ((new_speed / 3) * 2)

@@ -18,27 +18,39 @@ class Player < GeneralObject
     # image = Magick::Image::read("#{MEDIA_DIRECTORY}/spaceship.png").first.resize(0.3)
     # @image = Gosu::Image.new(image, :tileable => true)
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
+    @right_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_right.png")
+    @left_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_left.png")
     # @beep = Gosu::Sample.new("#{MEDIA_DIRECTORY}/beep.wav")
     @x, @y = x, y
     @score = 0
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @attack_speed = 1
+    # @attack_speed = 1
+    @attack_speed = 3
     # temp
     @health = 100
     # @health = 100000
     @armor = 0
-    @rockets = 25
+    # @rockets = 25
+    @rockets = 25000
     # @rocket_launcher = {}
-    @bombs = 3
+    # @bombs = 3
+    @bombs = 300
     @time_alive = 0
     @secondary_weapon = "missile"
+    @turn_right = false
+    @turn_left = false
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
   end
 
 
   def take_damage damage
-    @health -= damage
+    # @health -= damage
+    @health
   end
 
   def toggle_secondary
@@ -94,10 +106,12 @@ class Player < GeneralObject
   end
 
   def move_left width
+    @turn_left = true
     @x = [@x - get_speed, (get_width/3)].max
   end
   
   def move_right width
+    @turn_right = true
     @x = [@x + get_speed, (width - (get_width/3))].min
   end
   
@@ -164,9 +178,23 @@ class Player < GeneralObject
     return second_weapon
   end
 
-  # def draw
-  #   @image.draw(@x - get_width / 2, @y - get_height / 2, Module.const_get("ZOrder::#{self.class.name}"))
-  # end
+  def get_draw_ordering
+    ZOrder::Player
+  end
+
+  def draw
+    if @turn_right
+      image = @right_image
+    elsif @turn_left
+      image = @left_image
+    else
+      image = @image
+    end
+    # super
+    image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+    @turn_right = false
+    @turn_left = false
+  end
   
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
     # puts "TEST HERE: width: #{get_width} and height: #{get_height}"

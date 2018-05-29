@@ -43,6 +43,10 @@ class Projectile < GeneralObject
     if @angle < 0
       @angle = 360 - @angle.abs
     end
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
     # puts "INIT NEW ANGLE: #{@angle}"
   end
 
@@ -65,20 +69,22 @@ class Projectile < GeneralObject
     # return test
   end
 
+  require 'benchmark'
+
   def hit_objects(object_groups)
     drops = []
     points = 0
     hit_object = false
-    self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
     object_groups.each do |group|
       group.each do |object|
         break if hit_object
         # don't hit a dead object
-        if object.respond_to?(:health) && object.respond_to?(:is_alive) && !object.is_alive
+        if object.health <= 0
           next
         end
         # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
         if self.class.get_advanced_hit_box_detection
+          self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
           other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
           hit_object = rec_intersection(self_object, other_object)
         else

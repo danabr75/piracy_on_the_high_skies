@@ -9,11 +9,16 @@ class Building < GeneralObject
     # image = Magick::Image::read("#{MEDIA_DIRECTORY}/building.png").first.resize(0.3)
     # @image = Gosu::Image.new(image, :tileable => true)
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
     @x = rand * 800
     @y = 0 - get_height
     # puts "NEW BUILDING: #{@x} and #{@y}"
     @health = 15
     @armor = 0
+    @current_speed = (GLBackground::SCROLLING_SPEED * @scale)
   end
 
   def get_points
@@ -39,9 +44,14 @@ class Building < GeneralObject
     end
   end
 
+  def get_draw_ordering
+    ZOrder::Building
+  end
+
+
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
     if is_alive
-      @y += (GLBackground::SCROLLING_SPEED * @scale)
+      @y += @current_speed
       @y < height + get_height
     else
       false

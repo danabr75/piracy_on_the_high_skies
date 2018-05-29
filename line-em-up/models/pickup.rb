@@ -10,10 +10,15 @@ class Pickup < GeneralObject
     @x = x
     @y = y
     @time_alive = 0
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
+    @current_speed = SCROLLING_SPEED * @scale
   end
 
   def get_draw_ordering
-    ZOrder::Projectile
+    ZOrder::Pickups
   end
 
   # def draw
@@ -23,7 +28,7 @@ class Pickup < GeneralObject
 
 
   def update width, height, mouse_x = nil, mouse_y = nil, player = nil
-    @y += SCROLLING_SPEED * @scale
+    @y += @current_speed
 
     super(width, height, mouse_x, mouse_y)
   end

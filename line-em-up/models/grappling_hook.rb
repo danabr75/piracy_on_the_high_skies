@@ -46,6 +46,16 @@ class GrapplingHook < GeneralObject
     @reached_end_point = false
     @reached_back_to_player = false
     @reached_max_length = false
+    @image_width  = @image.width  * @scale
+    @image_height = @image.height * @scale
+    @image_size   = @image_width  * @image_height / 2
+    @image_radius = (@image_width  + @image_height) / 4
+    @current_speed = (self.class.get_max_speed * @scale).round
+    #Chain Image pre-calc
+    @chain_height  = @chain.width * @scale
+    @chain_width  = @chain.height * @scale
+    @chain_size   = @chain_width  * @chain_height / 2
+    @chain_radius = ((@chain_height + @chain_width) / 4) * @scale
   end
 
   def draw player
@@ -64,12 +74,10 @@ class GrapplingHook < GeneralObject
 
     chain_x = @x# - (get_width / 2)  - (@chain.width / 2)
     chain_y = @y# - (get_height / 2)  - (@chain.height / 2)
-    puts "INIT CHAIN #{chain_x} x #{chain_y}"
-    puts "PLAYER     #{player.x} x #{player.y}"
     loop_count = 0
     max_loop_count = 250
     # Subtracting 5, to get close to player coords
-    while Gosu.distance(chain_x,  chain_y, player.x, player.y) > (((@chain.height + @chain.width) / 2) * @scale) + (player.get_radius / 2) && loop_count < max_loop_count
+    while Gosu.distance(chain_x,  chain_y, player.x, player.y) > (@chain_radius + player.get_radius) && loop_count < max_loop_count
       vx = 0
       vy = 0
       vx = 5 * Math.cos(chain_angle * Math::PI / 180)
@@ -81,11 +89,27 @@ class GrapplingHook < GeneralObject
 
       chain_x = chain_x + vx
       chain_y = chain_y + vy
-      @chain.draw(chain_x - @chain.width / 2, chain_y - @chain.height / 2, ZOrder::Cursor, @scale, @scale)
+      @chain.draw(chain_x - @chain_width / 2, chain_y - @chain_height / 2, ZOrder::Cursor, @scale, @scale)
       loop_count += 1
     end
-    puts "WHILE LOOP: #{loop_count}"
   end
+
+  def get_chain_height
+    @chain_height
+  end
+
+  def get_chain_width
+    @chain_width
+  end
+
+  def get_chain_size
+    @chain_size
+  end
+
+  def get_chain_radius
+    @chain_radius
+  end
+
 
   def active
     @active# && @acquired_items == 0
@@ -99,9 +123,9 @@ class GrapplingHook < GeneralObject
     @active = true
   end
 
-  def self.get_max_cursor_follow scale
-    (MAX_CURSOR_FOLLOW * scale).round
-  end
+  # def self.get_max_cursor_follow scale
+    
+  # end
   
   def update width, height, player = nil
     # puts "GRAP UPDATE:#{@reached_max_length} and #{@max_length_counter}"
@@ -121,7 +145,7 @@ class GrapplingHook < GeneralObject
     end
     # new_speed = 0
     # if @time_alive > self.class.get_initial_delay
-    new_speed = (self.class.get_max_speed * @scale) # if new_speed > self.class.get_max_speed
+    new_speed = @current_speed
     new_speed = new_speed.fdiv(@acquired_items + 1) if @acquired_items > 0 && @reached_end_point
     # new_speed = new_speed * @scale
     # end

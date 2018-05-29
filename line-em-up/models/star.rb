@@ -14,6 +14,9 @@ class Star < Pickup
     @color.blue = rand(255 - 40) + 40
     @x = x || rand * 800
     @y = y || 0
+    @image_width  = 25 * @scale
+    @image_height = 25 * @scale
+    @image_radius = 13 * @scale
   end
 
   def get_image
@@ -25,17 +28,17 @@ class Star < Pickup
     return POINT_VALUE_BASE
   end
 
-  def get_height
-    25 * @scale
-  end
+  # def get_height
+  #   25 * @scale
+  # end
 
-  def get_width
-    25 * @scale
-  end
+  # def get_width
+  #   25 * @scale
+  # end
 
-  def get_radius
-    13 * @scale
-  end  
+  # def get_radius
+  #   13 * @scale
+  # end  
 
 
   def draw
