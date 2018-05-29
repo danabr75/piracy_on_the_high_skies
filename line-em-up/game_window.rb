@@ -430,7 +430,7 @@ class GameWindow < Gosu::Window
             @player.score += 100
           end
         end
-        if @boss_active_at_enemies_killed == @enemies_killed || @boss_active_at_level == @enemies_spawner_counter
+        if @boss_active_at_enemies_killed <= @enemies_killed || @boss_active_at_level <= @enemies_spawner_counter
           # puts "HEREaagL #{@boss_active_at_enemies_killed} amd #{@enemies_killed} and #{@boss_active_at_level} and #{ @enemies_spawner_counter}"
           @boss_active = true
         end
