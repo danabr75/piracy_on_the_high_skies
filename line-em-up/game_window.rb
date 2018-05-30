@@ -70,6 +70,7 @@ class GameWindow < Gosu::Window
   attr_accessor :width, :height, :block_all_controls
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @difficulty = options[:difficulty]
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
     @debug = options[:debug]
     # GameWindow.fullscreen(self) if fullscreen
@@ -137,6 +138,17 @@ class GameWindow < Gosu::Window
     # @boss_active_at_enemies_killed = 500
     @boss_active_at_enemies_killed = 700
     @boss_active_at_level          = 4
+    if @difficulty == 'easy'
+      @boss_active_at_enemies_killed = 100
+      @boss_active_at_level          = 1
+    elsif @difficulty == "medium"
+      @boss_active_at_level          = 3
+      @boss_active_at_enemies_killed = 350
+    else
+      @boss_active_at_level          = 4
+      @boss_active_at_enemies_killed = 700
+    end
+
     @boss_active = false
     @boss = nil
     @boss_killed = false
@@ -153,7 +165,7 @@ class GameWindow < Gosu::Window
   end
 
   def self.reset(window, options = {})
-    window = GameWindow.new(window.width, window.height, window.fullscreen?, {block_controls_until_button_up: true, debug: options[:debug]}).show
+    window = GameWindow.new(window.width, window.height, window.fullscreen?, options.merge({block_controls_until_button_up: true})).show
   end
 
 
@@ -189,32 +201,32 @@ class GameWindow < Gosu::Window
   end
 
   def self.up_resolution(window)
-    # puts "UP RESLUTION"
-    index = find_index_of_current_resolution(window.width, window.height)
-    # puts "FOUND INDEX: #{index}"
-    if index == RESOLUTIONS.count - 1
-      # Max resolution, do nothing
-    else
-      # window.width = RESOLUTIONS[index + 1][0]
-      # window.height = RESOLUTIONS[index + 1][1]
-      width = RESOLUTIONS[index + 1][0]
-      height = RESOLUTIONS[index + 1][1]
-      # puts "UPPING TO #{width} x #{height}"
-      window = GameWindow.new(width, height, {block_resize: true}).show
-    end
+    # # puts "UP RESLUTION"
+    # index = find_index_of_current_resolution(window.width, window.height)
+    # # puts "FOUND INDEX: #{index}"
+    # if index == RESOLUTIONS.count - 1
+    #   # Max resolution, do nothing
+    # else
+    #   # window.width = RESOLUTIONS[index + 1][0]
+    #   # window.height = RESOLUTIONS[index + 1][1]
+    #   width = RESOLUTIONS[index + 1][0]
+    #   height = RESOLUTIONS[index + 1][1]
+    #   # puts "UPPING TO #{width} x #{height}"
+    #   window = GameWindow.new(width, height, {block_resize: true}).show
+    # end
   end
 
   def self.down_resolution(window)
-    index = find_index_of_current_resolution(window.width, window.height)
-    if index == 0
-      # Min resolution, do nothing
-    else
-      # window.width = RESOLUTIONS[index - 1][0]
-      # window.height = RESOLUTIONS[index - 1][1]
-      width = RESOLUTIONS[index - 1][0]
-      height = RESOLUTIONS[index - 1][1]
-      window = GameWindow.new(width, height, {block_resize: true}).show
-    end
+    # index = find_index_of_current_resolution(window.width, window.height)
+    # if index == 0
+    #   # Min resolution, do nothing
+    # else
+    #   # window.width = RESOLUTIONS[index - 1][0]
+    #   # window.height = RESOLUTIONS[index - 1][1]
+    #   width = RESOLUTIONS[index - 1][0]
+    #   height = RESOLUTIONS[index - 1][1]
+    #   window = GameWindow.new(width, height, {block_resize: true}).show
+    # end
   end
 
   def button_up id

@@ -5,25 +5,38 @@ module ConfigSetting
     # puts "HERE: #{file_location} and #{setting_name} and #{setting_value}"
     create_file_if_non_existent(file_location)
     if setting_value
+      # File.open('xxx.txt').each do |line|
+      #   print "#{line_num += 1} #{line}"
+      # end
       if File.readlines(file_location).grep(/#{setting_name}:/).size > 0
-        # puts "FOUND SETTING"
         text = File.read(file_location)
-        # puts "FOUDN IN FILE: #{text.inspect}"
-        replace = text.gsub(/^#{setting_name}: ([^$]*)$/, setting_value)
-        # replace = replace.gsub(/bbb/, "Replace bbb with 222")
-        File.open(file_location, "w") {|file| file.puts "#{setting_name}: #{replace}"}
+        puts "READ TEXT IN FILE: #{text}"
+        File.open(file_location, 'w+'){|f| f << text.sub(/^#{setting_name}: ([^;]*);$/, "#{setting_name}: #{setting_value};") }
       else
-        # puts "COULDNT FIND SETTING"
         File.open(file_location, 'a') do |f|
-          f << "#{setting_name}: #{setting_value}"
+          f << "\n#{setting_name}: #{setting_value};"
         end
       end
+
+      # if File.readlines(file_location).grep(/#{setting_name}:/).size > 0
+      #   # puts "FOUND SETTING"
+      #   text = File.read(file_location)
+      #   # puts "FOUDN IN FILE: #{text.inspect}"
+      #   replace = text.gsub(/^#{setting_name}: ([^$]*)$/, setting_value)
+      #   # replace = replace.gsub(/bbb/, "Replace bbb with 222")
+      #   File.open(file_location, "w") {|file| file.puts "#{setting_name}: #{replace}"}
+      # else
+      #   # puts "COULDNT FIND SETTING"
+      #   File.open(file_location, 'a') do |f|
+      #     f << "#{setting_name}: #{setting_value}"
+      #   end
+      # end
     end
   end
 
   def self.get_setting file_location, setting_name, default_value
     create_file_if_non_existent(file_location)
-    test = File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^$]*)$/ }
+    test = File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }
     if test && test.first
       # puts "BEFORE SCAN: #{test}"
       # So many firstsss
@@ -48,7 +61,7 @@ module ConfigSetting
     if test == [] || test.nil? || test == ''
       test = default_value
     end
-    return test
+    return test.gsub(';', '')
   end
 
   def self.create_file_if_non_existent file_location
