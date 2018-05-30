@@ -33,6 +33,13 @@ class EnemyHomingMissile < Projectile
   end
 
 
+  def drops
+    [
+      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+    ]
+  end
+
+
   def take_damage damage
     @health -= damage
   end

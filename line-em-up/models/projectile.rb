@@ -206,6 +206,16 @@ class Projectile < GeneralObject
         end
       end
     end
+
+    # Drop projectile explosions
+    if hit_object
+      if self.respond_to?(:drops)
+        self.drops.each do |drop|
+          drops << drop
+        end
+      end
+    end
+
     @y = @off_screen if hit_object
     return {drops: drops, point_value: points, killed: killed}
   end

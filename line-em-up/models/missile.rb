@@ -4,9 +4,9 @@ class Missile < Projectile
   COOLDOWN_DELAY = 30
   MAX_SPEED      = 20
   STARTING_SPEED = 0.0
-  INITIAL_DELAY  = 2
-  SPEED_INCREASE_FACTOR = 0.5
-  DAMAGE = 50
+  INITIAL_DELAY  = 0.5
+  SPEED_INCREASE_FACTOR = 1.2
+  DAMAGE = 10
   AOE = 0
   
   MAX_CURSOR_FOLLOW = 4
@@ -23,7 +23,13 @@ class Missile < Projectile
   # end
 
   def get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/missile.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
+  end
+
+  def drops
+    [
+      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+    ]
   end
 
   # def initialize(object, mouse_x = nil, mouse_y = nil, options = {})

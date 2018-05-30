@@ -17,7 +17,7 @@ class EnemyPlayer < GeneralObject
     super(scale, x || rand(screen_width), y || 0, screen_width, screen_height, options)
     @cooldown_wait = 0
     @attack_speed = 0.5
-    @health = 15
+    @health = 25
     @armor = 0
     @current_speed = (rand(5) * @scale).round + 1
   end

@@ -140,6 +140,7 @@ class GeneralObject
   end
 
   def self.is_angle_between_two_angles?(angle, min_angle, max_angle)
+    return angle if min_angle.nil? || max_angle.nil?
     value = false
     if angle == min_angle
       value = true

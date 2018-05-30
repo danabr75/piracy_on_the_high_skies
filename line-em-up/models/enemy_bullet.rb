@@ -1,10 +1,11 @@
 require_relative 'dumb_projectile.rb'
 
 class EnemyBullet < DumbProjectile
-  DAMAGE = 5
-  COOLDOWN_DELAY = 30
+  DAMAGE = 3
+  COOLDOWN_DELAY = 18
   # Enemy y speeds are negative
-  MAX_SPEED      = -5
+  MAX_SPEED      = -8
+
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini-reverse.png")

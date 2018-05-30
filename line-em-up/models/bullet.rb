@@ -1,10 +1,10 @@
 require_relative 'dumb_projectile.rb'
 
 class Bullet < DumbProjectile
-  DAMAGE = 5
-  COOLDOWN_DELAY = 30
+  DAMAGE = 3
+  COOLDOWN_DELAY = 20
   # Friendly projects are + speeds
-  MAX_SPEED      = 5
+  MAX_SPEED      = 15
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
