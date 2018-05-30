@@ -358,10 +358,12 @@ class GameWindow < Gosu::Window
         @player.collect_pickups(@pickups)
 
         @enemy_projectiles.each do |projectile|
-          projectile.hit_object(@player)
+          results = projectile.hit_object(@player)
+          @pickups = @pickups + results[:drops]
         end
         @enemy_destructable_projectiles.each do |projectile|
-          projectile.hit_object(@player)
+          results = projectile.hit_object(@player)
+          @pickups = @pickups + results[:drops]
         end
 
 

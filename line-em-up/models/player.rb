@@ -25,9 +25,10 @@ class Player < GeneralObject
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
     @attack_speed = 1
+    # @attack_speed = 3
     @health = 100
     @armor = 0
-    @rockets = 25
+    @rockets = 50
     # @rockets = 250
     @bombs = 3
     @secondary_weapon = "missile"

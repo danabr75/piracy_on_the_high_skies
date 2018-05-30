@@ -11,7 +11,7 @@ class MissilePack < Pickup
   end
 
   def collected_by_player player
-    player.rockets += 50
+    player.rockets += 35
   end
 
 end

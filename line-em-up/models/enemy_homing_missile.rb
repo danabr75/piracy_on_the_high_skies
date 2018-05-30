@@ -2,10 +2,10 @@ require_relative 'projectile.rb'
 class EnemyHomingMissile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y, :health
   COOLDOWN_DELAY = 75
-  MAX_SPEED      = 18
+  MAX_SPEED      = 20
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 2
-  SPEED_INCREASE_FACTOR = 0.5
+  SPEED_INCREASE_FACTOR = 0.9
   DAMAGE = 15
   AOE = 0
   
@@ -15,13 +15,14 @@ class EnemyHomingMissile < Projectile
 
   def get_image
     # Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile_reverse.png")
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/tiny_missile.png")
   end
 
   def initialize(scale, screen_width, screen_height, object, homing_object, angle_min, angle_max, angle_init, options = {})
     options[:relative_object] = object
     super(scale, screen_width, screen_height, object, homing_object.x, homing_object.y, angle_min, angle_max, angle_init, options)
     @health = 5
+    # puts "CUSTOM DELAY: #{@custom_initial_delay}"
   end
 
   def destructable?
@@ -31,7 +32,6 @@ class EnemyHomingMissile < Projectile
   def is_alive
     @health > 0
   end
-
 
   def drops
     [

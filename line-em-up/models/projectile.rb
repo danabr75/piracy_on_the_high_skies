@@ -19,6 +19,10 @@ class Projectile < GeneralObject
   end
 
   def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
+    if options[:x_homing_padding]
+      end_point_x = end_point_x + options[:x_homing_padding]
+    end
+    @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
     options[:relative_object] = object
     super(scale, nil, nil, screen_width, screen_height, options)
 
@@ -94,26 +98,26 @@ class Projectile < GeneralObject
 
 
     new_speed = 0
-    if @time_alive > self.class.get_initial_delay
+    if @time_alive > (@custom_initial_delay || self.class.get_initial_delay)
       new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)
       new_speed = self.class.get_max_speed if new_speed > self.class.get_max_speed
       new_speed = new_speed * @scale
-    end
 
 
 
     vx = 0
     vy = 0
-  if new_speed != 0
-    vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+    if new_speed != 0
+      vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
 
-    vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-    vy = vy * -1
-  end
+      vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
+      vy = vy * -1
+    end
 
-    @x = @x + vx
-    @y = @y + vy
+      @x = @x + vx
+      @y = @y + vy
 
+    end
     super(mouse_x, mouse_y)
   end
 
