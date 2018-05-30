@@ -111,7 +111,7 @@ class Player < GeneralObject
   end
 
 
-  def attack mouse_x = nil, mouse_y = nil
+  def attack pointer
     return {
       projectiles: [
         Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left',  relative_object: self}),
@@ -121,10 +121,10 @@ class Player < GeneralObject
     }
   end
 
-  def trigger_secondary_attack mouse_x, mouse_y
+  def trigger_secondary_attack pointer
     return_projectiles = []
     if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
-      results = self.secondary_attack(mouse_x, mouse_y)
+      results = self.secondary_attack(pointer)
       projectiles = results[:projectiles]
       cooldown = results[:cooldown]
       self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
@@ -145,7 +145,7 @@ class Player < GeneralObject
   #   return second_weapon
   # end
 
-  def secondary_attack mouse_x = nil, mouse_y = nil
+  def secondary_attack pointer
     second_weapon = case @secondary_weapon
     when 'bomb'
       {
@@ -156,8 +156,8 @@ class Player < GeneralObject
       if get_secondary_ammo_count > 1
         {
           projectiles: [
-            Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self}),
-            Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self})
+            Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self}),
+            Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self})
             ],
           cooldown: Missile::COOLDOWN_DELAY
         }

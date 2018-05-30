@@ -261,6 +261,7 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    @pointer.update(self.mouse_x, self.mouse_y) if @pointer
     if @start_fullscreen
       @start_fullscreen = false
       GameWindow.fullscreen(self)
@@ -327,12 +328,12 @@ class GameWindow < Gosu::Window
         end
 
         if Gosu.button_down?(Gosu::MS_LEFT)
-          @projectiles = @projectiles + @player.trigger_secondary_attack(self.mouse_x, self.mouse_y)
+          @projectiles = @projectiles + @player.trigger_secondary_attack(@pointer)
         end
 
         if Gosu.button_down?(Gosu::KB_SPACE)
           if @player.cooldown_wait <= 0
-            results = @player.attack(self.mouse_x, self.mouse_y)
+            results = @player.attack(@pointer)
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
@@ -519,7 +520,7 @@ class GameWindow < Gosu::Window
     @footer_bar.draw(@player)
     @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
-    @pointer.draw(self.mouse_x, self.mouse_y)# if @grappling_hook.nil? || !@grappling_hook.active
+    @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
 
     @player.draw() if @player.is_alive
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook

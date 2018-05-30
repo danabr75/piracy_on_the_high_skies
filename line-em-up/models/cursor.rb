@@ -1,6 +1,6 @@
 require_relative 'general_object.rb'
 class Cursor < GeneralObject
-  # attr_reader :img, :visible, :imgObj
+  attr_accessor :x, :y, :image_width_half, :image_height_half
 
 
   def get_image
@@ -15,11 +15,18 @@ class Cursor < GeneralObject
     @image_height = @image.height * @scale
     @image_width_half  = @image_width  / 2
     @image_height_half = @image_height / 2
+    @x = 0
+    @y = 0
   end
 
 
-  def draw mouse_x, mouse_y
-    @image.draw(mouse_x - @image_width_half, mouse_y - @image_height_half, ZOrder::Cursor, @scale, @scale)
+  def draw
+    @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @scale, @scale)
+  end
+
+  def update mouse_x, mouse_y
+    @x = mouse_x
+    @y = mouse_y
   end
 
 end
