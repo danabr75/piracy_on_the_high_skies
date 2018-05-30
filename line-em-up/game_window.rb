@@ -136,8 +136,6 @@ class GameWindow < Gosu::Window
     reset_font_ui_y
 
     # @boss_active_at_enemies_killed = 500
-    @boss_active_at_enemies_killed = 700
-    @boss_active_at_level          = 4
     if @difficulty == 'easy'
       @boss_active_at_enemies_killed = 100
       @boss_active_at_level          = 1
@@ -285,8 +283,8 @@ class GameWindow < Gosu::Window
         @menu_open = true
         @can_open_menu = false
         @menu = Menu.new(self)
-        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, 1, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit_hover.png", false))
-        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, 1, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
+        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit_hover.png", false))
+        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
         # close!
       end
       if Gosu.button_down?(Gosu::KB_M)
@@ -423,6 +421,7 @@ class GameWindow < Gosu::Window
           if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
             (0..(@enemies_spawner_counter / 2).round).each do |count|
               @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+              # @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count == 0
             end
           end
           if @player.time_alive % 500 == 0

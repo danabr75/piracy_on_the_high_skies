@@ -27,8 +27,8 @@ class Player < GeneralObject
     @attack_speed = 1
     @health = 100
     @armor = 0
-    # @rockets = 25
-    @rockets = 250
+    @rockets = 25
+    # @rockets = 250
     @bombs = 3
     @secondary_weapon = "missile"
     @turn_right = false
@@ -149,7 +149,7 @@ class Player < GeneralObject
     second_weapon = case @secondary_weapon
     when 'bomb'
       {
-        projectiles: [Bomb.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y)],
+        projectiles: [Bomb.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y)],
         cooldown: Bomb::COOLDOWN_DELAY
       }
     else
@@ -169,7 +169,7 @@ class Player < GeneralObject
         # }
       else get_secondary_ammo_count == 1
         {
-          projectiles: [Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, {relative_object: self})],
+          projectiles: [Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, {relative_object: self})],
           cooldown: Missile::COOLDOWN_DELAY
         }
       end
