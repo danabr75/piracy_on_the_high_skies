@@ -420,16 +420,17 @@ class GameWindow < Gosu::Window
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
         if !@boss_active && !@boss && !@boss_killed
 
-          if @player.is_alive && @player.time_alive % 1000 == 0 # && @enemies.count <= @max_enemies
+          if @player.is_alive && (@player.time_alive < 1 || @player.time_alive % 500 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+              puts "Triggering swarm!!"
               swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
               @enemies = @enemies + swarm
+              @pickups << RocketLauncherPickup.new(@scale, @width, @height)
           end
 
           if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
             (0..(@enemies_spawner_counter / 2).round).each do |count|
               @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-              # @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count == 0
             end
           end
           if @player.time_alive % 500 == 0
@@ -453,7 +454,6 @@ class GameWindow < Gosu::Window
           end
         end
         if @boss_active_at_enemies_killed <= @enemies_killed || @boss_active_at_level <= @enemies_spawner_counter
-          # puts "HEREaagL #{@boss_active_at_enemies_killed} amd #{@enemies_killed} and #{@boss_active_at_level} and #{ @enemies_spawner_counter}"
           @boss_active = true
         end
 

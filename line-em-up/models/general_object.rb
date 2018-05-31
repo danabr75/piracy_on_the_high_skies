@@ -25,6 +25,7 @@ class GeneralObject
         @x = options[:relative_object].x
         @y = options[:relative_object].y
       end
+      @x = @x + options[:relative_x_padding] if options[:relative_x_padding]
     else
       @x = x
       @y = y

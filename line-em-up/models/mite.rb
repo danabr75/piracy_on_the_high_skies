@@ -75,22 +75,29 @@ class Mite < GeneralObject
       @y = @y + (Math.sin(@x / 50) * 5 * @scale)# * 20 * @scale
 
       if @switched_directions
+        # puts "CASE 1"
         if @x_direction > 0
+          # puts "CASE 1.3"
           @x < @screen_width
         else
+          # puts 'CASE 1.6'
           @x > 0
         end
       else
-        if @x_direction < 0 && @x > 0 - @screen_width / 2
+        if @x_direction < 0 && @x < 0 - @screen_width / 2
+          # puts "CASE 2: "
           @switched_directions = true
           @x_direction = @x_direction * -1
         elsif @x_direction > 0 && @x > @screen_width + @screen_width / 2
+          # puts "CASE 3"
           @switched_directions = true
           @x_direction = @x_direction * -1
         end
+        # puts "CASE 4"
         return true
       end
     else
+      # puts "CASE 5"
       false
     end
   end

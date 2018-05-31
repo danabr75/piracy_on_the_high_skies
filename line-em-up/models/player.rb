@@ -1,4 +1,5 @@
 require_relative 'general_object.rb'
+require_relative 'rocket_launcher_pickup.rb'
 
 class Player < GeneralObject
   SPEED = 7
@@ -6,11 +7,40 @@ class Player < GeneralObject
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive, :bombs, :secondary_weapon, :grapple_hook_cooldown_wait
   MAX_HEALTH = 200
 
-  SECONDARY_WEAPONS = %w[missile bomb]
+  SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle
   MISSILE_LAUNCHER_MIN_ANGLE = 75
   MISSILE_LAUNCHER_MAX_ANGLE = 105
   MISSILE_LAUNCHER_INIT_ANGLE = 90
+
+  # Rocket Launcher, Rocket launcher, Cannon, Cannon, Bomb Launcher
+  HARD_POINTS = 12
+
+  def add_hard_point hard_point
+    @hard_point_items << hard_point
+    trigger_hard_point_load
+  end
+
+  def trigger_hard_point_load
+    @rocket_launchers, @bomb_launchers, @cannon_launchers = [0, 0, 0]
+    count = 0
+    # puts "RUNNING ON: #{@hard_point_items}"
+    @hard_point_items.each do |hard_point|
+      break if count == HARD_POINTS
+      case hard_point
+      when 'bomb_launcher'
+        @bomb_launchers += 1
+      when RocketLauncherPickup::NAME
+        # puts "INCREASTING ROCKET LAUNCHER: #{RocketLauncherPickup::NAME}"
+        @rocket_launchers += 1
+      when 'cannon_launcher'
+        @cannon_launchers += 1
+      else
+        "Raise should never get here. hard_point: #{hard_point}"
+      end
+      count += 1
+    end
+  end
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
@@ -24,16 +54,22 @@ class Player < GeneralObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @attack_speed = 1
+    @attack_speed = 3
     # @attack_speed = 3
-    @health = 100
+    @health = 1000
     @armor = 0
-    @rockets = 50
+    @rockets = 500
     # @rockets = 250
     @bombs = 3
-    @secondary_weapon = "missile"
+    @secondary_weapon = RocketLauncherPickup::NAME
     @turn_right = false
     @turn_left = false
+
+    @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
+    @rocket_launchers = 0
+    @bomb_launchers   = 0
+    @cannon_launchers = 0
+    trigger_hard_point_load
   end
 
 
@@ -60,12 +96,12 @@ class Player < GeneralObject
   end
 
 
-  def decrement_secondary_ammo_count
+  def decrement_secondary_ammo_count count = 1
     return case @secondary_weapon
     when 'bomb'
-      self.bombs -= 1
+      self.bombs -= count
     else
-      self.rockets -= 1
+      self.rockets -= count
     end
   end
 
@@ -115,8 +151,8 @@ class Player < GeneralObject
   def attack pointer
     return {
       projectiles: [
-        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left',  relative_object: self}),
-        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', relative_object: self})
+        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left'}),
+        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right'})
       ],
       cooldown: Bullet::COOLDOWN_DELAY
     }
@@ -131,7 +167,6 @@ class Player < GeneralObject
       self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
 
       projectiles.each do |projectile|
-        self.decrement_secondary_ammo_count
         return_projectiles.push(projectile)
       end
     end
@@ -147,35 +182,44 @@ class Player < GeneralObject
   # end
 
   def secondary_attack pointer
-    second_weapon = case @secondary_weapon
+    projectiles = []
+    cooldown = 0
+    case @secondary_weapon
     when 'bomb'
-      {
-        projectiles: [Bomb.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y)],
-        cooldown: Bomb::COOLDOWN_DELAY
-      }
-    else
-      if get_secondary_ammo_count > 1
-        {
-          projectiles: [
-            Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self}),
-            Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self})
-            ],
-          cooldown: Missile::COOLDOWN_DELAY
-        }
-        # {
-        #   projectiles: [
-        #     Missile.new(@scale, @screen_width, @screen_height, self, mouse_x, mouse_y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE)
-        #     ],
-        #   cooldown: Missile::COOLDOWN_DELAY
-        # }
-      else get_secondary_ammo_count == 1
-        {
-          projectiles: [Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, {relative_object: self})],
-          cooldown: Missile::COOLDOWN_DELAY
-        }
+      projectiles << Bomb.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y)
+      cooldown = Bomb::COOLDOWN_DELAY
+    when RocketLauncherPickup::NAME
+      # NEEED TO DECRETMENT AMMO BASED OFF OF LAUNCHERS!!!!!!!!!!!
+      # puts "ROCKET LAUNCHERS: #{@rocket_launchers}"
+      cooldown = Missile::COOLDOWN_DELAY
+      if get_secondary_ammo_count == 1 && @rocket_launchers > 0 || @rocket_launchers == 1
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE)
+      elsif get_secondary_ammo_count == 2 && @rocket_launchers >= 2 || @rocket_launchers == 2
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left'})
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right'})
+      elsif get_secondary_ammo_count == 3 && @rocket_launchers >= 3 || @rocket_launchers == 3
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE)
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left'})
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right'})
+      elsif get_secondary_ammo_count == 4 && @rocket_launchers >= 4 || @rocket_launchers == 4
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 15, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left'})
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 15, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right'})
+
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 5, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_x_padding:  (@image_width_half / 2) })
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 5, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_x_padding: -(@image_width_half / 2) })
+      elsif get_secondary_ammo_count == 5 && @rocket_launchers >= 5 || @rocket_launchers >= 5
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE)
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 15, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left'})
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 15, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right'})
+
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 5, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_x_padding:  (@image_width_half / 2) })
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 5, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_x_padding: -(@image_width_half / 2) })
+      else
+        raise "Should never get here: @secondary_weapon: #{@secondary_weapon} for @rocket_launchers: #{@rocket_launchers} and get_secondary_ammo_count: #{get_secondary_ammo_count}"
       end
     end
-    return second_weapon
+    decrement_secondary_ammo_count projectiles.count
+    return {projectiles: projectiles, cooldown: cooldown}
   end
 
   def get_draw_ordering
