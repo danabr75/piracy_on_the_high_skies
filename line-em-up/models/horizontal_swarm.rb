@@ -8,6 +8,7 @@ class HorizontalSwarm
   # MISSILE_LAUNCHER_MAX_ANGLE = 285
   # MISSILE_LAUNCHER_INIT_ANGLE = 270
   # attr_accessor :cooldown_wait, :attack_speed, :health, :armor, :x, :y
+  # SWARM_COUNT = 10
   SWARM_COUNT = 10
 
   # def get_image
@@ -24,7 +25,7 @@ class HorizontalSwarm
     base_x_padding = 40 * scale
     y_padding = 40 * scale
 
-    y = y || rand(screen_height / 3) + screen_height / 6
+    y = y || rand(screen_height / 3) + screen_height / 8
 
     if rand(2) == 0
       x_direction = 1

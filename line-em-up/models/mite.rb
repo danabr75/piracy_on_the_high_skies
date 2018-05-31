@@ -27,6 +27,7 @@ class Mite < GeneralObject
     @armor = 0
     @current_speed = self.class.get_max_speed * @scale
     @x_direction = x_direction
+    @switched_directions = false
   end
 
   def get_points
@@ -53,7 +54,7 @@ class Mite < GeneralObject
 
 
   def drops
-    value = [SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, nil, {third_scale: true})]
+    value = [SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, nil, {ttl: 2, third_scale: true})]
     value << Star.new(@scale, @screen_width, @screen_height, @x, @y) if rand(2) == 0
     return value
   end
@@ -62,15 +63,32 @@ class Mite < GeneralObject
     ZOrder::Enemy
   end
 
+  # def exec_gl
+  #   raise "HERE"
+  # end
+
   def update mouse_x = nil, mouse_y = nil, player = nil
     @cooldown_wait -= 1 if @cooldown_wait > 0
+    @time_alive += 1
     if is_alive
       @x = @x + (@current_speed * @x_direction)
+      @y = @y + (Math.sin(@x / 50) * 5 * @scale)# * 20 * @scale
 
-      if @x_direction > 0
-        @x < @screen_width
+      if @switched_directions
+        if @x_direction > 0
+          @x < @screen_width
+        else
+          @x > 0
+        end
       else
-        @x > 0
+        if @x_direction < 0 && @x > 0 - @screen_width / 2
+          @switched_directions = true
+          @x_direction = @x_direction * -1
+        elsif @x_direction > 0 && @x > @screen_width + @screen_width / 2
+          @switched_directions = true
+          @x_direction = @x_direction * -1
+        end
+        return true
       end
     else
       false
