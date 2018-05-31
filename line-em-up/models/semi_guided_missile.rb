@@ -1,11 +1,12 @@
 require_relative 'projectile.rb'
-class EnemyHomingMissile < Projectile
+# Follows targets location only at time of launch. Will not follow target
+class SemiGuidedMissile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y, :health
   COOLDOWN_DELAY = 75
-  MAX_SPEED      = 20
+  MAX_SPEED      = 30
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 2
-  SPEED_INCREASE_FACTOR = 0.9
+  SPEED_INCREASE_FACTOR = 2
   DAMAGE = 15
   AOE = 0
   
@@ -18,7 +19,7 @@ class EnemyHomingMissile < Projectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/tiny_missile.png")
   end
 
-  def initialize(scale, screen_width, screen_height, object, homing_object, angle_min, angle_max, angle_init, options = {})
+  def initialize(scale, screen_width, screen_height, object, homing_object, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
     options[:relative_object] = object
     super(scale, screen_width, screen_height, object, homing_object.x, homing_object.y, angle_min, angle_max, angle_init, options)
     @health = 5

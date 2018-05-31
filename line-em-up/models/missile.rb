@@ -2,10 +2,10 @@ require_relative 'projectile.rb'
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
   COOLDOWN_DELAY = 30
-  MAX_SPEED      = 20
+  MAX_SPEED      = 30
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 0.5
-  SPEED_INCREASE_FACTOR = 1.2
+  SPEED_INCREASE_FACTOR = 2
   DAMAGE = 10
   AOE = 0
   

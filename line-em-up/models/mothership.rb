@@ -1,6 +1,6 @@
 # require_relative 'player.rb'
 require_relative 'enemy_bullet.rb'
-require_relative 'enemy_homing_missile.rb'
+require_relative 'semi_guided_missile.rb'
 require_relative 'small_explosion.rb'
 require_relative 'star.rb'
 require_relative 'enemy_bomb.rb'
@@ -67,10 +67,10 @@ class Mothership < GeneralObject
     return {
       projectiles: [
         # relative_object not required yet for these
-        EnemyHomingMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self }),
-        EnemyHomingMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self })
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self }),
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self })
       ],
-      cooldown: EnemyHomingMissile::COOLDOWN_DELAY
+      cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }
   end
 

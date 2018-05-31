@@ -420,6 +420,12 @@ class GameWindow < Gosu::Window
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
         if !@boss_active && !@boss && !@boss_killed
 
+          if @player.is_alive && @player.time_alive % 1000 == 0 # && @enemies.count <= @max_enemies
+              # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+              swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
+              @enemies = @enemies + swarm
+          end
+
           if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
             (0..(@enemies_spawner_counter / 2).round).each do |count|
               @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count

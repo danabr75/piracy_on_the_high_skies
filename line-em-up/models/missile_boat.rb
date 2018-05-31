@@ -1,6 +1,6 @@
 require_relative 'player.rb'
 require_relative 'enemy_bullet.rb'
-require_relative 'enemy_homing_missile.rb'
+require_relative 'semi_guided_missile.rb'
 require_relative 'small_explosion.rb'
 require_relative 'star.rb'
 
@@ -44,11 +44,11 @@ class MissileBoat < GeneralObject
     x_padding_2 = -(5 * @scale)
     return {
       projectiles: [
-        EnemyHomingMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2}),
-        EnemyHomingMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1}),
-        EnemyHomingMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2})
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2}),
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1}),
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2})
       ],
-      cooldown: EnemyHomingMissile::COOLDOWN_DELAY
+      cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }
   end
 
