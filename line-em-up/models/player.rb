@@ -54,11 +54,11 @@ class Player < GeneralObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @attack_speed = 3
+    @attack_speed = 1
     # @attack_speed = 3
-    @health = 1000
+    @health = 100
     @armor = 0
-    @rockets = 500
+    @rockets = 50
     # @rockets = 250
     @bombs = 3
     @secondary_weapon = RocketLauncherPickup::NAME
