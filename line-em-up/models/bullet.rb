@@ -1,8 +1,8 @@
 require_relative 'dumb_projectile.rb'
 require 'opengl'
 # require 'ruby-opengl'
-require 'glu'
-require 'glut'
+# require 'glu'
+# require 'glut'
 
 class Bullet < DumbProjectile
   DAMAGE = 3
@@ -15,9 +15,9 @@ class Bullet < DumbProjectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
   end
 
-  include Gl
-  include Glu 
-  include Glut
+  # include Gl
+  # include Glu 
+  # include Glut
 
 
   def alt_draw

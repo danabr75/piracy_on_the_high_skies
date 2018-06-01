@@ -1,9 +1,8 @@
 require_relative 'projectile.rb'
 
 require 'opengl'
-# require 'ruby-opengl'
-require 'glu'
-require 'glut'
+# require 'glu'
+# require 'glut'
 
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
@@ -27,9 +26,9 @@ class Missile < Projectile
   #   super(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
   #   # puts "MYYYY MISSILE ANGLE: #{@angle}"
   # end
-  include Gl
-  include Glu 
-  include Glut
+  # include Gl
+  # include Glu 
+  # include Glut
 
   # def draw
   #   z = ZOrder::Projectile

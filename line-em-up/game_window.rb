@@ -53,7 +53,6 @@ require 'opengl'
 
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
-require "#{CURRENT_DIRECTORY}/../menu_launcher.rb"
 
 # require_relative 'media'
 # Dir["/path/to/directory/*.rb"].each {|file| require file }
