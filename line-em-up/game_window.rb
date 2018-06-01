@@ -109,7 +109,6 @@ class GameWindow < Gosu::Window
     
     @gl_background = GLBackground.new
     
-    @player = Player.new(@scale, @width / 2, @height / 2, @width, @height)
     @grappling_hook = nil
     
     @buildings = Array.new
@@ -137,15 +136,19 @@ class GameWindow < Gosu::Window
 
     # @boss_active_at_enemies_killed = 500
     if @difficulty == 'easy'
-      @boss_active_at_enemies_killed = 100
-      @boss_active_at_level          = 1
+      @boss_active_at_enemies_killed = 300
+      @boss_active_at_level          = 2
+      @handicap = 0.3
     elsif @difficulty == "medium"
       @boss_active_at_level          = 3
-      @boss_active_at_enemies_killed = 350
+      @boss_active_at_enemies_killed = 450
+      @handicap = 0.6
     else
       @boss_active_at_level          = 4
       @boss_active_at_enemies_killed = 700
+      @handicap = 1
     end
+    @player = Player.new(@scale, @width / 2, @height / 2, @width, @height, {handicap: @handicap, max_movable_height: @height - @footer_bar.height})
 
     @boss_active = false
     @boss = nil
@@ -154,12 +157,22 @@ class GameWindow < Gosu::Window
 
 
   # Switch button downs to this method
+  # This only triggers once during press. Use the other section for when we want it contunually triggered
   def button_down(id)
     # puts "HERE: #{id.inspect}"
     # super(id)
     if id == Gosu::MsLeft && @menu_open && @menu
       @menu.clicked
     end
+
+    if @player.is_alive && !@game_pause && !@menu_open
+              # KB_LEFT_CONTROL    = 224,
+      if id == Gosu::KB_LEFT_CONTROL && @player.ready_for_special?
+        puts "Gosu::KB_LEFT_CONTROL CLICKED!!"
+        @player.special_attack
+      end
+    end
+
   end
 
   def self.reset(window, options = {})
@@ -283,8 +296,9 @@ class GameWindow < Gosu::Window
         @menu_open = true
         @can_open_menu = false
         @menu = Menu.new(self)
-        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit_hover.png", false))
         @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
+        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
+        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false))
         # close!
       end
       if Gosu.button_down?(Gosu::KB_M)
@@ -378,6 +392,7 @@ class GameWindow < Gosu::Window
           @pickups = @pickups + results[:drops]
           @player.score += results[:point_value]
           @enemies_killed += results[:killed]
+          @player.add_kill_count(results[:killed])
         end
 
 
@@ -420,11 +435,11 @@ class GameWindow < Gosu::Window
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
         if !@boss_active && !@boss && !@boss_killed
 
-          if @player.is_alive && (@player.time_alive % 600 == 0) # && @enemies.count <= @max_enemies
+          if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
               @pickups << RocketLauncherPickup.new(@scale, @width, @height)
           end
-          if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
+          if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
               swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
               @enemies = @enemies + swarm
@@ -564,7 +579,7 @@ class GameWindow < Gosu::Window
     @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    @font.draw("Boss Health: #{@boss.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @boss
+    @font.draw("Boss Health: #{@boss.health.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @boss
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -582,9 +597,12 @@ class GameWindow < Gosu::Window
       @font.draw("pickups count: #{@pickups.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Object count: #{@enemies.count + @enemy_projectiles.count + @projectiles.count + @enemy_destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Damage Reduction: #{@player.damage_reduction.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
-    @gl_background.draw(ZOrder::Background)
+    # @gl_background.draw(ZOrder::Background)
     reset_font_ui_y
   end
 

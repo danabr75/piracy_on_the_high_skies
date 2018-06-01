@@ -1,7 +1,7 @@
 require_relative 'general_object.rb'
 
 class FooterBar < GeneralObject
-  attr_reader :x, :y, :living_time
+  attr_reader :x, :y, :living_time, :height
 
   def initialize(scale, screen_width = nil, screen_height = nil, image = nil)
     @scale = scale * 0.7
@@ -19,6 +19,7 @@ class FooterBar < GeneralObject
     @health_00 = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_bar_10.png")
 
 
+
     @green_health_100 = Gosu::Image.new("#{MEDIA_DIRECTORY}/green_health_bar_0.png")
     @green_health_90 = Gosu::Image.new("#{MEDIA_DIRECTORY}/green_health_bar_1.png")
     @green_health_80 = Gosu::Image.new("#{MEDIA_DIRECTORY}/green_health_bar_2.png")
@@ -29,6 +30,20 @@ class FooterBar < GeneralObject
     @green_health_30 = Gosu::Image.new("#{MEDIA_DIRECTORY}/green_health_bar_7.png")
     @green_health_20 = Gosu::Image.new("#{MEDIA_DIRECTORY}/green_health_bar_8.png")
     @green_health_10 = Gosu::Image.new("#{MEDIA_DIRECTORY}/green_health_bar_9.png")
+
+    @progress_bar = []
+    @progress_bar_increments = 20
+    (0..20).each do |i|
+      @progress_bar << Gosu::Image.new("#{MEDIA_DIRECTORY}/progress_bar_#{i}.png")
+    end
+    @progress_bar_width  = (@progress_bar.first.width  * @scale)
+    @progress_bar_height = (@progress_bar.first.height * @scale)
+
+    # Right in the middle of the screen
+    @progress_bar_x = (screen_width / 2) - @progress_bar_width / 2
+    # Lets see how it looks without padding
+    @progress_bar_y = screen_height - @progress_bar_height # - padding
+
 
     @bomb_hud = Gosu::Image.new("#{MEDIA_DIRECTORY}/bomb_pack_hud.png")
     @missile_hud = Gosu::Image.new("#{MEDIA_DIRECTORY}/missile_pack_hud.png")
@@ -78,6 +93,8 @@ class FooterBar < GeneralObject
     @current_color.red = 51
     @current_color.green = 204
     @current_color.blue = 51
+
+    @height = [@missile_hud_height, @bomb_hud_height, @health_bar_height].max
     # rgb(51, 204, 51)
   end
 
@@ -132,6 +149,22 @@ class FooterBar < GeneralObject
     end
 
     health_image.draw(@health_bar_x, @health_bar_y, get_draw_ordering, @scale, @scale)
+
+
+
+    # progress_bar = []
+    # progress_bar_increments = 20
+    # (0..20).each do |i|
+    #   progress_bar << Gosu::Image.new("#{MEDIA_DIRECTORY}/progress_bar_#{i}.png")
+    # end
+    # @progress_bar_width  = (progress_bar.first.width  * @scale)
+    # @progress_bar_height = (progress_bar.first.height * @scale)
+    index = player.kill_count * @progress_bar_increments / player.get_kill_count_max
+    current_progress_bar = @progress_bar[index]
+    current_progress_bar.draw(@progress_bar_x, @progress_bar_y, get_draw_ordering, @scale, @scale)
+
+
+
 
     @bomb_hud.draw(@bomb_hud_x, @bomb_hud_y, get_draw_ordering, @scale, @scale)
     # @bomb_hud_width_half  = @bomb_hud_width / 2

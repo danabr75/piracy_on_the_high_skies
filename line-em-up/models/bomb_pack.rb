@@ -11,7 +11,8 @@ class BombPack < Pickup
   end
 
   def collected_by_player player
-    player.bombs += 3
+    value = 3
+    player.bombs += (value * player.boost_increase).round
   end
 
 end

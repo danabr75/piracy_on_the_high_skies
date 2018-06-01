@@ -53,7 +53,8 @@ class Star < Pickup
   # end
 
   def collected_by_player player
-    player.attack_speed += 0.02
+    value = 0.02
+    player.attack_speed += player.boost_increase * value
     if player.attack_speed > Player::MAX_ATTACK_SPEED
       player.attack_speed = Player::MAX_ATTACK_SPEED
       player.health += 1

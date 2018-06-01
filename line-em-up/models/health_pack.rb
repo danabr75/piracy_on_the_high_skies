@@ -22,10 +22,12 @@ class HealthPack < Pickup
 
 
   def collected_by_player player
-    if player.health + HEALTH_BOOST > player.class::MAX_HEALTH 
+    value = player.boost_increase * HEALTH_BOOST
+    if player.health + value > player.class::MAX_HEALTH 
       player.health = player.class::MAX_HEALTH
     else
-      player.health += HEALTH_BOOST
+
+      player.health += value
     end
   end
 

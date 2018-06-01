@@ -56,7 +56,7 @@ class Main < Gosu::Window
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
     @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
     debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
-    @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, start_image)
+    @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
     # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)

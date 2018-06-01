@@ -22,6 +22,7 @@ class Projectile < GeneralObject
     if options[:x_homing_padding]
       end_point_x = end_point_x + options[:x_homing_padding]
     end
+    @damage_increase = options[:damage_increase] || 1
     @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
     options[:relative_object] = object
     super(scale, nil, nil, screen_width, screen_height, options)
@@ -105,14 +106,14 @@ class Projectile < GeneralObject
 
 
 
-    vx = 0
-    vy = 0
-    if new_speed != 0
-      vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+      vx = 0
+      vy = 0
+      if new_speed != 0
+        vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
 
-      vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-      vy = vy * -1
-    end
+        vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
+        vy = vy * -1
+      end
 
       @x = @x + vx
       @y = @y + vy
@@ -169,7 +170,7 @@ class Projectile < GeneralObject
           # hit_object = true
           if self.class.get_aoe <= 0
             if object.respond_to?(:health) && object.respond_to?(:take_damage)
-              object.take_damage(self.class.get_damage)
+              object.take_damage(self.class.get_damage * @damage_increase)
             end
 
             if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
@@ -193,7 +194,7 @@ class Projectile < GeneralObject
           next if object.nil?
           if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @scale
             if object.respond_to?(:health) && object.respond_to?(:take_damage)
-              object.take_damage(self.class.get_damage)
+              object.take_damage(self.class.get_damage * @damage_increase)
             end
 
             if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)

@@ -11,7 +11,12 @@ class MissilePack < Pickup
   end
 
   def collected_by_player player
-    player.rockets += 35
+    value = 35
+    boost_increase = player.boost_increase
+    if boost_increase > 1
+      boost_increase = 1 + ((boost_increase - 1) / 10)
+    end
+    player.rockets += (boost_increase * value).round
   end
 
 end

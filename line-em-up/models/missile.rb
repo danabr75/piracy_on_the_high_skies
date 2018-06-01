@@ -1,4 +1,10 @@
 require_relative 'projectile.rb'
+
+require 'opengl'
+# require 'ruby-opengl'
+require 'glu'
+require 'glut'
+
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
   COOLDOWN_DELAY = 30
@@ -20,6 +26,42 @@ class Missile < Projectile
   # def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
   #   super(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
   #   # puts "MYYYY MISSILE ANGLE: #{@angle}"
+  # end
+  include Gl
+  include Glu 
+  include Glut
+
+  # def draw
+  #   z = ZOrder::Projectile
+  #   # @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+  #   # gl do
+  #   # points_x = 3
+  #   # pounts_y = 10
+  #   # Gosu.gl(z) {
+  #   #   # glColor3f(r,g,b);
+  #   #   0.upto(pounts_y) do |y|
+  #   #     0.upto(points_x) do |x|
+  #   #       # glColor3f(1.0, 1.0, 0.0)
+  #   #       glColor4d(1, 0, 0, z)
+  #   #       glBegin(GL_LINES)
+  #   #         glColor3f(1.0, 0.0, 0.0)
+  #   #         glVertex3d(@x + x, @y + y, z)
+  #   #         # glVertex3d(@x - 5, @y , z)
+  #   #       glEnd
+  #   #     end
+  #   #   end
+  #   # }
+
+  #   Gosu.gl(z) {
+  #     glLineWidth(2.5)
+  #     glColor3f(1.0, 0.0, 0.0)
+  #     glBegin(GL_LINES)
+  #       glVertex3f(0.0, 0.0, 0.0)
+  #       glVertex3f(15, 0, 0)
+  #     glEnd
+  #   }
+
+  #   # end
   # end
 
   def get_image

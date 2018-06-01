@@ -20,6 +20,7 @@ class DumbProjectile < GeneralObject
 
   def initialize(scale, screen_width, screen_height, object, options = {})
     options[:relative_object] = object
+    @damage_increase = options[:damage_increase] || 1
     super(scale, object.x, object.y, screen_width, screen_height, options)
     @current_speed = self.class.get_max_speed * @scale
   end
@@ -58,7 +59,7 @@ class DumbProjectile < GeneralObject
         hit_object = Gosu.distance(@x, @y, object.x, object.y) < self.get_radius + object.get_radius
         if hit_object
           if object.respond_to?(:health) && object.respond_to?(:take_damage)
-            object.take_damage(self.class.get_damage)
+            object.take_damage(self.class.get_damage * @damage_increase)
           end
 
           if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
