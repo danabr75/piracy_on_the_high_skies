@@ -11,7 +11,8 @@ class Bullet < DumbProjectile
   MAX_SPEED      = 15
 
   def get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/laserbolt.png")
+    # Gosu::Image.new("#{MEDIA_DIRECTORY}/laserbolt.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
   end
 
   include Gl
@@ -19,7 +20,7 @@ class Bullet < DumbProjectile
   include Glut
 
 
-  def draw
+  def alt_draw
     glClearColor(0.0, 0.2, 0.5, 1.0)
     glClearDepth(0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)

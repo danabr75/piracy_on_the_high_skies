@@ -53,6 +53,7 @@ require 'opengl'
 
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
+require "#{CURRENT_DIRECTORY}/../menu_launcher.rb"
 
 # require_relative 'media'
 # Dir["/path/to/directory/*.rb"].each {|file| require file }
@@ -602,7 +603,7 @@ class GameWindow < Gosu::Window
       @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
-    # @gl_background.draw(ZOrder::Background)
+    @gl_background.draw(ZOrder::Background)
     reset_font_ui_y
   end
 
