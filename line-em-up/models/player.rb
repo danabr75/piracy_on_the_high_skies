@@ -27,10 +27,53 @@ class Player < GeneralObject
     @kill_count >= get_kill_count_max
   end
 
-  def special_attack
+  def special_attack object_groups
     # Fire special attack.
     @kill_count = 0
+    projectiles = []
+    object_groups.each do |group|
+      group.each do |object|
+        next if object.nil?
+          projectiles << Missile.new(@scale, @screen_width, @screen_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
+      end
+    end
+    return projectiles
   end
+
+
+  def special_attack_2
+    # Fire special attack.
+    @kill_count = 0
+    projectiles = []
+    # object_groups.each do |group|
+    #   group.each do |object|
+    #     next if object.nil?
+    #       projectiles << Missile.new(@scale, @screen_width, @screen_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
+    #   end
+    # end
+
+    r = 10 * @scale
+    theta = 0
+    count_max = 360
+    max_passes = 3
+    pass_count = 0
+    theta = 0
+    # Need a projectile queue system?
+    while theta < count_max
+      x  =  @x + r * Math.cos(theta)
+      y  =  @y + r * Math.sin(theta)
+      if y < @y
+
+        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, x, y, nil, nil, nil, {damage_increase: @damage_increase})
+
+      end
+      theta += 5
+    end
+    # where r is the radius of the circle, and h,k are the coordinates of the center.
+
+    return projectiles
+  end
+
 
   # Rocket Launcher, Rocket launcher, Cannon, Cannon, Bomb Launcher
   HARD_POINTS = 12

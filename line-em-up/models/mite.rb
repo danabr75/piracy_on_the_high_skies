@@ -28,6 +28,7 @@ class Mite < GeneralObject
     @current_speed = self.class.get_max_speed * @scale
     @x_direction = x_direction
     @switched_directions = false
+    @damage_factor = options[:damage_increase] || 0.3
   end
 
   def get_points
@@ -46,7 +47,7 @@ class Mite < GeneralObject
   def attack player
     return {
       projectiles: [
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player)
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, nil, nil, nil, {damage_increase: @damage_factor})
       ],
       cooldown: SemiGuidedMissile::COOLDOWN_DELAY * MAX_ATTACK_SPEED
     }

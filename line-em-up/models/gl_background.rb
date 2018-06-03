@@ -29,14 +29,29 @@ class GLBackground
     Gosu.gl(z) { exec_gl }
   end
   
-  private
-  
   include Gl
   
   def exec_gl
-    glClearColor(0.0, 0.2, 0.5, 1.0)
-    glClearDepth(0)
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+    # glClearColor(0.0, 0.2, 0.5, 1.0)
+    # glClearDepth(0)
+    # glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
     
     # Get the name of the OpenGL texture the Image resides on, and the
     # u/v coordinates of the rect it occupies.

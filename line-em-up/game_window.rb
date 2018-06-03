@@ -169,7 +169,8 @@ class GameWindow < Gosu::Window
               # KB_LEFT_CONTROL    = 224,
       if id == Gosu::KB_LEFT_CONTROL && @player.ready_for_special?
         puts "Gosu::KB_LEFT_CONTROL CLICKED!!"
-        @player.special_attack
+        # @projectiles += @player.special_attack([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
+        @projectiles += @player.special_attack_2
       end
     end
 
@@ -552,6 +553,7 @@ class GameWindow < Gosu::Window
   end # END UPDATE FUNCTION
 
   def draw
+    ExecuteOpenGl.new.draw(@gl_background, @projectiles)
     @menu.draw if @menu
     @footer_bar.draw(@player)
     @boss.draw if @boss
@@ -602,7 +604,7 @@ class GameWindow < Gosu::Window
       @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
-    @gl_background.draw(ZOrder::Background)
+    # @gl_background.draw(ZOrder::Background)
     reset_font_ui_y
   end
 

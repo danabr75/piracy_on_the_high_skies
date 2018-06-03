@@ -18,6 +18,8 @@ class Projectile < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
+  def draw_gl
+  end
   def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
     if options[:x_homing_padding]
       end_point_x = end_point_x + options[:x_homing_padding]

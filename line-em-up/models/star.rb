@@ -57,7 +57,12 @@ class Star < Pickup
     player.attack_speed += player.boost_increase * value
     if player.attack_speed > Player::MAX_ATTACK_SPEED
       player.attack_speed = Player::MAX_ATTACK_SPEED
-      player.health += 1
+      if player.health + value > player.class::MAX_HEALTH 
+        player.health = player.class::MAX_HEALTH
+      else
+
+        player.health += 1
+      end
     end
   end
 end

@@ -24,6 +24,7 @@ class MissileBoat < GeneralObject
     @health = 10
     @armor = 0
     @current_speed = (rand(5) * @scale).round + 1
+    @damage_factor = options[:damage_increase] || 0.5
   end
 
   def get_points
@@ -44,9 +45,9 @@ class MissileBoat < GeneralObject
     x_padding_2 = -(5 * @scale)
     return {
       projectiles: [
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2}),
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1}),
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2})
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2, damage_increase: @damage_factor}),
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1, damage_increase: @damage_factor}),
+        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2, damage_increase: @damage_factor})
       ],
       cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }

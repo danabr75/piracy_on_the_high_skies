@@ -15,9 +15,9 @@ gem 'danabr75-opengl'
 # gem 'rmagick'
 gem 'ocra'
 # Gosu does not provide access to the underlying OpenGL APIs. A gem like ruby-opengl is required to use custom OpenGL drawing code.
-# gem "ruby-opengl"
-# gem "glu"
-# gem "glut"
+gem "ruby-opengl"
+gem "glu"
+gem "glut"
 
 # gem 'rb2exe'
 
