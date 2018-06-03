@@ -214,20 +214,39 @@ class GeneralObject
     GeneralObject.nearest_angle(angle, min_angle, max_angle)
   end
 
+# # new_pos_x = @x / @screen_width.to_f * (AXIS_X_MAX - AXIS_X_MIN) + AXIS_X_MIN;
+# # new_pos_y = (1 - @y / @screen_height.to_f) * (AXIS_Y_MAX - AXIS_Y_MIN) + AXIS_Y_MIN;
+#   # This isn't exactly right, objects are drawn farther away from center than they should be.
+#   def convert_x_and_y_to_opengl_coords
+#     # Don't have to recalce these 4 variables on each draw, save to singleton somewhere?
+#     middle_x = (@screen_width.to_f) / 2.0
+#     middle_y = (@screen_height.to_f) / 2.0
+#     increment_x = 1.0 / middle_x
+#     increment_y = 1.0 / middle_y
+#     new_pos_x = (@x.to_f - middle_x) * increment_x
+#     new_pos_y = (@y.to_f - middle_y) * increment_y
+#     # Inverted Y
+#     new_pos_y = new_pos_y * -1.0
+
+#     # height = @image_height.to_f * increment_x
+#     return [new_pos_x, new_pos_y, increment_x, increment_y]
+#   end
+
 
   # This isn't exactly right, objects are drawn farther away from center than they should be.
   def convert_x_and_y_to_opengl_coords
     middle_x = @screen_width / 2
     middle_y = @screen_height / 2
     increment_x = 1.0 / middle_x
-    increment_y = 1.0 / middle_y
+    # The zoom issue maybe, not quite sure why we need the Y offset.
+    increment_y = (1.0 / middle_y) * 0.75
     new_pos_x = (@x - middle_x) * increment_x
     new_pos_y = (@y - middle_y) * increment_y
     # Inverted Y
     new_pos_y = new_pos_y * -1
 
     # height = @image_height.to_f * increment_x
-    return [new_pos_x, new_pos_y, increment_x]
+    return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
 

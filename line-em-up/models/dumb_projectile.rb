@@ -25,6 +25,8 @@ class DumbProjectile < GeneralObject
     @current_speed = self.class.get_max_speed * @scale
   end
 
+  def draw_gl
+  end
 
   def update mouse_x = nil, mouse_y = nil, player = nil
     @y -= @current_speed

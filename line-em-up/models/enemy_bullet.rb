@@ -23,9 +23,9 @@ class EnemyBullet < DumbProjectile
   end
 
   def draw_gl
-    new_pos_x, new_pos_y, increment_x = convert_x_and_y_to_opengl_coords
+    new_pos_x, new_pos_y, increment_x, increment_y = convert_x_and_y_to_opengl_coords
 
-    height = @image_height.to_f * increment_x
+    height = @image_height.to_f * increment_y
 
     z = ZOrder::Projectile
 

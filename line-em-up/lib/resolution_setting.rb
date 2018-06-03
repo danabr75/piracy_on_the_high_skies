@@ -3,7 +3,7 @@ require_relative 'setting.rb'
 
 class ResolutionSetting < Setting
   FULLSCREEN_NAME = "fullscreen"
-  RESOLUTIONS = ["640x480", "800x600", "960x720", "1024x768", "1280x960", "1400x1050", "1440x1080", "1600x1200", "1856x1392", "1920x1440", "2048x1536", FULLSCREEN_NAME]
+  RESOLUTIONS = ["480x480", "640x480", "800x600", "960x720", "1024x768", "1280x960", "1400x1050", "1440x1080", "1600x1200", "1856x1392", "1920x1440", "2048x1536", FULLSCREEN_NAME]
   attr_accessor :x, :y, :font, :max_width, :max_height
 
 

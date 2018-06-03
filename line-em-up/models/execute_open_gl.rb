@@ -40,8 +40,9 @@ class ExecuteOpenGl
       projectiles.each_with_index do |projectile, i|
         glMatrixMode(GL_MODELVIEW)  #see lesson 01
         glLoadIdentity              #see lesson 01
-
-        glTranslatef(0, 0, -projectile.get_draw_ordering - 10)   #see lesson 01
+        puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
+        glTranslatef(0, 0, -13)   #see lesson 01
+        # glTranslatef(0, 0, -14)   #see lesson 01
         projectile.draw_gl
       end
     end
