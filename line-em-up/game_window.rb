@@ -70,6 +70,7 @@ class GameWindow < Gosu::Window
   attr_accessor :width, :height, :block_all_controls
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @open_gl_executer = ExecuteOpenGl.new
     @difficulty = options[:difficulty]
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
     @debug = options[:debug]
@@ -553,7 +554,7 @@ class GameWindow < Gosu::Window
   end # END UPDATE FUNCTION
 
   def draw
-    ExecuteOpenGl.new.draw(@gl_background, @projectiles)
+    @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles)
     @menu.draw if @menu
     @footer_bar.draw(@player)
     @boss.draw if @boss

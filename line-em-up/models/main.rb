@@ -1,5 +1,8 @@
 class Main < Gosu::Window
-  def initialize
+  CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
+  def initialize config_path = nil
+    config_path = CONFIG_FILE if config_path.nil?
     @width, @height = ResolutionSetting::RESOLUTIONS[0].split('x').collect{|s| s.to_i}
     super(@width, @height, false)
     @cursor = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/cursor.png", false)
@@ -27,10 +30,10 @@ class Main < Gosu::Window
     # 8
     @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
     window_height = Gosu.screen_height
-    @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, CONFIG_FILE)
+    @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
-    @difficulty_menu = DifficultySetting.new(@width, @height, get_center_font_ui_y, CONFIG_FILE)
+    @difficulty_menu = DifficultySetting.new(@width, @height, get_center_font_ui_y, config_path)
 
     start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/start.png")
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]

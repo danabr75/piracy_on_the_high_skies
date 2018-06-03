@@ -17,4 +17,4 @@ require "#{CURRENT_DIRECTORY}/line-em-up/game_window.rb"
 # @menu.add_item(Gosu::Image.new("#{MEDIA_DIRECTORY}question.png"), 100, 200, 1, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}question.png", false))
 # @menu.add_item(Gosu::Image.new("#{MEDIA_DIRECTORY}question.png"), 100, 250, 1, lambda { puts "something" }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}question.png", false))
 
-Main.new.show
+Main.new(CONFIG_FILE).show

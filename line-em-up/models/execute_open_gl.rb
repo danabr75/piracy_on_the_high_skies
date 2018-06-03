@@ -24,7 +24,7 @@ class ExecuteOpenGl
   include Glut
 
   def draw background, projectiles
-    @zoom = -14
+    # @zoom = -14
     Gosu.gl do
       # init_scene
       # glEnable(GL_TEXTURE_2D)
@@ -41,7 +41,7 @@ class ExecuteOpenGl
         glMatrixMode(GL_MODELVIEW)  #see lesson 01
         glLoadIdentity              #see lesson 01
 
-        glTranslatef(0, 0, @zoom)   #see lesson 01
+        glTranslatef(0, 0, -projectile.get_draw_ordering - 10)   #see lesson 01
         projectile.draw_gl
       end
     end

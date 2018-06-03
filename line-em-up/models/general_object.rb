@@ -215,10 +215,20 @@ class GeneralObject
   end
 
 
+  # This isn't exactly right, objects are drawn farther away from center than they should be.
+  def convert_x_and_y_to_opengl_coords
+    middle_x = @screen_width / 2
+    middle_y = @screen_height / 2
+    increment_x = 1.0 / middle_x
+    increment_y = 1.0 / middle_y
+    new_pos_x = (@x - middle_x) * increment_x
+    new_pos_y = (@y - middle_y) * increment_y
+    # Inverted Y
+    new_pos_y = new_pos_y * -1
 
-
-
-
+    # height = @image_height.to_f * increment_x
+    return [new_pos_x, new_pos_y, increment_x]
+  end
 
 
 
