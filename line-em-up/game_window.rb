@@ -341,7 +341,7 @@ class GameWindow < Gosu::Window
       end
 
       if @player.is_alive && !@game_pause && !@menu_open
-        @player.update()
+        @player.update(self.mouse_x, self.mouse_y, @player)
         @player.move_left()  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
         @player.move_right() if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)
         @player.accelerate() if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)

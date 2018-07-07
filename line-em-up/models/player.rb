@@ -153,22 +153,20 @@ class Player < GeneralObject
   end
  
   def stop_laser_attack
-    @main_weapon.active = false if @main_weapon
-    @main_weapon = nil
+    @main_weapon.deactivate if @main_weapon
   end
 
   def laser_attack pointer
     if @main_weapon.nil?
       @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
-      @main_weapon.attack
       return {
-        projectiles: [@main_weapon],
+        projectiles: [@main_weapon.attack],
         cooldown: LaserBeam::COOLDOWN_DELAY
       }
     else
-      @main_weapon.attack
+      @main_weapon.active = true if @main_weapon.active == false
       return {
-        projectiles: [],
+        projectiles: [@main_weapon.attack],
         cooldown: LaserBeam::COOLDOWN_DELAY
       }
     end
@@ -350,6 +348,9 @@ class Player < GeneralObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil
+    # Update list of weapons for special cases like beans. Could iterate though an association in the future.
+    @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+
     @cooldown_wait -= 1              if @cooldown_wait > 0
     @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0

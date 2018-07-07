@@ -5,10 +5,16 @@ require 'glu'
 require 'glut'
 
 class LaserParticle < DumbProjectile
-  DAMAGE = 5
+  attr_accessor :active
+  DAMAGE = 10
   COOLDOWN_DELAY = 0.001
   # Friendly projects are + speeds
   MAX_SPEED      = 15
+
+  def initialize(scale, screen_width, screen_height, object, options = {})
+    super(scale, screen_width, screen_height, object, options)
+    @active = true
+  end
 
   def get_image
     # Gosu::Image.new("#{MEDIA_DIRECTORY}/laserbolt.png")
@@ -16,11 +22,13 @@ class LaserParticle < DumbProjectile
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil
-    puts "ON LAStER PARTICLE, updating: @y: #{@y} and current_speed: #{@current_speed} and time_alive: #{@time_alive}"
-    @y -= @current_speed
-    puts "NEW Y: #{@y}"
-    @x = player.x if player
     @time_alive += 1
+    @y > 0 && @y < @screen_height
+  end
+
+  def parental_update mouse_x = nil, mouse_y = nil, player = nil
+    @y -= @current_speed
+    @x = player.x if player && @active
     @y > 0 && @y < @screen_height
   end
 
