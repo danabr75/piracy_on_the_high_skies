@@ -358,11 +358,9 @@ class GameWindow < Gosu::Window
           @projectiles = @projectiles + @player.trigger_secondary_attack(@pointer)
         end
 
-        puts "PROJECTILES: #{@projectiles}"
         if Gosu.button_down?(Gosu::KB_SPACE)
           if @player.cooldown_wait <= 0
             results = @player.laser_attack(@pointer)
-            puts "SPACE IS DOWN - #{results}"
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)

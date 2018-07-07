@@ -6,8 +6,8 @@ require 'glut'
 
 class LaserParticle < DumbProjectile
   attr_accessor :active
-  DAMAGE = 10
-  COOLDOWN_DELAY = 0.001
+  DAMAGE = 1
+  # COOLDOWN_DELAY = 1
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
