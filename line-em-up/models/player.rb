@@ -7,7 +7,7 @@ class Player < GeneralObject
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
-  attr_accessor :special_attack
+  attr_accessor :special_attack, :main_weapon
   MAX_HEALTH = 200
 
   SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -128,7 +128,7 @@ class Player < GeneralObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @attack_speed = 1
+    @attack_speed = 3
     # @attack_speed = 3
     @health = 100.0
     @armor = 0
@@ -149,6 +149,29 @@ class Player < GeneralObject
     @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
     @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
     @kill_count = 0
+    @main_weapon = nil
+  end
+ 
+  def stop_laser_attack
+    @main_weapon.active = false if @main_weapon
+    @main_weapon = nil
+  end
+
+  def laser_attack pointer
+    if @main_weapon.nil?
+      @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
+      @main_weapon.attack
+      return {
+        projectiles: [@main_weapon],
+        cooldown: LaserBeam::COOLDOWN_DELAY
+      }
+    else
+      @main_weapon.attack
+      return {
+        projectiles: [],
+        cooldown: LaserBeam::COOLDOWN_DELAY
+      }
+    end
   end
 
 
@@ -233,14 +256,16 @@ class Player < GeneralObject
 
 
   def attack pointer
-    return {
-      projectiles: [
-        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left', damage_increase: @damage_increase}),
-        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', damage_increase: @damage_increase})
-      ],
-      cooldown: Bullet::COOLDOWN_DELAY
-    }
+    laser_attack(pointer)
+    # return {
+    #   projectiles: [
+    #     Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left', damage_increase: @damage_increase}),
+    #     Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', damage_increase: @damage_increase})
+    #   ],
+    #   cooldown: Bullet::COOLDOWN_DELAY
+    # }
   end
+
 
   def trigger_secondary_attack pointer
     return_projectiles = []

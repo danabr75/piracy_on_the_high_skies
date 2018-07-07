@@ -128,7 +128,8 @@ class GameWindow < Gosu::Window
     @enemies_killed = 0
     
     @font = Gosu::Font.new(20)
-    @max_enemies = 4
+    # @max_enemies = 4
+    @max_enemies = 0
 
     @pointer = Cursor.new(@scale)
     @ui_y = 0
@@ -357,9 +358,11 @@ class GameWindow < Gosu::Window
           @projectiles = @projectiles + @player.trigger_secondary_attack(@pointer)
         end
 
+        puts "PROJECTILES: #{@projectiles}"
         if Gosu.button_down?(Gosu::KB_SPACE)
           if @player.cooldown_wait <= 0
-            results = @player.attack(@pointer)
+            results = @player.laser_attack(@pointer)
+            puts "SPACE IS DOWN - #{results}"
             projectiles = results[:projectiles]
             cooldown = results[:cooldown]
             @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
@@ -368,6 +371,8 @@ class GameWindow < Gosu::Window
               @projectiles.push(projectile)
             end
           end
+        else
+          @player.stop_laser_attack
         end
 
 
@@ -407,12 +412,12 @@ class GameWindow < Gosu::Window
           @grappling_hook = nil if !grap_result
         end
 
-        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y) }
+        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player) }
 
-        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y) }
+        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
-        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y) }
-        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y) }
+        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
         @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
 
         if @boss
@@ -443,13 +448,13 @@ class GameWindow < Gosu::Window
           end
           if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-              swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
-              @enemies = @enemies + swarm
+              # swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
+              # @enemies = @enemies + swarm
           end
 
           if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
             (0..(@enemies_spawner_counter / 2).round).each do |count|
-              @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+              # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
             end
           end
           if @player.time_alive % 500 == 0
@@ -461,7 +466,7 @@ class GameWindow < Gosu::Window
           # temp
           if @player.time_alive % 200 == 0
             (0..(@enemies_spawner_counter / 4).round).each do |count|
-              @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+              # @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
             end
           end
           if @player.time_alive % 5000 == 0
@@ -555,11 +560,11 @@ class GameWindow < Gosu::Window
 
   def draw
     @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles)
+    @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw if @menu
     @footer_bar.draw(@player)
     @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
-    @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
 
     @player.draw() if @player.is_alive
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook

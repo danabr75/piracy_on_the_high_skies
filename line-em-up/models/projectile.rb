@@ -79,7 +79,7 @@ class Projectile < GeneralObject
 
   end
 
-  def update mouse_x = nil, mouse_y = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil
     if @end_image_angle && @time_alive > 10
       incrementing_amount = 0.5
       angle_difference = (@current_image_angle - @end_image_angle)

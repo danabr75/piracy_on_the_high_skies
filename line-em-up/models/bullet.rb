@@ -41,7 +41,7 @@ class Bullet < DumbProjectile
   def draw_gl
     new_pos_x, new_pos_y, increment_x, increment_y = convert_x_and_y_to_opengl_coords
 
-    height = 15 * increment_y
+    height = 15 * increment_y * @scale
 
     puts "X and Y: #{@x} and #{@y}"
     puts "increment Y: #{increment_y}"
@@ -53,7 +53,7 @@ class Bullet < DumbProjectile
     z = ZOrder::Projectile
 
     # glLineWidth(5 * @scale)
-    glLineWidth(5)
+    glLineWidth(20 * @scale)
     glBegin(GL_LINES)
     # 22.4% red, 100% green and 7.8% blue
       glColor3f(1, 1.0, 1.0)
