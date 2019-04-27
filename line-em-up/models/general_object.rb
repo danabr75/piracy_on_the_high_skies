@@ -19,7 +19,7 @@ class GeneralObject
         @x = options[:relative_object].x - (options[:relative_object].get_width / 2)
         @y = options[:relative_object].y
       elsif RIGHT == options[:side]
-        @x = (options[:relative_object].x + options[:relative_object].get_width / 2) - 4
+        @x = (options[:relative_object].x + options[:relative_object].get_width / 2)
         @y = options[:relative_object].y
       else
         @x = options[:relative_object].x

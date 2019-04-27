@@ -19,9 +19,9 @@ class ExecuteOpenGl
   #   glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST) #see nehe07
   # end
 
-  include Gl
-  include Glu 
-  include Glut
+  # include Gl
+  # include Glu 
+  # include Glut
 
   def draw background, projectiles
     # @zoom = -14

@@ -1,4 +1,19 @@
+require 'gosu'
+# # require 'opengl'
+# # require 'glu'
+
+# require 'opengl'
+# require 'glut'
+
 require 'opengl'
+require 'glut'
+
+OpenGL.load_lib()
+GLUT.load_lib()
+
+include OpenGL
+include GLUT
+
 class GLBackground
   # Height map size
   POINTS_X = 7
@@ -34,7 +49,7 @@ class GLBackground
     end
   end
   
-  include Gl
+  # include Gl
   
   def exec_gl
     
@@ -57,7 +72,7 @@ class GLBackground
 
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity
-    glTranslate(0, 0, -4)
+    glTranslated(0, 0, -4)
   
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, info.tex_name)

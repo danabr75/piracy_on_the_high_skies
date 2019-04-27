@@ -130,7 +130,7 @@ class GameWindow < Gosu::Window
     @font = Gosu::Font.new(20)
     @max_enemies = 4
 
-    @pointer = Cursor.new(@scale)
+    @pointer = Cursor.new(@scale, @width, @height)
     @ui_y = 0
     @footer_bar = FooterBar.new(@scale, @width, @height)
     reset_font_ui_y

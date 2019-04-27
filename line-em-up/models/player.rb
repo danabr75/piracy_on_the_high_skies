@@ -237,6 +237,7 @@ class Player < GeneralObject
       projectiles: [
         Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left', damage_increase: @damage_increase}),
         Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', damage_increase: @damage_increase})
+        # Bullet.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
       ],
       cooldown: Bullet::COOLDOWN_DELAY
     }
@@ -311,6 +312,8 @@ class Player < GeneralObject
   end
 
   def draw
+    puts "PLAYER X: #{@x}"
+    puts "PLAYER Y: #{@y}"
     if @turn_right
       image = @right_image
     elsif @turn_left
