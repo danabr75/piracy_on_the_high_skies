@@ -1,5 +1,5 @@
 class GeneralObject
-  attr_accessor :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path
+  attr_accessor :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
   LEFT  = 'left'
   RIGHT = 'right'
   SCROLLING_SPEED = 4
@@ -55,6 +55,7 @@ class GeneralObject
     @screen_width  = screen_width
     @screen_height = screen_height
     @off_screen = screen_height + screen_height
+    @inited = true
   end
 
   # If using a different class for ZOrder than it has for model name, or if using subclass (from subclass or parent)
@@ -245,7 +246,10 @@ class GeneralObject
   def convert_x_and_y_to_opengl_coords
     middle_x = @screen_width / 2
     middle_y = @screen_height / 2
-    increment_x = 1.0 / middle_x
+
+    ratio = @screen_width.to_f / @screen_height.to_f
+
+    increment_x = (ratio / middle_x) * 0.97
     # The zoom issue maybe, not quite sure why we need the Y offset.
     increment_y = (1.0 / middle_y) * 0.75
     new_pos_x = (@x - middle_x) * increment_x
@@ -257,9 +261,23 @@ class GeneralObject
     return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
+  def self.convert_x_and_y_to_opengl_coords(x, y, screen_width, screen_height)
+    puts "convert_x_and_y_to_opengl_coords"
+    middle_x = screen_width.to_f / 2.0
+    middle_y = screen_height.to_f / 2.0
 
+    ratio = screen_width.to_f / screen_height.to_f
 
-
+    increment_x = (ratio / middle_x) * 0.97
+    # The zoom issue maybe, not quite sure why we need the Y offset.
+    increment_y = (1.0 / middle_y)
+    new_pos_x = (x.to_f - middle_x) * increment_x
+    puts ""
+    new_pos_y = (y.to_f - middle_y) * increment_y
+    # Inverted Y
+    new_pos_y = new_pos_y * -1
+    return [new_pos_x, new_pos_y, increment_x, increment_y]
+  end
 
 
 
