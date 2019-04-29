@@ -1,5 +1,5 @@
 class GeneralObject
-  attr_accessor :time_alive, :x, :y, :health
+  attr_accessor :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path
   LEFT  = 'left'
   RIGHT = 'right'
   SCROLLING_SPEED = 4
@@ -7,6 +7,10 @@ class GeneralObject
 
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
+  end
+
+  def get_image_path
+    "#{MEDIA_DIRECTORY}/question.png"
   end
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
@@ -25,10 +29,14 @@ class GeneralObject
         @x = options[:relative_object].x
         @y = options[:relative_object].y
       end
-      @x = @x + options[:relative_x_padding] if options[:relative_x_padding]
     else
       @x = x
       @y = y
+    end
+    @x = @x + options[:relative_x_padding] if options[:relative_x_padding]
+    @y = @y + options[:relative_y_padding] if options[:relative_y_padding]
+    if options[:relative_y_padding]
+      puts 'YEAH FOUND IT'
     end
 
     @time_alive = 0

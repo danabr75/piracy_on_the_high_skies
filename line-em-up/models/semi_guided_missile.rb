@@ -46,7 +46,7 @@ class SemiGuidedMissile < Projectile
   end
 
 
-  def update mouse_x = nil, mouse_y = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil
     if is_alive
       super(mouse_x, mouse_y)
     else

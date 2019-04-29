@@ -121,7 +121,6 @@ class Bullet < DumbProjectile
     # height = 55 * increment_y * @scale
     # width  = 55 * increment_x * @scale
 
-
     puts "X and Y: #{@x} and #{@y}"
     puts "increment Y: #{increment_y}"
     puts "increment X: #{increment_x}"
@@ -163,13 +162,17 @@ class Bullet < DumbProjectile
       glVertex3f(new_width2, new_height2, 0.0)
       glVertex3f(new_width3, new_height3, 0.0)
     glEnd
-    # glBegin(GL_LINES)
-    #   glLineWidth(10 * @scale)
-    #   glColor3f(1.0, 0.0, 0.0)
-    #   glVertex3d(1, 1,     0)
-    #   glVertex3d(1, 0.9, 0)
-    # glEnd
 
+
+# =======
+#     glLineWidth(20 * @scale)
+#     glBegin(GL_LINES)
+#     # 22.4% red, 100% green and 7.8% blue
+#       glColor3f(1, 1.0, 1.0)
+#       glVertex3d(new_pos_x, new_pos_y, z)
+#       glVertex3d(new_pos_x, new_pos_y + height, z)
+    # glEnd
+# >>>>>>> 8012b34281af3e19bb5f897bcab2161c1a00e7b0
 
 
   end

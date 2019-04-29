@@ -7,7 +7,7 @@ class Player < GeneralObject
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
-  attr_accessor :special_attack
+  attr_accessor :special_attack, :main_weapon
   MAX_HEALTH = 200
 
   SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -115,6 +115,10 @@ class Player < GeneralObject
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
   end
+  
+  def get_image_path
+    "#{MEDIA_DIRECTORY}/spaceship.png"
+  end
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
     super(scale, x, y, screen_width, screen_height, options)
@@ -128,7 +132,7 @@ class Player < GeneralObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @attack_speed = 1
+    @attack_speed = 3
     # @attack_speed = 3
     @health = 100.0
     @armor = 0
@@ -149,6 +153,27 @@ class Player < GeneralObject
     @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
     @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
     @kill_count = 0
+    @main_weapon = nil
+  end
+ 
+  def stop_laser_attack
+    @main_weapon.deactivate if @main_weapon
+  end
+
+  def laser_attack pointer
+    if @main_weapon.nil?
+      @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
+      return {
+        projectiles: [@main_weapon.attack],
+        cooldown: LaserBeam::COOLDOWN_DELAY
+      }
+    else
+      @main_weapon.active = true if @main_weapon.active == false
+      return {
+        projectiles: [@main_weapon.attack],
+        cooldown: LaserBeam::COOLDOWN_DELAY
+      }
+    end
   end
 
 
@@ -233,15 +258,24 @@ class Player < GeneralObject
 
 
   def attack pointer
-    return {
-      projectiles: [
-        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left', damage_increase: @damage_increase}),
-        Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', damage_increase: @damage_increase})
-        # Bullet.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
-      ],
-      cooldown: Bullet::COOLDOWN_DELAY
-    }
+#     return {
+#       projectiles: [
+#         Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left', damage_increase: @damage_increase}),
+#         Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', damage_increase: @damage_increase})
+#         # Bullet.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
+#       ],
+#       cooldown: Bullet::COOLDOWN_DELAY
+#     }
+    laser_attack(pointer)
+    # return {
+    #   projectiles: [
+    #     Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'left', damage_increase: @damage_increase}),
+    #     Bullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', damage_increase: @damage_increase})
+    #   ],
+    #   cooldown: Bullet::COOLDOWN_DELAY
+    # }
   end
+
 
   def trigger_secondary_attack pointer
     return_projectiles = []
@@ -322,12 +356,15 @@ class Player < GeneralObject
       image = @image
     end
     # super
-    image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+    image.draw(@x - image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
     @turn_right = false
     @turn_left = false
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil
+    # Update list of weapons for special cases like beans. Could iterate though an association in the future.
+    @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+
     @cooldown_wait -= 1              if @cooldown_wait > 0
     @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0

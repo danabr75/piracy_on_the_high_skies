@@ -22,6 +22,8 @@ gem 'ocra'
 gem "glu"
 gem "glut"
 
+gem "pry"
+
 # gem 'rb2exe'
 
 # Project of the Day screenshot
