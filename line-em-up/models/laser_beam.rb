@@ -94,9 +94,8 @@ class LaserBeam < DumbProjectile
     if @inited
       z = ZOrder::Projectile
       new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
-      new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_width         , @screen_height)
+      new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_width         , @screen_height)
       new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
-      new_width4, new_height4, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_width         , @screen_height)
       glBegin(GL_TRIANGLES)
         glColor4f(0, 1, 0, get_draw_ordering)
         glVertex3f(new_width1, new_height1, 0.0)
@@ -104,13 +103,21 @@ class LaserBeam < DumbProjectile
         glVertex3f(new_width3, new_height3, 0.0)
         # glVertex3f(new_width4, new_height4, 0.0)
       glEnd
-      glBegin(GL_TRIANGLES)
-        glColor4f(0, 1, 0, get_draw_ordering)
-        # glVertex3f(new_width1, new_height1, 0.0)
-        glVertex3f(new_width2, new_height2, 0.0)
-        glVertex3f(new_width3, new_height3, 0.0)
-        glVertex3f(new_width4, new_height4, 0.0)
-      glEnd
+      # glBegin(GL_TRIANGLES)
+      #   glColor4f(0, 1, 0, get_draw_ordering)
+      #   # glVertex3f(new_width1, new_height1, 0.0)
+      #   glVertex3f(new_width2, new_height2, 0.0)
+      #   glVertex3f(new_width3, new_height3, 0.0)
+      #   glVertex3f(new_width4, new_height4, 0.0)
+      # glEnd
+       # glBegin(GL_LINE_LOOP)
+       #    (0..360).each do |i|
+       #      degInRad = i * Math::PI / 180
+       #      glVertex2f(new_width1 * Math.cos(degInRad) * self.get_radius, new_height1 *  Math.sin(degInRad) * self.get_radius)
+       #    end
+       # glEnd
+ 
+
     end
   end
 
