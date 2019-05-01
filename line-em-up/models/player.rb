@@ -7,7 +7,7 @@ class Player < GeneralObject
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
-  attr_accessor :special_attack, :main_weapon
+  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   MAX_HEALTH = 200
 
   SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -154,6 +154,7 @@ class Player < GeneralObject
     @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
     @kill_count = 0
     @main_weapon = nil
+    @drawable_items_near_self = []
   end
  
   def stop_laser_attack
@@ -163,12 +164,14 @@ class Player < GeneralObject
   def laser_attack pointer
     if @main_weapon.nil?
       @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
+      @drawable_items_near_self << @main_weapon
       return {
         projectiles: [@main_weapon.attack],
         cooldown: LaserBeam::COOLDOWN_DELAY
       }
     else
       @main_weapon.active = true if @main_weapon.active == false
+      @drawable_items_near_self << @main_weapon
       return {
         projectiles: [@main_weapon.attack],
         cooldown: LaserBeam::COOLDOWN_DELAY
@@ -346,8 +349,8 @@ class Player < GeneralObject
   end
 
   def draw
-    puts "PLAYER X: #{@x}"
-    puts "PLAYER Y: #{@y}"
+    @drawable_items_near_self.reject! { |item| item.draw }
+
     if @turn_right
       image = @right_image
     elsif @turn_left

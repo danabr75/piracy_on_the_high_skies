@@ -15,19 +15,14 @@ class LaserBeam < DumbProjectile
     super(scale, screen_width, screen_height, object, options)
     @active = true
     @laser_particles = []
-    puts "@object. #{@object}"
-    @image_path = object.get_image_path
-    puts "AHA HERE"
-    puts "@image_path: #{@image_path}"
-    @test = 'test'
+    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
     @inited = true
   end
 
   def attack
     options = {damage_increase: @damage_increase}
-    if laser_particles.count == 1
-      options[:head] = true
-    elsif false # tail something how
+    if laser_particles.count == 0
+      options[:is_head] = true
     end
     @laser_particles << LaserParticle.new(@scale, @screen_width, @screen_height, self, options)
     return @laser_particles.last
@@ -35,19 +30,12 @@ class LaserBeam < DumbProjectile
 
   # Get image is called before the initialization is complete
   def get_image
-    if @inited
-      # puts "GET IMAGE - v2"
-      # puts "PARTICLE COUNT: #{@laser_particles.count}"
-      # puts @laser_particles.inspect
-      # puts "image_path: #{@image_path}"
-      # Gosu::Image.new(@image_path)
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
-      # puts 'SELF.object.getimage'
-      # puts self.object
-      # self.object.get_image
-    else
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
-    end
+    # if @inited
+      # getting spaceship size
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
+    # else
+      # Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
+    # end
   end
 
   def deactivate
@@ -55,6 +43,9 @@ class LaserBeam < DumbProjectile
     @laser_particles.each do |particle|
       particle.active = false
     end
+    # if @laser_particles.count >= 2
+    #   @laser_particles.last.position = :is_tail
+    # end
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil
@@ -88,11 +79,15 @@ class LaserBeam < DumbProjectile
   # include Glu 
   # include Glut
 
-  # def draw
-  #   # # draw nothing
-  #   # @laser_particles.each do |particle|
-  #   #   particle.draw
-  #   # end
+  def draw
+    if @active
+      @image.draw(@x - @image_width_half, @y - @image_height_half, 0, @scale, @scale)
+      # @image.draw(@x + @image_width_half, @y - @image_height_half, 0, @scale, @scale)
+      return true
+    else
+      return false
+    end
+  end
 
   # end
 
