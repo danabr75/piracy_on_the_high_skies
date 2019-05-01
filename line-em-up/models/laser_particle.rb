@@ -22,7 +22,6 @@ class LaserParticle < DumbProjectile
 
   def initialize(scale, screen_width, screen_height, object, options = {})
     options[:debug] = true
-    puts "object.image_height_half: #{object.image_height_half}"
 
     options[:relative_y_padding] = -(object.image_height_half)
     super(scale, screen_width, screen_height, object, options)

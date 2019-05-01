@@ -36,7 +36,6 @@ class Bullet < DumbProjectile
 
   def initialize(scale, screen_width, screen_height, object, options = {})
     super(scale, screen_width, screen_height, object, options)
-    puts "BULLET START X AND Y: #{object.x} and #{object.y}"
   end
 
   # def convert_x_and_y_to_opengl_coords
@@ -88,25 +87,12 @@ class Bullet < DumbProjectile
     height = 20 * @scale
     width = 30 * @scale
     new_pos_x, new_pos_y, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x, @y, @screen_width, @screen_height)
-    puts "@x + width / 2: #{@x + width / 2}"
     new_width1, new_height1, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x + width / 2, @y, @screen_width, @screen_height)
     new_width2, new_height2, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x, @y + height, @screen_width, @screen_height)
     new_width3, new_height3, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x - width / 2, @y, @screen_width, @screen_height)
 
     # height = 55 * increment_y * @scale
     # width  = 55 * increment_x * @scale
-
-    puts "X and Y: #{@x} and #{@y}"
-    puts "increment Y: #{increment_y}"
-    puts "increment X: #{increment_x}"
-
-    puts "hieght bullet: #{height}"
-    puts "NEW POS Y: #{new_pos_y}"
-
-    puts "VERTICES"
-    puts [new_width1, new_height1].join(' - ')
-    puts [new_width2, new_height2].join(' - ')
-    puts [new_width3, new_height3].join(' - ')
 
     z = ZOrder::Projectile
 

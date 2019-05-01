@@ -21,10 +21,10 @@ class DumbProjectile < GeneralObject
   def initialize(scale, screen_width, screen_height, object, options = {})
     options[:relative_object] = object
     @damage_increase = options[:damage_increase] || 1
-    if options[:debug] == true
-      puts "NEW DUMB PROJECTILE: X- #{object.x}"
-      puts "NEW DUMB PROJECTILE: y- #{object.y}"
-    end
+    # if options[:debug] == true
+    #   puts "NEW DUMB PROJECTILE: X- #{object.x}"
+    #   puts "NEW DUMB PROJECTILE: y- #{object.y}"
+    # end
     super(scale, object.x, object.y, screen_width, screen_height, options)
     @current_speed = self.class.get_max_speed * @scale
   end

@@ -12,6 +12,8 @@ class LaserBeam < DumbProjectile
   MAX_SPEED      = 15
 
   def initialize(scale, screen_width, screen_height, object, options = {})
+    options[:relative_y_padding] = -(object.image_height_half)
+    puts "START LASER BEAM: #{options}"
     super(scale, screen_width, screen_height, object, options)
     @active = true
     @laser_particles = []
@@ -51,22 +53,17 @@ class LaserBeam < DumbProjectile
   def update mouse_x = nil, mouse_y = nil, player = nil
     if @active
       @x = player.x
-      @y = player.y
+      @y = player.y - player.image_height_half
     end
     if !@active && @laser_particles.count == 0
-      puts "RETURING FALSE"
       return false
     else
-      puts "PARTICLE COUNT: #{@laser_particles.count}"
       @laser_particles.reject! do |particle|
-        puts "updating particle: #{particle.x} and #{particle.y}"
         if @active
           result = !particle.parental_update(nil, nil, player)
-          puts "PARTICLE REUTERINING: #{result}"
           result
         else
           result = !particle.parental_update(nil, nil, nil)
-          puts "PARTICLE REUTERINING: #{result}"
           result
         end
       end
@@ -79,13 +76,41 @@ class LaserBeam < DumbProjectile
   # include Glu 
   # include Glut
 
+  def get_draw_ordering
+    ZOrder::LaserBeam
+  end
+
   def draw
     if @active
-      @image.draw(@x - @image_width_half, @y - @image_height_half, 0, @scale, @scale)
+      @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
       # @image.draw(@x + @image_width_half, @y - @image_height_half, 0, @scale, @scale)
       return true
     else
       return false
+    end
+  end
+
+  def draw_gl
+    if @inited
+      z = ZOrder::Projectile
+      new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
+      new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_width         , @screen_height)
+      new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
+      new_width4, new_height4, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_width         , @screen_height)
+      glBegin(GL_TRIANGLES)
+        glColor4f(0, 1, 0, get_draw_ordering)
+        glVertex3f(new_width1, new_height1, 0.0)
+        glVertex3f(new_width2, new_height2, 0.0)
+        glVertex3f(new_width3, new_height3, 0.0)
+        # glVertex3f(new_width4, new_height4, 0.0)
+      glEnd
+      glBegin(GL_TRIANGLES)
+        glColor4f(0, 1, 0, get_draw_ordering)
+        # glVertex3f(new_width1, new_height1, 0.0)
+        glVertex3f(new_width2, new_height2, 0.0)
+        glVertex3f(new_width3, new_height3, 0.0)
+        glVertex3f(new_width4, new_height4, 0.0)
+      glEnd
     end
   end
 

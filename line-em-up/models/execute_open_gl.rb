@@ -23,7 +23,7 @@ class ExecuteOpenGl
   # include Glu 
   # include Glut
 
-  def draw background, projectiles
+  def draw background, projectiles, player
     # @zoom = -14
     Gosu.gl do
       # init_scene
@@ -45,6 +45,9 @@ class ExecuteOpenGl
         # glTranslatef(0, 0, -14)   #see lesson 01
         projectile.draw_gl
       end
+
+      player.draw_gl
+
     end
   end
 end

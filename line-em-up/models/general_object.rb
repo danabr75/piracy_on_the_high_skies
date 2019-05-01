@@ -36,7 +36,7 @@ class GeneralObject
     @x = @x + options[:relative_x_padding] if options[:relative_x_padding]
     @y = @y + options[:relative_y_padding] if options[:relative_y_padding]
     if options[:relative_y_padding]
-      puts 'YEAH FOUND IT'
+      puts "options[:relative_y_padding]: #{options[:relative_y_padding]}"
     end
 
     @time_alive = 0
@@ -262,7 +262,6 @@ class GeneralObject
   end
 
   def self.convert_x_and_y_to_opengl_coords(x, y, screen_width, screen_height)
-    puts "convert_x_and_y_to_opengl_coords"
     middle_x = screen_width.to_f / 2.0
     middle_y = screen_height.to_f / 2.0
 
@@ -272,7 +271,6 @@ class GeneralObject
     # The zoom issue maybe, not quite sure why we need the Y offset.
     increment_y = (1.0 / middle_y)
     new_pos_x = (x.to_f - middle_x) * increment_x
-    puts ""
     new_pos_y = (y.to_f - middle_y) * increment_y
     # Inverted Y
     new_pos_y = new_pos_y * -1

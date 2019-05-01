@@ -163,7 +163,9 @@ class Player < GeneralObject
 
   def laser_attack pointer
     if @main_weapon.nil?
-      @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, {damage_increase: @damage_increase})
+      # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
+      options = {damage_increase: @damage_increase}
+      @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, options)
       @drawable_items_near_self << @main_weapon
       return {
         projectiles: [@main_weapon.attack],
@@ -362,6 +364,11 @@ class Player < GeneralObject
     image.draw(@x - image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
     @turn_right = false
     @turn_left = false
+  end
+
+  def draw_gl
+    # draw gl stuff
+    @drawable_items_near_self.each {|item| item.draw_gl }
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil
