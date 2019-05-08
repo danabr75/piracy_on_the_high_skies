@@ -123,29 +123,28 @@ class LaserBeam < DumbProjectile
         @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
       end
       # @image.draw(@x + @image_width_half, @y - @image_height_half, 0, @scale, @scale)
-      if @laser_particles.count > 0
-        # puts "LASER PARTICLES HERE"
-        counter = @y
+      # not going to draw the laser particles
+      # if @laser_particles.count > 0
+      #   # puts "LASER PARTICLES HERE"
+      #   counter = @y
 
-        furthest_laser_particle = get_furthest_active_particle
-          if furthest_laser_particle
-          image = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-overlay-half.png")
-          image_width_half = image.width  / 2
-          image_height = image.height  / 2
-          # puts "INITIAL COUNTER"
-          # puts "counter: #{counter}"
-          # puts "furthest_laser_particle.y: #{furthest_laser_particle.y}"
-          while counter > furthest_laser_particle.y
-            # counter = counter + furthest_laser_particle.get_image
-            # counter = counter + (image.height * @scale)
-            counter = counter - (image.height)
-            # puts "DRAWING AT: #{@x - image_width_half} and #{counter}"
-            image.draw(@x - image_width_half, counter - 1, get_draw_ordering, @scale, @scale)
-          end
-        end
-      else
-        # puts "NO LASER PARTICLES"
-      end
+      #   furthest_laser_particle = get_furthest_active_particle
+      #     if furthest_laser_particle
+      #     image = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-overlay-half.png")
+      #     image_width_half = image.width  / 2
+      #     image_height = image.height  / 2
+      #     # puts "INITIAL COUNTER"
+      #     # puts "counter: #{counter}"
+      #     # puts "furthest_laser_particle.y: #{furthest_laser_particle.y}"
+      #     while counter > furthest_laser_particle.y
+      #       # counter = counter + furthest_laser_particle.get_image
+      #       # counter = counter + (image.height * @scale)
+      #       counter = counter - (image.height)
+      #       # puts "DRAWING AT: #{@x - image_width_half} and #{counter}"
+      #       image.draw(@x - image_width_half, counter - 1, get_draw_ordering, @scale, @scale)
+      #     end
+      #   end
+      # end
 
       return true
     else
@@ -169,20 +168,38 @@ class LaserBeam < DumbProjectile
         glVertex3f(new_width2, new_height2, 0.0)
         glVertex3f(new_width3, new_height3, 0.0)
       glEnd
-      # glBegin(GL_TRIANGLES)
-      #   glColor4f(0, 1, 0, get_draw_ordering)
-      #   # glVertex3f(new_width1, new_height1, 0.0)
-      #   glVertex3f(new_width2, new_height2, 0.0)
-      #   glVertex3f(new_width3, new_height3, 0.0)
-      #   glVertex3f(new_width4, new_height4, 0.0)
-      # glEnd
-       # glBegin(GL_LINE_LOOP)
-       #    (0..360).each do |i|
-       #      degInRad = i * Math::PI / 180
-       #      glVertex2f(new_width1 * Math.cos(degInRad) * self.get_radius, new_height1 *  Math.sin(degInRad) * self.get_radius)
-       #    end
-       # glEnd
- 
+      # Not going to draw GL the laser particles
+      if false && @laser_particles.count > 0
+        furthest_laser_particle = get_furthest_active_particle
+        if furthest_laser_particle
+          image = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-overlay.png")
+          image_width_half = image.width  / 2
+          image_height_half = image.height  / 2
+
+          new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - image_width_half/2, @y - image_height_half/2, @screen_width, @screen_height)
+          new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - image_width_half/2, furthest_laser_particle.y + image_height_half/2, @screen_width, @screen_height)
+          new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + image_width_half/2, @y - image_height_half/2, @screen_width, @screen_height)
+          new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + image_width_half/2, furthest_laser_particle.y + image_height_half/2, @screen_width, @screen_height)
+
+          # glEnable(GL_BLEND)
+          # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+          glBegin(GL_TRIANGLES)
+            glColor4f(0, 1, 0, 0.4)
+            glVertex3f(new_width1, new_height1, 0.0)
+            glVertex3f(new_width2, new_height2, 0.0)
+            glVertex3f(new_width3, new_height3, 0.0)
+            # glVertex3f(new_width4, new_height4, 0.0)
+          glEnd
+          glBegin(GL_TRIANGLES)
+            glColor4f(0, 1, 0, 0.4)
+            # glVertex3f(new_width1, new_height1, 0.0)
+            glVertex3f(new_width2, new_height2, 0.0)
+            glVertex3f(new_width3, new_height3, 0.0)
+            glVertex3f(new_width4, new_height4, 0.0)
+          glEnd
+        end
+      end
 
     end
   end
