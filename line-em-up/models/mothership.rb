@@ -99,7 +99,7 @@ class Mothership < GeneralObject
     
   # end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     @cooldown_wait -= 1 if @cooldown_wait > 0
     @secondary_cooldown_wait -= 1 if @secondary_cooldown_wait > 0
     @tertiary_cooldown_wait -= 1 if @tertiary_cooldown_wait > 0

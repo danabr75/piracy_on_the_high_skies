@@ -50,7 +50,7 @@ class LaserBeam < DumbProjectile
     # end
   end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     if @inited && @active
       @x = player.x
       @y = player.y - player.image_height_half
@@ -67,7 +67,7 @@ class LaserBeam < DumbProjectile
       found_collision = false
       # puts "LASER TEST"
       @laser_particles.reverse.each do |particle|
-        puts "PARTICLE Y: #{particle.y} - inited: #{particle.collision}"
+        # puts "PARTICLE Y: #{particle.y} - inited: #{particle.collision}"
         if found_collision
           particle.active = false
         elsif particle.collision

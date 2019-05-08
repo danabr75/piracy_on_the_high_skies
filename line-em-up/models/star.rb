@@ -46,7 +46,7 @@ class Star < Pickup
     @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @scale, @scale, @color, :add)
   end
   
-  # def update mouse_x = nil, mouse_y = nil
+  # def update mouse_x = nil, mouse_y = nil, scroll_factor = 1
   #   # Move towards bottom of screen
   #   @y += 1
   #   super(mouse_x, mouse_y)

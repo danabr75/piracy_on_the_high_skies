@@ -70,7 +70,7 @@ class MissileBoat < GeneralObject
     
   # end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     @cooldown_wait -= 1 if @cooldown_wait > 0
     if is_alive
       # Stay above the player

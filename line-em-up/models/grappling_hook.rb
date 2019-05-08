@@ -187,7 +187,7 @@ class GrapplingHook < GeneralObject
     end
 
     if @reached_end_point || @reached_max_length
-      @reached_back_to_player = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, player.x, player.y) < (self.get_radius * @scale) * 1.2
+      @reached_back_to_player = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, player.x, player.y) < ((self.get_radius * 2) * @scale)
     end
 
 

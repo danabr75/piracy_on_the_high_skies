@@ -92,7 +92,7 @@ class GeneralObject
     @image_radius
   end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     @time_alive += 1

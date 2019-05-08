@@ -26,13 +26,13 @@ class GLBackground
 
   def initialize
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
-    @scrolls = 0
+    @scrolls = 0.0
     @height_map = Array.new(POINTS_Y) { Array.new(POINTS_X) { rand } }
   end
   
-  def scroll
-    @scrolls += 1
-    if @scrolls == SCROLLS_PER_STEP
+  def scroll factor = 1
+    @scrolls += 1.0 * factor
+    if @scrolls >= SCROLLS_PER_STEP
       @scrolls = 0
       @height_map.shift
       @height_map.push Array.new(POINTS_X) { rand }

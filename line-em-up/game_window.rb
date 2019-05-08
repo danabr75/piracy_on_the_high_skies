@@ -106,6 +106,7 @@ class GameWindow < Gosu::Window
     @can_toggle_fullscreen_a = true
     @can_toggle_fullscreen_b = true
 
+
     self.caption = "OpenGL Integration"
     
     @gl_background = GLBackground.new
@@ -151,7 +152,8 @@ class GameWindow < Gosu::Window
       @handicap = 1
     end
     @player = Player.new(@scale, @width / 2, @height / 2, @width, @height, {handicap: @handicap, max_movable_height: @height - @footer_bar.height})
-
+    @scroll_factor = 1
+    @can_toggle_scroll_factor = true
     @boss_active = false
     @boss = nil
     @boss_killed = false
@@ -262,6 +264,9 @@ class GameWindow < Gosu::Window
     if (id == Gosu::KB_TAB)
       @can_toggle_secondary = true
     end
+    if (id == Gosu::KB_Q)
+      @can_toggle_scroll_factor = true
+    end
 
     if id == Gosu::KB_RETURN
       @can_toggle_fullscreen_a = true
@@ -346,6 +351,11 @@ class GameWindow < Gosu::Window
         @player.toggle_secondary
       end
 
+     if Gosu.button_down?(Gosu::KB_Q) && @can_toggle_scroll_factor
+        @can_toggle_scroll_factor = false
+        @scroll_factor = @player.toggle_broadside_mode
+      end
+
       if @player.is_alive && !@game_pause && !@menu_open
         @player.update(self.mouse_x, self.mouse_y, @player)
         @player.move_left()  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
@@ -366,17 +376,18 @@ class GameWindow < Gosu::Window
 
         if Gosu.button_down?(Gosu::KB_SPACE)
           if @player.cooldown_wait <= 0
-            results = @player.laser_attack(@pointer)
-            projectiles = results[:projectiles]
-            cooldown = results[:cooldown]
-            @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
+            @player.attack_group_1(@pointer).each do |results|
+              projectiles = results[:projectiles]
+              cooldown = results[:cooldown]
+              @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
 
-            projectiles.each do |projectile|
-              @projectiles.push(projectile)
+              projectiles.each do |projectile|
+                @projectiles.push(projectile)
+              end
             end
           end
         else
-          @player.stop_laser_attack
+          @player.deactivate_group_1
         end
 
 
@@ -409,23 +420,23 @@ class GameWindow < Gosu::Window
 
         
         
-        @buildings.reject! { |building| !building.update() }
+        @buildings.reject! { |building| !building.update(nil, nil, nil, @scroll_factor) }
 
         if @player.is_alive && @grappling_hook
           grap_result = @grappling_hook.update(@player)
           @grappling_hook = nil if !grap_result
         end
 
-        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player) }
+        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
 
-        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
 
-        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
-        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
-        @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
+        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
+        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
+        @enemies.reject! { |enemy| !enemy.update(nil, nil, @player, @scroll_factor) }
 
         if @boss
-          result = @boss.update(nil, nil, @player)
+          result = @boss.update(nil, nil, @player, @scroll_factor)
           if !result
             @boss_killed = true
             @boss = nil
@@ -435,7 +446,7 @@ class GameWindow < Gosu::Window
         end
 
 
-        @gl_background.scroll
+        @gl_background.scroll(@scroll_factor)
         
 
         if !@boss_killed && !@boss_active

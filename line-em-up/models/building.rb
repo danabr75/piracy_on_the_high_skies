@@ -55,9 +55,9 @@ class Building < GeneralObject
   end
 
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     if is_alive
-      @y += @current_speed
+      @y += @current_speed * scroll_factor
       @y < @screen_height + get_height
     else
       false

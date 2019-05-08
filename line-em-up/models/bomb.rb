@@ -25,7 +25,7 @@ class Bomb < Projectile
   end
   
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     vx = (self.class.get_starting_speed * @scale) * Math.cos(@angle * Math::PI / 180)
 
     vy =  (self.class.get_starting_speed * @scale) * Math.sin(@angle * Math::PI / 180)

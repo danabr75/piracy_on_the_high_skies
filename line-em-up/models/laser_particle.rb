@@ -72,7 +72,7 @@ class LaserParticle < DumbProjectile
     end
   end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     if @inited
       @time_alive += 1
       @y > 0 && @y < @screen_height

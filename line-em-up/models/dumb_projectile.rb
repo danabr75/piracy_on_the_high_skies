@@ -32,8 +32,8 @@ class DumbProjectile < GeneralObject
   def draw_gl
   end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil
-    @y -= @current_speed
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
+    @y -= @current_speed * scroll_factor
     @y > 0 && @y < @screen_height
   end
 
