@@ -83,6 +83,7 @@ class DumbProjectile < GeneralObject
       end
     end
     @y = @off_screen if hit_object
+    collision_triggers if hit_object
     return {drops: drops, point_value: points, killed: killed}
   end
 

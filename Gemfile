@@ -10,8 +10,11 @@ gem 'gosu'
 # gem 'gosu-examples'
 # FORKED from opengl (0.10.0)
 # gem 'danabr75-opengl'
+gem 'opengl'
+# gem 'ashton'
 
-gem 'opengl-bindings'
+# gem 'opengl-bindings'
+# gem 'ashton'
 
 # gem 'ruby-opengl'
 # gem 'texplay'
@@ -21,6 +24,8 @@ gem 'ocra'
 # gem "ruby-opengl"
 gem "glu"
 gem "glut"
+
+# gem 'glfw', '1.0.2'
 
 gem "pry"
 

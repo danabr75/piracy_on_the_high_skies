@@ -3,7 +3,16 @@
 require 'rubygems'
 require 'gosu'
 require 'opengl'
+require 'glu'
 require 'glut'
+# require 'ashton'
+include OpenGL
+include GLUT
+# include GLU
+# OpenGL.load_lib()
+# GLUT.load_lib()
+# Ashton::ParticleEmitter
+# test = Ashton::ParticleEmitter.new(1, 1, 4)
 
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"

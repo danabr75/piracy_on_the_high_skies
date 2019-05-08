@@ -35,9 +35,9 @@ class GeneralObject
     end
     @x = @x + options[:relative_x_padding] if options[:relative_x_padding]
     @y = @y + options[:relative_y_padding] if options[:relative_y_padding]
-    if options[:relative_y_padding]
-      puts "options[:relative_y_padding]: #{options[:relative_y_padding]}"
-    end
+    # if options[:relative_y_padding]
+      # puts "options[:relative_y_padding]: #{options[:relative_y_padding]}"
+    # end
 
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
@@ -278,5 +278,13 @@ class GeneralObject
   end
 
 
+  def y_is_on_screen
+    @y >= 0 && @y <= @screen_height
+  end
+
+  def collision_triggers
+    # Explosion or something
+    # Override
+  end
 
 end

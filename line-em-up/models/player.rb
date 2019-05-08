@@ -1,5 +1,13 @@
 require_relative 'general_object.rb'
 require_relative 'rocket_launcher_pickup.rb'
+require 'gosu'
+
+require 'opengl'
+require 'glut'
+
+
+include OpenGL
+include GLUT
 
 class Player < GeneralObject
   SPEED = 7
@@ -353,6 +361,10 @@ class Player < GeneralObject
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
 
+    # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
+    # test.draw
+    # test.update(5.0)
+
     if @turn_right
       image = @right_image
     elsif @turn_left
@@ -366,9 +378,61 @@ class Player < GeneralObject
     @turn_left = false
   end
 
+  POINTS_X = 7
+  POINTS_Y = 7
+
+  def draw_gl_list
+    @drawable_items_near_self + [self]
+  end
+
   def draw_gl
     # draw gl stuff
-    @drawable_items_near_self.each {|item| item.draw_gl }
+    # @drawable_items_near_self.each {|item| item.draw_gl }
+
+    info = @image.gl_tex_info
+
+    # glDepthFunc(GL_GEQUAL)
+    # glEnable(GL_DEPTH_TEST)
+    # glEnable(GL_BLEND)
+
+    # glMatrixMode(GL_PROJECTION)
+    # glLoadIdentity
+    # perspective matrix
+    # glFrustum(-0.10, 0.10, -0.075, 0.075, 1, 100)
+
+    # glMatrixMode(GL_MODELVIEW)
+    # glLoadIdentity
+    # glTranslated(0, 0, -4)
+  
+    z = get_draw_ordering
+    
+    # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
+    # offs_y = 1
+    new_width1, new_height1, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width, @screen_height)
+    new_width2, new_height2, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_width, @screen_height)
+    new_width3, new_height3, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width, @screen_height)
+    new_width4, new_height4, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_width, @screen_height)
+
+    glEnable(GL_TEXTURE_2D)
+    glBindTexture(GL_TEXTURE_2D, info.tex_name)
+
+    glBegin(GL_TRIANGLE_STRIP)
+      # glColor4d(1, 1, 1, get_draw_ordering)
+      glTexCoord2d(info.left, info.top)
+      # glVertex3f(new_width1, new_height1, z)
+
+      # glColor4d(1, 1, 1, get_draw_ordering)
+      glTexCoord2d(info.left, info.bottom)
+      # glVertex3f(new_width2, new_height2, z)
+    
+      # glColor4d(1, 1, 1, get_draw_ordering)
+      glTexCoord2d(info.right, info.top)
+      # glVertex3f(new_width3, new_height3, z)
+
+      # glColor4d(1, 1, 1, get_draw_ordering)
+      glTexCoord2d(info.right, info.bottom)
+      # glVertex3f(new_width4, new_height4, z)
+    glEnd
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil

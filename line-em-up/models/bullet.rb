@@ -9,8 +9,11 @@ require 'glut'
 
 include OpenGL
 include GLUT
-OpenGL.load_lib()
-GLUT.load_lib()
+
+# For opengl-bindings
+# OpenGL.load_lib()
+
+# GLUT.load_lib()
 
 
 class Bullet < DumbProjectile

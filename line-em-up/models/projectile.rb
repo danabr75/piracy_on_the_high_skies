@@ -30,14 +30,9 @@ class Projectile < GeneralObject
     super(scale, nil, nil, screen_width, screen_height, options)
 
     start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
-    # start_point = GeoPoint.new(@x - WIDTH / 2, @y - HEIGHT / 2)
-    # end_point   =   OpenStruct.new(:x => @mouse_start_x, :y => @mouse_start_y)
     end_point   = OpenStruct.new(:x => end_point_x - screen_width / 2, :y => end_point_y - screen_height / 2)
-    # end_point = GeoPoint.new(@mouse_start_x - WIDTH / 2, @mouse_start_y - HEIGHT / 2)
     @angle = calc_angle(start_point, end_point)
     @radian = calc_radian(start_point, end_point)
-
-    # puts "PRE-ANGLE: #{@angle}"
 
     @image_angle = @angle
     if @angle < 0
@@ -47,20 +42,12 @@ class Projectile < GeneralObject
     if angle_min.nil? && angle_max.nil?
       # do nothing
     else
-      # if @angle < angle_min
-      #   @angle = angle_max
-      # # elsif @angle < angle_min && @angle > add_angles(@angle, 180)
-      #   # @angle = angle_max
       if is_angle_between_two_angles?(@angle, angle_min, angle_max)
         # Do nothing, we're good
-        # puts "ANGLE WAS BETWEEN TWO POINTS: #{@angle} was between #{angle_min} and #{angle_max}"
       else
-        # puts "ANGLE WAS CHOSEN TO BE NEAREST: #{@angle} with #{angle_min} and #{angle_max}"
         @angle = nearest_angle(@angle, angle_min, angle_max)
-        # puts "ANGLE WAS CHSOEN: #{@angle}"
       end
     end
-
 
     if angle_init
       @current_image_angle = (angle_init - 90) * -1
@@ -68,15 +55,6 @@ class Projectile < GeneralObject
     else
       @current_image_angle = (@angle - 90) * -1
     end
-
-    # puts "POST-ANGLE: #{@angle}"
-
-    # # Limit extreme angles 180 and 0 are the 
-    # image_angle = 0
-    # if @angle > 160 < 
-    # if @angle > 160 && @ange 
-
-
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil
@@ -92,7 +70,6 @@ class Projectile < GeneralObject
       elsif angle_difference < 0
         @current_image_angle += incrementing_amount
       else
-        # puts "ENDING IMAGE HERE!!!!!!"
         @current_image_angle = @end_image_angle
         @end_image_angle = nil
       end

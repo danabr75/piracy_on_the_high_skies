@@ -10,12 +10,14 @@ require 'glut'
 
 include OpenGL
 include GLUT
-OpenGL.load_lib()
-GLUT.load_lib()
+# For opengl-bindings
+# OpenGL.load_lib()
+# GLUT.load_lib()
 
 class LaserParticle < DumbProjectile
-  attr_accessor :active, :position, :image_background, :background_image_width_half, :background_image_height_half
+  attr_accessor :active, :position, :image_background, :background_image_width_half, :background_image_height_half, :collision
   DAMAGE = 0.4
+  # DAMAGE = 0.1
   # COOLDOWN_DELAY = 1
   # Friendly projects are + speeds
   MAX_SPEED      = 15
@@ -36,11 +38,16 @@ class LaserParticle < DumbProjectile
       @image            = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
     else
       @image_background = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-background.png")
-      @image            = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-overlay.png")
+      @image            = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-overlay-half.png")
     end
 
     @background_image_width_half = get_background_image.width / 2
     @background_image_height_half = get_background_image.height / 2
+    @collision = false
+  end
+
+  def get_draw_ordering
+    ZOrder::LaserParticle
   end
 
   def get_background_image
@@ -80,40 +87,47 @@ class LaserParticle < DumbProjectile
     end
   end
 
+  def collision_triggers
+    @collision = true
+  end
+
 
   # include Gl
   # include Glu 
   # include Glut
 
   def draw
-    if @inited
-      @image_background.draw(@x - @background_image_width_half, @y - @background_image_height_half, get_draw_ordering, @scale, @scale)
+    if @inited && !@active
+    #   @image_background.draw(@x - @background_image_width_half, @y - @background_image_height_half, get_draw_ordering, @scale, @scale)
       @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
     end
   end
 
   def draw_gl
-    if @inited
-      z = ZOrder::Projectile
-      new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
-      new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_width         , @screen_height)
-      new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
-      new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_width         , @screen_height)
-      glBegin(GL_TRIANGLES)
-        glColor4f(0, 1, 0, get_draw_ordering)
-        glVertex3f(new_width1, new_height1, 0.0)
-        glVertex3f(new_width2, new_height2, 0.0)
-        glVertex3f(new_width3, new_height3, 0.0)
-        # glVertex3f(new_width4, new_height4, 0.0)
-      glEnd
-      glBegin(GL_TRIANGLES)
-        glColor4f(0, 1, 0, get_draw_ordering)
-        # glVertex3f(new_width1, new_height1, 0.0)
-        glVertex3f(new_width2, new_height2, 0.0)
-        glVertex3f(new_width3, new_height3, 0.0)
-        glVertex3f(new_width4, new_height4, 0.0)
-      glEnd
-    end
+    # if @inited
+    #   new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width, @screen_height)
+    #   new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_width, @screen_height)
+    #   new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width, @screen_height)
+    #   new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_width, @screen_height)
+
+    #   glEnable(GL_BLEND)
+    #   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
+    #   glBegin(GL_TRIANGLES)
+    #     glColor4f(0, 1, 0, 0.4)
+    #     glVertex3f(new_width1, new_height1, 0.0)
+    #     glVertex3f(new_width2, new_height2, 0.0)
+    #     glVertex3f(new_width3, new_height3, 0.0)
+    #     # glVertex3f(new_width4, new_height4, 0.0)
+    #   glEnd
+    #   glBegin(GL_TRIANGLES)
+    #     glColor4f(0, 1, 0, 0.4)
+    #     # glVertex3f(new_width1, new_height1, 0.0)
+    #     glVertex3f(new_width2, new_height2, 0.0)
+    #     glVertex3f(new_width3, new_height3, 0.0)
+    #     glVertex3f(new_width4, new_height4, 0.0)
+    #   glEnd
+    # end
   end
 
 end

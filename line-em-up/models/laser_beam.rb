@@ -51,14 +51,31 @@ class LaserBeam < DumbProjectile
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil
-    if @active
+    if @inited && @active
       @x = player.x
       @y = player.y - player.image_height_half
     end
     if !@active && @laser_particles.count == 0
       return false
     else
+      # puts "REJECTING PARTICLES HERE"
+
+      # Starting with futherest away, then getting closer to the player
+
+      # Starting with closest to ship, to futher away
+      # collision is gone before update
+      found_collision = false
+      # puts "LASER TEST"
+      @laser_particles.reverse.each do |particle|
+        puts "PARTICLE Y: #{particle.y} - inited: #{particle.collision}"
+        if found_collision
+          particle.active = false
+        elsif particle.collision
+          found_collision = true
+        end
+      end
       @laser_particles.reject! do |particle|
+        # puts "LASETER PART UPDATE: #{particle.collision}"
         if @active
           result = !particle.parental_update(nil, nil, player)
           result
@@ -67,6 +84,7 @@ class LaserBeam < DumbProjectile
           result
         end
       end
+
       return true
     end
   end
@@ -80,10 +98,55 @@ class LaserBeam < DumbProjectile
     ZOrder::LaserBeam
   end
 
-  def draw
+  # Furthest active particle in active beam
+  def get_furthest_active_particle
+    # puts "get_furthest_active_particle"
+    last_active_particle = nil
     if @active
-      @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+      @laser_particles.reverse.each do |lp|
+        # puts "LP Y: #{lp.y} - ACTIVE: #{lp.active} - ONSCREEN: #{lp.y_is_on_screen}"
+        # puts "LP collision: #{lp.collision}"
+        if lp.active && lp.y_is_on_screen
+          last_active_particle = lp
+        else
+          break
+        end
+
+      end
+    end
+    return last_active_particle
+  end
+
+  def draw
+    if @inited
+      if @active
+        @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+      end
       # @image.draw(@x + @image_width_half, @y - @image_height_half, 0, @scale, @scale)
+      if @laser_particles.count > 0
+        # puts "LASER PARTICLES HERE"
+        counter = @y
+
+        furthest_laser_particle = get_furthest_active_particle
+          if furthest_laser_particle
+          image = Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-middle-overlay-half.png")
+          image_width_half = image.width  / 2
+          image_height = image.height  / 2
+          # puts "INITIAL COUNTER"
+          # puts "counter: #{counter}"
+          # puts "furthest_laser_particle.y: #{furthest_laser_particle.y}"
+          while counter > furthest_laser_particle.y
+            # counter = counter + furthest_laser_particle.get_image
+            # counter = counter + (image.height * @scale)
+            counter = counter - (image.height)
+            # puts "DRAWING AT: #{@x - image_width_half} and #{counter}"
+            image.draw(@x - image_width_half, counter - 1, get_draw_ordering, @scale, @scale)
+          end
+        end
+      else
+        # puts "NO LASER PARTICLES"
+      end
+
       return true
     else
       return false
@@ -96,12 +159,15 @@ class LaserBeam < DumbProjectile
       new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
       new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_width         , @screen_height)
       new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
+
+      glEnable(GL_BLEND)
+      glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+
       glBegin(GL_TRIANGLES)
-        glColor4f(0, 1, 0, get_draw_ordering)
+        glColor4f(0, 1, 0, 0.2)
         glVertex3f(new_width1, new_height1, 0.0)
         glVertex3f(new_width2, new_height2, 0.0)
         glVertex3f(new_width3, new_height3, 0.0)
-        # glVertex3f(new_width4, new_height4, 0.0)
       glEnd
       # glBegin(GL_TRIANGLES)
       #   glColor4f(0, 1, 0, get_draw_ordering)
