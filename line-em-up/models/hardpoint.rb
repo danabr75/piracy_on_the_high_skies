@@ -8,6 +8,7 @@ require 'glut'
 include OpenGL
 include GLUT
 
+# Not intended to be overridden
 class Hardpoint < GeneralObject
   attr_accessor :x, :y
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half
@@ -40,24 +41,27 @@ class Hardpoint < GeneralObject
   end
 
   def attack pointer, opts = {}
-    # puts "HARDPOINT ATTACK"
+    puts "HARDPOINT ATTACK"
+    attack_projectile = nil
     if @main_weapon.nil?
       # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
       options = {}
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, options)
       @drawable_items_near_self << @main_weapon
-      return {
-        projectiles: [@main_weapon.attack],
-        cooldown: @assigned_weapon_class::COOLDOWN_DELAY
-      }
+      attack_projectile = @main_weapon.attack(pointer)
     else
       @main_weapon.active = true if @main_weapon.active == false
       @drawable_items_near_self << @main_weapon
+      attack_projectile = @main_weapon.attack(pointer)
+    end
+    if attack_projectile
       return {
-        projectiles: [@main_weapon.attack],
+        projectiles: [attack_projectile],
         cooldown: @assigned_weapon_class::COOLDOWN_DELAY
       }
+    else
+      return nil
     end
   end
 

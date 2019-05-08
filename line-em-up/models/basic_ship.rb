@@ -20,9 +20,9 @@ class BasicShip < GeneralObject
 
   SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle
-  MISSILE_LAUNCHER_MIN_ANGLE = 75
-  MISSILE_LAUNCHER_MAX_ANGLE = 105
-  MISSILE_LAUNCHER_INIT_ANGLE = 90
+  # MISSILE_LAUNCHER_MIN_ANGLE = 75
+  # MISSILE_LAUNCHER_MAX_ANGLE = 105
+  # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
   SPECIAL_POWER = 'laser'
   SPECIAL_POWER_KILL_MAX = 50
@@ -74,7 +74,7 @@ class BasicShip < GeneralObject
     @front_hard_points = []
     @broadside_hard_points = []
     FRONT_HARDPOINT_LOCATIONS.each do |location|
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], LaserBeam, options)
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], DumbMissileLauncher, options)
     end
     # puts "Front hard points"
     BROADSIDE_HARDPOINT_LOCATIONS.each do |location|
@@ -237,105 +237,67 @@ class BasicShip < GeneralObject
     @y = [@y + get_speed, @max_movable_height - (get_height/2)].min
   end
 
-
-  def attack_group_1 pointer
+  def attack_group pointer, group
     if @broadside_mode
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(pointer) if hp.group_number == 1
+        hp.attack(pointer) if hp.group_number == group
       end
+      # puts "Results :#{results}"
     else
       # puts "@front_hard_points: #{@front_hard_points}"
       results = @front_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(pointer) if hp.group_number == 1
+        hp.attack(pointer) if hp.group_number == group
       end
     end
+    results.reject!{|v| v.nil?}
     # puts "Results: #{results}"
     return results
-    # [laser_attack(pointer)]
   end
 
-  def deactivate_group_1
-    # @main_weapon.deactivate if @main_weapon
-
-      # puts "@broadside_hard_points: #{@broadside_hard_points}"
+  def deactivate_group group
     @broadside_hard_points.each do |hp|
       # puts "HP #{hp}"
-      hp.stop_attack if hp.group_number == 1
+      hp.stop_attack if hp.group_number == group
     end
     # puts "@front_hard_points: #{@front_hard_points}"
     @front_hard_points.each do |hp|
       # puts "HP #{hp}"
-      hp.stop_attack if hp.group_number == 1
+      hp.stop_attack if hp.group_number == group
     end
-
   end
 
-  def trigger_secondary_attack pointer
-    return_projectiles = []
-    if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
-      results = self.secondary_attack(pointer)
-      projectiles = results[:projectiles]
-      cooldown = results[:cooldown]
-      self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
-
-      projectiles.each do |projectile|
-        return_projectiles.push(projectile)
-      end
-    end
-    return return_projectiles
+  def attack_group_1 pointer
+    return attack_group(pointer, 1)
   end
 
-  # def toggle_state_secondary_attack
-  #   second_weapon = case @secondary_weapon
-  #   when 'bomb'
-  #   else
+  def attack_group_2 pointer
+    return attack_group(pointer, 2)
+  end
+
+  def deactivate_group_1
+    deactivate_group(1)
+  end
+
+  def deactivate_group_2
+    deactivate_group(2)
+  end
+  # def trigger_secondary_attack pointer
+  #   return_projectiles = []
+  #   if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
+  #     results = self.secondary_attack(pointer)
+  #     projectiles = results[:projectiles]
+  #     cooldown = results[:cooldown]
+  #     self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
+
+  #     projectiles.each do |projectile|
+  #       return_projectiles.push(projectile)
+  #     end
   #   end
-  #   return second_weapon
+  #   return return_projectiles
   # end
-
-  def secondary_attack pointer
-    projectiles = []
-    cooldown = 0
-    case @secondary_weapon
-    when 'bomb'
-      projectiles << Bomb.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, nil, nil, nil, {damage_increase: @damage_increase})
-      cooldown = Bomb::COOLDOWN_DELAY
-    when RocketLauncherPickup::NAME
-      # NEEED TO DECRETMENT AMMO BASED OFF OF LAUNCHERS!!!!!!!!!!!
-      # puts "ROCKET LAUNCHERS: #{@rocket_launchers}"
-      cooldown = Missile::COOLDOWN_DELAY
-      if get_secondary_ammo_count == 1 && @rocket_launchers > 0 || @rocket_launchers == 1
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {damage_increase: @damage_increase})
-      elsif get_secondary_ammo_count == 2 && @rocket_launchers >= 2 || @rocket_launchers == 2
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left', damage_increase: @damage_increase})
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', damage_increase: @damage_increase})
-      elsif get_secondary_ammo_count == 3 && @rocket_launchers >= 3 || @rocket_launchers == 3
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {damage_increase: @damage_increase})
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left', damage_increase: @damage_increase})
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', damage_increase: @damage_increase})
-      elsif get_secondary_ammo_count == 4 && @rocket_launchers >= 4 || @rocket_launchers == 4
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 15, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left', damage_increase: @damage_increase})
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 15, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', damage_increase: @damage_increase})
-
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 5, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left', damage_increase: @damage_increase,  relative_x_padding:  (@image_width_half / 2) })
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 5, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', damage_increase: @damage_increase, relative_x_padding: -(@image_width_half / 2) })
-      elsif get_secondary_ammo_count == 5 && @rocket_launchers >= 5 || @rocket_launchers >= 5
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {damage_increase: @damage_increase})
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 15, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left', damage_increase: @damage_increase})
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 15, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', damage_increase: @damage_increase})
-
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x - @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE + 5, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left', damage_increase: @damage_increase,  relative_x_padding:  (@image_width_half / 2) })
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, pointer.x + @image_width_half / 2, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - 5, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', damage_increase: @damage_increase, relative_x_padding: -(@image_width_half / 2) })
-      else
-        raise "Should never get here: @secondary_weapon: #{@secondary_weapon} for @rocket_launchers: #{@rocket_launchers} and get_secondary_ammo_count: #{get_secondary_ammo_count}"
-      end
-    end
-    decrement_secondary_ammo_count projectiles.count
-    return {projectiles: projectiles, cooldown: cooldown}
-  end
 
   def get_draw_ordering
     ZOrder::Ship

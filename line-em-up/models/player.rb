@@ -283,21 +283,29 @@ class Player < GeneralObject
     @ship.deactivate_group_1
   end
 
-
-  def trigger_secondary_attack pointer
-    return_projectiles = []
-    if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
-      results = @ship.secondary_attack(pointer)
-      projectiles = results[:projectiles]
-      cooldown = results[:cooldown]
-      self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
-
-      projectiles.each do |projectile|
-        return_projectiles.push(projectile)
-      end
-    end
-    return return_projectiles
+  def attack_group_2 pointer
+    @ship.attack_group_2(pointer)
   end
+ 
+  def deactivate_group_2
+    @ship.deactivate_group_2
+  end
+
+
+  # def trigger_secondary_attack pointer
+  #   return_projectiles = []
+  #   if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
+  #     results = @ship.secondary_attack(pointer)
+  #     projectiles = results[:projectiles]
+  #     cooldown = results[:cooldown]
+  #     self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
+
+  #     projectiles.each do |projectile|
+  #       return_projectiles.push(projectile)
+  #     end
+  #   end
+  #   return return_projectiles
+  # end
 
   def get_draw_ordering
     ZOrder::Player

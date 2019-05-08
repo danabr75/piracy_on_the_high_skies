@@ -157,6 +157,8 @@ class GameWindow < Gosu::Window
     @boss_active = false
     @boss = nil
     @boss_killed = false
+
+    @debug = true #is_debug?
   end
 
 
@@ -297,6 +299,10 @@ class GameWindow < Gosu::Window
     @center_ui_x = @width / 2 - 100
   end
 
+  def is_debug?
+    ENV['debug'] == 'true' || ENV['debug'] == true
+  end
+
   def update
     @pointer.update(self.mouse_x, self.mouse_y) if @pointer
     if @start_fullscreen
@@ -371,15 +377,23 @@ class GameWindow < Gosu::Window
         end
 
         if Gosu.button_down?(Gosu::MS_LEFT)
-          @projectiles = @projectiles + @player.trigger_secondary_attack(@pointer)
+          new_projectiles = @player.attack_group_2(@pointer)
+          # puts "NEW PROJECTILES: #{new_projectiles}" if @debug
+          if @debug
+            raise "BAD Projectile found: #{new_projectiles}" if new_projectiles.include?(nil)
+          end
+          @projectiles = @projectiles + new_projectiles
+        else
+          @player.deactivate_group_2
         end
 
         if Gosu.button_down?(Gosu::KB_SPACE)
           if @player.cooldown_wait <= 0
             @player.attack_group_1(@pointer).each do |results|
+            # puts "NEW PROJECTILESv2: #{results}" if @debug
               projectiles = results[:projectiles]
-              cooldown = results[:cooldown]
-              @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
+              # cooldown = results[:cooldown]
+              # @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
 
               projectiles.each do |projectile|
                 @projectiles.push(projectile)
