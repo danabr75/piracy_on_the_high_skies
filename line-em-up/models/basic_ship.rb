@@ -15,7 +15,7 @@ class BasicShip < GeneralObject
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
-  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
+  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode, :front_hard_points, :broadside_hard_points
   MAX_HEALTH = 200
 
   SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -26,6 +26,12 @@ class BasicShip < GeneralObject
 
   SPECIAL_POWER = 'laser'
   SPECIAL_POWER_KILL_MAX = 50
+
+  FRONT_HARDPOINT_LOCATIONS = [{x_offset: 0, y_offset: -get_image.height}]
+  BROADSIDE_HARDPOINT_LOCATIONS = [{x_offset: get_image.width / 2, y_offset: -(get_image.height * 0.8)}, {x_offset: get_image.width, y_offset: -(get_image.height * 0.8)}, {x_offset: 0, y_offset: -(get_image.height * 0.8)}]
+  # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
+  FRONT_HARD_POINTS_MAX = 1
+  BROADSIDE_HARD_POINTS = 3
 
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
@@ -56,7 +62,7 @@ class BasicShip < GeneralObject
     @rocket_launchers = 0
     @bomb_launchers   = 0
     @cannon_launchers = 0
-    trigger_hard_point_load
+    # trigger_hard_point_load
     @damage_reduction = options[:handicap] ? options[:handicap] : 1
     invert_handicap = 1 - options[:handicap]
     @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
@@ -65,101 +71,43 @@ class BasicShip < GeneralObject
     @main_weapon = nil
     @drawable_items_near_self = []
     @broadside_mode = false
-  end
-
-  def get_kill_count_max
-    self.class::SPECIAL_POWER_KILL_MAX
-  end
-
-  def ready_for_special?
-    @kill_count >= get_kill_count_max
-  end
-
-  def special_attack object_groups
-    # Fire special attack.
-    @kill_count = 0
-    projectiles = []
-    object_groups.each do |group|
-      group.each do |object|
-        next if object.nil?
-          projectiles << Missile.new(@scale, @screen_width, @screen_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
-      end
+    @front_hard_points = []
+    @broadside_hard_points = []
+    FRONT_HARDPOINT_LOCATIONS.each do |location|
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], LaserBeam, options)
     end
-    return projectiles
-  end
-
-
-  def special_attack_2
-    # Fire special attack.
-    @kill_count = 0
-    projectiles = []
-    # object_groups.each do |group|
-    #   group.each do |object|
-    #     next if object.nil?
-    #       projectiles << Missile.new(@scale, @screen_width, @screen_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
-    #   end
-    # end
-
-    r = 10 * @scale
-    theta = 0
-    count_max = 360
-    max_passes = 3
-    pass_count = 0
-    theta = 0
-    # Need a projectile queue system?
-    while theta < count_max
-      x  =  @x + r * Math.cos(theta)
-      y  =  @y + r * Math.sin(theta)
-      if y < @y
-
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, x, y, nil, nil, nil, {damage_increase: @damage_increase})
-
-      end
-      theta += 5
-    end
-    # where r is the radius of the circle, and h,k are the coordinates of the center.
-
-    return projectiles
-  end
-
-
-  # Rocket Launcher, Rocket launcher, Cannon, Cannon, Bomb Launcher
-  FRONT_HARD_POINTS = 1
-  BROADSIDE_HARD_POINTS = 3
-
-  def add_kill_count kill_count
-    if @kill_count + kill_count > get_kill_count_max
-      @kill_count = get_kill_count_max
-    else
-      @kill_count += kill_count
+    # puts "Front hard points"
+    BROADSIDE_HARDPOINT_LOCATIONS.each do |location|
+      @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], LaserBeam, options)
     end
   end
+
 
   def add_hard_point hard_point
-    @hard_point_items << hard_point
-    trigger_hard_point_load
+  #   @hard_point_items << hard_point
+  #   trigger_hard_point_load
   end
 
-  def trigger_hard_point_load
-    @rocket_launchers, @bomb_launchers, @cannon_launchers = [0, 0, 0]
-    count = 0
-    # puts "RUNNING ON: #{@hard_point_items}"
-    @hard_point_items.each do |hard_point|
-      break if count == FRONT_HARD_POINTS
-      case hard_point
-      when 'bomb_launcher'
-        @bomb_launchers += 1
-      when RocketLauncherPickup::NAME
-        # puts "INCREASTING ROCKET LAUNCHER: #{RocketLauncherPickup::NAME}"
-        @rocket_launchers += 1
-      when 'cannon_launcher'
-        @cannon_launchers += 1
-      else
-        "Raise should never get here. hard_point: #{hard_point}"
-      end
-      count += 1
-    end
-  end
+  # def trigger_hard_point_load
+  #   @rocket_launchers, @bomb_launchers, @cannon_launchers = [0, 0, 0]
+  #   count = 0
+  #   # puts "RUNNING ON: #{@hard_point_items}"
+  #   @hard_point_items.each do |hard_point|
+  #     break if count == FRONT_HARD_POINTS_MAX
+  #     case hard_point
+  #     when 'bomb_launcher'
+  #       @bomb_launchers += 1
+  #     when RocketLauncherPickup::NAME
+  #       # puts "INCREASTING ROCKET LAUNCHER: #{RocketLauncherPickup::NAME}"
+  #       @rocket_launchers += 1
+  #     when 'cannon_launcher'
+  #       @cannon_launchers += 1
+  #     else
+  #       "Raise should never get here. hard_point: #{hard_point}"
+  #     end
+  #     count += 1
+  #   end
+  # end
 
   def get_image
     if @broadside_mode
@@ -183,52 +131,49 @@ class BasicShip < GeneralObject
     end
   end
  
-  def deactivate_group_1
-    @main_weapon.deactivate if @main_weapon
-  end
 
-  def laser_attack pointer
-    if @main_weapon.nil?
-      # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
-      options = {damage_increase: @damage_increase}
-      @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, options)
-      @drawable_items_near_self << @main_weapon
-      return {
-        projectiles: [@main_weapon.attack],
-        cooldown: LaserBeam::COOLDOWN_DELAY
-      }
-    else
-      @main_weapon.active = true if @main_weapon.active == false
-      @drawable_items_near_self << @main_weapon
-      return {
-        projectiles: [@main_weapon.attack],
-        cooldown: LaserBeam::COOLDOWN_DELAY
-      }
-    end
-  end
+  # def laser_attack pointer
+  #   if @main_weapon.nil?
+  #     # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
+  #     options = {damage_increase: @damage_increase}
+  #     @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, options)
+  #     @drawable_items_near_self << @main_weapon
+  #     return {
+  #       projectiles: [@main_weapon.attack],
+  #       cooldown: LaserBeam::COOLDOWN_DELAY
+  #     }
+  #   else
+  #     @main_weapon.active = true if @main_weapon.active == false
+  #     @drawable_items_near_self << @main_weapon
+  #     return {
+  #       projectiles: [@main_weapon.attack],
+  #       cooldown: LaserBeam::COOLDOWN_DELAY
+  #     }
+  #   end
+  # end
 
 
   def take_damage damage
     @health -= damage * @damage_reduction
   end
 
-  def toggle_secondary
-    current_index = SECONDARY_WEAPONS.index(@secondary_weapon)
-    if current_index == SECONDARY_WEAPONS.count - 1
-      @secondary_weapon = SECONDARY_WEAPONS[0]
-    else
-      @secondary_weapon = SECONDARY_WEAPONS[current_index + 1]
-    end
-  end
+  # def toggle_secondary
+  #   current_index = SECONDARY_WEAPONS.index(@secondary_weapon)
+  #   if current_index == SECONDARY_WEAPONS.count - 1
+  #     @secondary_weapon = SECONDARY_WEAPONS[0]
+  #   else
+  #     @secondary_weapon = SECONDARY_WEAPONS[current_index + 1]
+  #   end
+  # end
 
-  def get_secondary_ammo_count
-    return case @secondary_weapon
-    when 'bomb'
-      self.bombs
-    else
-      self.rockets
-    end
-  end
+  # def get_secondary_ammo_count
+  #   return case @secondary_weapon
+  #   when 'bomb'
+  #     self.bombs
+  #   else
+  #     self.rockets
+  #   end
+  # end
 
 
   def decrement_secondary_ammo_count count = 1
@@ -262,7 +207,7 @@ class BasicShip < GeneralObject
 
   def get_speed
     if @broadside_mode
-      speed = SPEED * 0.7
+      speed = SPEED * 0.3
     else
       speed = SPEED
     end
@@ -294,9 +239,39 @@ class BasicShip < GeneralObject
 
 
   def attack_group_1 pointer
-    [laser_attack(pointer)]
+    if @broadside_mode
+      # puts "@broadside_hard_points: #{@broadside_hard_points}"
+      results = @broadside_hard_points.collect do |hp|
+        # puts "HP #{hp}"
+        hp.attack(pointer) if hp.group_number == 1
+      end
+    else
+      # puts "@front_hard_points: #{@front_hard_points}"
+      results = @front_hard_points.collect do |hp|
+        # puts "HP #{hp}"
+        hp.attack(pointer) if hp.group_number == 1
+      end
+    end
+    # puts "Results: #{results}"
+    return results
+    # [laser_attack(pointer)]
   end
 
+  def deactivate_group_1
+    # @main_weapon.deactivate if @main_weapon
+
+      # puts "@broadside_hard_points: #{@broadside_hard_points}"
+    @broadside_hard_points.each do |hp|
+      # puts "HP #{hp}"
+      hp.stop_attack if hp.group_number == 1
+    end
+    # puts "@front_hard_points: #{@front_hard_points}"
+    @front_hard_points.each do |hp|
+      # puts "HP #{hp}"
+      hp.stop_attack if hp.group_number == 1
+    end
+
+  end
 
   def trigger_secondary_attack pointer
     return_projectiles = []
@@ -368,6 +343,8 @@ class BasicShip < GeneralObject
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
+    @broadside_hard_points.each { |item| item.draw(@broadside_mode) }
+    @front_hard_points.each { |item| item.draw(!@broadside_mode) }
 
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
@@ -448,7 +425,13 @@ class BasicShip < GeneralObject
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
-    @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+    # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+    @front_hard_points.each do |hardpoint|
+      hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
+    end
+    @broadside_hard_points.each do |hardpoint|
+      hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
+    end
 
     # @cooldown_wait -= 1              if @cooldown_wait > 0
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0

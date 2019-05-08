@@ -5,12 +5,20 @@ class GeneralObject
   SCROLLING_SPEED = 4
   MAX_SPEED      = 5
 
-  def get_image
+  def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def get_image_path
+  def get_image
+    self.class.get_image
+  end
+
+  def self.get_image_path
     "#{MEDIA_DIRECTORY}/question.png"
+  end
+
+  def get_image_path
+    self.class.get_image_path
   end
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})

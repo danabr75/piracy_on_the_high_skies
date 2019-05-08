@@ -254,7 +254,8 @@ class Player < GeneralObject
   end
 
   def is_alive
-    health > 0
+    @ship.is_alive
+    # health > 0
   end
 
   def move_left
