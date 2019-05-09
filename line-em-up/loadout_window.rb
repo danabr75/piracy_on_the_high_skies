@@ -169,7 +169,7 @@ class LoadoutWindow < Gosu::Window
     if id == Gosu::MsLeft then
       @menu.clicked
       # @resolution_menu.clicked(self.mouse_x, self.mouse_y)
-      # @difficulty_menu.clicked(self.mouse_x, self.mouse_y)
+      @ship_menu.clicked(self.mouse_x, self.mouse_y)
     end
   end
 

@@ -34,7 +34,7 @@ module ConfigSetting
     end
   end
 
-  def self.get_setting file_location, setting_name, default_value
+  def self.get_setting file_location, setting_name, default_value = nil
     create_file_if_non_existent(file_location)
     test = File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }
     if test && test.first
@@ -58,7 +58,7 @@ module ConfigSetting
     #   # puts "TEST NIL HERE"
     #   test = default_value
     # end
-    if test == [] || test.nil? || test == ''
+    if (test == [] || test.nil? || test == '')
       test = default_value
     end
     return test.gsub(';', '')

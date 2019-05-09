@@ -10,15 +10,15 @@ require 'glut'
 include OpenGL
 include GLUT
 
-class BasicShip < PilotableShip
-  SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
-  SPEED = 7
+class MiteShip < PilotableShip
+  SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/mite_ship"
+  SPEED = 8
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode, :front_hard_points, :broadside_hard_points
-  MAX_HEALTH = 200
+  MAX_HEALTH = 100
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle
@@ -34,32 +34,25 @@ class BasicShip < PilotableShip
   FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image| 0 }, y_offset: lambda { |image| -(image.height / 2) } }]
   BROADSIDE_HARDPOINT_LOCATIONS = [
     {x_offset: lambda { |image| image.width / 2 },     y_offset: lambda { |image| -(image.height / 2)} },
-    {x_offset: lambda { |image| image.width },         y_offset: lambda { |image| -(image.height / 2)} },
     {x_offset: lambda { |image| -(image.width / 2) } , y_offset: lambda { |image| -(image.height / 2)} }
   ]
 
 
   # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
-  FRONT_HARD_POINTS_MAX = 1
-  BROADSIDE_HARD_POINTS = 3
+  # FRONT_HARD_POINTS_MAX = 1
+  # BROADSIDE_HARD_POINTS = 2
 
   # def self.get_broadside_image
-  #   Gosu::Image.new("#{SHIP_MEDIA_DIRECTORY}/broadside.png")
+  #   Gosu::Image.new("#{MEDIA_DIRECTORY}/mite.png")
   # end
 
   # def self.get_image
-  #   Gosu::Image.new("#{SHIP_MEDIA_DIRECTORY}/default.png")
+  #   Gosu::Image.new("#{MEDIA_DIRECTORY}/mite.png")
   # end
 
-  # def self.get_right_image
-  #   Gosu::Image.new("#{SHIP_MEDIA_DIRECTORY}/right.png")
-  # end
   
-  # def self.get_left_image
-  #   Gosu::Image.new("#{SHIP_MEDIA_DIRECTORY}/left.png")
-  # end
   # def get_image_path
-  #   "#{SHIP_MEDIA_DIRECTORY}/default.png"
+  #   "#{MEDIA_DIRECTORY}/spaceship.png"
   # end
 
 

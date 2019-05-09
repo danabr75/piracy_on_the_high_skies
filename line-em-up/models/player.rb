@@ -1,5 +1,6 @@
 require_relative 'general_object.rb'
 require_relative 'rocket_launcher_pickup.rb'
+require_relative '../lib/config_setting.rb'
 require 'gosu'
 
 require 'opengl'
@@ -10,6 +11,8 @@ include OpenGL
 include GLUT
 
 class Player < GeneralObject
+  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+  puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
@@ -33,9 +36,9 @@ class Player < GeneralObject
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
     @max_movable_height = options[:max_movable_height] || screen_height
-    @right_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_right.png")
-    @left_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_left.png")
-    @broadside_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_broadside.png")
+    # @right_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_right.png")
+    # @left_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_left.png")
+    # @broadside_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_broadside.png")
     @score = 0
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
@@ -64,7 +67,13 @@ class Player < GeneralObject
     @main_weapon = nil
     # @drawable_items_near_self = []
     @broadside_mode = false
-    @ship = BasicShip.new(scale, x, y, screen_width, screen_height, options)
+    ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip)
+    if ship
+      ship_class = eval(ship)
+      @ship = ship_class.new(scale, x, y, screen_width, screen_height, options)
+    else
+      @ship = BasicShip.new(scale, x, y, screen_width, screen_height, options)
+    end
   end
 
   def get_kill_count_max
@@ -160,17 +169,21 @@ class Player < GeneralObject
     end
   end
 
-  def get_image
-    if @broadside_mode
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship-broadside.png")
-    else
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
-    end
-  end
+  # Issue with image.. probably shouldn't be using images to define sizes
+  # def get_image
+  #   # if @inited
+  #   #   @ship.get_image
+  #   # end
+  #   if @broadside_mode
+  #     Gosu::Image.new("#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship/spaceship_broadside.png")
+  #   else
+  #     Gosu::Image.new("#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship/spaceship.png")
+  #   end
+  # end
   
-  def get_image_path
-    "#{MEDIA_DIRECTORY}/spaceship.png"
-  end
+  # def get_image_path
+  #   "#{MEDIA_DIRECTORY}/spaceship.png"
+  # end
 
 
   def toggle_broadside_mode

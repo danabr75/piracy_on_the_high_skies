@@ -10,6 +10,7 @@ include OpenGL
 include GLUT
 
 class PilotableShip < GeneralObject
+  SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
@@ -26,7 +27,7 @@ class PilotableShip < GeneralObject
 
   # SPECIAL_POWER = 'laser'
   # SPECIAL_POWER_KILL_MAX = 50
-  
+
   FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image| 0 }, y_offset: lambda { |image| -(image.height / 2) } }]
   BROADSIDE_HARDPOINT_LOCATIONS = [
     {x_offset: lambda { |image| image.width / 2 },     y_offset: lambda { |image| -(image.height / 2)} },
@@ -34,19 +35,21 @@ class PilotableShip < GeneralObject
     {x_offset: lambda { |image| -(image.width / 2) } , y_offset: lambda { |image| -(image.height / 2)} }
   ]
   # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
-  FRONT_HARD_POINTS_MAX = 1
-  BROADSIDE_HARD_POINTS = 3
+  # FRONT_HARD_POINTS_MAX = 1
+  # BROADSIDE_HARD_POINTS = 3
 
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
+    path = self.class::SHIP_MEDIA_DIRECTORY
+    @right_image = self.class.get_right_image(path)
+    @left_image = self.class.get_left_image(path)
+    @broadside_image = self.class.get_broadside_image(path)
+    @image = self.class.get_image(path)
     super(scale, x, y, screen_width, screen_height, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
     @max_movable_height = options[:max_movable_height] || screen_height
-    @right_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_right.png")
-    @left_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_left.png")
-    @broadside_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_broadside.png")
     @score = 0
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
@@ -77,13 +80,13 @@ class PilotableShip < GeneralObject
     @broadside_mode = false
     @front_hard_points = []
     @broadside_hard_points = []
-    FRONT_HARDPOINT_LOCATIONS.each do |location|
+    self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
       puts "PRE IMAGE: #{get_image.height}"
       puts "PILOTABLE: #{location[:y_offset].call(get_image)}"
       @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image), location[:y_offset].call(get_image), DumbMissileLauncher, options)
     end
     # puts "Front hard points"
-    BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
+    self.class::BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       if index < 2
         @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image), location[:y_offset].call(get_image), LaserLauncher, options)
       else
@@ -119,24 +122,37 @@ class PilotableShip < GeneralObject
   #   end
   # end
 
-  def self.get_broadside_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_broadside.png")
+  def self.get_broadside_image path
+    Gosu::Image.new("#{path}/broadside.png")
   end
 
-  def self.get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
+  def self.get_image path
+    Gosu::Image.new("#{path}/default.png")
+  end
+
+  def self.get_right_image path
+    Gosu::Image.new("#{path}/right.png")
+  end
+  
+  def self.get_left_image path
+    Gosu::Image.new("#{path}/left.png")
+  end
+  def self.get_image_path path
+    "#{path}/default.png"
   end
 
   def get_image
     if @broadside_mode
-      self.class.get_broadside_image
+      @broadside_image
+      # self.class.get_broadside_image
     else
-      self.class.get_image
+      @image
+      # self.class.get_image
     end
   end
   
-  def get_image_path
-    "#{MEDIA_DIRECTORY}/spaceship.png"
+  def get_image_path path
+    "#{path}/default.png"
   end
 
 

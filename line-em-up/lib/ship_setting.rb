@@ -5,7 +5,7 @@ require_relative '../models/basic_ship.rb'
 
 class ShipSetting < Setting
   # MEDIA_DIRECTORY
-  SELECTION = ["BasicShip"]
+  SELECTION = ["MiteShip", "BasicShip"]
   NAME = "ship"
 
   # def initialize fullscreen_height, max_width, max_height, height, config_file_path

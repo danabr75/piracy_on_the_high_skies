@@ -38,6 +38,7 @@ class Setting
   end
 
   def clicked mx, my
+    puts "CLICKED!!!!"
     if is_mouse_hovering_next(mx, my)
       puts "NEXT!!"
       puts "Value: #{@value}"
