@@ -122,6 +122,10 @@ class PilotableShip < GeneralObject
   #   end
   # end
 
+  def self.get_image_assets_path
+    SHIP_MEDIA_DIRECTORY
+  end
+
   def self.get_broadside_image path
     Gosu::Image.new("#{path}/broadside.png")
   end
