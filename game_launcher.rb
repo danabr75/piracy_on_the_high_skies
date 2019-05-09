@@ -4,6 +4,7 @@ require 'gosu'
 
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/line-em-up/media"
+MODEL_DIRECTORY   = File.expand_path('../', __FILE__) + "/line-em-up/models"
 CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
 
 Dir["#{CURRENT_DIRECTORY}/line-em-up/lib/*.rb"].each { |f| require f }

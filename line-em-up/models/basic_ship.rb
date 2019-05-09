@@ -113,11 +113,19 @@ class BasicShip < GeneralObject
   #   end
   # end
 
+  def self.get_broadside_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_broadside.png")
+  end
+
+  def self.get_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
+  end
+
   def get_image
     if @broadside_mode
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship-broadside.png")
+      self.class.get_broadside_image
     else
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship.png")
+      self.class.get_image
     end
   end
   

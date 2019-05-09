@@ -114,11 +114,21 @@ class LoadoutWindow < Gosu::Window
     @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
-    # @difficulty_menu = DifficultySetting.new(@width, @height, get_center_font_ui_y, config_path)
+    @ship_menu = ShipSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
 
     # start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
-    @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
+
+
+
+    # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
+    # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
+
+    # Increase y for padding
+    get_center_font_ui_y
+
+    back_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/back_to_menu.png")
+    @menu.add_item(back_image, (@width / 2) - (back_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
 
     # @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
     # loadout_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/loadout.png")
@@ -133,6 +143,8 @@ class LoadoutWindow < Gosu::Window
 
   def update
     @menu.update
+    @ship_menu.update(self.mouse_x, self.mouse_y)
+
     # @resolution_menu.update(self.mouse_x, self.mouse_y)
     # @difficulty_menu.update(self.mouse_x, self.mouse_y)
     
@@ -146,6 +158,7 @@ class LoadoutWindow < Gosu::Window
     # @back.draw(0,0,0)
     reset_center_font_ui_y
     @menu.draw
+    @ship_menu.draw
     # @resolution_menu.draw
     # @difficulty_menu.draw
     @gl_background.draw(ZOrder::Background)
