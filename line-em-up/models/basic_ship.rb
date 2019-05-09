@@ -22,7 +22,10 @@ class BasicShip < PilotableShip
 
   FRONT_HARDPOINT_LOCATIONS = [
     {
-      x_offset: lambda { |image, scale| 0 }, y_offset: lambda { |image, scale| -((image.height * scale) / 2) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2) },
+    },
+    {
+      x_offset: lambda { |image, scale| -((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2) },
     }
   ]
   RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = [

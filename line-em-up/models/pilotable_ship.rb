@@ -67,19 +67,19 @@ class PilotableShip < GeneralObject
     @left_broadside_hard_points = []
     @right_broadside_hard_points = []
     self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), DumbMissileLauncher, options)
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
     end
     # puts "Front hard points"
     self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
-      if index < 2
+      # if index < 2
         @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-      else
-        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
-      end
+      # else
+      #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+      # end
     end
     self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), DumbMissileLauncher, options)
     end
   end
 
@@ -320,11 +320,25 @@ class PilotableShip < GeneralObject
   def move_left
     @turn_left = true
     @x = [@x - get_speed, (get_width/3)].max
+
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
+        hp.x = @x + hp.x_offset
+      end
+    end
+    return @x
   end
   
   def move_right
     @turn_right = true
     @x = [@x + get_speed, (@screen_width - (get_width/3))].min
+
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
+        hp.x = @x + hp.x_offset
+      end
+    end
+    return @x
   end
   
   def accelerate
@@ -334,10 +348,24 @@ class PilotableShip < GeneralObject
     # @max_movable_height = options[:max_movable_height] || screen_height
 
     @y = [@y - get_speed, @min_moveable_height + (get_height/2)].max
+
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
+        hp.y = @y + hp.y_offset
+      end
+    end
+    return @y
   end
   
   def brake
     @y = [@y + get_speed, @max_movable_height - (get_height/2)].min
+
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
+        hp.y = @y + hp.y_offset
+      end
+    end
+    return @y
   end
 
   def attack_group pointer, group
