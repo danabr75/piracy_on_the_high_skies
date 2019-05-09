@@ -31,11 +31,15 @@ class ShipSetting < Setting
     end
   end
 
+  def get_image
+    return eval("#{@value}.get_broadside_image")
+  end
+
   def draw
     @font.draw("<", @next_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
     @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 
-    image = eval("#{@value}.get_broadside_image")
+    image = get_image
     image.draw((@max_width / 2) - image.width / 2, y + image.height / 2, 1)
     @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
     @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)

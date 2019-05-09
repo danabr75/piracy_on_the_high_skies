@@ -19,9 +19,10 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
   def initialize(scale, x, y, screen_width, screen_height, group_number, x_offset, y_offset, weapon_klass, options = {})
+    puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
-    @x_offset = x_offset * scale
-    @y_offset = y_offset * scale
+    @x_offset = x_offset# * scale
+    @y_offset = y_offset# * scale
     super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, options)
     @main_weapon = nil
     @assigned_weapon_class = weapon_klass
@@ -90,8 +91,11 @@ class Hardpoint < GeneralObject
 
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    @x = player.x + @x_offset
-    @y = player.y + @y_offset
+    puts "HARDPOINT Y - #{@y} and offset: #{@y_offset}"
+    puts "HARD PLAYTWER: #{player.y}"
+    @x = player.x + @x_offset# * @scale
+    @y = player.y + @y_offset# * @scale
+    puts "POST Y: #{@y}"
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     @main_weapon.update(mouse_x, mouse_y, self, scroll_factor) if @main_weapon
     # @cooldown_wait -= 1              if @cooldown_wait > 0

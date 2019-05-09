@@ -125,7 +125,8 @@ class LoadoutWindow < Gosu::Window
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
 
     # Increase y for padding
-    get_center_font_ui_y
+    # get_center_font_ui_y
+    increase_center_font_ui_y(@ship_menu.get_image.height)
 
     back_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/back_to_menu.png")
     @menu.add_item(back_image, (@width / 2) - (back_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
@@ -172,10 +173,12 @@ class LoadoutWindow < Gosu::Window
     end
   end
 
+  def increase_center_font_ui_y amount
+    @center_ui_y += amount 
+  end
+
   def get_center_font_ui_y
-    return_value = @center_ui_y
-    @center_ui_y += 50 
-    return return_value
+    increase_center_font_ui_y(50)
   end
 
   def get_center_font_ui_x
