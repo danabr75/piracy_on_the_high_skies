@@ -78,11 +78,9 @@ class Hardpoint < GeneralObject
     ZOrder::Hardpoint
   end
 
-  def draw active = false
+  def draw
     @drawable_items_near_self.reject! { |item| item.draw }
-    if active
-      @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
-    end
+    @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
   end
 
   def draw_gl
@@ -91,11 +89,10 @@ class Hardpoint < GeneralObject
 
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    puts "HARDPOINT Y - #{@y} and offset: #{@y_offset}"
-    puts "HARD PLAYTWER: #{player.y}"
+    # puts "HARDPOINT X offset: #{@x_offset}"
+    # puts "HARDPOINT Y offset: #{@y_offset}"
     @x = player.x + @x_offset# * @scale
     @y = player.y + @y_offset# * @scale
-    puts "POST Y: #{@y}"
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     @main_weapon.update(mouse_x, mouse_y, self, scroll_factor) if @main_weapon
     # @cooldown_wait -= 1              if @cooldown_wait > 0

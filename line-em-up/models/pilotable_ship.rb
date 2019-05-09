@@ -28,23 +28,30 @@ class PilotableShip < GeneralObject
   # SPECIAL_POWER = 'laser'
   # SPECIAL_POWER_KILL_MAX = 50
 
-  FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image| 0 }, y_offset: lambda { |image| -(image.height / 2) } }]
-  BROADSIDE_HARDPOINT_LOCATIONS = [
-    {x_offset: lambda { |image| image.width / 2 },     y_offset: lambda { |image| -(image.height / 2)} },
-    {x_offset: lambda { |image| image.width },         y_offset: lambda { |image| -(image.height / 2)} },
-    {x_offset: lambda { |image| -(image.width / 2) } , y_offset: lambda { |image| -(image.height / 2)} }
-  ]
+
+  # Need to update with both views
+  # FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image| 0 }, y_offset: lambda { |image| -(image.height / 2) } }]
+  # BROADSIDE_HARDPOINT_LOCATIONS = [
+  #   {x_offset: lambda { |image| image.width / 2 },     y_offset: lambda { |image| -(image.height / 2)} },
+  #   {x_offset: lambda { |image| image.width },         y_offset: lambda { |image| -(image.height / 2)} },
+  #   {x_offset: lambda { |image| -(image.width / 2) } , y_offset: lambda { |image| -(image.height / 2)} }
+  # ]
+
+
+
   # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
   # FRONT_HARD_POINTS_MAX = 1
   # BROADSIDE_HARD_POINTS = 3
 
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
-    path = self.class::SHIP_MEDIA_DIRECTORY
+    media_path = self.class::SHIP_MEDIA_DIRECTORY
+    path = media_path
     @right_image = self.class.get_right_image(path)
     @left_image = self.class.get_left_image(path)
     @broadside_image = self.class.get_broadside_image(path)
     @image = self.class.get_image(path)
+    options[:image] = @image
     super(scale, x, y, screen_width, screen_height, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
@@ -81,16 +88,44 @@ class PilotableShip < GeneralObject
     @front_hard_points = []
     @broadside_hard_points = []
     self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
-      puts "PRE IMAGE: #{get_image.height}"
-      puts "PILOTABLE: #{location[:y_offset].call(get_image)}"
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image), location[:y_offset].call(get_image), DumbMissileLauncher, options)
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), DumbMissileLauncher, options)
     end
     # puts "Front hard points"
     self.class::BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       if index < 2
-        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image), location[:y_offset].call(get_image), LaserLauncher, options)
+        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       else
-        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image), location[:y_offset].call(get_image), BulletLauncher, options)
+        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+      end
+    end
+  end
+
+  def toggle_hardpoint_broadside
+    if @broadside_mode
+      @broadside_hard_points.each do |hp|
+        hp_y_offset = hp.y_offset
+        hp_x_offset = hp.x_offset
+        hp.y_offset = hp_x_offset * -1
+        hp.x_offset = hp_y_offset
+      end
+      @front_hard_points.each do |hp|
+        hp_y_offset = hp.y_offset
+        hp_x_offset = hp.x_offset
+        hp.y_offset = hp_x_offset * -1
+        hp.x_offset = hp_y_offset
+      end
+    else
+      @broadside_hard_points.each do |hp|
+        hp_y_offset = hp.y_offset
+        hp_x_offset = hp.x_offset
+        hp.y_offset = hp_x_offset
+        hp.x_offset = hp_y_offset * -1
+      end
+      @front_hard_points.each do |hp|
+        hp_y_offset = hp.y_offset
+        hp_x_offset = hp.x_offset
+        hp.y_offset = hp_x_offset
+        hp.x_offset = hp_y_offset * -1
       end
     end
   end
@@ -163,6 +198,14 @@ class PilotableShip < GeneralObject
   #slow scrolling speed here
   def toggle_broadside_mode
     @broadside_mode = !@broadside_mode
+    if @broadside_mode
+      @image_width_half = (@broadside_image.width * @scale) / 2
+      @image_height_half = (@broadside_image.height * @scale) / 2
+    else
+      @image_width_half = (@image.width * @scale) / 2
+      @image_height_half = (@image.height * @scale) / 2
+    end
+    toggle_hardpoint_broadside
     if @broadside_mode
       return 1
     else
@@ -344,8 +387,8 @@ class PilotableShip < GeneralObject
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
-    @broadside_hard_points.each { |item| item.draw(@broadside_mode) }
-    @front_hard_points.each { |item| item.draw(!@broadside_mode) }
+    @broadside_hard_points.each { |item| item.draw }
+    @front_hard_points.each { |item| item.draw }
 
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
@@ -362,7 +405,8 @@ class PilotableShip < GeneralObject
       end
     end
     # super
-    image.draw(@x - image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+    puts "DRAWING PLAYER: image_height_half: #{@image_height_half} and image_width_half: #{@image_width_half}"
+    image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
     @turn_right = false
     @turn_left = false
   end
