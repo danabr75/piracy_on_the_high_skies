@@ -16,40 +16,17 @@ class PilotableShip < GeneralObject
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
-  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode, :front_hard_points, :broadside_hard_points
+  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
+  attr_accessor :right_broadside_mode, :left_broadside_mode, :right_broadside_hard_points, :left_broadside_hard_points, :front_hard_points
   MAX_HEALTH = 200
-
-  # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
-  # Range goes clockwise around the 0-360 angle
-  # MISSILE_LAUNCHER_MIN_ANGLE = 75
-  # MISSILE_LAUNCHER_MAX_ANGLE = 105
-  # MISSILE_LAUNCHER_INIT_ANGLE = 90
-
-  # SPECIAL_POWER = 'laser'
-  # SPECIAL_POWER_KILL_MAX = 50
-
-
-  # Need to update with both views
-  # FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image| 0 }, y_offset: lambda { |image| -(image.height / 2) } }]
-  # BROADSIDE_HARDPOINT_LOCATIONS = [
-  #   {x_offset: lambda { |image| image.width / 2 },     y_offset: lambda { |image| -(image.height / 2)} },
-  #   {x_offset: lambda { |image| image.width },         y_offset: lambda { |image| -(image.height / 2)} },
-  #   {x_offset: lambda { |image| -(image.width / 2) } , y_offset: lambda { |image| -(image.height / 2)} }
-  # ]
-
-
-
-  # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
-  # FRONT_HARD_POINTS_MAX = 1
-  # BROADSIDE_HARD_POINTS = 3
-
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
-    @right_image = self.class.get_right_image(path)
-    @left_image = self.class.get_left_image(path)
-    @broadside_image = self.class.get_broadside_image(path)
+    # @right_image = self.class.get_right_image(path)
+    # @left_image = self.class.get_left_image(path)
+    @right_broadside_image = self.class.get_right_broadside_image(path)
+    @left_broadside_image = self.class.get_left_broadside_image(path)
     @image = self.class.get_image(path)
     options[:image] = @image
     super(scale, x, y, screen_width, screen_height, options)
@@ -84,44 +61,44 @@ class PilotableShip < GeneralObject
     @kill_count = 0
     @main_weapon = nil
     @drawable_items_near_self = []
-    @broadside_mode = false
+    @right_broadside_mode = false
+    @left_broadside_mode = false
     @front_hard_points = []
-    @broadside_hard_points = []
+    @left_broadside_hard_points = []
+    @right_broadside_hard_points = []
     self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
       @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), DumbMissileLauncher, options)
     end
     # puts "Front hard points"
-    self.class::BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
+    self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       if index < 2
-        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       else
-        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+      end
+    end
+    self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
+      # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+    end
+  end
+
+  # right broadside
+  def rotate_hardpoints_counterclockwise
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
+        hp_y_offset = hp.y_offset
+        hp_x_offset = hp.x_offset
+        hp.y_offset = hp_x_offset * -1
+        hp.x_offset = hp_y_offset
       end
     end
   end
 
-  def toggle_hardpoint_broadside
-    if @broadside_mode
-      @broadside_hard_points.each do |hp|
-        hp_y_offset = hp.y_offset
-        hp_x_offset = hp.x_offset
-        hp.y_offset = hp_x_offset * -1
-        hp.x_offset = hp_y_offset
-      end
-      @front_hard_points.each do |hp|
-        hp_y_offset = hp.y_offset
-        hp_x_offset = hp.x_offset
-        hp.y_offset = hp_x_offset * -1
-        hp.x_offset = hp_y_offset
-      end
-    else
-      @broadside_hard_points.each do |hp|
-        hp_y_offset = hp.y_offset
-        hp_x_offset = hp.x_offset
-        hp.y_offset = hp_x_offset
-        hp.x_offset = hp_y_offset * -1
-      end
-      @front_hard_points.each do |hp|
+  # left broadside
+  def rotate_hardpoints_clockwise
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
         hp_y_offset = hp.y_offset
         hp_x_offset = hp.x_offset
         hp.y_offset = hp_x_offset
@@ -129,6 +106,38 @@ class PilotableShip < GeneralObject
       end
     end
   end
+
+  # def toggle_hardpoint_broadside
+  #   if @right_broadside_mode
+  #     @broadside_hard_points.each do |hp|
+  #       hp_y_offset = hp.y_offset
+  #       hp_x_offset = hp.x_offset
+  #       hp.y_offset = hp_x_offset * -1
+  #       hp.x_offset = hp_y_offset
+  #     end
+  #     @front_hard_points.each do |hp|
+  #       hp_y_offset = hp.y_offset
+  #       hp_x_offset = hp.x_offset
+  #       hp.y_offset = hp_x_offset * -1
+  #       hp.x_offset = hp_y_offset
+  #     end
+  #   elsif @left_broadside_mode
+      
+  #   else
+  #     @broadside_hard_points.each do |hp|
+  #       hp_y_offset = hp.y_offset
+  #       hp_x_offset = hp.x_offset
+  #       hp.y_offset = hp_x_offset
+  #       hp.x_offset = hp_y_offset * -1
+  #     end
+  #     @front_hard_points.each do |hp|
+  #       hp_y_offset = hp.y_offset
+  #       hp_x_offset = hp.x_offset
+  #       hp.y_offset = hp_x_offset
+  #       hp.x_offset = hp_y_offset * -1
+  #     end
+  #   end
+  # end
 
 
   def add_hard_point hard_point
@@ -136,57 +145,41 @@ class PilotableShip < GeneralObject
   #   trigger_hard_point_load
   end
 
-  # def trigger_hard_point_load
-  #   @rocket_launchers, @bomb_launchers, @cannon_launchers = [0, 0, 0]
-  #   count = 0
-  #   # puts "RUNNING ON: #{@hard_point_items}"
-  #   @hard_point_items.each do |hard_point|
-  #     break if count == FRONT_HARD_POINTS_MAX
-  #     case hard_point
-  #     when 'bomb_launcher'
-  #       @bomb_launchers += 1
-  #     when RocketLauncherPickup::NAME
-  #       # puts "INCREASTING ROCKET LAUNCHER: #{RocketLauncherPickup::NAME}"
-  #       @rocket_launchers += 1
-  #     when 'cannon_launcher'
-  #       @cannon_launchers += 1
-  #     else
-  #       "Raise should never get here. hard_point: #{hard_point}"
-  #     end
-  #     count += 1
-  #   end
-  # end
-
   def self.get_image_assets_path
     SHIP_MEDIA_DIRECTORY
   end
 
-  def self.get_broadside_image path
-    Gosu::Image.new("#{path}/broadside.png")
+  def self.get_right_broadside_image path
+    Gosu::Image.new("#{path}/right_broadside.png")
   end
-
+  def self.get_left_broadside_image path
+    Gosu::Image.new("#{path}/left_broadside.png")
+  end
   def self.get_image path
     Gosu::Image.new("#{path}/default.png")
   end
 
-  def self.get_right_image path
-    Gosu::Image.new("#{path}/right.png")
-  end
+  # def self.get_right_image path
+  #   Gosu::Image.new("#{path}/right.png")
+  # end
   
-  def self.get_left_image path
-    Gosu::Image.new("#{path}/left.png")
-  end
+  # def self.get_left_image path
+  #   Gosu::Image.new("#{path}/left.png")
+  # end
   def self.get_image_path path
     "#{path}/default.png"
   end
 
   def get_image
-    if @broadside_mode
-      @broadside_image
-      # self.class.get_broadside_image
+    # puts "GET IMAGE"
+    if @right_broadside_mode
+      return @right_broadside_image
+    elsif @left_broadside_mode
+      return @left_broadside_image
     else
-      @image
-      # self.class.get_image
+      # puts "DEFAULT"
+      # puts @image
+      return @image
     end
   end
   
@@ -196,17 +189,83 @@ class PilotableShip < GeneralObject
 
 
   #slow scrolling speed here
-  def toggle_broadside_mode
-    @broadside_mode = !@broadside_mode
-    if @broadside_mode
-      @image_width_half = (@broadside_image.width * @scale) / 2
-      @image_height_half = (@broadside_image.height * @scale) / 2
+  # Show right broadside
+  def rotate_counterclockwise
+    puts "rotate_counterclockwise"
+    puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
+    puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
+    trigger_rotation = false
+    if @right_broadside_mode
+      # Do nothing
+    elsif @left_broadside_mode
+      trigger_rotation = true
+      @left_broadside_mode = false
     else
-      @image_width_half = (@image.width * @scale) / 2
+      trigger_rotation = true
+      @right_broadside_mode = true
+    end
+    puts "POST-right_broadside_mode: #{@right_broadside_mode}"
+    puts "POST-left_broadside_mode: #{@left_broadside_mode}"
+        
+
+    # @right_broadside_mode = !@right_broadside_mode
+    if @right_broadside_mode
+      @image_width_half  = (@right_broadside_image.width * @scale) / 2
+      @image_height_half = (@right_broadside_image.height * @scale) / 2
+    elsif @left_broadside_mode
+      @image_width_half  = (@left_broadside_image.width * @scale) / 2
+      @image_height_half = (@left_broadside_image.height * @scale) / 2
+    else
+      @image_width_half  = (@image.width * @scale) / 2
       @image_height_half = (@image.height * @scale) / 2
     end
-    toggle_hardpoint_broadside
-    if @broadside_mode
+
+    rotate_hardpoints_counterclockwise if trigger_rotation
+    puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
+    # @image = self.get_image if trigger_rotation
+
+    if @right_broadside_mode
+      return 1
+    elsif @left_broadside_mode
+      # Logically, this would never be true
+      return 1
+    else
+      return 1
+    end
+  end
+   # Show right broadside
+  def rotate_clockwise
+    trigger_rotation = false
+    if @left_broadside_mode
+      # Do nothing
+    elsif @right_broadside_mode
+      trigger_rotation = true
+      @right_broadside_mode = false
+    else
+      trigger_rotation = true
+      @left_broadside_mode = true
+    end
+        
+    # @right_broadside_mode = !@right_broadside_mode
+    if @right_broadside_mode
+      # Logically, this would never be true
+      @image_width_half  = (@right_broadside_image.width * @scale) / 2
+      @image_height_half = (@right_broadside_image.height * @scale) / 2
+    elsif @left_broadside_mode
+      @image_width_half  = (@left_broadside_image.width * @scale) / 2
+      @image_height_half = (@left_broadside_image.height * @scale) / 2
+    else
+      @image_width_half  = (@image.width * @scale) / 2
+      @image_height_half = (@image.height * @scale) / 2
+    end
+
+    rotate_hardpoints_clockwise if trigger_rotation
+    # @image = self.get_image if trigger_rotation
+
+    if @right_broadside_mode
+      # Logically, this would never be true
+      return 1
+    elsif @left_broadside_mode
       return 1
     else
       return 1
@@ -214,48 +273,10 @@ class PilotableShip < GeneralObject
   end
  
 
-  # def laser_attack pointer
-  #   if @main_weapon.nil?
-  #     # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
-  #     options = {damage_increase: @damage_increase}
-  #     @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, options)
-  #     @drawable_items_near_self << @main_weapon
-  #     return {
-  #       projectiles: [@main_weapon.attack],
-  #       cooldown: LaserBeam::COOLDOWN_DELAY
-  #     }
-  #   else
-  #     @main_weapon.active = true if @main_weapon.active == false
-  #     @drawable_items_near_self << @main_weapon
-  #     return {
-  #       projectiles: [@main_weapon.attack],
-  #       cooldown: LaserBeam::COOLDOWN_DELAY
-  #     }
-  #   end
-  # end
-
 
   def take_damage damage
     @health -= damage * @damage_reduction
   end
-
-  # def toggle_secondary
-  #   current_index = SECONDARY_WEAPONS.index(@secondary_weapon)
-  #   if current_index == SECONDARY_WEAPONS.count - 1
-  #     @secondary_weapon = SECONDARY_WEAPONS[0]
-  #   else
-  #     @secondary_weapon = SECONDARY_WEAPONS[current_index + 1]
-  #   end
-  # end
-
-  # def get_secondary_ammo_count
-  #   return case @secondary_weapon
-  #   when 'bomb'
-  #     self.bombs
-  #   else
-  #     self.rockets
-  #   end
-  # end
 
 
   def decrement_secondary_ammo_count count = 1
@@ -288,7 +309,7 @@ class PilotableShip < GeneralObject
   end
 
   def get_speed
-    if @broadside_mode
+    if @left_broadside_mode || @right_broadside_mode
       speed = self.class::SPEED * 0.3
     else
       speed = self.class::SPEED
@@ -320,13 +341,18 @@ class PilotableShip < GeneralObject
   end
 
   def attack_group pointer, group
-    if @broadside_mode
+    if @left_broadside_mode
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
-      results = @broadside_hard_points.collect do |hp|
+      results = @left_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
         hp.attack(pointer) if hp.group_number == group
       end
       # puts "Results :#{results}"
+    elsif @right_broadside_mode
+      results = @right_broadside_hard_points.collect do |hp|
+        # puts "HP #{hp}"
+        hp.attack(pointer) if hp.group_number == group
+      end
     else
       # puts "@front_hard_points: #{@front_hard_points}"
       results = @front_hard_points.collect do |hp|
@@ -340,14 +366,10 @@ class PilotableShip < GeneralObject
   end
 
   def deactivate_group group
-    @broadside_hard_points.each do |hp|
-      # puts "HP #{hp}"
-      hp.stop_attack if hp.group_number == group
-    end
-    # puts "@front_hard_points: #{@front_hard_points}"
-    @front_hard_points.each do |hp|
-      # puts "HP #{hp}"
-      hp.stop_attack if hp.group_number == group
+    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+      group.each do |hp|
+        hp.stop_attack if hp.group_number == group
+      end
     end
   end
 
@@ -366,20 +388,6 @@ class PilotableShip < GeneralObject
   def deactivate_group_2
     deactivate_group(2)
   end
-  # def trigger_secondary_attack pointer
-  #   return_projectiles = []
-  #   if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
-  #     results = self.secondary_attack(pointer)
-  #     projectiles = results[:projectiles]
-  #     cooldown = results[:cooldown]
-  #     self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
-
-  #     projectiles.each do |projectile|
-  #       return_projectiles.push(projectile)
-  #     end
-  #   end
-  #   return return_projectiles
-  # end
 
   def get_draw_ordering
     ZOrder::Ship
@@ -387,25 +395,27 @@ class PilotableShip < GeneralObject
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
-    @broadside_hard_points.each { |item| item.draw }
+    @right_broadside_hard_points.each { |item| item.draw }
+    @left_broadside_hard_points.each { |item| item.draw }
     @front_hard_points.each { |item| item.draw }
 
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
     # test.update(5.0)
-    if @broadside_mode
-      image = @broadside_image
-    else
-      if @turn_right
-        image = @right_image
-      elsif @turn_left
-        image = @left_image
-      else
-        image = @image
-      end
-    end
+    image = self.get_image
+    # if @broadside_mode
+    #   image = @broadside_image
+    # else
+    #   if @turn_right
+    #     image = @right_image
+    #   elsif @turn_left
+    #     image = @left_image
+    #   else
+    #     image = @image
+    #   end
+    # end
     # super
-    puts "DRAWING PLAYER: image_height_half: #{@image_height_half} and image_width_half: #{@image_width_half}"
+    # puts "DRAWING PLAYER: image_height_half: #{@image_height_half} and image_width_half: #{@image_width_half}"
     image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
     @turn_right = false
     @turn_left = false
@@ -422,7 +432,8 @@ class PilotableShip < GeneralObject
     # draw gl stuff
     @drawable_items_near_self.each {|item| item.draw_gl }
 
-    @broadside_hard_points.each { |item| item.draw_gl }
+    @left_broadside_hard_points.each { |item| item.draw_gl }
+    @right_broadside_hard_points.each { |item| item.draw_gl }
     @front_hard_points.each { |item| item.draw_gl }
 
     info = @image.gl_tex_info
@@ -472,13 +483,15 @@ class PilotableShip < GeneralObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    puts "PLAYER Y - #{player.y}"
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
     @front_hard_points.each do |hardpoint|
       hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
     end
-    @broadside_hard_points.each do |hardpoint|
+    @left_broadside_hard_points.each do |hardpoint|
+      hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
+    end
+    @right_broadside_hard_points.each do |hardpoint|
       hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
     end
 

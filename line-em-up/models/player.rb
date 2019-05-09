@@ -186,14 +186,12 @@ class Player < GeneralObject
   # end
 
 
-  def toggle_broadside_mode
-    return @ship.toggle_broadside_mode
-    # @broadside_mode = !@broadside_mode
-    # if @broadside_mode
-    #   return 0.8
-    # else
-    #   return 1
-    # end
+  def rotate_counterclockwise
+    return @ship.rotate_counterclockwise
+  end
+
+  def rotate_clockwise
+    return @ship.rotate_clockwise
   end
 
   # def laser_attack pointer

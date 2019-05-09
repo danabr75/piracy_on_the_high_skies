@@ -266,7 +266,7 @@ class GameWindow < Gosu::Window
     if (id == Gosu::KB_TAB)
       @can_toggle_secondary = true
     end
-    if (id == Gosu::KB_Q)
+    if (id == Gosu::KB_Q || id == Gosu::KB_E)
       @can_toggle_scroll_factor = true
     end
 
@@ -359,7 +359,12 @@ class GameWindow < Gosu::Window
 
      if Gosu.button_down?(Gosu::KB_Q) && @can_toggle_scroll_factor
         @can_toggle_scroll_factor = false
-        @scroll_factor = @player.toggle_broadside_mode
+        @scroll_factor = @player.rotate_counterclockwise
+      end
+
+     if Gosu.button_down?(Gosu::KB_E) && @can_toggle_scroll_factor
+        @can_toggle_scroll_factor = false
+        @scroll_factor = @player.rotate_clockwise
       end
 
       if @player.is_alive && !@game_pause && !@menu_open
