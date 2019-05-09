@@ -33,8 +33,6 @@ class ShipSetting < Setting
 
   def get_image
     klass = eval(@value)
-    puts "KLASS #{@value}"
-    puts "KLASS constant path #{klass::SHIP_MEDIA_DIRECTORY}"
     # puts "KLASS HERE : #{klass.get_image_assets_path(klass::SHIP_MEDIA_DIRECTORY)}"
     return klass.get_broadside_image(klass::SHIP_MEDIA_DIRECTORY)
   end

@@ -378,6 +378,9 @@ class PilotableShip < GeneralObject
     # draw gl stuff
     @drawable_items_near_self.each {|item| item.draw_gl }
 
+    @broadside_hard_points.each { |item| item.draw_gl }
+    @front_hard_points.each { |item| item.draw_gl }
+
     info = @image.gl_tex_info
 
     # glDepthFunc(GL_GEQUAL)
