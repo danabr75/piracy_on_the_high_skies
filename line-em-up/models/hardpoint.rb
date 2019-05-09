@@ -20,8 +20,8 @@ class Hardpoint < GeneralObject
 
   def initialize(scale, x, y, screen_width, screen_height, group_number, x_offset, y_offset, weapon_klass, options = {})
     @group_number = group_number
-    @x_offset = x_offset
-    @y_offset = y_offset
+    @x_offset = x_offset * scale
+    @y_offset = y_offset * scale
     super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, options)
     @main_weapon = nil
     @assigned_weapon_class = weapon_klass

@@ -3,7 +3,7 @@ class Main < Gosu::Window
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   def initialize config_path = nil
     config_path = CONFIG_FILE if config_path.nil?
-    @width, @height = ResolutionSetting::RESOLUTIONS[0].split('x').collect{|s| s.to_i}
+    @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
     super(@width, @height, false)
     @cursor = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/cursor.png", false)
     @gl_background = GLBackground.new
@@ -33,11 +33,13 @@ class Main < Gosu::Window
     @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
-    @difficulty_menu = DifficultySetting.new(@width, @height, get_center_font_ui_y, config_path)
+    @difficulty_menu = DifficultySetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
 
-    start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/start.png")
+    start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
     @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
+    loadout_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/loadout.png")
+    @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) }, loadout_image)
     debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
     @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
     # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
@@ -55,8 +57,8 @@ class Main < Gosu::Window
     @resolution_menu.update(self.mouse_x, self.mouse_y)
     @difficulty_menu.update(self.mouse_x, self.mouse_y)
     
-    @game_window_width, @game_window_height, @fullscreen = @resolution_menu.get_resolution
-    @difficulty = @difficulty_menu.get_difficulty
+    @game_window_width, @game_window_height, @fullscreen = @resolution_menu.get_values
+    @difficulty = @difficulty_menu.get_values
     @gl_background.scroll
   end
 

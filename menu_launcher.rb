@@ -1,16 +1,17 @@
 require 'gosu'
 
-CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+current_directory = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/line-em-up/media"
-CONFIG_FILE = "#{CURRENT_DIRECTORY}/config.txt"
+CONFIG_FILE = "#{current_directory}/config.txt"
 
-Dir["#{CURRENT_DIRECTORY}/line-em-up/lib/*.rb"].each { |f| require f }
+Dir["#{current_directory}/line-em-up/lib/*.rb"].each { |f| require f }
 # Shouldn't need models
 # Does need the GL BACKGROUND Model
-require "#{CURRENT_DIRECTORY}/line-em-up/models/gl_background.rb"
+require "#{current_directory}/line-em-up/models/gl_background.rb"
 # Dir["#{CURRENT_DIRECTORY}/line-em-up/models/*.rb"].each { |f| require f }
 
-require "#{CURRENT_DIRECTORY}/line-em-up/game_window.rb"
+require "#{current_directory}/line-em-up/game_window.rb"
+require "#{current_directory}/line-em-up/loadout_window.rb"
 
 # @menu = Menu.new(self) #instantiate the menu, passing the Window in the constructor
 

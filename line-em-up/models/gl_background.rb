@@ -40,16 +40,16 @@ class GLBackground
   end
   
   # Not needed
-  # def draw(z)
-  #   # gl will execute the given block in a clean OpenGL environment, then reset
-  #   # everything so Gosu's rendering can take place again.
-  #   Gosu.gl(z) do
-  #     glClearColor(0.0, 0.2, 0.5, 1.0)
-  #     glClearDepth(0)
-  #     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-  #     exec_gl
-  #   end
-  # end
+  def draw(z)
+    # gl will execute the given block in a clean OpenGL environment, then reset
+    # everything so Gosu's rendering can take place again.
+    Gosu.gl(z) do
+      glClearColor(0.0, 0.2, 0.5, 1.0)
+      glClearDepth(0)
+      glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+      exec_gl
+    end
+  end
   
   # include Gl
   

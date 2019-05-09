@@ -28,7 +28,7 @@ class BasicShip < GeneralObject
   SPECIAL_POWER_KILL_MAX = 50
 
   FRONT_HARDPOINT_LOCATIONS = [{x_offset: 0, y_offset: -get_image.height}]
-  BROADSIDE_HARDPOINT_LOCATIONS = [{x_offset: get_image.width / 2, y_offset: -(get_image.height * 0.8)}, {x_offset: get_image.width, y_offset: -(get_image.height * 0.8)}, {x_offset: 0, y_offset: -(get_image.height * 0.8)}]
+  BROADSIDE_HARDPOINT_LOCATIONS = [{x_offset: get_image.width / 2, y_offset: -(get_image.height * 0.9)}, {x_offset: get_image.width, y_offset: -(get_image.height * 0.8)}, {x_offset: -(get_image.width / 2), y_offset: -(get_image.height * 0.8)}]
   # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
   FRONT_HARD_POINTS_MAX = 1
   BROADSIDE_HARD_POINTS = 3
@@ -77,8 +77,12 @@ class BasicShip < GeneralObject
       @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], DumbMissileLauncher, options)
     end
     # puts "Front hard points"
-    BROADSIDE_HARDPOINT_LOCATIONS.each do |location|
-      @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], LaserBeam, options)
+    BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
+      if index < 2
+        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], LaserLauncher, options)
+      else
+        @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset], location[:y_offset], BulletLauncher, options)
+      end
     end
   end
 
@@ -122,10 +126,11 @@ class BasicShip < GeneralObject
   end
 
 
+  #slow scrolling speed here
   def toggle_broadside_mode
     @broadside_mode = !@broadside_mode
     if @broadside_mode
-      return 0.8
+      return 1
     else
       return 1
     end

@@ -5,7 +5,7 @@ require 'glu'
 require 'glut'
 
 # Should be LaserLauncher
-class LaserBeam < Launcher
+class LaserLauncher < Launcher
   attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited
   # DAMAGE = 0.001
   # Doesn't work
@@ -38,7 +38,7 @@ class LaserBeam < Launcher
   # end
 
   def get_cooldown
-    1
+    self.class::COOLDOWN_DELAY
   end
 
   # only needed for is-head command
@@ -142,9 +142,9 @@ class LaserBeam < Launcher
   def draw_gl
     if @inited
       z = ZOrder::Projectile
-      new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
-      new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_width         , @screen_height)
-      new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
+      new_width1, new_height1, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
+      new_width2, new_height2, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_width         , @screen_height)
+      new_width3, new_height3, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
 
       glEnable(GL_BLEND)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

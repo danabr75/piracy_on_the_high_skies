@@ -60,13 +60,13 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 # exit if Object.const_defined?(:Ocra) #allow ocra to create an exe without executing the entire script
 
 
-DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
-RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
 # RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768]]
 # WIDTH, HEIGHT = 1080, 720
 
 class GameWindow < Gosu::Window
+  RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
+  DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
   attr_accessor :width, :height, :block_all_controls
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
