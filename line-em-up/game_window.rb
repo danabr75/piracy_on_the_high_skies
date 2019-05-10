@@ -283,10 +283,10 @@ class GameWindow < Gosu::Window
       @can_resize = true
     end
     if id == Gosu::MS_LEFT
-      @player.deactivate_group_1
+      @player.deactivate_group_2
     end
     if id == Gosu::KB_SPACE
-      @player.deactivate_group_2
+      @player.deactivate_group_1
     end
   end
 
