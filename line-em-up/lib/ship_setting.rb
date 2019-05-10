@@ -10,12 +10,15 @@ class ShipSetting < Setting
   NAME = "ship"
 
   # attr_accessor :mouse_x, :mouse_y
-  def initialize window, fullscreen_height, max_width, max_height, height, config_file_path
+  def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path
+    puts "fullscreen_height: #{fullscreen_height}"
+    puts "max height: #{max_height}"
     @selection = self.class::SELECTION
     # puts "INNITING #{config_file_path}"
     @font = Gosu::Font.new(20)
     # @x = width
-    @y = height
+    puts "current_height: #{current_height} - 100"
+    @y = current_height
     @max_width = max_width
     @max_height = max_height
     @prev_x = 0
@@ -31,10 +34,10 @@ class ShipSetting < Setting
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     @fullscreen_height = fullscreen_height
     LUIT.config(window)
-    @next_button = LUIT::Button.new(self, :next, @next_x, @y, "Next")
+    @next_button = LUIT::Button.new(self, :next, @next_x, @y, "Next", 0, 1)
     # @next_button.x = @next_x - (@next_button.w / 2)
 
-    @prev_button = LUIT::Button.new(self, :previous, @prev_x, @y, "Previous")
+    @prev_button = LUIT::Button.new(self, :previous, @prev_x, @y, "Previous", 0, 1)
     @window = window
     @button_id_mapping = self.class.get_id_button_mapping
   end
@@ -63,10 +66,10 @@ class ShipSetting < Setting
     # @mouse_x = mouse_x
     # @mouse_y = mouse_y
     # @next_x = max_width / 5
-    puts "new next x: #{@next_x}"
+    # puts "new next x: #{@next_x}"
     # @next_button.update(@next_x - @next_button.w, @y)
     @next_button.update(@next_x - @next_button.w, @y)
-    puts "NEXT IS AT: #{@next_button.x}"
+    # puts "NEXT IS AT: #{@next_button.x}"
     # @next_button.update(@next_x - (@next_button.w / 2), @y)
     @prev_button.update(@prev_x, @y)
     return @value
@@ -77,7 +80,7 @@ class ShipSetting < Setting
 
     @next_button.draw(@next_x - @next_button.w, @y)
 
-    @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 
     # image = get_image
     # image.draw((@max_width / 2) - image.width / 2, y + image.height / 2, 1)

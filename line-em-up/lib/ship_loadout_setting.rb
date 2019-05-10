@@ -14,14 +14,14 @@ class ShipLoadoutSetting < Setting
   # end
 
   attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
-  def initialize window, fullscreen_height, max_width, max_height, height, config_file_path, ship_value
+  def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path, ship_value
     @selection = []
     @launchers = ::Launcher.descendants.collect{|d| d.name}
     puts "SELECTION: #{@selection}"
     # puts "INNITING #{config_file_path}"
     @font = Gosu::Font.new(20)
     # @x = width
-    @y = height
+    @y = current_height
     @max_width = max_width
     @max_height = max_height
     @next_x = 15
@@ -30,7 +30,11 @@ class ShipLoadoutSetting < Setting
     @name = self.class::NAME
     @ship_value = ship_value
     klass = eval(@ship_value)
-    @ship = klass.new(1, @max_width / 2, @y, max_width, max_height, {})
+    @ship = klass.new(1, @max_width / 2, @y + klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY).height / 2, max_width, max_height, {use_large_image: true})
+    # @ship_large_image = klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY)
+    # @ship_large_image_y = @y + @ship_large_image.height
+    # @ship_large_image_h = @ship_large_image.height
+    # @ship_large_image_w = @ship_large_image.width
     # @ship.rotate_counterclockwise
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     @fullscreen_height = fullscreen_height
@@ -48,13 +52,19 @@ class ShipLoadoutSetting < Setting
       puts "NEW SHIP VALUE"
       @ship_value = ship_value
       klass = eval(@ship_value)
-      @ship = klass.new(1, @max_width / 2, @y, @max_width, @max_height, {})
+      @ship = klass.new(1, @max_width / 2, @y + klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY).height / 2, @max_width, @max_height, {use_large_image: true})
+      # @ship_large_image = klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY)
+      # @ship_large_image_y = @y + @ship_large_image.height
+
+      # @ship_large_image_h = @ship_large_image.height
+      # @ship_large_image_w = @ship_large_image.width
+
       # @ship.rotate_counterclockwise
     else
       # Do nothing
     end
-    @ship.y = @y
-    @ship.x = (@max_width / 2)
+    # @ship.y = @y
+    # @ship.x = (@max_width / 2)
     return @value
   end
 
@@ -73,6 +83,12 @@ class ShipLoadoutSetting < Setting
     return klass.get_right_broadside_image(klass::SHIP_MEDIA_DIRECTORY)
   end
 
+  def get_large_image
+    klass = eval(@ship_value)
+    return klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY)
+  end
+
+  # deprecated
   def clicked mx, my
     puts "CLICKED!!!!"
     if is_mouse_hovering_next(mx, my)
@@ -137,6 +153,8 @@ class ShipLoadoutSetting < Setting
     # image = get_image
     # image.draw((@max_width / 2) - image.width / 2, y + image.height / 2, 1)
     @ship.draw
+    # put back in
+    # @ship_large_image.draw((@max_width / 2) - @ship_large_image_w/2, @ship_large_image_y - @ship_large_image_h / 2, 1)
     @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
     @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
   end

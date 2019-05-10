@@ -111,13 +111,13 @@ class LoadoutWindow < Gosu::Window
     # puts "WIDTH HERE: #{exit_image.width}"
     # 8
     # @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
-    window_height = Gosu.screen_height
-    @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+    fullscreen_window_height = Gosu.screen_height
+    # @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
-    @ship_menu = ShipSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
-    @ship_loadout_menu = ShipLoadoutSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path, @ship_menu.value)
-    increase_center_font_ui_y(@ship_loadout_menu.get_image.height)
+    @ship_menu = ShipSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path)
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path, @ship_menu.value)
+    increase_center_font_ui_y(@ship_loadout_menu.get_image.height + @ship_loadout_menu.get_large_image.height)
     # puts "KLASS HERE : #{klass.get_image_assets_path(klass::SHIP_MEDIA_DIRECTORY)}"
 
     # start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
@@ -135,6 +135,7 @@ class LoadoutWindow < Gosu::Window
     back_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/back_to_menu.png")
     @menu.add_item(back_image, (@width / 2) - (back_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
 
+    # @button_id_mapping = self.class.get_id_button_mapping
     # @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
     # loadout_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/loadout.png")
     # @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start() }, loadout_image)
@@ -196,4 +197,20 @@ class LoadoutWindow < Gosu::Window
     @center_ui_y = -(self.height  / 2) + self.height  / 2
     @center_ui_x = self.width / 2
   end
+
+  # def self.get_id_button_mapping
+  #   {
+  #     back: lambda { |setting| setting.next_clicked }
+  #   }
+  # end
+
+  # # required for LUIT objects, passes id of element
+  # def onClick element_id
+  #   button_clicked_exists = @button_id_mapping.key?(element_id)
+  #   if button_clicked_exists
+  #     @button_id_mapping[element_id].call(self)
+  #   else
+  #     puts "Clicked button that is not mapped: #{element_id}"
+  #   end
+  # end
 end

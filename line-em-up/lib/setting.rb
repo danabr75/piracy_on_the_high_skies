@@ -5,12 +5,12 @@ class Setting
   NAME = "OverrideMe"
 
   attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :window
-  def initialize window, fullscreen_height, max_width, max_height, height, config_file_path
+  def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path
     @selection = self.class::SELECTION
     # puts "INNITING #{config_file_path}"
     @font = Gosu::Font.new(20)
     # @x = width
-    @y = height
+    @y = current_height
     @max_width = max_width
     @max_height = max_height
     @next_x = 15

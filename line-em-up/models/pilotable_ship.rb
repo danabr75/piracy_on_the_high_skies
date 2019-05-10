@@ -27,7 +27,12 @@ class PilotableShip < GeneralObject
     # @left_image = self.class.get_left_image(path)
     @right_broadside_image = self.class.get_right_broadside_image(path)
     @left_broadside_image = self.class.get_left_broadside_image(path)
-    @image = self.class.get_image(path)
+    if options[:use_large_image]
+      @use_large_image = true
+      @image = self.class.get_large_image(path)
+    else
+      @image = self.class.get_image(path)
+    end
     options[:image] = @image
     super(scale, x, y, screen_width, screen_height, options)
     # Top of screen
@@ -164,6 +169,10 @@ class PilotableShip < GeneralObject
   end
   def self.get_image path
     Gosu::Image.new("#{path}/default.png")
+  end
+
+  def self.get_large_image path
+    Gosu::Image.new("#{path}/large.png")
   end
 
   # def self.get_right_image path
@@ -441,6 +450,8 @@ class PilotableShip < GeneralObject
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
     # test.update(5.0)
+    # image = self.get_image
+    # Why using self?
     image = self.get_image
     # if @broadside_mode
     #   image = @broadside_image
