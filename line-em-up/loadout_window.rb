@@ -132,8 +132,8 @@ class LoadoutWindow < Gosu::Window
     # get_center_font_ui_y
     # increase_center_font_ui_y(@ship_menu.get_image.height)
 
-    back_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/back_to_menu.png")
-    @menu.add_item(back_image, (@width / 2) - (back_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
+    # back_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/back_to_menu.png")
+    # @menu.add_item(back_image, (@width / 2) - (back_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
 
     # @button_id_mapping = self.class.get_id_button_mapping
     # @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
@@ -141,6 +141,8 @@ class LoadoutWindow < Gosu::Window
     # @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start() }, loadout_image)
     # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
+    @button_id_mapping = self.class.get_id_button_mapping
+    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height - 50, "Back To Menu", 0, 1)
   end
 
   def dynamic_get_resolution_fs
@@ -152,6 +154,9 @@ class LoadoutWindow < Gosu::Window
     @ship_value = @ship_menu.update(self.mouse_x, self.mouse_y)
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @ship_value)
 
+
+    @back_button.update(-(@back_button.w / 2), -(@back_button.h / 2))
+
     # @resolution_menu.update(self.mouse_x, self.mouse_y)
     # @difficulty_menu.update(self.mouse_x, self.mouse_y)
     
@@ -162,6 +167,7 @@ class LoadoutWindow < Gosu::Window
 
   def draw
     @cursor.draw(self.mouse_x, self.mouse_y, 2)
+    @back_button.draw(-(@back_button.w / 2), -(@back_button.h / 2))
     # @back.draw(0,0,0)
     reset_center_font_ui_y
     @menu.draw
@@ -198,19 +204,19 @@ class LoadoutWindow < Gosu::Window
     @center_ui_x = self.width / 2
   end
 
-  # def self.get_id_button_mapping
-  #   {
-  #     back: lambda { |setting| setting.next_clicked }
-  #   }
-  # end
+  def self.get_id_button_mapping
+    {
+      back: lambda { |window| window.close; Main.new.show }
+    }
+  end
 
-  # # required for LUIT objects, passes id of element
-  # def onClick element_id
-  #   button_clicked_exists = @button_id_mapping.key?(element_id)
-  #   if button_clicked_exists
-  #     @button_id_mapping[element_id].call(self)
-  #   else
-  #     puts "Clicked button that is not mapped: #{element_id}"
-  #   end
-  # end
+  # required for LUIT objects, passes id of element
+  def onClick element_id
+    button_clicked_exists = @button_id_mapping.key?(element_id)
+    if button_clicked_exists
+      @button_id_mapping[element_id].call(self)
+    else
+      puts "Clicked button that is not mapped: #{element_id}"
+    end
+  end
 end
