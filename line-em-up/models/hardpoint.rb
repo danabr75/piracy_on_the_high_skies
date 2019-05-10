@@ -11,7 +11,7 @@ include GLUT
 # Not intended to be overridden
 class Hardpoint < GeneralObject
   attr_accessor :x, :y
-  attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half
+  attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half, :image_angle
 
 
   # MISSILE_LAUNCHER_MIN_ANGLE = 75
@@ -19,7 +19,7 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
   def initialize(scale, x, y, screen_width, screen_height, group_number, x_offset, y_offset, weapon_klass, options = {})
-    puts "GHARDPOINT INIT: #{y_offset}"
+    # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
     @x_offset = x_offset# * scale
     @y_offset = y_offset# * scale
@@ -31,7 +31,7 @@ class Hardpoint < GeneralObject
     @image_hardpoint = weapon_klass.get_image_hardpoint
     @image_hardpoint_width_half = @image_hardpoint.width  / 2
     @image_hardpoint_height_half = @image_hardpoint.height  / 2
-
+    @image_angle = options[:image_angle]
   end
 
 
@@ -39,15 +39,17 @@ class Hardpoint < GeneralObject
   def stop_attack
     # puts "HARDPOINT STOP ATTACK"
     @main_weapon.deactivate if @main_weapon
+
   end
 
   def attack pointer, opts = {}
-    puts "HARDPOINT ATTACK"
+    # puts "HARDPOINT ATTACK"
     attack_projectile = nil
     if @main_weapon.nil?
       # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
       options = {}
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
+      options[:image_angle] = @image_angle
       @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, options)
       @drawable_items_near_self << @main_weapon
       attack_projectile = @main_weapon.attack(pointer)
@@ -80,7 +82,13 @@ class Hardpoint < GeneralObject
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
-    @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
+
+    if @image_angle != nil
+      @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, @image_angle, 0.5, 0.5, @scale, @scale)
+    else
+      @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
+    end
+
   end
 
   def draw_gl

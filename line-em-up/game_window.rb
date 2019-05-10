@@ -282,6 +282,12 @@ class GameWindow < Gosu::Window
     if id == Gosu::KB_EQUALS
       @can_resize = true
     end
+    if id == Gosu::MS_LEFT
+      @player.deactivate_group_1
+    end
+    if id == Gosu::KB_SPACE
+      @player.deactivate_group_2
+    end
   end
 
   def get_center_font_ui_y
@@ -389,7 +395,7 @@ class GameWindow < Gosu::Window
           end
           @projectiles = @projectiles + new_projectiles
         else
-          @player.deactivate_group_2
+          # @player.deactivate_group_2
         end
 
         if Gosu.button_down?(Gosu::KB_SPACE)
@@ -406,7 +412,8 @@ class GameWindow < Gosu::Window
             end
           end
         else
-          @player.deactivate_group_1
+          # MOVE ELSEWHERE... KEY UP
+          # @player.deactivate_group_1
         end
 
 

@@ -25,6 +25,9 @@ class Launcher < DumbProjectile
 
     @inited = true
     @cooldown_wait = 0
+    # @image_angle = options[:image_angle] || 0
+    # puts "IMAGE ANGLE: #{@image_angle}"
+    # raise "STOP "
   end
 
   def get_cooldown
@@ -111,7 +114,11 @@ class Launcher < DumbProjectile
     if @inited
       if @active
         if @image_optional
-          @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+          # if @image_angle != nil
+          #   @image_optional.draw_rot(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @image_angle, 0.5, 0.5, @scale, @scale)
+          # else
+            @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+          # end
         end
       end
 

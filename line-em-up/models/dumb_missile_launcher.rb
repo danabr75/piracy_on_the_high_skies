@@ -12,7 +12,7 @@ class DumbMissileLauncher < Launcher
 
 
   def self.get_image_hardpoint
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/missile_launcher.png")
   end
   # def draw
   #   if @inited
@@ -27,7 +27,7 @@ class DumbMissileLauncher < Launcher
   # end
 
   def attack pointer
-    puts "DUMB MISSILE LAUNCHER ATTACK"
+    # puts "DUMB MISSILE LAUNCHER ATTACK"
     if @cooldown_wait <= 0
       options = {damage_increase: @damage_increase}
       projectile = init_projectile(pointer, options)

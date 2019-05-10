@@ -72,6 +72,7 @@ class PilotableShip < GeneralObject
     # puts "Front hard points"
     self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       # if index < 2
+        options[:image_angle] = 90
         @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # else
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
@@ -79,6 +80,7 @@ class PilotableShip < GeneralObject
     end
     self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+      options[:image_angle] = 270
       @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), DumbMissileLauncher, options)
     end
   end
@@ -87,6 +89,7 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_counterclockwise
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
+        hp.image_angle = (hp.image_angle || 0) - 90
         hp_y_offset = hp.y_offset
         hp_x_offset = hp.x_offset
         hp.y_offset = hp_x_offset * -1
@@ -99,6 +102,7 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_clockwise
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
+        hp.image_angle = (hp.image_angle || 0) + 90
         hp_y_offset = hp.y_offset
         hp_x_offset = hp.x_offset
         hp.y_offset = hp_x_offset
@@ -191,9 +195,9 @@ class PilotableShip < GeneralObject
   #slow scrolling speed here
   # Show right broadside
   def rotate_counterclockwise
-    puts "rotate_counterclockwise"
-    puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
-    puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
+    # puts "rotate_counterclockwise"
+    # puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
+    # puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
     trigger_rotation = false
     if @right_broadside_mode
       # Do nothing
@@ -204,8 +208,8 @@ class PilotableShip < GeneralObject
       trigger_rotation = true
       @right_broadside_mode = true
     end
-    puts "POST-right_broadside_mode: #{@right_broadside_mode}"
-    puts "POST-left_broadside_mode: #{@left_broadside_mode}"
+    # puts "POST-right_broadside_mode: #{@right_broadside_mode}"
+    # puts "POST-left_broadside_mode: #{@left_broadside_mode}"
         
 
     # @right_broadside_mode = !@right_broadside_mode
@@ -221,7 +225,7 @@ class PilotableShip < GeneralObject
     end
 
     rotate_hardpoints_counterclockwise if trigger_rotation
-    puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
+    # puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
     # @image = self.get_image if trigger_rotation
 
     if @right_broadside_mode
@@ -393,10 +397,12 @@ class PilotableShip < GeneralObject
     return results
   end
 
-  def deactivate_group group
+  def deactivate_group group_number
+    # puts "deactivate_group: #{group_number}"
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        hp.stop_attack if hp.group_number == group
+        # puts "STOPPING ATTACK #{hp.group_number} == #{group_number}: #{hp.group_number == group_number}"
+        hp.stop_attack if hp.group_number == group_number
       end
     end
   end
