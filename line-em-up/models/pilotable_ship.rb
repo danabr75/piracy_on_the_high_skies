@@ -55,7 +55,7 @@ class PilotableShip < GeneralObject
     @cannon_launchers = 0
     # trigger_hard_point_load
     @damage_reduction = options[:handicap] ? options[:handicap] : 1
-    invert_handicap = 1 - options[:handicap]
+    invert_handicap = 1 - @damage_reduction
     @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
     @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
     @kill_count = 0
@@ -68,12 +68,14 @@ class PilotableShip < GeneralObject
     @right_broadside_hard_points = []
     self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
       @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+      # @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
     # puts "Front hard points"
     self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       # if index < 2
         options[:image_angle] = 90
-        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+        # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
       # else
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
@@ -87,6 +89,7 @@ class PilotableShip < GeneralObject
 
   # right broadside
   def rotate_hardpoints_counterclockwise
+    puts "RIGHT HERE: rotate_hardpoints_counterclockwise"
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
         hp.image_angle = (hp.image_angle || 0) - 90
@@ -429,6 +432,8 @@ class PilotableShip < GeneralObject
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
+    # puts "DRAWING HARDPOINTS"
+    # puts "@right_broadside_hard_points: #{@right_broadside_hard_points.count}"
     @right_broadside_hard_points.each { |item| item.draw }
     @left_broadside_hard_points.each { |item| item.draw }
     @front_hard_points.each { |item| item.draw }

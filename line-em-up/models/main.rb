@@ -30,10 +30,11 @@ class Main < Gosu::Window
     # 8
     @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
     window_height = Gosu.screen_height
-    @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
+    @window = self
+    @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
-    @difficulty_menu = DifficultySetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
+    @difficulty_menu = DifficultySetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
     start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
@@ -91,7 +92,7 @@ class Main < Gosu::Window
   end
 
   def reset_center_font_ui_y
-    @center_ui_y = self.height  / 2 - 100
-    @center_ui_x = self.width / 2 - 100
+    @center_ui_y = -(self.height  / 2) + self.height  / 1.5
+    @center_ui_x = self.width / 2
   end
 end

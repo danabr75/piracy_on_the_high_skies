@@ -27,6 +27,8 @@ require 'gosu'
 
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
+VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors"
+require "#{VENDOR_DIRECTORY}/lib/luit.rb"
 
 # ONLY ENABLE FOR WINDOWS COMPILATION
 # Place opengl lib in lib library

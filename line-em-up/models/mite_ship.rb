@@ -31,11 +31,12 @@ class MiteShip < PilotableShip
 
   # FRONT_HARDPOINT_LOCATIONS = [{x_offset: 0, y_offset: -get_image.height}]
   # RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = [{x_offset: get_image.width / 2, y_offset: -(get_image.height * 0.9)}, {x_offset: get_image.width, y_offset: -(get_image.height * 0.8)}, {x_offset: -(get_image.width / 2), y_offset: -(get_image.height * 0.8)}]
-  FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image| 0 }, y_offset: lambda { |image| -(image.height / 2) } }]
+  FRONT_HARDPOINT_LOCATIONS = [{x_offset: lambda { |image, scale| 0 }, y_offset: lambda { |image, scale| -(image.height * scale / 2) } }]
   RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = [
-    {x_offset: lambda { |image| image.width / 2 },     y_offset: lambda { |image| -(image.height / 2)} },
-    {x_offset: lambda { |image| -(image.width / 2) } , y_offset: lambda { |image| -(image.height / 2)} }
+    {x_offset: lambda { |image, scale| image.width * scale / 2 },     y_offset: lambda { |image, scale| -(image.height * scale / 2)} },
+    {x_offset: lambda { |image, scale| -(image.width * scale / 2) } , y_offset: lambda { |image, scale| -(image.height * scale / 2)} }
   ]
+  LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
 
 
   # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher

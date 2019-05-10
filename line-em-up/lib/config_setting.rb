@@ -61,7 +61,7 @@ module ConfigSetting
     if (test == [] || test.nil? || test == '')
       test = default_value
     end
-    return test.gsub(';', '')
+    return test ? test.gsub(';', '') : test
   end
 
   def self.create_file_if_non_existent file_location

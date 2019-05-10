@@ -101,20 +101,24 @@ class LoadoutWindow < Gosu::Window
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/item.png", false), x, y, 1, lambda { })
     #   y += lineHeight
     # }, lambda {}]
-    @menu = Menu.new(self)
+    @window = self
+    @menu = Menu.new(@window)
     # for i in (0..items.size - 1)
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}.png", false), x, y, 1, actions[i], Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}_hover.png", false))
     #   y += lineHeight
     # end
-    exit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/exit.png")
+    # exit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/exit.png")
     # puts "WIDTH HERE: #{exit_image.width}"
     # 8
     # @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
     window_height = Gosu.screen_height
-    @resolution_menu = ResolutionSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
+    @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
-    @ship_menu = ShipSetting.new(window_height, @width, @height, get_center_font_ui_y, config_path)
+    @ship_menu = ShipSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path, @ship_menu.value)
+    increase_center_font_ui_y(@ship_loadout_menu.get_image.height)
+    # puts "KLASS HERE : #{klass.get_image_assets_path(klass::SHIP_MEDIA_DIRECTORY)}"
 
     # start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
@@ -126,7 +130,7 @@ class LoadoutWindow < Gosu::Window
 
     # Increase y for padding
     # get_center_font_ui_y
-    increase_center_font_ui_y(@ship_menu.get_image.height)
+    # increase_center_font_ui_y(@ship_menu.get_image.height)
 
     back_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/back_to_menu.png")
     @menu.add_item(back_image, (@width / 2) - (back_image.width / 2), get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
@@ -144,7 +148,8 @@ class LoadoutWindow < Gosu::Window
 
   def update
     @menu.update
-    @ship_menu.update(self.mouse_x, self.mouse_y)
+    @ship_value = @ship_menu.update(self.mouse_x, self.mouse_y)
+    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @ship_value)
 
     # @resolution_menu.update(self.mouse_x, self.mouse_y)
     # @difficulty_menu.update(self.mouse_x, self.mouse_y)
@@ -160,6 +165,7 @@ class LoadoutWindow < Gosu::Window
     reset_center_font_ui_y
     @menu.draw
     @ship_menu.draw
+    @ship_loadout_menu.draw
     # @resolution_menu.draw
     # @difficulty_menu.draw
     @gl_background.draw(ZOrder::Background)
@@ -170,6 +176,7 @@ class LoadoutWindow < Gosu::Window
       @menu.clicked
       # @resolution_menu.clicked(self.mouse_x, self.mouse_y)
       @ship_menu.clicked(self.mouse_x, self.mouse_y)
+      @ship_loadout_menu.clicked(self.mouse_x, self.mouse_y)
     end
   end
 
@@ -186,7 +193,7 @@ class LoadoutWindow < Gosu::Window
   end
 
   def reset_center_font_ui_y
-    @center_ui_y = self.height  / 2 - 100
-    @center_ui_x = self.width / 2 - 100
+    @center_ui_y = -(self.height  / 2) + self.height  / 2
+    @center_ui_x = self.width / 2
   end
 end

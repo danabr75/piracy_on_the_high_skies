@@ -35,7 +35,7 @@ class Launcher < DumbProjectile
   end
 
   # Used via hardpoint
-  def self.get_image_hardpoint
+  def self.get_hardpoint_image
     # raise "Override me"
     # default
     Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
@@ -63,7 +63,7 @@ class Launcher < DumbProjectile
 
   def get_hardpoint_image
     # default
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-beam-hardpoint.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
   end
 
   def deactivate

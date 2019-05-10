@@ -25,10 +25,14 @@ class Hardpoint < GeneralObject
     @y_offset = y_offset# * scale
     super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, options)
     @main_weapon = nil
-    @assigned_weapon_class = weapon_klass
     @drawable_items_near_self = []
 
-    @image_hardpoint = weapon_klass.get_image_hardpoint
+    if weapon_klass
+      @assigned_weapon_class = weapon_klass
+      @image_hardpoint = weapon_klass.get_hardpoint_image
+    else
+      @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
+    end
     @image_hardpoint_width_half = @image_hardpoint.width  / 2
     @image_hardpoint_height_half = @image_hardpoint.height  / 2
     @image_angle = options[:image_angle]
@@ -50,9 +54,11 @@ class Hardpoint < GeneralObject
       options = {}
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       options[:image_angle] = @image_angle
-      @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, options)
-      @drawable_items_near_self << @main_weapon
-      attack_projectile = @main_weapon.attack(pointer)
+      if @assigned_weapon_class
+        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, options)
+        @drawable_items_near_self << @main_weapon
+        attack_projectile = @main_weapon.attack(pointer)
+      end
     else
       @main_weapon.active = true if @main_weapon.active == false
       @drawable_items_near_self << @main_weapon
@@ -81,6 +87,7 @@ class Hardpoint < GeneralObject
   end
 
   def draw
+    # puts "DRAWING HARDPOINT: #{@x} and #{@y}"
     @drawable_items_near_self.reject! { |item| item.draw }
 
     if @image_angle != nil

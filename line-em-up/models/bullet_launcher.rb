@@ -5,7 +5,7 @@ class BulletLauncher < Launcher
   end
 
 
-  def self.get_image_hardpoint
+  def self.get_hardpoint_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
   end
   def draw

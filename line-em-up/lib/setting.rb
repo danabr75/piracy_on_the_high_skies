@@ -4,8 +4,8 @@ class Setting
   SELECTION = []
   NAME = "OverrideMe"
 
-  attr_accessor :x, :y, :font, :max_width, :max_height, :selection
-  def initialize fullscreen_height, max_width, max_height, height, config_file_path
+  attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :window
+  def initialize window, fullscreen_height, max_width, max_height, height, config_file_path
     @selection = self.class::SELECTION
     # puts "INNITING #{config_file_path}"
     @font = Gosu::Font.new(20)
@@ -19,6 +19,13 @@ class Setting
     @name = self.class::NAME
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     @fullscreen_height = fullscreen_height
+    @button_id_mapping = self.class.get_id_button_mapping
+  end
+
+  def self.get_id_button_mapping
+    {
+      next: lambda { |setting| setting.next_clicked }
+    }
   end
 
   def get_values
@@ -35,40 +42,49 @@ class Setting
   end
 
   def update mouse_x, mouse_y
+    return @value
   end
 
+  # required for LUIT objects, passes id of element
+  def onClick element_id
+    button_clicked_exists = @button_id_mapping.key?(element_id)
+    if button_clicked_exists
+      @button_id_mapping[element_id].call(self)
+    else
+      puts "Clicked button that is not mapped: #{element_id}"
+    end
+  end
+
+  def previous_clicked
+    index = @selection.index(@value)
+    value = @value
+    if index == 0
+      value = @selection[@selection.count - 1]
+    else
+      value = @selection[index - 1]
+    end
+    ConfigSetting.set_setting(@config_file_path, @name, value)
+    @value = value
+  end
+
+  def next_clicked
+    index = @selection.index(@value)
+    value = @value
+    if index == @selection.count - 1
+      value = @selection[0]
+    else
+      value = @selection[index + 1]
+    end
+    ConfigSetting.set_setting(@config_file_path, @name, value)
+    @value = value
+  end
+
+  # Deprecating, using Liut
   def clicked mx, my
-    puts "CLICKED!!!!"
     if is_mouse_hovering_next(mx, my)
-      puts "NEXT!!"
-      puts "Value: #{@value}"
-      puts "@selection: #{@selection}"
-      index = @selection.index(@value)
-      puts "INDEX: #{index}"
-      value = @value
-      if index == 0
-        value = @selection[@selection.count - 1]
-      else
-        value = @selection[index - 1]
-      end
-      ConfigSetting.set_setting(@config_file_path, @name, value)
-      @value = value
+      previous_clicked
     elsif is_mouse_hovering_prev(mx, my)
-      puts "NEXT!!"
-      puts "Value: #{@value}"
-      puts "@selection: #{@selection}"
-      index = @selection.index(@value)
-      puts "INDEX: #{index}"
-      value = @value
-      if index == @selection.count - 1
-        value = @selection[0]
-      else
-        puts "INDEX: #{index}"
-        puts "@selection[index + 1]: #{@selection[index + 1]}"
-        value = @selection[index + 1]
-      end
-      ConfigSetting.set_setting(@config_file_path, @name, value)
-      @value = value
+      next_clicked
     end
   end
 
