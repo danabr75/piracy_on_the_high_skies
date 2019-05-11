@@ -72,6 +72,7 @@ class GameWindow < Gosu::Window
   attr_accessor :width, :height, :block_all_controls
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @window = self
     @open_gl_executer = ExecuteOpenGl.new
     @difficulty = options[:difficulty]
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false

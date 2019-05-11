@@ -1,69 +1,19 @@
-# A simple "Triangle Game" that allows you to move a Roguelike '@' around the
-# window (and off of it). This is a working example on MacOS 10.12 as of Dec 16, 2017.
-# This combines some of the Ruby2D tutorial code with keypress management
-# that actually works.
-# 
-# Keys: hjkl: movement, q: quit
-# 
-# To run: ruby triangle-game.rb after installing the Simple2D library and Ruby2D Gem.
-#
-# Author: Douglas P. Fields, Jr.
-# E-mail: symbolics@lisp.engineer
-# Site: https://symbolics.lisp.engineer/
-# Copyright 2017 Douglas P. Fields, Jr.
-# License: The MIT License
-
-# require 'gosu'
-
-# Encoding: UTF-8
-
-# The tutorial game over a landscape rendered with OpenGL.
-# Basically shows how arbitrary OpenGL calls can be put into
-# the block given to Window#gl, and that Gosu Images can be
-# used as textures using the gl_tex_info call.
-
-# require 'rubygems'
 require 'gosu'
+require 'luit'
 
+
+VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors"
+require "#{VENDOR_DIRECTORY}/lib/luit.rb"
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
-
-# ONLY ENABLE FOR WINDOWS COMPILATION
-# Place opengl lib in lib library
-# Replace the meths list iteration with the following (added rescue blocks):
-  # meths.each do |mn|
-  #   define_singleton_method(mn) do |*args,&block|
-  #     begin
-  #       implementation.send(mn, *args, &block)
-  #     rescue
-  #     end
-  #   end
-  #   define_method(mn) do |*args,&block|
-  #     begin
-  #       implementation.send(mn, *args, &block)
-  #     rescue
-  #     end
-  #   end
-  #   private mn
-  # end
-# For WINDOWS - using local lip
-# require_relative 'lib/opengl.rb'
-# FOR Linux\OSX - using opengl gem
-# require 'opengl'
-
-
-# require_relative 'media'
-# Dir["/path/to/directory/*.rb"].each {|file| require file }
-# 
-# exit if Object.const_defined?(:Ocra) #allow ocra to create an exe without executing the entire script
-
-
-
-# RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768]]
-# WIDTH, HEIGHT = 1080, 720
+Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
+Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
+require 'opengl'
 
 class LoadoutWindow < Gosu::Window
-  attr_accessor :width, :height, :block_all_controls
+  # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+  MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
+
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   puts "TEMP SAVE PATH: #{CURRENT_DIRECTORY}/../save.txt"
   SAVE_FILE = "#{CURRENT_DIRECTORY}/../save.txt"
@@ -82,7 +32,13 @@ class LoadoutWindow < Gosu::Window
     # end
   end
 
+  attr_accessor :width, :height, :block_all_controls
+  # attr_accessor :mouse_x, :mouse_y
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    # @mouse_y = 0
+    # @mouse_x = 0
+    @window = self
+    LUIT.config({window: @window, z: 25})
     config_path = options[:config_path] || CONFIG_FILE
     @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
     super(@width, @height, false)
@@ -101,7 +57,6 @@ class LoadoutWindow < Gosu::Window
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/item.png", false), x, y, 1, lambda { })
     #   y += lineHeight
     # }, lambda {}]
-    @window = self
     @menu = Menu.new(@window)
     # for i in (0..items.size - 1)
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}.png", false), x, y, 1, actions[i], Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}_hover.png", false))
@@ -142,7 +97,7 @@ class LoadoutWindow < Gosu::Window
     # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
     @button_id_mapping = self.class.get_id_button_mapping
-    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height - 50, "Back To Menu", 0, 1)
+    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back To Menu", 0, 1)
   end
 
   def dynamic_get_resolution_fs
@@ -155,7 +110,7 @@ class LoadoutWindow < Gosu::Window
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @ship_value)
 
 
-    @back_button.update(-(@back_button.w / 2), -(@back_button.h / 2))
+    @back_button.update(-(@back_button.w / 2), -(@back_button.h))
 
     # @resolution_menu.update(self.mouse_x, self.mouse_y)
     # @difficulty_menu.update(self.mouse_x, self.mouse_y)
@@ -166,8 +121,8 @@ class LoadoutWindow < Gosu::Window
   end
 
   def draw
-    @cursor.draw(self.mouse_x, self.mouse_y, 2)
-    @back_button.draw(-(@back_button.w / 2), -(@back_button.h / 2))
+    @cursor.draw(self.mouse_x, self.mouse_y, 100)
+    @back_button.draw(-(@back_button.w / 2), -(@back_button.h))
     # @back.draw(0,0,0)
     reset_center_font_ui_y
     @menu.draw
@@ -212,6 +167,7 @@ class LoadoutWindow < Gosu::Window
 
   # required for LUIT objects, passes id of element
   def onClick element_id
+    puts "LOADOUT WINDOW ONCLICK"
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
       @button_id_mapping[element_id].call(self)
@@ -220,3 +176,6 @@ class LoadoutWindow < Gosu::Window
     end
   end
 end
+
+
+LoadoutWindow.new.show if __FILE__ == $0

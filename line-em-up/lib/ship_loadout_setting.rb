@@ -1,3 +1,5 @@
+require 'luit'
+
 require_relative 'setting.rb'
 require_relative '../models/basic_ship.rb'
 require_relative '../models/launcher.rb'
@@ -15,6 +17,8 @@ class ShipLoadoutSetting < Setting
 
   attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
   def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path, ship_value
+    @window = window
+    LUIT.config({window: @window, z: 25})
     @selection = []
     @launchers = ::Launcher.descendants.collect{|d| d.name}
     puts "SELECTION: #{@selection}"
@@ -146,6 +150,10 @@ class ShipLoadoutSetting < Setting
       image = klass.get_hardpoint_image
       image.draw(x, @y, 1)
       x = x + image.width * 2
+
+      # @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back To Menu", 0, 1)
+      click_area = LUIT::ClickArea.new(self, :click_me, x, @y, 0, 1)
+      click_area.draw(0, 0)
     end
 
     @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)

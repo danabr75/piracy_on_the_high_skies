@@ -16,6 +16,7 @@ include GLUT
 
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
+VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors/"
 CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
 # include OpenGL
@@ -27,4 +28,5 @@ CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
 Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
+Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
 

@@ -1,6 +1,11 @@
+
 class Main < Gosu::Window
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
+  require "#{CURRENT_DIRECTORY}/../game_window.rb"
+  require "#{CURRENT_DIRECTORY}/../loadout_window.rb"
+
+
   def initialize config_path = nil
     config_path = CONFIG_FILE if config_path.nil?
     @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}

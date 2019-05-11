@@ -47,6 +47,8 @@ class Setting
 
   # required for LUIT objects, passes id of element
   def onClick element_id
+    puts "ONCLICK mappuing"
+    puts @button_id_mapping
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
       @button_id_mapping[element_id].call(self)
