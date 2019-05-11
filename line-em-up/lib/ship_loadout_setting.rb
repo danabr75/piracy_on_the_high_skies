@@ -17,12 +17,7 @@ class ShipLoadoutSetting < Setting
 
   attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
   def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path, ship_value
-    @window = window
-    LUIT.config({window: @window, z: 25})
-    @selection = []
-    @launchers = ::Launcher.descendants.collect{|d| d.name}
-    puts "SELECTION: #{@selection}"
-    # puts "INNITING #{config_file_path}"
+    @window = window # Want relative to self, not window. Can't do that from settting, not a window.
     @font = Gosu::Font.new(20)
     # @x = width
     @y = current_height
@@ -30,6 +25,18 @@ class ShipLoadoutSetting < Setting
     @max_height = max_height
     @next_x = 15
     @prev_x = @max_width - 15 - @font.text_width('>')
+    LUIT.config({window: @window, z: 25})
+    @selection = []
+    @launchers = ::Launcher.descendants.collect{|d| d.name}
+    @meta_launchers = []
+    @launchers.each do |klass_name|
+      klass = eval(klass_name)
+      image = klass.get_hardpoint_image
+      click_area = LUIT::ClickArea.new(@window, :click_me, 0, 0, 0, 1)
+      @meta_launchers << {klass: klass, click_area: click_area, image: image}
+    end
+    puts "SELECTION: #{@selection}"
+    # puts "INNITING #{config_file_path}"
     @config_file_path = config_file_path
     @name = self.class::NAME
     @ship_value = ship_value
@@ -52,6 +59,21 @@ class ShipLoadoutSetting < Setting
   end
 
   def update mouse_x, mouse_y, ship_value
+
+    x = @next_x
+    click_area_x = 0
+    @meta_launchers.each do |launcher|
+      klass = launcher[:klass]
+      click_area = launcher[:click_area]
+
+      image = launcher[:image]
+      # click_area.update(click_area_x, 0)
+      click_area.update(0, 0)
+      x = x + image.width * 2
+      click_area_x = click_area_x + click_area.w * 2
+    end
+
+
     if ship_value != @ship_value
       puts "NEW SHIP VALUE"
       @ship_value = ship_value
@@ -145,15 +167,17 @@ class ShipLoadoutSetting < Setting
   def draw
     # @font.draw("<", @next_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
     x = @next_x
-    @launchers.each do |launcher|
-      klass = eval(launcher)
-      image = klass.get_hardpoint_image
+    click_area_x = 0
+    @meta_launchers.each do |launcher|
+      klass = launcher[:klass]
+      click_area = launcher[:click_area]
+      # image = klass.get_hardpoint_image
+      image = launcher[:image]
+      # click_area.draw(click_area_x, 0)
+      click_area.draw(0, 0)
       image.draw(x, @y, 1)
       x = x + image.width * 2
-
-      # @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back To Menu", 0, 1)
-      click_area = LUIT::ClickArea.new(self, :click_me, x, @y, 0, 1)
-      click_area.draw(0, 0)
+      click_area_x = click_area_x + click_area.w * 2
     end
 
     @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
