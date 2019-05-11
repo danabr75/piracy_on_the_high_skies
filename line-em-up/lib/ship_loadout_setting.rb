@@ -15,9 +15,13 @@ class ShipLoadoutSetting < Setting
   #   ::Launcher.descendants
   # end
 
-  attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
+  # attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
+  attr_accessor :value, :ship_value
+  attr_accessor :mouse_x, :mouse_y
   def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path, ship_value
-    @window = window # Want relative to self, not window. Can't do that from settting, not a window.
+    # @window = window # Want relative to self, not window. Can't do that from settting, not a window.
+    @mouse_x, @mouse_y = [0,0]
+    @window = self # ignoring outer window here? Want actions relative to this window.
     @font = Gosu::Font.new(20)
     # @x = width
     @y = current_height
@@ -29,11 +33,18 @@ class ShipLoadoutSetting < Setting
     @selection = []
     @launchers = ::Launcher.descendants.collect{|d| d.name}
     @meta_launchers = []
-    @launchers.each do |klass_name|
+    @button_id_mapping = self.class.get_id_button_mapping
+    @launchers.each_with_index do |klass_name, index|
       klass = eval(klass_name)
       image = klass.get_hardpoint_image
-      click_area = LUIT::ClickArea.new(@window, :click_me, 0, 0, 0, 1)
-      @meta_launchers << {klass: klass, click_area: click_area, image: image}
+      button_key = "clicked_launcher_#{index}".to_sym
+                         # initialize(holder, id, x, y, w = 0, h = 0)
+      # click_area = LUIT::Button.new(@window, button_key, 0, 0, 'X', image.width, image.height)
+      click_area = LUIT::ClickArea.new(@window, button_key, 0, 0, image.width, image.height)
+      @meta_launchers << {
+        klass: klass, click_area: click_area, image: image, index: index, click_key: button_key
+      }
+      @button_id_mapping[button_key] = lambda { |setting| setting.stick_launcher_to_cursor(self) }
     end
     puts "SELECTION: #{@selection}"
     # puts "INNITING #{config_file_path}"
@@ -50,7 +61,24 @@ class ShipLoadoutSetting < Setting
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     @fullscreen_height = fullscreen_height
     @window = window
+
   end
+
+  def stick_launcher_to_cursor launcher
+    puts "LUANCHER: #{launcher}"
+    puts "stick_launcher_to_cursor: "
+    @meta_launchers
+    # Remove launcher from meta_launcher list.
+    # Stick it to cursor
+  end
+
+  def self.get_id_button_mapping
+    {
+      next: lambda { |setting| setting.next_clicked },
+      previous: lambda { |setting| setting.previous_clicked }
+    }
+  end
+
   def get_values
     # puts "GETTING DIFFICULTY: #{@value}"
     if @value
@@ -59,18 +87,19 @@ class ShipLoadoutSetting < Setting
   end
 
   def update mouse_x, mouse_y, ship_value
-
+    @mouse_x, @mouse_y = [mouse_x, mouse_y]
+    puts "SHIP LOADOUT SETTING - UPDATE"
     x = @next_x
-    click_area_x = 0
+    click_area_x = @next_x
     @meta_launchers.each do |launcher|
       klass = launcher[:klass]
       click_area = launcher[:click_area]
 
       image = launcher[:image]
-      # click_area.update(click_area_x, 0)
-      click_area.update(0, 0)
-      x = x + image.width * 2
-      click_area_x = click_area_x + click_area.w * 2
+      click_area.update(click_area_x, @y)
+      # click_area.update(0, 0)
+      x = x + image.width
+      click_area_x = click_area_x + click_area.w
     end
 
 
@@ -167,17 +196,17 @@ class ShipLoadoutSetting < Setting
   def draw
     # @font.draw("<", @next_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
     x = @next_x
-    click_area_x = 0
+    click_area_x = @next_x
     @meta_launchers.each do |launcher|
       klass = launcher[:klass]
       click_area = launcher[:click_area]
       # image = klass.get_hardpoint_image
       image = launcher[:image]
-      # click_area.draw(click_area_x, 0)
-      click_area.draw(0, 0)
+      click_area.draw(click_area_x, @y)
+      # click_area.draw(0, 0)
       image.draw(x, @y, 1)
-      x = x + image.width * 2
-      click_area_x = click_area_x + click_area.w * 2
+      x = x + image.width
+      click_area_x = click_area_x + click_area.w
     end
 
     @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
