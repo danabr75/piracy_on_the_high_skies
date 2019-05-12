@@ -25,29 +25,78 @@ class Main < Gosu::Window
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/item.png", false), x, y, 1, lambda { })
     #   y += lineHeight
     # }, lambda {}]
-    @menu = Menu.new(self)
-    # for i in (0..items.size - 1)
-    #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}.png", false), x, y, 1, actions[i], Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}_hover.png", false))
-    #   y += lineHeight
-    # end
-    exit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/exit.png")
-    # puts "WIDTH HERE: #{exit_image.width}"
-    # 8
-    @menu.add_item(exit_image, ((@width / 2) - (exit_image.width / 2)), get_center_font_ui_y, 1, lambda { self.close }, exit_image)
+
+    # exit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/exit.png")
+
+
+    # @menu.add_item(exit_image, @, @menu.y_offset, 1, lambda { self.close }, exit_image)
+
+
     window_height = Gosu.screen_height
     @window = self
     @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @difficulty = nil
     @difficulty_menu = DifficultySetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+    @menu = Menu.new(self, @width / 2, get_center_font_ui_y, ZOrder::UI)
+    button_key = :exit
+    @menu.add_item(
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
+      0,
+      0,
+      lambda {|window, id| self.close },
+      nil,
+      {is_button: true, key: button_key}
+    )
+    # Just move everything else above the menu
+    # increase_center_font_ui_y(@menu.current_height)
 
-    start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
-    @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
-    @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
-    loadout_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/loadout.png")
-    @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) }, loadout_image)
-    debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
-    @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
+    # start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
+    # @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]
+    # @menu.add_item(start_image, (@width / 2) - (start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) }, start_image)
+
+    button_key = :start_game
+    @menu.add_item(
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Start", 0, 1),
+      0,
+      0,
+      lambda {|window, id| self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) },
+      # lambda {|window, id| self.close },
+      nil,
+      {is_button: true, key: button_key}
+    )
+
+
+
+
+    # loadout_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/loadout.png")
+    # @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) }, loadout_image)
+    button_key = :loadout
+    @menu.add_item(
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Loadout", 0, 1),
+      0,
+      0,
+      lambda {|window, id| self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) },
+      nil,
+      {is_button: true, key: button_key}
+    )
+
+    # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
+    # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
+
+    button_key = :debug_start
+    @menu.add_item(
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Debug Start", 0, 1),
+      0,
+      0,
+      lambda {|window, id| self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) },
+      nil,
+      {is_button: true, key: button_key}
+    )
+
+
+
+
     # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Resolution", width / 2, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
     # @font.draw(">", width - 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
@@ -69,7 +118,7 @@ class Main < Gosu::Window
   end
 
   def draw
-    @cursor.draw(self.mouse_x, self.mouse_y, 2)
+    @cursor.draw(self.mouse_x, self.mouse_y, ZOrder::Cursor)
     # @back.draw(0,0,0)
     reset_center_font_ui_y
     @menu.draw
@@ -86,11 +135,20 @@ class Main < Gosu::Window
     end
   end
 
-  def get_center_font_ui_y
-    return_value = @center_ui_y
-    @center_ui_y += 50 
-    return return_value
+  def increase_center_font_ui_y amount
+    @center_ui_y += amount 
   end
+
+  def get_center_font_ui_y
+    increase_center_font_ui_y(50)
+  end
+
+
+  # def get_center_font_ui_y
+  #   return_value = @center_ui_y
+  #   @center_ui_y += 50 
+  #   return return_value
+  # end
 
   def get_center_font_ui_x
     return @center_ui_x

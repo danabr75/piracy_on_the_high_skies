@@ -87,7 +87,7 @@ class LoadoutWindow < Gosu::Window
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/item.png", false), x, y, 1, lambda { })
     #   y += lineHeight
     # }, lambda {}]
-    @menu = Menu.new(@window)
+    @menu = Menu.new(@window, @width, get_center_font_ui_y)
     # for i in (0..items.size - 1)
     #   @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}.png", false), x, y, 1, actions[i], Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/#{items[i]}_hover.png", false))
     #   y += lineHeight

@@ -296,7 +296,7 @@ class GameWindow < Gosu::Window
 
   def get_center_font_ui_y
     return_value = @center_ui_y
-    @center_ui_y += 50 
+    @center_ui_y += 10 * @scale
     return return_value
   end
 
@@ -305,8 +305,8 @@ class GameWindow < Gosu::Window
   end
 
   def reset_center_font_ui_y
-    @center_ui_y = @height  / 2 - 100
-    @center_ui_x = @width / 2 - 100
+    @center_ui_y = @height  / 2
+    @center_ui_x = @width / 2
   end
 
   def is_debug?
@@ -326,7 +326,20 @@ class GameWindow < Gosu::Window
         @menu_open = true
         @can_open_menu = false
         @menu = Menu.new(self)
-        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
+
+
+        button_key = :resume
+        @menu.add_item(
+          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Resume", 0, 1),
+          0,
+          0,
+          ZOrder::UI,
+          lambda {|window, id| @menu_open = false; @menu = nil; @can_open_menu = true; },
+          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
+          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
+          {is_button: true, key: button_key}
+        )
+        # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
 
 
         # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
@@ -342,10 +355,34 @@ class GameWindow < Gosu::Window
           nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
           {is_button: true, key: button_key}
         )
+        button_key = :back_to_menu
+        @menu.add_item(
+          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Back To Menu", 0, 1),
+          0,
+          0,
+          ZOrder::UI,
+          lambda {|window, id| self.close; Main.new.show }, 
+          # lambda {|window, id| self.close; LoadoutWindow.new.show },
+          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
+          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
+          {is_button: true, key: button_key}
+        )
 
+        button_key = :exit
+        @menu.add_item(
+          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Exit", 0, 1),
+          0,
+          0,
+          ZOrder::UI,
+          lambda {|window, id| self.close; }, 
+          # lambda {|window, id| self.close; LoadoutWindow.new.show },
+          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
+          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
+          {is_button: true, key: button_key}
+        )
 
-        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
-        @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false))
+        # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
+        # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false))
         # close!
       end
       if Gosu.button_down?(Gosu::KB_M)

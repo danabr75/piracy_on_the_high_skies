@@ -11,6 +11,7 @@ class MenuItem
         # Can also be a font object!
         @active_image = @main_image
         @is_button = options[:is_button]
+        @y_offset = options[:y_offset] || 0
         # @text = options[:text]
         # @value = options[:value]
         # @settings_name = options[:settings_name]
@@ -24,7 +25,8 @@ class MenuItem
       elsif !@is_button
         @active_image.draw(@x, @y, @z)
       elsif @is_button
-        @main_image.draw(@main_image.w / 2, @main_image.h / 2)
+        @main_image.draw(-(@main_image.w / 2), -(@y_offset - @main_image.h / 2))
+        # @main_image.draw(0, 0)
       end
     end
 
@@ -44,7 +46,7 @@ class MenuItem
               @y = @original_y
           end
         else
-          @main_image.update(@main_image.w / 2, @main_image.h / 2)
+          @main_image.update(-(@main_image.w / 2), -(@y_offset - @main_image.h / 2))
         end
     end
 

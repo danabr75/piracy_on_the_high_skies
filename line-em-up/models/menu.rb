@@ -1,20 +1,38 @@
 require_relative 'menu_item.rb'
 class Menu
-    attr_accessor :local_window
-    def initialize (window)
+    attr_accessor :local_window, :current_height, :x, :y
+    def initialize(window, x, y, z = ZOrder::UI)
         @window = window
+        @x = x
+        @y = y
+        @z = z
+        # @offset_y = 0
         @local_window = self
-        LUIT.config({window: @window, z: 25})
+        LUIT.config({window: @window, z: z})
         @items = Array.new
+        @current_height = 0
         # Add to it while the buttons are being added, in add_item
         @button_id_mapping = {}
     end
 
-    def add_item(object, x, y, z, callback, hover_image = nil, options = {})
+    # For external use
+    def increase_y_offset amount
+        @current_height = @current_height + amount
+    end
+
+    def add_item(object, x, y, callback, hover_image = nil, options = {})
         if options[:key]
           @button_id_mapping[options[:key]] = callback
         end
-        item = MenuItem.new(@window, object, x, y, z, callback, hover_image, options)
+        if options[:is_button]
+
+        end
+        item = MenuItem.new(@window, object, x, y, @z, callback, hover_image, options)
+        if options[:is_button]
+          @current_height = @current_height + object.h
+        else
+          @current_height = @current_height + object.height
+        end
         @items << item
         self
     end
