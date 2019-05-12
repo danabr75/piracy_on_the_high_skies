@@ -71,7 +71,7 @@ class ShipLoadoutSetting < Setting
     # puts "FILLER ITEMS: #{@filler_items}"
     fill_matrix(@filler_items)
     @cursor_object = nil
-    @ship_clickable_hardpoints = get_ship_hardpoint_click_areas(@ship)
+    @ship_hardpoints = init_hardpoints(@ship)
   end
 
   def self.get_id_button_mapping
@@ -143,6 +143,30 @@ class ShipLoadoutSetting < Setting
     end
   end
 
+  def hardpoint_draw
+    @ship_hardpoints.each do |key, list|
+      if list.any?
+        list.each do |value|
+          click_area = value[:click_area]
+          if click_area
+            click_area.draw(0, 0)
+          else
+            # puts " NO CLICK AREA FOUND"
+          end
+          item = value[:item]
+          if item
+            image = item[:image]
+            if image
+              image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
+            end
+          end
+        end
+      else
+        # puts " KEY DID NOT HAVE Value"
+      end
+    end
+  end
+
   def matrix_update
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
@@ -167,7 +191,7 @@ class ShipLoadoutSetting < Setting
     end
   end
 
-  def get_ship_hardpoint_click_areas ship
+  def init_hardpoints ship
     # Populate ship hardpoints from save file here.
     # will be populated from the ship, don't need to here.
     value = {front: [], right: [], left: []}
@@ -181,11 +205,11 @@ class ShipLoadoutSetting < Setting
         click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, @cell_width, @cell_height)
         @button_id_mapping[button_key] = lambda { |setting, id| setting.click_ship_hardpoint(id) }
         item = {
-          image: image, click_area: click_area, follow_cursor: false, key: button_key, 
+          image: image, key: button_key, 
           weapon_klass: hp.assigned_weapon_class, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset
         }
 
-        value[:right] << {item: item, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset}
+        value[:right] << {item: item, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset, click_area: click_area, key: button_key}
       else
         puts "NO WEAPON GLASS FOUND"
       end
@@ -203,30 +227,51 @@ class ShipLoadoutSetting < Setting
 
   def click_ship_hardpoint id
     puts "click_ship_hardpoint: #{id}"
-    @ship_clickable_hardpoints.each do |key, list|
-      if list.any?
-        list.each do |value|
-          # puts "VALUE - #{value[:key]}"
-          follow_cursor = false
-          if id == value[:key] && value[:follow_cursor] == true
-            # puts "CURSER WAS TRUE"
-            value[:follow_cursor] = false
-            @cursor_object = false
-          elsif id == value[:key]
-            # puts "FOLLOW CURSER"
-            follow_cursor = true
-            value[:follow_cursor] = true
-            @cursor_object = value
-          else
-            # puts "ID #{id} was not equal to #{value[:key]}"
-          end
-          if value[:follow_cursor] == true && follow_cursor == false
-            value[:follow_cursor] = false
-            @cursor_object = nil
-          end
-          # puts "END VALUE: #{value[:key]}"
-        end
+    # Key is front, right, or left
+
+
+    port, i = id.scan(/(\w+)_broadside_hardpoint_(\d+)/).first
+    port, i = [port.to_sym, i.to_i]
+    puts "PORT AND I: #{port} and #{i}"
+
+    hardpoint_element = @ship_hardpoints[port][i]
+    element = hardpoint_element ? hardpoint_element[:item] : nil
+
+    if @cursor_object && element
+      puts "@cursor_object[:key]: #{@cursor_object[:key]}"
+      puts "ID: #{id}"
+      puts "== #{@cursor_object[:key] == id}"
+      if @cursor_object[:key] == id
+        # Same Object, Unstick it, put it back
+        # element[:follow_cursor] = false
+        # @inventory_matrix[x][y][:item][:follow_cursor] =
+        hardpoint_element[:item] = @cursor_object
+        hardpoint_element[:item][:key] = id
+        @cursor_object = nil
+      else
+        # Else, drop object, pick up new object
+        # @cursor_object[:follow_cursor] = false
+        # element[:follow_cursor] = true
+        temp_element = element
+        hardpoint_element[:item] = @cursor_object
+        hardpoint_element[:item][:key] = id
+        @cursor_object = temp_element
+        @cursor_object[:key] = nil # Original home lost, no last home of key present
+        # @cursor_object[:follow_cursor] = true
+        # WRRROOOONNGGG!
+        # element = 
       end
+    elsif element
+      # Pick up element, no current object
+      # element[:follow_cursor] = true
+      @cursor_object = element
+      hardpoint_element[:item] = nil
+    elsif @cursor_object
+      # Placeing something new in inventory
+      hardpoint_element[:item] = @cursor_object
+      hardpoint_element[:item][:key] = id
+      # matrix_element[:item][:follow_cursor] = false
+      @cursor_object = false
     end
   end
 
@@ -287,6 +332,19 @@ class ShipLoadoutSetting < Setting
     end
   end
 
+  def hardpoint_update
+    @ship_hardpoints.each do |key, list|
+      if list.any?
+        list.each do |value|
+          click_area = value[:click_area]
+          if click_area
+            click_area.update(0, 0)
+          end
+        end
+      end
+    end
+  end
+
   def update mouse_x, mouse_y, ship_value
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
     # puts "SHIP LOADOUT SETTING - UPDATE"
@@ -303,19 +361,7 @@ class ShipLoadoutSetting < Setting
     #   click_area_x = click_area_x + click_area.w
     # end
 
-    @ship_clickable_hardpoints.each do |key, list|
-      if list.any?
-        list.each do |value|
-          click_area = value[:click_area]
-          if click_area
-            click_area.update(0, 0)
-          end
-          # No need to update image?
-          # image = value[:image]
-          # image.draw()
-        end
-      end
-    end
+    hardpoint_update
 
     matrix_update
 
@@ -323,7 +369,7 @@ class ShipLoadoutSetting < Setting
       @ship_value = ship_value
       klass = eval(@ship_value)
       @ship = klass.new(1, @max_width / 2, @y + klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY).height / 2, @max_width, @max_height, {use_large_image: true, hide_hardpoints: true})
-      @ship_clickable_hardpoints = get_ship_hardpoint_click_areas(@ship)
+      @ship_hardpoints = get_ship_hardpoint_click_areas(@ship)
     else
       # Do nothing
     end
@@ -394,31 +440,32 @@ class ShipLoadoutSetting < Setting
     #   click_area_x = click_area_x + click_area.w
     # end
 
+    hardpoint_draw
 
-    @ship_clickable_hardpoints.each do |key, list|
-      # puts "KEY: #{key}"
-      if list.any?
-        list.each do |value|
-          click_area = value[:click_area]
-          if click_area
-            click_area.draw(0, 0)
-          else
-            # puts " NO CLICK AREA FOUND"
-          end
-          image = value[:image]
-          if image
-            if value[:follow_cursor]
-              image.draw(@mouse_x, @mouse_y, @hardpoint_image_z)
-            else
-              image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
-              # image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z)
-            end
-          end
-        end
-      else
-        # puts " KEY DID NOT HAVE Value"
-      end
-    end
+    # @ship_hardpoints.each do |key, list|
+    #   # puts "KEY: #{key}"
+    #   if list.any?
+    #     list.each do |value|
+    #       click_area = value[:click_area]
+    #       if click_area
+    #         click_area.draw(0, 0)
+    #       else
+    #         # puts " NO CLICK AREA FOUND"
+    #       end
+    #       image = value[:image]
+    #       if image
+    #         if value[:follow_cursor]
+    #           image.draw(@mouse_x, @mouse_y, @hardpoint_image_z)
+    #         else
+    #           image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
+    #           # image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z)
+    #         end
+    #       end
+    #     end
+    #   else
+    #     # puts " KEY DID NOT HAVE Value"
+    #   end
+    # end
 
     matrix_draw
 
