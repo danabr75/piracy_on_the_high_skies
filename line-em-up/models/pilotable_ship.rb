@@ -24,6 +24,7 @@ class PilotableShip < GeneralObject
   RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = []
   LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
 
+  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   def initialize(scale, x, y, screen_width, screen_height, options = {})
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
@@ -79,7 +80,15 @@ class PilotableShip < GeneralObject
 
     # Load hardpoints from CONFIG FILE HERE, plug in launcher class !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
+    # get_config_save_settings = [self.class.name]
+
+    # # ConfigSetting.set_mapped_setting(self.class::CONFIG_FILE, [BasicShip, 'front_hardpoint_locations', 1], 'launcher')
+    # ConfigSetting.set_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'], 'launcher')
+    # ConfigSetting.set_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '2'], 'launcher')
+    # ConfigSetting.set_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '3'], 'launcher')
+    # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
+
+    self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, location[:slot_type], options)
       # @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
