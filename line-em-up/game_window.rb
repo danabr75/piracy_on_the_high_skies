@@ -69,9 +69,14 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 class GameWindow < Gosu::Window
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
   DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
+
+  CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+
   attr_accessor :width, :height, :block_all_controls
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @config_path = self.class::CONFIG_FILE
     @window = self
     @open_gl_executer = ExecuteOpenGl.new
     @difficulty = options[:difficulty]
@@ -82,21 +87,43 @@ class GameWindow < Gosu::Window
     @center_ui_y = 0
     @center_ui_x = 0
 
-    @width  = width || DEFAULT_WIDTH
-    @height = height || DEFAULT_HEIGHT
+    # @width  = width || DEFAULT_WIDTH
+    # @height = height || DEFAULT_HEIGHT
 
-    reset_center_font_ui_y
+    # reset_center_font_ui_y
 
     # Need to just pull from config file.. and then do scaling. See LoadoutWindow
-    index = GameWindow.find_index_of_current_resolution(self.width, self.height)
-    if index == 0
+    # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
+    # if index == 0
+    #   @scale = 1
+    # else
+    #   original_width, original_height = RESOLUTIONS[0]
+    #   width_scale = @width / original_width.to_f
+    #   height_scale = @height / original_height.to_f
+    #   @scale = (width_scale + height_scale) / 2
+    # end
+    value = ConfigSetting.get_setting(@config_path, 'resolution', ResolutionSetting::SELECTION[0])
+    raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
+    width, height = value.split('x')
+    @width, @height = [width.to_i, height.to_i]
+
+    default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
+    # default_width, default_height = default_value.split('x')
+    default_width, default_height = [default_width.to_i, default_height.to_i]
+
+
+    # Need to just pull from config file.. and then do scaling.
+    # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
+    if @width == default_width && @height == @default_height
       @scale = 1
     else
-      original_width, original_height = RESOLUTIONS[0]
-      width_scale = @width / original_width.to_f
-      height_scale = @height / original_height.to_f
+      # original_width, original_height = RESOLUTIONS[0]
+      width_scale = @width / default_width.to_f
+      height_scale = @height / default_height.to_f
       @scale = (width_scale + height_scale) / 2
     end
+
+
     super(@width, @height)
     
     @game_pause = false
@@ -304,10 +331,10 @@ class GameWindow < Gosu::Window
     return @center_ui_x
   end
 
-  def reset_center_font_ui_y
-    @center_ui_y = @height  / 2
-    @center_ui_x = @width / 2
-  end
+  # def reset_center_font_ui_y
+  #   @center_ui_y = @height  / 2
+  #   @center_ui_x = @width / 2
+  # end
 
   def is_debug?
     ENV['debug'] == 'true' || ENV['debug'] == true
@@ -319,21 +346,20 @@ class GameWindow < Gosu::Window
       @start_fullscreen = false
       GameWindow.fullscreen(self)
     end
-    reset_center_font_ui_y
+    # reset_center_font_ui_y
     @menu.update if @menu
     if !@block_all_controls
       if Gosu.button_down?(Gosu::KbEscape) && @can_open_menu
         @menu_open = true
         @can_open_menu = false
-        @menu = Menu.new(self)
-
+        # @menu = Menu.new(self)
+        @menu = Menu.new(self, @width / 2, 10 * @scale, ZOrder::UI, @scale)
 
         button_key = :resume
         @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Resume", 0, 1),
+          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Resume", 0, 1),
           0,
           0,
-          ZOrder::UI,
           lambda {|window, id| @menu_open = false; @menu = nil; @can_open_menu = true; },
           # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
           nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
@@ -346,21 +372,22 @@ class GameWindow < Gosu::Window
         # (object, x, y, z, callback, hover_image = nil, options = {})
         button_key = :loadout
         @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Inventory", 0, 1),
+          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Inventory", 0, 1),
           0,
           0,
-          ZOrder::UI,
-          lambda {|window, id| self.close; LoadoutWindow.new.show },
+          lambda {|window, id|
+            self.close
+            LoadoutWindow.new(nil,nil,nil,{game_window: @window}).show
+          },
           # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
           nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
           {is_button: true, key: button_key}
         )
         button_key = :back_to_menu
         @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Back To Menu", 0, 1),
+          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Back To Menu", 0, 1),
           0,
           0,
-          ZOrder::UI,
           lambda {|window, id| self.close; Main.new.show }, 
           # lambda {|window, id| self.close; LoadoutWindow.new.show },
           # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
@@ -370,10 +397,9 @@ class GameWindow < Gosu::Window
 
         button_key = :exit
         @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Exit", 0, 1),
+          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
           0,
           0,
-          ZOrder::UI,
           lambda {|window, id| self.close; }, 
           # lambda {|window, id| self.close; LoadoutWindow.new.show },
           # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },

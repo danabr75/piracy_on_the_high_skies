@@ -8,7 +8,31 @@ class Main < Gosu::Window
 
   def initialize config_path = nil
     config_path = CONFIG_FILE if config_path.nil?
-    @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
+
+
+    # @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
+    value = ConfigSetting.get_setting(config_path, 'resolution', ResolutionSetting::SELECTION[0])
+    raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
+    width, height = value.split('x')
+    @width, @height = [width.to_i, height.to_i]
+
+    default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
+    # default_width, default_height = default_value.split('x')
+    default_width, default_height = [default_width.to_i, default_height.to_i]
+
+
+    # Need to just pull from config file.. and then do scaling.
+    # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
+    if @width == default_width && @height == @default_height
+      @scale = 1
+    else
+      # original_width, original_height = RESOLUTIONS[0]
+      width_scale = @width / default_width.to_f
+      height_scale = @height / default_height.to_f
+      @scale = (width_scale + height_scale) / 2
+    end
+
+
     super(@width, @height, false)
     @cursor = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/cursor.png", false)
     @gl_background = GLBackground.new
@@ -38,16 +62,7 @@ class Main < Gosu::Window
 
     @difficulty = nil
     @difficulty_menu = DifficultySetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
-    @menu = Menu.new(self, @width / 2, get_center_font_ui_y, ZOrder::UI)
-    button_key = :exit
-    @menu.add_item(
-      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
-      0,
-      0,
-      lambda {|window, id| self.close },
-      nil,
-      {is_button: true, key: button_key}
-    )
+    @menu = Menu.new(self, @width / 2, get_center_font_ui_y, ZOrder::UI, @scale)
     # Just move everything else above the menu
     # increase_center_font_ui_y(@menu.current_height)
 
@@ -90,6 +105,15 @@ class Main < Gosu::Window
       0,
       0,
       lambda {|window, id| self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) },
+      nil,
+      {is_button: true, key: button_key}
+    )
+    button_key = :exit
+    @menu.add_item(
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
+      0,
+      0,
+      lambda {|window, id| self.close },
       nil,
       {is_button: true, key: button_key}
     )

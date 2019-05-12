@@ -1,11 +1,13 @@
 require_relative 'menu_item.rb'
 class Menu
     attr_accessor :local_window, :current_height, :x, :y
-    def initialize(window, x, y, z = ZOrder::UI)
+    def initialize(window, x, y, z = ZOrder::UI, scale = 1)
+        @scale = scale
         @window = window
         @x = x
         @y = y
         @z = z
+        @cell_padding = 10 * @scale
         # @offset_y = 0
         @local_window = self
         LUIT.config({window: @window, z: z})
@@ -29,9 +31,9 @@ class Menu
         end
         item = MenuItem.new(@window, object, x, y, @z, callback, hover_image, options)
         if options[:is_button]
-          @current_height = @current_height + object.h
+          @current_height = @current_height + object.h + @cell_padding
         else
-          @current_height = @current_height + object.height
+          @current_height = @current_height + object.height + @cell_padding
         end
         @items << item
         self

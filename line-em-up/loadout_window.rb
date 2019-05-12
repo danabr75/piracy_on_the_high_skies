@@ -34,33 +34,47 @@ class LoadoutWindow < Gosu::Window
     # end
   end
 
-  attr_accessor :width, :height, :block_all_controls
+  attr_accessor :width, :height, :block_all_controls, :game_window
   # attr_accessor :mouse_x, :mouse_y
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    puts "INCOMING WIDHT AND HEIGHT: #{width} and #{height}"
     @config_file_path = self.class::CONFIG_FILE
     # @mouse_y = 0
     # @mouse_x = 0
     @window = self
+    @game_window = options[:game_window]
+    puts "NEW GAME WINDOW UIN LOADOUT"
+    puts @game_window
     # @scale = 1
     LUIT.config({window: @window, z: 25})
     config_path = options[:config_path] || CONFIG_FILE
  
 
+    if width.nil? || height.nil?
+      # @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
+      value = ConfigSetting.get_setting(@config_file_path, 'resolution', ResolutionSetting::SELECTION[0])
+      puts "RESOLUTION HERE: #{value}"
+      raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
+      width, height = value.split('x')
+      @width, @height = [width.to_i, height.to_i]
+    else
+      puts 'USING INCOMING'
+      @width = width
+      @height = height
+    end
 
-    # @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
-    value = ConfigSetting.get_setting(@config_file_path, 'resolution', ResolutionSetting::SELECTION[0])
-    raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
-    width, height = value.split('x')
-    @width, @height = [width.to_i, height.to_i]
 
     default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
     # default_width, default_height = default_value.split('x')
     default_width, default_height = [default_width.to_i, default_height.to_i]
+    puts "DEFAULT WIDTH AND HIEGHT: #{default_width} - #{default_height}"
+    puts "DEFAULT WIDTH AND HIEGHT.to_f: #{default_width.to_f} - #{default_height.to_f}"
 
+    puts " WIDTH AND HIEGHT.: #{ @width} - #{@height}"
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
-    if @width == default_width && @height == @default_height
+    if @width == default_width && @height == default_height
       @scale = 1
     else
       # original_width, original_height = RESOLUTIONS[0]
@@ -126,9 +140,9 @@ class LoadoutWindow < Gosu::Window
     # @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start() }, loadout_image)
     # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
-    @button_id_mapping = self.class.get_id_button_mapping
+    @button_id_mapping = self.class.get_id_button_mapping(self)
     # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
-    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back To Menu", 0, 1)
+    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back", 0, 1)
   end
 
   def dynamic_get_resolution_fs
@@ -192,9 +206,22 @@ class LoadoutWindow < Gosu::Window
     @center_ui_x = self.width / 2
   end
 
-  def self.get_id_button_mapping
+  def self.get_id_button_mapping(local_window)
     {
-      back: lambda { |window, id| window.close; Main.new.show }
+      # back: lambda { |window, id| window.close; Main.new.show }
+      back: lambda { |window, id|
+        # puts "SElocal_windowLF? #{local_window.class.name}"
+        # can't get it to bring the game window back
+        # self.close
+        local_window.close
+        # puts "!!!!!!GAME wINDOW: #{window.game_window}"
+        if window.game_window
+        #   window.game_window.show
+          GameWindow.new.show
+        else
+          Main.new.show
+        end
+      }
     }
   end
 
@@ -211,4 +238,4 @@ class LoadoutWindow < Gosu::Window
 end
 
 
-LoadoutWindow.new.show if __FILE__ == $0
+LoadoutWindow.new(nil,nil,nil,{game_window: nil}).show() if __FILE__ == $0

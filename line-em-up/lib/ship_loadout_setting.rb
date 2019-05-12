@@ -240,12 +240,12 @@ class ShipLoadoutSetting < Setting
         value[group[:location]] << {item: item, x: hp.x + hp.x_offset - (@cell_width / 2), y: hp.y + hp.y_offset - @cell_height / 2, click_area: click_area, key: button_key}
       end
     end
-    puts "VALUES HERE FRONT:"
-    puts value[:front]
-    puts "VALUES HERE RIGHT:"
-    puts value[:right].count
-    puts "VALUES HERE LEFT:"
-    puts value[:left].count
+    # puts "VALUES HERE FRONT:"
+    # puts value[:front]
+    # puts "VALUES HERE RIGHT:"
+    # puts value[:right].count
+    # puts "VALUES HERE LEFT:"
+    # puts value[:left].count
 
     # ship.left_broadside_hard_points.each do |hp|
     #   value[:left] << {weapon_klass: hp.assigned_weapon_class, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset}
