@@ -161,7 +161,7 @@ class LoadoutWindow < Gosu::Window
 
   def self.get_id_button_mapping
     {
-      back: lambda { |window| window.close; Main.new.show }
+      back: lambda { |window, id| window.close; Main.new.show }
     }
   end
 
@@ -170,7 +170,7 @@ class LoadoutWindow < Gosu::Window
     puts "LOADOUT WINDOW ONCLICK"
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
-      @button_id_mapping[element_id].call(self)
+      @button_id_mapping[element_id].call(self, element_id)
     else
       puts "Clicked button that is not mapped: #{element_id}"
     end

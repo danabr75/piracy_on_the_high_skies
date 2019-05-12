@@ -10,7 +10,7 @@ include GLUT
 
 # Not intended to be overridden
 class Hardpoint < GeneralObject
-  attr_accessor :x, :y
+  attr_accessor :x, :y, :assigned_weapon_class
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half, :image_angle
 
 

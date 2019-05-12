@@ -25,7 +25,7 @@ class Setting
 
   def self.get_id_button_mapping
     {
-      next: lambda { |setting| setting.next_clicked }
+      next: lambda { |setting, id| setting.next_clicked }
     }
   end
 
@@ -48,11 +48,11 @@ class Setting
 
   # required for LUIT objects, passes id of element
   def onClick element_id
-    puts "ONCLICK mappuing"
+    # puts "ONCLICK mappuing"
     puts @button_id_mapping
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
-      @button_id_mapping[element_id].call(self)
+      @button_id_mapping[element_id].call(self, element_id)
     else
       puts "Clicked button that is not mapped: #{element_id}"
     end

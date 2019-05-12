@@ -48,8 +48,8 @@ class ShipSetting < Setting
 
   def self.get_id_button_mapping
     {
-      next: lambda { |setting| setting.next_clicked },
-      previous: lambda { |setting| setting.previous_clicked }
+      next: lambda { |setting, id| setting.next_clicked },
+      previous: lambda { |setting, id| setting.previous_clicked }
     }
   end
 
@@ -68,7 +68,7 @@ class ShipSetting < Setting
 
   def update mouse_x, mouse_y
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
-    puts "SHIP SETTING - UPDATE"
+    # puts "SHIP SETTING - UPDATE"
     # @mouse_x = mouse_x
     # @mouse_y = mouse_y
     # @next_x = max_width / 5

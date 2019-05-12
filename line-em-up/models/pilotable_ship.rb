@@ -20,6 +20,10 @@ class PilotableShip < GeneralObject
   attr_accessor :right_broadside_mode, :left_broadside_mode, :right_broadside_hard_points, :left_broadside_hard_points, :front_hard_points
   MAX_HEALTH = 200
 
+  FRONT_HARDPOINT_LOCATIONS = []
+  RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = []
+  LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
+
   def initialize(scale, x, y, screen_width, screen_height, options = {})
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
@@ -71,8 +75,11 @@ class PilotableShip < GeneralObject
     @front_hard_points = []
     @left_broadside_hard_points = []
     @right_broadside_hard_points = []
+
+    # Load hardpoints from CONFIG FILE HERE, plug in launcher class !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
     self.class::FRONT_HARDPOINT_LOCATIONS.each do |location|
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), BulletLauncher, options)
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
       # @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
     # puts "Front hard points"
@@ -80,7 +87,7 @@ class PilotableShip < GeneralObject
       # if index < 2
         options[:image_angle] = 90
         # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
+        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # else
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
@@ -88,8 +95,9 @@ class PilotableShip < GeneralObject
     self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       options[:image_angle] = 270
-      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), DumbMissileLauncher, options)
+      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
+
   end
 
   # right broadside
