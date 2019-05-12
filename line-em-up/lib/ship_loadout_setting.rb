@@ -172,18 +172,20 @@ class ShipLoadoutSetting < Setting
     # will be populated from the ship, don't need to here.
     value = {front: [], right: [], left: []}
     ship.right_broadside_hard_points.each_with_index do |hp, index|
-      button_key = "ship_hardpoint_#{index}"
+      button_key = "right_broadside_hardpoint_#{index}"
       if hp.assigned_weapon_class
         puts "FOUND_WEAPON GLASS"
         image = hp.assigned_weapon_class.get_hardpoint_image
         # click_area = LUIT::Button.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, '', image.width, image.height)
         # raise "awfule" if @cell_width.nil? || @cell_height.nil?
         click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, @cell_width, @cell_height)
-        @button_id_mapping[button_key] = lambda { |setting, id| setting.stick_ship_hardpoint_to_cursor(id) }
-        value[:right] << {
+        @button_id_mapping[button_key] = lambda { |setting, id| setting.click_ship_hardpoint(id) }
+        item = {
           image: image, click_area: click_area, follow_cursor: false, key: button_key, 
           weapon_klass: hp.assigned_weapon_class, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset
         }
+
+        value[:right] << {item: item, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset}
       else
         puts "NO WEAPON GLASS FOUND"
       end
@@ -199,8 +201,8 @@ class ShipLoadoutSetting < Setting
     return value
   end
 
-  def stick_ship_hardpoint_to_cursor id
-    puts "stick_ship_hardpoint_to_cursor: #{id}"
+  def click_ship_hardpoint id
+    puts "click_ship_hardpoint: #{id}"
     @ship_clickable_hardpoints.each do |key, list|
       if list.any?
         list.each do |value|
@@ -231,22 +233,13 @@ class ShipLoadoutSetting < Setting
   def click_inventory id
     puts "LUANCHER: #{id}"
     puts "click_inventory: "
-    # id
     x, y = id.scan(/matrix_(\d+)_(\d+)/).first
     x, y = [x.to_i, y.to_i]
-    # follow_cursor = true
-    # @meta_launchers.each do |key, value|
-    #   if value[:follow_cursor] == true
-    #     value[:follow_cursor] = false
-    #     # if ID == KEY, then return to original place
-    #     if id == key
-    #       follow_cursor = false
-    #     end
-    #   end
-    # end
     puts "LCICKED: #{x} and #{y}"
     matrix_element = @inventory_matrix[x][y]
     element = matrix_element ? matrix_element[:item] : nil
+
+    # Resave new key when dropping element in.
 
     if @cursor_object && element
       puts "@cursor_object[:key]: #{@cursor_object[:key]}"
@@ -254,42 +247,36 @@ class ShipLoadoutSetting < Setting
       puts "== #{@cursor_object[:key] == id}"
       if @cursor_object[:key] == id
         # Same Object, Unstick it, put it back
-        element[:follow_cursor] = false
+        # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         matrix_element[:item] = @cursor_object
+        matrix_element[:item][:key] = id
         @cursor_object = nil
       else
         # Else, drop object, pick up new object
-        @cursor_object[:follow_cursor] = false
-        element[:follow_cursor] = true
+        # @cursor_object[:follow_cursor] = false
+        # element[:follow_cursor] = true
         temp_element = element
         matrix_element[:item] = @cursor_object
+        matrix_element[:item][:key] = id
         @cursor_object = temp_element
-        @cursor_object[:follow_cursor] = true
+        @cursor_object[:key] = nil # Original home lost, no last home of key present
+        # @cursor_object[:follow_cursor] = true
         # WRRROOOONNGGG!
         # element = 
       end
     elsif element
-      element[:follow_cursor] = true
+      # Pick up element, no current object
+      # element[:follow_cursor] = true
       @cursor_object = element
       matrix_element[:item] = nil
     elsif @cursor_object
-      # Place somewhere new
+      # Placeing something new in inventory
       matrix_element[:item] = @cursor_object
-      matrix_element[:item][:follow_cursor] = false
+      matrix_element[:item][:key] = id
+      # matrix_element[:item][:follow_cursor] = false
       @cursor_object = false
     end
-    puts "@cursor_object here? #{!@cursor_object.nil?}"
-    if @cursor_object
-      puts "cursor".upcase
-      puts @cursor_object
-    end
-# 
-    # meta_launcher = @meta_launchers[id]
-    # puts "meta_launcher: #{meta_launcher}"
-    # meta_launcher[:follow_cursor] = true if follow_cursor
-    # Remove launcher from meta_launcher list.
-    # Stick it to cursor
   end
 
 
