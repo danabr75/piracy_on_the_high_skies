@@ -87,6 +87,7 @@ class GameWindow < Gosu::Window
 
     reset_center_font_ui_y
 
+    # Need to just pull from config file.. and then do scaling. See LoadoutWindow
     index = GameWindow.find_index_of_current_resolution(self.width, self.height)
     if index == 0
       @scale = 1

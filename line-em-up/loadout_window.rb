@@ -16,9 +16,9 @@ class LoadoutWindow < Gosu::Window
   # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
 
-  CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+  # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   puts "TEMP SAVE PATH: #{CURRENT_DIRECTORY}/../save.txt"
-  SAVE_FILE = "#{CURRENT_DIRECTORY}/../save.txt"
+  # SAVE_FILE = "#{CURRENT_DIRECTORY}/../save.txt"
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
 
@@ -37,13 +37,39 @@ class LoadoutWindow < Gosu::Window
   attr_accessor :width, :height, :block_all_controls
   # attr_accessor :mouse_x, :mouse_y
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @config_file_path = self.class::CONFIG_FILE
     # @mouse_y = 0
     # @mouse_x = 0
     @window = self
-    @scale = 1
+    # @scale = 1
     LUIT.config({window: @window, z: 25})
     config_path = options[:config_path] || CONFIG_FILE
-    @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
+ 
+
+
+    # @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
+    value = ConfigSetting.get_setting(@config_file_path, 'resolution', ResolutionSetting::SELECTION[0])
+    raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
+    width, height = value.split('x')
+    @width, @height = [width.to_i, height.to_i]
+
+    default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
+    # default_width, default_height = default_value.split('x')
+    default_width, default_height = [default_width.to_i, default_height.to_i]
+
+
+    # Need to just pull from config file.. and then do scaling.
+    # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
+    if @width == default_width && @height == @default_height
+      @scale = 1
+    else
+      # original_width, original_height = RESOLUTIONS[0]
+      width_scale = @width / default_width.to_f
+      height_scale = @height / default_height.to_f
+      @scale = (width_scale + height_scale) / 2
+    end
+    # super(@width, @height)
+
     super(@width, @height, false)
     @cursor = Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/cursor.png", false)
     @gl_background = GLBackground.new

@@ -24,8 +24,10 @@ class PilotableShip < GeneralObject
   RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = []
   LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
 
-  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+  CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   def initialize(scale, x, y, screen_width, screen_height, options = {})
+    puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
     # @right_image = self.class.get_right_image(path)

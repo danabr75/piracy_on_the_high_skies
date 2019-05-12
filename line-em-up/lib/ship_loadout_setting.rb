@@ -69,9 +69,13 @@ class ShipLoadoutSetting < Setting
     @button_id_mapping = self.class.get_id_button_mapping
     init_matrix
     # puts "FILLER ITEMS: #{@filler_items}"
-    fill_matrix(@filler_items)
+    @inventory_items = retrieve_inventory_items
+    # fill_matrix(@filler_items)
     @cursor_object = nil
     @ship_hardpoints = init_hardpoints(@ship)
+  end
+
+  def retrieve_inventory_items
   end
 
   def self.get_id_button_mapping
@@ -81,13 +85,15 @@ class ShipLoadoutSetting < Setting
     }
   end
 
+  # Use to fill when dropped on screen somewhere..
+  # Currently not used
   def fill_matrix elements
     elements.each do |element|
       space = find_next_matrix_space
       if space
         # puts "ASSIGNING ELEMENT:"
         # puts element.inspect
-        @inventory_matrix[space[:x]][space[:y]][:item] = element.merge({follow_cursor: false, key: space[:key]})
+        @inventory_matrix[space[:x]][space[:y]][:item] = element.merge({key: space[:key]})
       else
         puts "NO SPACE LEFT"
       end
@@ -120,7 +126,15 @@ class ShipLoadoutSetting < Setting
         key = "matrix_#{x}_#{y}"
         click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
         # click_area = LUIT::Button.new(@window, click_key, current_x, current_y, '', @cell_width, @cell_height)
-        @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: nil}
+        klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
+        item = nil
+        if klass_name
+          klass = eval(klass_name)
+          image = klass.get_hardpoint_image
+          item = {key: key, klass: klass, image: image}
+        end
+        # @filler_items << {follow_cursor: false, klass: klass, image: image}
+        @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
         current_x = current_x + @cell_width + @cell_width_padding
         @button_id_mapping[key] = lambda { |setting, id| setting.click_inventory(id) }
       end
@@ -326,6 +340,7 @@ class ShipLoadoutSetting < Setting
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         matrix_element[:item] = @cursor_object
+        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], hardpoint_element[:item][:klass])
         matrix_element[:item][:key] = id
         @cursor_object = nil
       else
@@ -335,6 +350,7 @@ class ShipLoadoutSetting < Setting
         temp_element = element
         matrix_element[:item] = @cursor_object
         matrix_element[:item][:key] = id
+        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], hardpoint_element[:item][:klass])
         @cursor_object = temp_element
         @cursor_object[:key] = nil # Original home lost, no last home of key present
         # @cursor_object[:follow_cursor] = true
@@ -346,9 +362,11 @@ class ShipLoadoutSetting < Setting
       # element[:follow_cursor] = true
       @cursor_object = element
       matrix_element[:item] = nil
+      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
     elsif @cursor_object
       # Placeing something new in inventory
       matrix_element[:item] = @cursor_object
+      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
       matrix_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
       @cursor_object = false
