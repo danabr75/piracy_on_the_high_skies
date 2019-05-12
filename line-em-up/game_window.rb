@@ -327,6 +327,23 @@ class GameWindow < Gosu::Window
         @can_open_menu = false
         @menu = Menu.new(self)
         @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
+
+
+        # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
+        # (object, x, y, z, callback, hover_image = nil, options = {})
+        button_key = :loadout
+        @menu.add_item(
+          LUIT::Button.new(@menu.local_window, button_key, get_center_font_ui_x, get_center_font_ui_y, "Inventory", 0, 1),
+          0,
+          0,
+          ZOrder::UI,
+          lambda {|window, id| self.close; LoadoutWindow.new.show },
+          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
+          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
+          {is_button: true, key: button_key}
+        )
+
+
         @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
         @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false))
         # close!

@@ -10,6 +10,7 @@ class MenuItem
         @callback = callback
         # Can also be a font object!
         @active_image = @main_image
+        @is_button = options[:is_button]
         # @text = options[:text]
         # @value = options[:value]
         # @settings_name = options[:settings_name]
@@ -18,26 +19,32 @@ class MenuItem
     end
 
     def draw
-      if @text
+      if @text && !@is_button
         @active_image.draw(@text, @x, @y, 1, 1.0, 1.0, 0xff_ffff00)
-      else
+      elsif !@is_button
         @active_image.draw(@x, @y, @z)
+      elsif @is_button
+        @main_image.draw(@main_image.w / 2, @main_image.h / 2)
       end
     end
 
     def update
         # @text = @get_value_callback.call(@config_file, @settings_name) if @get_value_callback && @config_file && @settings_name
-        if is_mouse_hovering
-            if !@hover_image.nil? then
-                @active_image = @hover_image
-            end
+        if !@is_button
+          if is_mouse_hovering
+              if !@hover_image.nil? then
+                  @active_image = @hover_image
+              end
 
-            @x = @original_x + HOVER_OFFSET
-            @y = @original_y + HOVER_OFFSET
-        else 
-            @active_image = @main_image
-            @x = @original_x
-            @y = @original_y
+              @x = @original_x + HOVER_OFFSET
+              @y = @original_y + HOVER_OFFSET
+          else 
+              @active_image = @main_image
+              @x = @original_x
+              @y = @original_y
+          end
+        else
+          @main_image.update(@main_image.w / 2, @main_image.h / 2)
         end
     end
 
@@ -60,8 +67,10 @@ class MenuItem
       # if is_mouse_hovering && @callback && @value && @config_file && @settings_name
       #   return_value = @callback.call(@config_file, @settings_name, @value)
       # end
-      if is_mouse_hovering && @callback
-        @callback.call
+      if !@is_button
+        if is_mouse_hovering && @callback
+          @callback.call
+        end
       end
       # if return_value
       #   @text = return_value

@@ -23,6 +23,7 @@ class ShipLoadoutSetting < Setting
     @mouse_x, @mouse_y = [0,0]
     @window = self # ignoring outer window here? Want actions relative to this window.
     @scale = options[:scale] || 1
+    puts "SHIP LOADOUT SETTING SCALE: #{@scale}"
     @font = Gosu::Font.new(20)
     # @x = width
     @y = current_height
@@ -151,7 +152,7 @@ class ShipLoadoutSetting < Setting
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z)
+          image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z, @scale, @scale)
         end
       end
     end
@@ -171,7 +172,7 @@ class ShipLoadoutSetting < Setting
           if item
             image = item[:image]
             if image
-              image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
+              image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z, @scale, @scale)
             end
           end
         end
@@ -457,7 +458,7 @@ class ShipLoadoutSetting < Setting
   def draw
 
     if @cursor_object
-      @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z)
+      @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @scale, @scale)
     end
 
     hardpoint_draw

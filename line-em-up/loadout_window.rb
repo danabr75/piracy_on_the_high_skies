@@ -68,6 +68,7 @@ class LoadoutWindow < Gosu::Window
       height_scale = @height / default_height.to_f
       @scale = (width_scale + height_scale) / 2
     end
+    puts "NEW SCALE: #{@scale}"
     # super(@width, @height)
 
     super(@width, @height, false)
@@ -126,6 +127,7 @@ class LoadoutWindow < Gosu::Window
     # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
     @button_id_mapping = self.class.get_id_button_mapping
+    # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
     @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back To Menu", 0, 1)
   end
 
@@ -138,7 +140,7 @@ class LoadoutWindow < Gosu::Window
     @ship_value = @ship_menu.update(self.mouse_x, self.mouse_y)
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @ship_value)
 
-
+    # @loadout_button.update(-(@loadout_button.w / 2), -(@loadout_button.h))
     @back_button.update(-(@back_button.w / 2), -(@back_button.h))
 
     # @resolution_menu.update(self.mouse_x, self.mouse_y)
@@ -152,6 +154,7 @@ class LoadoutWindow < Gosu::Window
   def draw
     @cursor.draw(self.mouse_x, self.mouse_y, 100)
     # puts "X and Y: #{self.mouse_x} and #{self.mouse_y}"
+    # @loadout_button.update(-(@loadout_button.w / 2), -(@loadout_button.h))
     @back_button.draw(-(@back_button.w / 2), -(@back_button.h))
     # @back.draw(0,0,0)
     reset_center_font_ui_y
