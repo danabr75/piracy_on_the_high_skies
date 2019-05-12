@@ -341,7 +341,7 @@ class ShipLoadoutSetting < Setting
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         matrix_element[:item] = @cursor_object
-        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], hardpoint_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
         matrix_element[:item][:key] = id
         @cursor_object = nil
       else
@@ -351,7 +351,7 @@ class ShipLoadoutSetting < Setting
         temp_element = element
         matrix_element[:item] = @cursor_object
         matrix_element[:item][:key] = id
-        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], hardpoint_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
         @cursor_object = temp_element
         @cursor_object[:key] = nil # Original home lost, no last home of key present
         # @cursor_object[:follow_cursor] = true
@@ -410,7 +410,7 @@ class ShipLoadoutSetting < Setting
     else
       # Do nothing
     end
-    return @value
+    return @cursor_object
   end
 
   def get_hardpoints
@@ -434,6 +434,7 @@ class ShipLoadoutSetting < Setting
 
   # deprecated
   def clicked mx, my
+    puts "SHIP LOADOUT CLICKED"
     if is_mouse_hovering_next(mx, my)
 
     elsif is_mouse_hovering_prev(mx, my)

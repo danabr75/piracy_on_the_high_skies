@@ -39,6 +39,7 @@ class LoadoutWindow < Gosu::Window
   def initialize width = nil, height = nil, fullscreen = false, options = {}
     puts "INCOMING WIDHT AND HEIGHT: #{width} and #{height}"
     @config_file_path = self.class::CONFIG_FILE
+    @cursor_object = nil
     # @mouse_y = 0
     # @mouse_x = 0
     @window = self
@@ -150,9 +151,10 @@ class LoadoutWindow < Gosu::Window
   end
 
   def update
+    @cursor_object = nil
     @menu.update
     @ship_value = @ship_menu.update(self.mouse_x, self.mouse_y)
-    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @ship_value)
+    @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @ship_value)
 
     # @loadout_button.update(-(@loadout_button.w / 2), -(@loadout_button.h))
     @back_button.update(-(@back_button.w / 2), -(@back_button.h))
@@ -213,6 +215,9 @@ class LoadoutWindow < Gosu::Window
         # puts "SElocal_windowLF? #{local_window.class.name}"
         # can't get it to bring the game window back
         # self.close
+        # puts "curser"
+        # puts @cursor
+        # raise "STOP HERRE"
         local_window.close
         # puts "!!!!!!GAME wINDOW: #{window.game_window}"
         if window.game_window
@@ -228,12 +233,19 @@ class LoadoutWindow < Gosu::Window
   # required for LUIT objects, passes id of element
   def onClick element_id
     puts "LOADOUT WINDOW ONCLICK"
-    button_clicked_exists = @button_id_mapping.key?(element_id)
-    if button_clicked_exists
-      @button_id_mapping[element_id].call(self, element_id)
+    # Block any clicks unless curser object is nil
+    if !@cursor_object
+      button_clicked_exists = @button_id_mapping.key?(element_id)
+      if button_clicked_exists
+        @button_id_mapping[element_id].call(self, element_id)
+      else
+        puts "Clicked button that is not mapped: #{element_id}"
+      end
     else
-      puts "Clicked button that is not mapped: #{element_id}"
+      puts "CURSOR OBJECT WASNLT NIL"
+      puts @cursor_object
     end
+
   end
 end
 

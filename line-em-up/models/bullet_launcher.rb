@@ -6,7 +6,7 @@ class BulletLauncher < Launcher
 
 
   def self.get_hardpoint_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet_launcher_hardpoint.png")
   end
   def draw
     if @inited
