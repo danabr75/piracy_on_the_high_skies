@@ -51,7 +51,7 @@ class ShipLoadoutSetting < Setting
     @ship_value = ship_value
     klass = eval(@ship_value)
     # implement hide_hardpoints on pilotable ship class
-    @ship = klass.new(1, @max_width / 2, @y + klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY).height / 2, max_width, max_height, {use_large_image: true, hide_hardpoints: true})
+    @ship = klass.new(1, @max_width / 2, max_height / 2, max_width, max_height, {use_large_image: true, hide_hardpoints: true})
     # puts "RIGHT HERE!@!!!"
     # puts "@ship.right_broadside_hard_points"
     # puts @ship.right_broadside_hard_points
@@ -204,7 +204,14 @@ class ShipLoadoutSetting < Setting
       value[group[:location]] = []
       group[:hardpoints].each_with_index do |hp, index|
         button_key = "#{group[:location].to_s}_hardpoint_#{index}"
-        click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset / 2, hp.y + hp.y_offset / 2, @cell_width, @cell_height)
+        # click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
+# image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
+        # if group[:location] == :front
+        #   puts "FRONT HERE!!!!!"
+        #   puts "HP X and Y: #{hp.x} and #{hp.y}"
+        #   puts "hp.x_offset and hp.y_offset: #{hp.x_offset} and #{hp.y_offset}"
+        # end
+        click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset - (@cell_width / 2), hp.y + hp.y_offset - @cell_height / 2, @cell_width, @cell_height)
         @button_id_mapping[button_key] = lambda { |setting, id| setting.click_ship_hardpoint(id) }
         if hp.assigned_weapon_class
           image = hp.assigned_weapon_class.get_hardpoint_image
@@ -215,7 +222,7 @@ class ShipLoadoutSetting < Setting
 
         else
         end
-        value[group[:location]] << {item: item, x: hp.x + hp.x_offset / 2, y: hp.y + hp.y_offset / 2, click_area: click_area, key: button_key}
+        value[group[:location]] << {item: item, x: hp.x + hp.x_offset - (@cell_width / 2), y: hp.y + hp.y_offset - @cell_height / 2, click_area: click_area, key: button_key}
       end
     end
     puts "VALUES HERE FRONT:"
@@ -365,7 +372,7 @@ class ShipLoadoutSetting < Setting
     if ship_value != @ship_value
       @ship_value = ship_value
       klass = eval(@ship_value)
-      @ship = klass.new(1, @max_width / 2, @y + klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY).height / 2, @max_width, @max_height, {use_large_image: true, hide_hardpoints: true})
+      @ship = klass.new(1, @max_width / 2, @max_height / 2, @max_width, @max_height, {use_large_image: true, hide_hardpoints: true})
       @ship_hardpoints = init_hardpoints(@ship)
     else
       # Do nothing

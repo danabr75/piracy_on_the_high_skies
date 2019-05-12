@@ -125,6 +125,7 @@ class LoadoutWindow < Gosu::Window
 
   def draw
     @cursor.draw(self.mouse_x, self.mouse_y, 100)
+    # puts "X and Y: #{self.mouse_x} and #{self.mouse_y}"
     @back_button.draw(-(@back_button.w / 2), -(@back_button.h))
     # @back.draw(0,0,0)
     reset_center_font_ui_y

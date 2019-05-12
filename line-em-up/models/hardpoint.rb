@@ -10,7 +10,7 @@ include GLUT
 
 # Not intended to be overridden
 class Hardpoint < GeneralObject
-  attr_accessor :x, :y, :assigned_weapon_class
+  attr_accessor :x, :y, :assigned_weapon_class, :slot_type
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half, :image_angle
 
 
@@ -18,18 +18,19 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(scale, x, y, screen_width, screen_height, group_number, x_offset, y_offset, weapon_klass, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, group_number, x_offset, y_offset, item, slot_type, options = {})
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
     @x_offset = x_offset# * scale
     @y_offset = y_offset# * scale
+    @slot_type = slot_type
     super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, options)
     @main_weapon = nil
     @drawable_items_near_self = []
 
-    if weapon_klass
-      @assigned_weapon_class = weapon_klass
-      @image_hardpoint = weapon_klass.get_hardpoint_image
+    if item
+      @assigned_weapon_class = item
+      @image_hardpoint = item.get_hardpoint_image
     else
       @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     end
