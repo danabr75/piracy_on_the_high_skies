@@ -194,26 +194,36 @@ class ShipLoadoutSetting < Setting
   def init_hardpoints ship
     # Populate ship hardpoints from save file here.
     # will be populated from the ship, don't need to here.
-    value = {front: [], right: [], left: []}
-    ship.right_broadside_hard_points.each_with_index do |hp, index|
-      button_key = "right_broadside_hardpoint_#{index}"
-      if hp.assigned_weapon_class
-        puts "FOUND_WEAPON GLASS"
-        image = hp.assigned_weapon_class.get_hardpoint_image
-        # click_area = LUIT::Button.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, '', image.width, image.height)
-        # raise "awfule" if @cell_width.nil? || @cell_height.nil?
-        click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, @cell_width, @cell_height)
+    value = {}
+    groups = [
+      {hardpoints: ship.right_broadside_hard_points, location: :right},
+      {hardpoints: ship.left_broadside_hard_points, location: :left},
+      {hardpoints: ship.front_hard_points, location: :front}
+    ]
+    groups.each do |group|
+      value[group[:location]] = []
+      group[:hardpoints].each_with_index do |hp, index|
+        button_key = "#{group[:location].to_s}_hardpoint_#{index}"
+        click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset / 2, hp.y + hp.y_offset / 2, @cell_width, @cell_height)
         @button_id_mapping[button_key] = lambda { |setting, id| setting.click_ship_hardpoint(id) }
-        item = {
-          image: image, key: button_key, 
-          weapon_klass: hp.assigned_weapon_class, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset
-        }
+        if hp.assigned_weapon_class
+          image = hp.assigned_weapon_class.get_hardpoint_image
+          item = {
+            image: image, key: button_key, 
+            weapon_klass: hp.assigned_weapon_class
+          }
 
-        value[:right] << {item: item, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset, click_area: click_area, key: button_key}
-      else
-        puts "NO WEAPON GLASS FOUND"
+        else
+        end
+        value[group[:location]] << {item: item, x: hp.x + hp.x_offset / 2, y: hp.y + hp.y_offset / 2, click_area: click_area, key: button_key}
       end
     end
+    puts "VALUES HERE FRONT:"
+    puts value[:front]
+    puts "VALUES HERE RIGHT:"
+    puts value[:right].count
+    puts "VALUES HERE LEFT:"
+    puts value[:left].count
 
     # ship.left_broadside_hard_points.each do |hp|
     #   value[:left] << {weapon_klass: hp.assigned_weapon_class, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset}
@@ -230,7 +240,7 @@ class ShipLoadoutSetting < Setting
     # Key is front, right, or left
 
 
-    port, i = id.scan(/(\w+)_broadside_hardpoint_(\d+)/).first
+    port, i = id.scan(/(\w+)_hardpoint_(\d+)/).first
     port, i = [port.to_sym, i.to_i]
     puts "PORT AND I: #{port} and #{i}"
 
@@ -347,19 +357,6 @@ class ShipLoadoutSetting < Setting
 
   def update mouse_x, mouse_y, ship_value
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
-    # puts "SHIP LOADOUT SETTING - UPDATE"
-    # x = @next_x
-    # click_area_x = @next_x
-    # @meta_launchers.each do |key, launcher|
-    #   klass = launcher[:klass]
-    #   click_area = launcher[:click_area]
-
-    #   image = launcher[:image]
-    #   click_area.update(click_area_x, @y)
-    #   # click_area.update(0, 0)
-    #   x = x + image.width
-    #   click_area_x = click_area_x + click_area.w
-    # end
 
     hardpoint_update
 
@@ -369,7 +366,7 @@ class ShipLoadoutSetting < Setting
       @ship_value = ship_value
       klass = eval(@ship_value)
       @ship = klass.new(1, @max_width / 2, @y + klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY).height / 2, @max_width, @max_height, {use_large_image: true, hide_hardpoints: true})
-      @ship_hardpoints = get_ship_hardpoint_click_areas(@ship)
+      @ship_hardpoints = init_hardpoints(@ship)
     else
       # Do nothing
     end
@@ -423,49 +420,8 @@ class ShipLoadoutSetting < Setting
     if @cursor_object
       @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z)
     end
-    # x = @next_x
-    # click_area_x = @next_x
-    # @meta_launchers.each do |key, launcher|
-    #   klass = launcher[:klass]
-    #   click_area = launcher[:click_area]
-    #   image = launcher[:image]
-    #   click_area.draw(click_area_x, @y)
-    #   if launcher[:follow_cursor] == true
-    #     # do not hsow
-    #     image.draw(@mouse_x, @mouse_y, @hardpoint_image_z)
-    #   else
-    #     image.draw(x, @y, @hardpoint_image_z)
-    #   end
-    #   x = x + image.width
-    #   click_area_x = click_area_x + click_area.w
-    # end
 
     hardpoint_draw
-
-    # @ship_hardpoints.each do |key, list|
-    #   # puts "KEY: #{key}"
-    #   if list.any?
-    #     list.each do |value|
-    #       click_area = value[:click_area]
-    #       if click_area
-    #         click_area.draw(0, 0)
-    #       else
-    #         # puts " NO CLICK AREA FOUND"
-    #       end
-    #       image = value[:image]
-    #       if image
-    #         if value[:follow_cursor]
-    #           image.draw(@mouse_x, @mouse_y, @hardpoint_image_z)
-    #         else
-    #           image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
-    #           # image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z)
-    #         end
-    #       end
-    #     end
-    #   else
-    #     # puts " KEY DID NOT HAVE Value"
-    #   end
-    # end
 
     matrix_draw
 
