@@ -35,14 +35,13 @@ class ShipLoadoutSetting < Setting
     @launchers = ::Launcher.descendants.collect{|d| d.name}
     @meta_launchers = {}
     @filler_items = []
-    @button_id_mapping = self.class.get_id_button_mapping
     @launchers.each_with_index do |klass_name, index|
       klass = eval(klass_name)
       image = klass.get_hardpoint_image
       button_key = "clicked_launcher_#{index}".to_sym
       @meta_launchers[button_key] = {follow_cursor: false, klass: klass, image: image}
       @filler_items << {follow_cursor: false, klass: klass, image: image}
-      @button_id_mapping[button_key] = lambda { |setting, id| setting.stick_inventory_to_cursor(id) }
+      # @button_id_mapping[button_key] = lambda { |setting, id| setting.click_inventory(id) }
     end
     @hardpoint_image_z = 50
     # puts "SELECTION: #{@selection}"
@@ -67,11 +66,19 @@ class ShipLoadoutSetting < Setting
     @cell_height = 25 * @scale
     @cell_width_padding = 5 * @scale
     @cell_height_padding = 5 * @scale
+    @button_id_mapping = self.class.get_id_button_mapping
     init_matrix
     # puts "FILLER ITEMS: #{@filler_items}"
     fill_matrix(@filler_items)
     @cursor_object = nil
     @ship_clickable_hardpoints = get_ship_hardpoint_click_areas(@ship)
+  end
+
+  def self.get_id_button_mapping
+    values = {
+      next: lambda { |setting, id| setting.next_clicked },
+      previous: lambda { |setting, id| setting.previous_clicked }
+    }
   end
 
   def fill_matrix elements
@@ -80,7 +87,7 @@ class ShipLoadoutSetting < Setting
       if space
         # puts "ASSIGNING ELEMENT:"
         # puts element.inspect
-        @inventory_matrix[space[0]][space[1]][:item] = element
+        @inventory_matrix[space[:x]][space[:y]][:item] = element.merge({follow_cursor: false, key: space[:key]})
       else
         puts "NO SPACE LEFT"
       end
@@ -91,7 +98,10 @@ class ShipLoadoutSetting < Setting
     found_space = nil
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
-        found_space = [x, y] if @inventory_matrix[x][y][:item].nil?
+        if @inventory_matrix[x][y][:item].nil?
+          key = "matrix_#{x}_#{y}"            
+          found_space = {x: x, y: y, key: key}
+        end
         break if found_space
       end
       break if found_space
@@ -107,12 +117,12 @@ class ShipLoadoutSetting < Setting
     current_x = @next_x
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
-        click_key = "matrix_#{x}_#{y}"
-        click_area = LUIT::ClickArea.new(@window, click_key, current_x, current_y, @cell_width, @cell_height)
+        key = "matrix_#{x}_#{y}"
+        click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
         # click_area = LUIT::Button.new(@window, click_key, current_x, current_y, '', @cell_width, @cell_height)
-        @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, click_key: click_key, item: nil}
+        @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: nil}
         current_x = current_x + @cell_width + @cell_width_padding
-
+        @button_id_mapping[key] = lambda { |setting, id| setting.click_inventory(id) }
       end
       current_x = @next_x
       current_y = current_y + @cell_height + @cell_height_padding
@@ -125,7 +135,7 @@ class ShipLoadoutSetting < Setting
         element = @inventory_matrix[x][y]
         element[:click_area].draw(0,0)
         # puts "element[:item]: #{element[:item]}"
-        if !element[:item].nil?
+        if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
           image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z)
         end
@@ -199,15 +209,18 @@ class ShipLoadoutSetting < Setting
           if id == value[:key] && value[:follow_cursor] == true
             # puts "CURSER WAS TRUE"
             value[:follow_cursor] = false
+            @cursor_object = false
           elsif id == value[:key]
             # puts "FOLLOW CURSER"
             follow_cursor = true
             value[:follow_cursor] = true
+            @cursor_object = value
           else
             # puts "ID #{id} was not equal to #{value[:key]}"
           end
           if value[:follow_cursor] == true && follow_cursor == false
             value[:follow_cursor] = false
+            @cursor_object = nil
           end
           # puts "END VALUE: #{value[:key]}"
         end
@@ -215,32 +228,70 @@ class ShipLoadoutSetting < Setting
     end
   end
 
-  def stick_inventory_to_cursor id
+  def click_inventory id
     puts "LUANCHER: #{id}"
-    puts "stick_inventory_to_cursor: "
-    follow_cursor = true
-    @meta_launchers.each do |key, value|
-      if value[:follow_cursor] == true
-        value[:follow_cursor] = false
-        # if ID == KEY, then return to original place
-        if id == key
-          follow_cursor = false
-        end
+    puts "click_inventory: "
+    # id
+    x, y = id.scan(/matrix_(\d+)_(\d+)/).first
+    x, y = [x.to_i, y.to_i]
+    # follow_cursor = true
+    # @meta_launchers.each do |key, value|
+    #   if value[:follow_cursor] == true
+    #     value[:follow_cursor] = false
+    #     # if ID == KEY, then return to original place
+    #     if id == key
+    #       follow_cursor = false
+    #     end
+    #   end
+    # end
+    puts "LCICKED: #{x} and #{y}"
+    matrix_element = @inventory_matrix[x][y]
+    element = matrix_element ? matrix_element[:item] : nil
+
+    if @cursor_object && element
+      puts "@cursor_object[:key]: #{@cursor_object[:key]}"
+      puts "ID: #{id}"
+      puts "== #{@cursor_object[:key] == id}"
+      if @cursor_object[:key] == id
+        # Same Object, Unstick it, put it back
+        element[:follow_cursor] = false
+        # @inventory_matrix[x][y][:item][:follow_cursor] =
+        matrix_element[:item] = @cursor_object
+        @cursor_object = nil
+      else
+        # Else, drop object, pick up new object
+        @cursor_object[:follow_cursor] = false
+        element[:follow_cursor] = true
+        temp_element = element
+        matrix_element[:item] = @cursor_object
+        @cursor_object = temp_element
+        @cursor_object[:follow_cursor] = true
+        # WRRROOOONNGGG!
+        # element = 
       end
+    elsif element
+      element[:follow_cursor] = true
+      @cursor_object = element
+      matrix_element[:item] = nil
+    elsif @cursor_object
+      # Place somewhere new
+      matrix_element[:item] = @cursor_object
+      matrix_element[:item][:follow_cursor] = false
+      @cursor_object = false
     end
-    meta_launcher = @meta_launchers[id]
+    puts "@cursor_object here? #{!@cursor_object.nil?}"
+    if @cursor_object
+      puts "cursor".upcase
+      puts @cursor_object
+    end
+# 
+    # meta_launcher = @meta_launchers[id]
     # puts "meta_launcher: #{meta_launcher}"
-    meta_launcher[:follow_cursor] = true if follow_cursor
+    # meta_launcher[:follow_cursor] = true if follow_cursor
     # Remove launcher from meta_launcher list.
     # Stick it to cursor
   end
 
-  def self.get_id_button_mapping
-    {
-      next: lambda { |setting, id| setting.next_clicked },
-      previous: lambda { |setting, id| setting.previous_clicked }
-    }
-  end
 
   def get_values
     # puts "GETTING DIFFICULTY: #{@value}"
@@ -335,6 +386,10 @@ class ShipLoadoutSetting < Setting
   end
 
   def draw
+
+    if @cursor_object
+      @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z)
+    end
     # x = @next_x
     # click_area_x = @next_x
     # @meta_launchers.each do |key, launcher|
