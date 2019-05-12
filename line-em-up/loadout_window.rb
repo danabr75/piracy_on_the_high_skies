@@ -11,6 +11,8 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 require 'opengl'
 
 class LoadoutWindow < Gosu::Window
+  require 'luit'
+
   # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
 
@@ -38,6 +40,7 @@ class LoadoutWindow < Gosu::Window
     # @mouse_y = 0
     # @mouse_x = 0
     @window = self
+    @scale = 1
     LUIT.config({window: @window, z: 25})
     config_path = options[:config_path] || CONFIG_FILE
     @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
@@ -71,7 +74,7 @@ class LoadoutWindow < Gosu::Window
 
     @difficulty = nil
     @ship_menu = ShipSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path)
-    @ship_loadout_menu = ShipLoadoutSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path, @ship_menu.value)
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path, @ship_menu.value, {scale: @scale})
     increase_center_font_ui_y(@ship_loadout_menu.get_image.height + @ship_loadout_menu.get_large_image.height)
     # puts "KLASS HERE : #{klass.get_image_assets_path(klass::SHIP_MEDIA_DIRECTORY)}"
 
