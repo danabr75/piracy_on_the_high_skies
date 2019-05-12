@@ -1,5 +1,5 @@
 require 'fileutils'
-
+require 'json'
 module ConfigSetting
   def self.set_setting file_location, setting_name, setting_value
     # puts "HERE: #{file_location} and #{setting_name} and #{setting_value}"
@@ -53,8 +53,11 @@ module ConfigSetting
   end
 
   def self.set_mapped_setting file_location, setting_names, setting_value
+    puts "set_mapped_setting".upcase
+    puts setting_names
+    puts setting_value
     create_file_if_non_existent(file_location)
-    if setting_names.any? && setting_value
+    if setting_names.any?
       # File.open('xxx.txt').each do |line|
       #   print "#{line_num += 1} #{line}"
       # end
@@ -65,7 +68,7 @@ module ConfigSetting
         puts text
         text = text.scan(/^#{setting_name}: ([^;]*);$/).first
         text = text.first if text
-        data = JSON.parse(text)
+        data = ::JSON.parse(text)
         indexing_values = data
         # puts "FOUND IT"
         # text = File.read(file_location)
@@ -82,11 +85,17 @@ module ConfigSetting
         indexer = setting_names.shift
         while indexer
           puts "indexing_values: #{indexing_values}"
-          puts "INDEXER"
+          puts "INDEXER - #{indexer}"
           if setting_names.count == 0
             indexing_values[indexer] = setting_value
           else
-            indexing_values = indexing_values[indexer]
+            if indexing_values[indexer]
+              indexing_values = indexing_values[indexer]
+            else 
+              indexing_values[indexer] = {}
+              indexing_values = indexing_values[indexer]
+            end
+            # indexing_values ||= {}
           end
           # puts data
           indexer = setting_names.shift
@@ -148,10 +157,10 @@ module ConfigSetting
     if text
       text = text.scan(/^#{setting_name}: ([^;]*);$/).first
       text = text.first if text
-      data = JSON.parse(text)
+      data = ::JSON.parse(text)
       # data = data.with_indifferent_access
       indexer = setting_names.shift
-      while indexer
+      while indexer && data
         puts "DATA index"
         data = data[indexer]
         puts data

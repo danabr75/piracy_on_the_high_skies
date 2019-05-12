@@ -217,7 +217,7 @@ class ShipLoadoutSetting < Setting
           image = hp.assigned_weapon_class.get_hardpoint_image
           item = {
             image: image, key: button_key, 
-            weapon_klass: hp.assigned_weapon_class
+            klass: hp.assigned_weapon_class
           }
 
         else
@@ -245,6 +245,7 @@ class ShipLoadoutSetting < Setting
   def click_ship_hardpoint id
     puts "click_ship_hardpoint: #{id}"
     # Key is front, right, or left
+    # left_hardpoint_0
 
 
     port, i = id.scan(/(\w+)_hardpoint_(\d+)/).first
@@ -263,6 +264,8 @@ class ShipLoadoutSetting < Setting
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         hardpoint_element[:item] = @cursor_object
+        puts "CONFIG SETTING 1"
+        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         hardpoint_element[:item][:key] = id
         @cursor_object = nil
       else
@@ -272,6 +275,8 @@ class ShipLoadoutSetting < Setting
         temp_element = element
         hardpoint_element[:item] = @cursor_object
         hardpoint_element[:item][:key] = id
+        puts "CONFIG SETTING 2 "
+        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         @cursor_object = temp_element
         @cursor_object[:key] = nil # Original home lost, no last home of key present
         # @cursor_object[:follow_cursor] = true
@@ -283,9 +288,18 @@ class ShipLoadoutSetting < Setting
       # element[:follow_cursor] = true
       @cursor_object = element
       hardpoint_element[:item] = nil
+        puts "CONFIG SETTING 3 "
+        # Not working.. 
+      puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
+      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], nil)
     elsif @cursor_object
       # Placeing something new in inventory
       hardpoint_element[:item] = @cursor_object
+      puts "PUTTING ELEMENT IN: #{hardpoint_element[:item]}"
+        puts "CONFIG SETTING 4 "
+      puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
+      puts hardpoint_element[:item][:klass]
+      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
       hardpoint_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
       @cursor_object = false
