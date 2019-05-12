@@ -75,6 +75,7 @@ class PilotableShip < GeneralObject
     @front_hard_points = []
     @left_broadside_hard_points = []
     @right_broadside_hard_points = []
+    @hide_hardpoints = options[:hide_hardpoints] || false
 
     # Load hardpoints from CONFIG FILE HERE, plug in launcher class !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
@@ -451,9 +452,11 @@ class PilotableShip < GeneralObject
     @drawable_items_near_self.reject! { |item| item.draw }
     # puts "DRAWING HARDPOINTS"
     # puts "@right_broadside_hard_points: #{@right_broadside_hard_points.count}"
-    @right_broadside_hard_points.each { |item| item.draw }
-    @left_broadside_hard_points.each { |item| item.draw }
-    @front_hard_points.each { |item| item.draw }
+    if !@hide_hardpoints
+      @right_broadside_hard_points.each { |item| item.draw }
+      @left_broadside_hard_points.each { |item| item.draw }
+      @front_hard_points.each { |item| item.draw }
+    end
 
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
