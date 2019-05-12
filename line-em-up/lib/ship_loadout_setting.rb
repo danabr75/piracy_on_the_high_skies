@@ -56,7 +56,6 @@ class ShipLoadoutSetting < Setting
     # puts "RIGHT HERE!@!!!"
     # puts "@ship.right_broadside_hard_points"
     # puts @ship.right_broadside_hard_points
-    @ship_clickable_hardpoints = get_ship_hardpoint_click_areas(@ship)
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     @fullscreen_height = fullscreen_height
     # @window = window
@@ -72,6 +71,7 @@ class ShipLoadoutSetting < Setting
     # puts "FILLER ITEMS: #{@filler_items}"
     fill_matrix(@filler_items)
     @cursor_object = nil
+    @ship_clickable_hardpoints = get_ship_hardpoint_click_areas(@ship)
   end
 
   def fill_matrix elements
@@ -166,9 +166,9 @@ class ShipLoadoutSetting < Setting
       if hp.assigned_weapon_class
         puts "FOUND_WEAPON GLASS"
         image = hp.assigned_weapon_class.get_hardpoint_image
-        click_area = LUIT::Button.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, '', image.width, image.height)
-        # click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, image.width, image.height)
-        # click_area = LUIT::ClickArea.new(@window, button_key, 0, 0, image.width, image.height)
+        # click_area = LUIT::Button.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, '', image.width, image.height)
+        # raise "awfule" if @cell_width.nil? || @cell_height.nil?
+        click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset, hp.y + hp.y_offset, @cell_width, @cell_height)
         @button_id_mapping[button_key] = lambda { |setting, id| setting.stick_ship_hardpoint_to_cursor(id) }
         value[:right] << {
           image: image, click_area: click_area, follow_cursor: false, key: button_key, 
@@ -368,7 +368,8 @@ class ShipLoadoutSetting < Setting
             if value[:follow_cursor]
               image.draw(@mouse_x, @mouse_y, @hardpoint_image_z)
             else
-              image.draw(value[:x], value[:y], @hardpoint_image_z)
+              image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
+              # image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z)
             end
           end
         end
