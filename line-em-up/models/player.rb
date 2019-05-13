@@ -269,20 +269,27 @@ class Player < GeneralObject
     # health > 0
   end
 
-  def move_left
-    @x = @ship.move_left
+  # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
+
+  def move_left movement_x = 0, movement_y = 0
+    # @x = @ship.move_left
+    return [movement_x - 1.0, movement_y]
   end
   
-  def move_right
-    @x = @ship.move_right
+  def move_right movement_x = 0, movement_y = 0
+    # @x = @ship.move_right
+    return [movement_x + 1.0, movement_y]
   end
   
-  def accelerate
-    @y = @ship.accelerate
+  def accelerate movement_x = 0, movement_y = 0
+    # @y = @ship.accelerate
+    puts "ACCELLERATE"
+    return [movement_x, movement_y + 1.0]
   end
   
-  def brake
-    @y = @ship.brake
+  def brake movement_x = 0, movement_y = 0
+    # @y = @ship.brake
+    return [movement_x, movement_y - 1.0]
   end
 
 

@@ -184,6 +184,8 @@ class GameWindow < Gosu::Window
     end
     @player = Player.new(@scale, @width / 2, @height / 2, @width, @height, {handicap: @handicap, max_movable_height: @height - @footer_bar.height})
     @scroll_factor = 1
+    @movement_x = 0.0
+    @movement_y = 0.0
     @can_toggle_scroll_factor = true
     @boss_active = false
     @boss = nil
@@ -459,10 +461,12 @@ class GameWindow < Gosu::Window
 
       if @player.is_alive && !@game_pause && !@menu_open
         @player.update(self.mouse_x, self.mouse_y, @player)
-        @player.move_left()  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
-        @player.move_right() if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)
-        @player.accelerate() if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
-        @player.brake()      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
+        puts "FIRST: #{@movement_x} and #{@movement_y}"
+        @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
+        @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)
+        puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
+        @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
+        @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
@@ -556,7 +560,7 @@ class GameWindow < Gosu::Window
         end
 
 
-        @gl_background.scroll(@scroll_factor)
+        @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y)
         
 
         if !@boss_killed && !@boss_active

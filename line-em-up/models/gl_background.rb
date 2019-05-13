@@ -28,15 +28,43 @@ class GLBackground
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
     @scrolls = 0.0
     @height_map = Array.new(POINTS_Y) { Array.new(POINTS_X) { rand } }
+    @movement_y = 0.0
+    @movement_x = 0.0
   end
+
+  # def scroll factor = 1, movement_x, movement_y
+  #   @scrolls += 1.0 * factor
+  #   if @scrolls >= SCROLLS_PER_STEP
+  #     @scrolls = 0
+  #     @height_map.shift
+  #     @height_map.push Array.new(POINTS_X) { rand }
+  #   end
+  # end
   
-  def scroll factor = 1
-    @scrolls += 1.0 * factor
-    if @scrolls >= SCROLLS_PER_STEP
-      @scrolls = 0
+  def scroll factor = 1, movement_x, movement_y
+    # @scrolls += 1.0 * factor
+    # if @scrolls >= SCROLLS_PER_STEP
+    #   @scrolls = 0
+    #   @height_map.shift
+    #   @height_map.push Array.new(POINTS_X) { rand }
+    # end
+
+
+    if movement_y >= SCROLLS_PER_STEP
       @height_map.shift
       @height_map.push Array.new(POINTS_X) { rand }
+      movement_y = 0#movement_y - SCROLLS_PER_STEP
     end
+    if movement_y <= -SCROLLS_PER_STEP
+      # if @scrolls >= SCROLLS_PER_STEP
+        # @scrolls = 0
+      @height_map.pop
+      @height_map.unshift(Array.new(POINTS_X) { rand })
+      movement_y = 0#movement_y + SCROLLS_PER_STEP
+    end
+    @movement_y = movement_y
+    @movement_x = movement_x
+    return [movement_x, movement_y]
   end
   
   # Not needed
@@ -81,7 +109,13 @@ class GLBackground
   
     glEnable(GL_TEXTURE_2D)
     
-    offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
+    # puts "SCROLLS AND PER STEP: #{@scrolls / SCROLLS_PER_STEP}"
+    # puts "SCROLL AND STEP: #{@scrolls} and #{SCROLLS_PER_STEP}"
+    # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
+    # puts "SCROLLS AND PER STEP: #{@scrolls / SCROLLS_PER_STEP}"
+    # puts "SCROLL AND STEP: #{@scrolls} and #{SCROLLS_PER_STEP}"
+    # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
+    offs_y = 1.0 * @movement_y / SCROLLS_PER_STEP
 
 
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
