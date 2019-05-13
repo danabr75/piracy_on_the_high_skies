@@ -144,6 +144,7 @@ class LoadoutWindow < Gosu::Window
     @button_id_mapping = self.class.get_id_button_mapping(self)
     # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
     @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back", 0, 1)
+    @movement_x, @movement_y = [0.0, 0.0]
   end
 
   def dynamic_get_resolution_fs
@@ -164,7 +165,9 @@ class LoadoutWindow < Gosu::Window
     
     # @game_window_width, @game_window_height, @fullscreen = @resolution_menu.get_resolution
     # @difficulty = @difficulty_menu.get_difficulty
-    @gl_background.scroll
+    # @movement_x += 1.0
+    @movement_y += 1.0
+    @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y)
   end
 
   def draw

@@ -118,7 +118,7 @@ class Main < Gosu::Window
       {is_button: true, key: button_key}
     )
 
-
+    @movement_x, @movement_y = [0.0, 0.0]
 
 
     # @font.draw("<", width + 15, get_center_font_ui_y, 1, 1.0, 1.0, 0xff_ffff00)
@@ -138,7 +138,9 @@ class Main < Gosu::Window
     
     @game_window_width, @game_window_height, @fullscreen = @resolution_menu.get_values
     @difficulty = @difficulty_menu.get_values
-    @gl_background.scroll
+    # @movement_x += 0.0
+    @movement_y += 1.0
+    @movement_x, @movement_y = @gl_background.scroll(1, @movement_x, @movement_y)
   end
 
   def draw

@@ -152,7 +152,7 @@ class GLBackground
           z = @height_map[y][x + 1]
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.right, info.top)
-          puts "#{x}, #{offs_x}, #{POINTS_X}, #{y}, #{offs_y}, #{POINTS_Y}, #{z}"
+          # puts "#{x}, #{offs_x}, #{POINTS_X}, #{y}, #{offs_y}, #{POINTS_Y}, #{z}"
           glVertex3d(-0.5 + (x - offs_x + 1.0) / (POINTS_X-1), -0.5 + (y - offs_y - 0.0) / (POINTS_Y-2), z)
 
           z = @height_map[y+1][x + 1]
