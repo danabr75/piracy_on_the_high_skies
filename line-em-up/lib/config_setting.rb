@@ -35,6 +35,7 @@ module ConfigSetting
   end
 
   def self.get_setting file_location, setting_name, default_value = nil
+    raise "NO FILE LOCATION PATH" if file_location.nil?
     create_file_if_non_existent(file_location)
     test = File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }
     if test && test.first
@@ -53,6 +54,7 @@ module ConfigSetting
   end
 
   def self.set_mapped_setting file_location, setting_names, setting_value
+    raise "NO FILE LOCATION PATH" if file_location.nil?
     puts "set_mapped_setting".upcase
     puts setting_names
     puts setting_value
@@ -149,6 +151,7 @@ module ConfigSetting
   end
 
   def self.get_mapped_setting file_location, setting_names = [], default_value = nil
+    raise "NO FILE LOCATION PATH" if file_location.nil?
     create_file_if_non_existent(file_location)
     setting_name = setting_names.shift
     text = (File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }).first
@@ -168,7 +171,11 @@ module ConfigSetting
         indexer = indexer.to_s if indexer
       end
       puts "FOUND DATA: #{data}"
-      return data
+      if data
+        return data
+      else
+        return default_value
+      end
     else
       return default_value
     end

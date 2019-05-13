@@ -127,7 +127,32 @@ class ShipLoadoutSetting < Setting
         key = "matrix_#{x}_#{y}"
         click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
         # click_area = LUIT::Button.new(@window, click_key, current_x, current_y, '', @cell_width, @cell_height)
-        klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
+        # Kludge here to populate inventory on first load, without committing the config file.
+        # puts "X AND Y START : #{x} - #{y}"
+        # if y == 0
+        #   klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'DumbMissileLauncher')
+        #   if klass_name == 'DumbMissileLauncher'
+        #     puts "SETTING X AND Y: #{x} - #{y} - with DumbMissileLauncher"
+        #     ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'DumbMissileLauncher')
+        #   end
+        # elsif y == 1
+        #   klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'LaserLauncher')
+        #   puts "Y HERE was 1: AND GOT ORIGINAL KLASS HERE #{klass_name}"
+        #   if klass_name == 'LaserLauncher'
+        #     puts "SETTING X AND Y: #{x} - #{y} - with LaserLauncher"
+        #     ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'LaserLauncher')
+        #   end
+        # elsif y == 2
+        #   klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'BulletLauncher')
+        #   if klass_name == 'BulletLauncher'
+        #     puts "SETTING X AND Y: #{x} - #{y} - with BulletLauncher"
+        #     ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'BulletLauncher')
+        #   end
+        # else
+          klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
+        # end
+        puts "X and Y WAS : #{x} - #{y}"
+        puts "CLASS WAS: #{klass_name}"
         item = nil
         if klass_name
           klass = eval(klass_name)

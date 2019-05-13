@@ -37,6 +37,7 @@ class LoadoutWindow < Gosu::Window
   attr_accessor :width, :height, :block_all_controls, :game_window
   # attr_accessor :mouse_x, :mouse_y
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+    @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
     puts "INCOMING WIDHT AND HEIGHT: #{width} and #{height}"
     @config_file_path = self.class::CONFIG_FILE
     @cursor_object = nil
@@ -194,6 +195,10 @@ class LoadoutWindow < Gosu::Window
     end
   end
 
+  def button_up id
+    @block_all_controls = false
+  end
+
   def increase_center_font_ui_y amount
     @center_ui_y += amount 
   end
@@ -215,6 +220,7 @@ class LoadoutWindow < Gosu::Window
     {
       # back: lambda { |window, id| window.close; Main.new.show }
       back: lambda { |window, id|
+        puts "RIGHT HERE IS THE ISSUE!!!!!!!!!!!!!!!!"
         # puts "SElocal_windowLF? #{local_window.class.name}"
         # can't get it to bring the game window back
         # self.close
@@ -225,9 +231,9 @@ class LoadoutWindow < Gosu::Window
         # puts "!!!!!!GAME wINDOW: #{window.game_window}"
         if window.game_window
         #   window.game_window.show
-          GameWindow.new.show
+          GameWindow.new(nil, nil, nil, {block_controls_until_button_up: true}).show
         else
-          Main.new.show
+          Main.new(@config_file_path, {block_controls_until_button_up: true}).show
         end
       }
     }

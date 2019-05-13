@@ -5,13 +5,18 @@ class Main < Gosu::Window
   require "#{CURRENT_DIRECTORY}/../game_window.rb"
   require "#{CURRENT_DIRECTORY}/../loadout_window.rb"
 
-
-  def initialize config_path = nil
-    config_path = CONFIG_FILE if config_path.nil?
+  # block_controls_until_button_up: true
+  attr_accessor :block_all_controls, :config_path
+  def initialize config_path = nil, options = {}
+    @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
+    puts "MAIN HERE: block? #{@block_all_controls}"
+    @config_file_path = config_path
+    @config_file_path = CONFIG_FILE if config_path.nil?
+    puts "MAIN CONFIG INITL: #{@config_file_path} - #{config_path} - #{CONFIG_FILE}"
 
 
     # @width, @height = ResolutionSetting::SELECTION[0].split('x').collect{|s| s.to_i}
-    value = ConfigSetting.get_setting(config_path, 'resolution', ResolutionSetting::SELECTION[0])
+    value = ConfigSetting.get_setting(@config_file_path, 'resolution', ResolutionSetting::SELECTION[0])
     raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
     width, height = value.split('x')
     @width, @height = [width.to_i, height.to_i]
@@ -58,10 +63,10 @@ class Main < Gosu::Window
 
     window_height = Gosu.screen_height
     @window = self
-    @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+    @resolution_menu = ResolutionSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, @config_file_path)
 
     @difficulty = nil
-    @difficulty_menu = DifficultySetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+    @difficulty_menu = DifficultySetting.new(@window, window_height, @width, @height, get_center_font_ui_y, @config_file_path)
     @menu = Menu.new(self, @width / 2, get_center_font_ui_y, ZOrder::UI, @scale)
     # Just move everything else above the menu
     # increase_center_font_ui_y(@menu.current_height)
@@ -75,7 +80,11 @@ class Main < Gosu::Window
       LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Start", 0, 1),
       0,
       0,
-      lambda {|window, id| self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty}) },
+      lambda {|window, id|
+        if !@block_all_controls
+          self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, difficulty: @difficulty})
+        end
+      },
       # lambda {|window, id| self.close },
       nil,
       {is_button: true, key: button_key}
@@ -91,7 +100,11 @@ class Main < Gosu::Window
       LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Loadout", 0, 1),
       0,
       0,
-      lambda {|window, id| self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) },
+      lambda {|window, id|
+        if !@block_all_controls
+          self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true})
+        end
+      },
       nil,
       {is_button: true, key: button_key}
     )
@@ -99,21 +112,54 @@ class Main < Gosu::Window
     # debug_start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/debug_start.png")
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
 
-    button_key = :debug_start
+    # button_key = :debug_start
+    # @menu.add_item(
+    #   LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Debug Start", 0, 1),
+    #   0,
+    #   0,
+    #   lambda {|window, id|
+    #     if !@block_all_controls
+    #       self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty})
+    #     end
+    #   },
+    #   nil,
+    #   {is_button: true, key: button_key}
+    # )
+    button_key = :debug_start # too lazy to rename
     @menu.add_item(
-      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Debug Start", 0, 1),
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Populate Inventory", 0, 1),
       0,
       0,
-      lambda {|window, id| self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) },
+      lambda {|window, id|
+        if !@block_all_controls
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '0'.to_s], 'DumbMissileLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '0'.to_s], 'DumbMissileLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '0'.to_s], 'DumbMissileLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '1'.to_s], 'LaserLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '1'.to_s], 'LaserLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '1'.to_s], 'LaserLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '2'.to_s], 'BulletLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '2'.to_s], 'BulletLauncher')
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '2'.to_s], 'BulletLauncher')
+        end
+      },
       nil,
       {is_button: true, key: button_key}
     )
+
     button_key = :exit
     @menu.add_item(
       LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
       0,
       0,
-      lambda {|window, id| self.close },
+      lambda {|window, id|
+        puts "WINDOW: #{window.class}"
+        puts "SELF blcok?: #{self.block_all_controls}"
+        puts "EXIT BUTTON: @block_all_controls: #{@block_all_controls}"
+        if !@block_all_controls
+          self.close
+        end
+      },
       nil,
       {is_button: true, key: button_key}
     )
@@ -159,6 +205,10 @@ class Main < Gosu::Window
       @resolution_menu.clicked(self.mouse_x, self.mouse_y)
       @difficulty_menu.clicked(self.mouse_x, self.mouse_y)
     end
+  end
+
+  def button_up id
+    @block_all_controls = false
   end
 
   def increase_center_font_ui_y amount

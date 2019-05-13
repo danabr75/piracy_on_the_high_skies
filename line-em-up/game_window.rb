@@ -79,6 +79,7 @@ class GameWindow < Gosu::Window
     @config_path = self.class::CONFIG_FILE
     @window = self
     @open_gl_executer = ExecuteOpenGl.new
+    # GET difficulty from config file.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     @difficulty = options[:difficulty]
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
     @debug = options[:debug]
