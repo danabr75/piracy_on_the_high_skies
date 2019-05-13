@@ -67,7 +67,7 @@ class Player < GeneralObject
     @main_weapon = nil
     # @drawable_items_near_self = []
     @broadside_mode = false
-    ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip)
+    ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     if ship
       ship_class = eval(ship)
       @ship = ship_class.new(scale, x, y, screen_width, screen_height, options)
