@@ -18,7 +18,9 @@ include GLUT
 class GLBackground
   # Height map size
   POINTS_X = 7
+  MAP_WIDTH = 11
   POINTS_Y = 7
+  MAP_HEIGHT = 11
   # Scrolling speed
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
@@ -27,7 +29,7 @@ class GLBackground
   def initialize
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
     @scrolls = 0.0
-    @height_map = Array.new(POINTS_Y) { Array.new(POINTS_X) { rand } }
+    @height_map = Array.new(MAP_HEIGHT) { Array.new(MAP_WIDTH) { rand } }
     @movement_y = 0.0
     @movement_x = 0.0
   end
@@ -45,12 +47,12 @@ class GLBackground
     # @scrolls += 1.0 * factor
     if movement_y >= SCROLLS_PER_STEP
       @height_map.shift
-      @height_map.push Array.new(POINTS_X) { rand }
+      @height_map.push Array.new(MAP_WIDTH) { rand }
       movement_y = 0
     end
     if movement_y <= -SCROLLS_PER_STEP
       @height_map.pop
-      @height_map.unshift(Array.new(POINTS_X) { rand })
+      @height_map.unshift(Array.new(MAP_WIDTH) { rand })
       movement_y = 0
     end
 
@@ -131,10 +133,11 @@ class GLBackground
 
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
     
-    0.upto(POINTS_Y - 2) do |y|
-      0.upto(POINTS_X - 2) do |x|
+    0.upto(MAP_WIDTH - 2) do |y|
+      0.upto(MAP_HEIGHT - 2) do |x|
         glBegin(GL_TRIANGLE_STRIP)
-          z = @height_map[y][x]
+          z = @height_map[y][x] || 0.0
+          raise "no Z" if z.nil?
           glTexCoord2d(info.left, info.top)
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.left, info.top)
@@ -148,6 +151,7 @@ class GLBackground
           z = @height_map[y][x + 1]
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.right, info.top)
+          puts "#{x}, #{offs_x}, #{POINTS_X}, #{y}, #{offs_y}, #{POINTS_Y}, #{z}"
           glVertex3d(-0.5 + (x - offs_x + 1.0) / (POINTS_X-1), -0.5 + (y - offs_y - 0.0) / (POINTS_Y-2), z)
 
           z = @height_map[y+1][x + 1]
