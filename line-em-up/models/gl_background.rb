@@ -43,25 +43,35 @@ class GLBackground
   
   def scroll factor = 1, movement_x, movement_y
     # @scrolls += 1.0 * factor
-    # if @scrolls >= SCROLLS_PER_STEP
-    #   @scrolls = 0
-    #   @height_map.shift
-    #   @height_map.push Array.new(POINTS_X) { rand }
-    # end
-
-
     if movement_y >= SCROLLS_PER_STEP
       @height_map.shift
       @height_map.push Array.new(POINTS_X) { rand }
-      movement_y = 0#movement_y - SCROLLS_PER_STEP
+      movement_y = 0
     end
     if movement_y <= -SCROLLS_PER_STEP
-      # if @scrolls >= SCROLLS_PER_STEP
-        # @scrolls = 0
       @height_map.pop
       @height_map.unshift(Array.new(POINTS_X) { rand })
-      movement_y = 0#movement_y + SCROLLS_PER_STEP
+      movement_y = 0
     end
+
+    if movement_x >= SCROLLS_PER_STEP
+      # @height_map.shift
+      # @height_map.push Array.new(POINTS_X) { rand }
+      @height_map.each do |row|
+        row.shift
+        row.push(rand)
+      end
+      movement_x = 0
+    end
+    if movement_x <= -SCROLLS_PER_STEP
+      @height_map.each do |row|
+        row.pop
+        row.unshift(rand)
+      end
+      movement_x = 0
+    end
+
+
     @movement_y = movement_y
     @movement_x = movement_x
     return [movement_x, movement_y]
@@ -116,6 +126,7 @@ class GLBackground
     # puts "SCROLL AND STEP: #{@scrolls} and #{SCROLLS_PER_STEP}"
     # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
     offs_y = 1.0 * @movement_y / SCROLLS_PER_STEP
+    offs_x = 1.0 * @movement_x / SCROLLS_PER_STEP
 
 
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
@@ -127,22 +138,22 @@ class GLBackground
           glTexCoord2d(info.left, info.top)
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.left, info.top)
-          glVertex3d(-0.5 + (x - 0.0) / (POINTS_X-1), -0.5 + (y - offs_y - 0.0) / (POINTS_Y-2), z)
+          glVertex3d(-0.5 + (x - offs_x - 0.0) / (POINTS_X-1), -0.5 + (y - offs_y - 0.0) / (POINTS_Y-2), z)
 
           z = @height_map[y+1][x]
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.left, info.bottom)
-          glVertex3d(-0.5 + (x - 0.0) / (POINTS_X-1), -0.5 + (y - offs_y + 1.0) / (POINTS_Y-2), z)
+          glVertex3d(-0.5 + (x - offs_x - 0.0) / (POINTS_X-1), -0.5 + (y - offs_y + 1.0) / (POINTS_Y-2), z)
         
           z = @height_map[y][x + 1]
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.right, info.top)
-          glVertex3d(-0.5 + (x + 1.0) / (POINTS_X-1), -0.5 + (y - offs_y - 0.0) / (POINTS_Y-2), z)
+          glVertex3d(-0.5 + (x - offs_x + 1.0) / (POINTS_X-1), -0.5 + (y - offs_y - 0.0) / (POINTS_Y-2), z)
 
           z = @height_map[y+1][x + 1]
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.right, info.bottom)
-          glVertex3d(-0.5 + (x + 1.0) / (POINTS_X-1), -0.5 + (y - offs_y + 1.0) / (POINTS_Y-2), z)
+          glVertex3d(-0.5 + (x - offs_x + 1.0) / (POINTS_X-1), -0.5 + (y - offs_y + 1.0) / (POINTS_Y-2), z)
         glEnd
       end
     end

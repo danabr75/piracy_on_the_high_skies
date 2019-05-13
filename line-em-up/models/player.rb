@@ -74,6 +74,7 @@ class Player < GeneralObject
     else
       @ship = BasicShip.new(scale, x, y, screen_width, screen_height, options)
     end
+    @angle = 90
   end
 
   def get_kill_count_max
