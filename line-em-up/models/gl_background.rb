@@ -18,7 +18,7 @@ include GLUT
 class GLBackground
   # Height map size
   POINTS_X = 7
-  MAP_WIDTH = 11
+  MAP_WIDTH = 15
   POINTS_Y = 7
   MAP_HEIGHT = 11
   # Scrolling speed
@@ -132,12 +132,13 @@ class GLBackground
 
 
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
-    
-    0.upto(MAP_WIDTH - 2) do |y|
-      0.upto(MAP_HEIGHT - 2) do |x|
+    # Offset keeps screen from clipping into blackness on the left side.
+    offs_x = offs_x + 1
+    0.upto(MAP_HEIGHT - 2) do |y|
+      0.upto(MAP_WIDTH - 2) do |x|
         glBegin(GL_TRIANGLE_STRIP)
           z = @height_map[y][x] || 0.0
-          raise "no Z" if z.nil?
+          # raise "no Z" if z.nil?
           glTexCoord2d(info.left, info.top)
           # glColor4d(1, 1, 1, z)
           glTexCoord2d(info.left, info.top)
