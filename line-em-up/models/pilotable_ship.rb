@@ -129,7 +129,7 @@ class PilotableShip < GeneralObject
         hp.x = Math.cos(hp.angle) * hp.radius + @x
         hp.y = Math.sin(hp.angle) * hp.radius + @y
 
-        hp.image_angle = (hp.image_angle || 0) - 1
+        # hp.image_angle = (hp.image_angle || 0) - 1
         # hp_y_offset = hp.y_offset
         # hp_x_offset = hp.x_offset
         # hp.y_offset = hp_x_offset * -1
@@ -143,13 +143,16 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_clockwise
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
+        puts "ID: #{hp.id}"
         puts "RADIUS: #{hp.radius} and angle: #{hp.angle} and player angle: #{@angle}"
-        puts "PRE  X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
+        # puts "PRE  X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
+        puts "PRE  X AND Y : #{hp.x} - #{hp.y}"
         # @theta = 0 if @theta.nil?
         # @theta += 1
 
         hp.decrement_angle
-        step = (Math::PI/180 * hp.angle) + 90
+        step = (Math::PI/180 * (hp.angle)) + 90 + 45
+        puts "STEP: #{step}"
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
@@ -162,10 +165,11 @@ class PilotableShip < GeneralObject
         # Y := originY + sin(angle)*radius;
 
 
-        puts "POST X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
+        # puts "POST X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
+        puts "POST  X AND Y : #{hp.x} - #{hp.y}"
         puts "POST RADIUS: #{hp.radius} and angle: #{hp.angle}"
 
-        hp.image_angle = (hp.image_angle || 0) + 1
+        # hp.image_angle = (hp.image_angle || 0) + 1
         # hp_y_offset = hp.y_offset
         # hp_x_offset = hp.x_offset
         # hp.y_offset = hp_x_offset

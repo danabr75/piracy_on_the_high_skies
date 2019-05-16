@@ -25,8 +25,7 @@ class Hardpoint < GeneralObject
     @y_offset = y_offset# * scale
     @center_x = x
     @center_y = y
-    @radius = Gosu.distance(@center_x, @center_y, x + @x_offset, y + @y_offset)
-    puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
+    # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
     super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, options)
     @main_weapon = nil
@@ -41,25 +40,30 @@ class Hardpoint < GeneralObject
     @image_hardpoint_width_half = @image_hardpoint.width  / 2
     @image_hardpoint_height_half = @image_hardpoint.height  / 2
     @image_angle = options[:image_angle] || 0# 180
-    start_point = OpenStruct.new(:x => x,        :y => y)
-    end_point   = OpenStruct.new(:x => x_offset, :y => y_offset)
+    # Maybe these are reversed?
+    start_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
+    end_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
+    @init_angle = @angle
     @radian = calc_radian(start_point, end_point)
+    @radius = Gosu.distance(@center_x, @center_y, @x, @y)
+    puts "ID: #{@id}"
+    puts "INIT X ANY Y: #{@x} - #{@y} - w/ angle #{@angle} and radius: #{@radius}"
   end
 
 
   # Needs more precision, we're losing angle.
   def increment_angle
     if @angle >= 360.0
-      @angle = 1
+      @angle = (@angle + 1.0) - 360.0
     else
-      @angle += 1
+      @angle += 1.0
     end
   end
 
   def decrement_angle
     if @angle <= 0.0
-      @angle = 359
+      @angle = (@angle - 1.0) + 360.0
     else
       @angle -= 1
     end
@@ -117,8 +121,10 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.reject! { |item| item.draw }
 
     # if @image_angle != nil
-    angle = @angle# + @image_angle
-      @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, angle, 0.5, 0.5, @scale, @scale)
+    # angle = @angle + @image_angle
+    angle = @image_angle + @angle - @init_angle
+    # puts "ANGLE HERE: #{angle}"
+    @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, angle, 0.5, 0.5, @scale, @scale)
     # else
     #   @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
     # end

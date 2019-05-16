@@ -21,10 +21,10 @@ class BasicShip < PilotableShip
   MAX_HEALTH = 200
 
   FRONT_HARDPOINT_LOCATIONS = [
-    # {
-    #   slot_type: :generic, 
-    #   x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
-    # },
+    {
+      slot_type: :generic, 
+      x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
+    },
     {
       slot_type: :generic, 
       x_offset: lambda { |image, scale| -((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },

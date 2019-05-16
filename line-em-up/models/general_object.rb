@@ -1,10 +1,11 @@
+require 'securerandom'
 class GeneralObject
-  attr_accessor :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
+  attr_accessor :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
   LEFT  = 'left'
   RIGHT = 'right'
   SCROLLING_SPEED = 4
   MAX_SPEED      = 5
-
+  
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -22,6 +23,8 @@ class GeneralObject
   end
 
   def initialize(scale, x, y, screen_width, screen_height, options = {})
+    # Only use ID in debug\test
+    @id    = SecureRandom.uuid
     @scale = scale
     @image = options[:image] || get_image
 
