@@ -200,17 +200,20 @@ class Player < GeneralObject
       @angle += 1
     end
     @ship.angle = @angle
-    return @ship.rotate_counterclockwise
+    @ship.rotate_hardpoints_counterclockwise
+    return 1
   end
 
   def rotate_clockwise
+    increment = 1
     if @angle == 0
       @angle = 359
     else
       @angle -= 1
     end
     @ship.angle = @angle
-    return @ship.rotate_clockwise
+    @ship.rotate_hardpoints_clockwise(increment.to_f)
+    return 1
   end
 
   # def laser_attack pointer

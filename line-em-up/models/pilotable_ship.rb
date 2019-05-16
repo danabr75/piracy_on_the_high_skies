@@ -140,7 +140,7 @@ class PilotableShip < GeneralObject
 
   # left broadside
   # Key: E
-  def rotate_hardpoints_clockwise
+  def rotate_hardpoints_clockwise angle_increment
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
         puts "ID: #{hp.id}"
@@ -150,11 +150,14 @@ class PilotableShip < GeneralObject
         # @theta = 0 if @theta.nil?
         # @theta += 1
 
-        hp.decrement_angle
-        step = (Math::PI/180 * (hp.angle)) + 90 + 45
+
+        # 90 and 45 should probably from from hp.. image angle?
+        (step = (Math::PI/180 * (hp.angle + 1.0)) + 90.0 + 45.0)# - 180
         puts "STEP: #{step}"
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
+
+        hp.decrement_angle(angle_increment)
 
         # hp.x = hp.radius * Math.cos(@angle) + hp.center_x
 
@@ -265,89 +268,55 @@ class PilotableShip < GeneralObject
 
   #slow scrolling speed here
   # Show right broadside
-  def rotate_counterclockwise
-    # puts "rotate_counterclockwise"
-    # puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
-    # puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
-    # trigger_rotation = false
-    # if @right_broadside_mode
-    #   # Do nothing
-    # elsif @left_broadside_mode
-    #   trigger_rotation = true
-    #   @left_broadside_mode = false
-    # else
-    #   trigger_rotation = true
-    #   @right_broadside_mode = true
-    # end
-    # puts "POST-right_broadside_mode: #{@right_broadside_mode}"
-    # puts "POST-left_broadside_mode: #{@left_broadside_mode}"
+  # def rotate_counterclockwise
+  #   # puts "rotate_counterclockwise"
+  #   # puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
+  #   # puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
+  #   # trigger_rotation = false
+  #   # if @right_broadside_mode
+  #   #   # Do nothing
+  #   # elsif @left_broadside_mode
+  #   #   trigger_rotation = true
+  #   #   @left_broadside_mode = false
+  #   # else
+  #   #   trigger_rotation = true
+  #   #   @right_broadside_mode = true
+  #   # end
+  #   # puts "POST-right_broadside_mode: #{@right_broadside_mode}"
+  #   # puts "POST-left_broadside_mode: #{@left_broadside_mode}"
         
 
-    # @right_broadside_mode = !@right_broadside_mode
-    # if @right_broadside_mode
-    #   @image_width_half  = (@right_broadside_image.width * @scale) / 2
-    #   @image_height_half = (@right_broadside_image.height * @scale) / 2
-    # elsif @left_broadside_mode
-    #   @image_width_half  = (@left_broadside_image.width * @scale) / 2
-    #   @image_height_half = (@left_broadside_image.height * @scale) / 2
-    # else
-    #   @image_width_half  = (@image.width * @scale) / 2
-    #   @image_height_half = (@image.height * @scale) / 2
-    # end
+  #   # @right_broadside_mode = !@right_broadside_mode
+  #   # if @right_broadside_mode
+  #   #   @image_width_half  = (@right_broadside_image.width * @scale) / 2
+  #   #   @image_height_half = (@right_broadside_image.height * @scale) / 2
+  #   # elsif @left_broadside_mode
+  #   #   @image_width_half  = (@left_broadside_image.width * @scale) / 2
+  #   #   @image_height_half = (@left_broadside_image.height * @scale) / 2
+  #   # else
+  #   #   @image_width_half  = (@image.width * @scale) / 2
+  #   #   @image_height_half = (@image.height * @scale) / 2
+  #   # end
 
-    rotate_hardpoints_counterclockwise# if trigger_rotation
-    # puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
-    # @image = self.get_image if trigger_rotation
+  #   rotate_hardpoints_counterclockwise# if trigger_rotation
+  #   # puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
+  #   # @image = self.get_image if trigger_rotation
 
-    # if @right_broadside_mode
-    #   return 1
-    # elsif @left_broadside_mode
-    #   # Logically, this would never be true
-    #   return 1
-    # else
-    #   return 1
-    # end
-    return 1
-  end
+  #   # if @right_broadside_mode
+  #   #   return 1
+  #   # elsif @left_broadside_mode
+  #   #   # Logically, this would never be true
+  #   #   return 1
+  #   # else
+  #   #   return 1
+  #   # end
+  #   return 1
+  # end
    # Show right broadside
-  def rotate_clockwise
-    # trigger_rotation = false
-    # if @left_broadside_mode
-    #   # Do nothing
-    # elsif @right_broadside_mode
-    #   trigger_rotation = true
-    #   @right_broadside_mode = false
-    # else
-    #   trigger_rotation = true
-    #   @left_broadside_mode = true
-    # end
-        
-    # # @right_broadside_mode = !@right_broadside_mode
-    # if @right_broadside_mode
-    #   # Logically, this would never be true
-    #   @image_width_half  = (@right_broadside_image.width * @scale) / 2
-    #   @image_height_half = (@right_broadside_image.height * @scale) / 2
-    # elsif @left_broadside_mode
-    #   @image_width_half  = (@left_broadside_image.width * @scale) / 2
-    #   @image_height_half = (@left_broadside_image.height * @scale) / 2
-    # else
-    #   @image_width_half  = (@image.width * @scale) / 2
-    #   @image_height_half = (@image.height * @scale) / 2
-    # end
-
-    rotate_hardpoints_clockwise# if trigger_rotation
-    # @image = self.get_image if trigger_rotation
-
-    # if @right_broadside_mode
-    #   # Logically, this would never be true
-    #   return 1
-    # elsif @left_broadside_mode
-    #   return 1
-    # else
-    #   return 1
-    # end
-    return 1
-  end
+  # def rotate_clockwise
+  #   rotate_hardpoints_clockwise
+  #   return 1
+  # end
  
 
 

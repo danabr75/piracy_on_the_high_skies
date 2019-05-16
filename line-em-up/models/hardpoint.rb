@@ -52,20 +52,19 @@ class Hardpoint < GeneralObject
   end
 
 
-  # Needs more precision, we're losing angle.
-  def increment_angle
-    if @angle >= 360.0
-      @angle = (@angle + 1.0) - 360.0
+  def increment_angle angle_increment
+    if @angle + angle_increment >= 360.0
+      @angle = (@angle + angle_increment) - 360.0
     else
-      @angle += 1.0
+      @angle += angle_increment
     end
   end
 
-  def decrement_angle
-    if @angle <= 0.0
-      @angle = (@angle - 1.0) + 360.0
+  def decrement_angle angle_increment
+    if @angle - angle_increment <= 0.0
+      @angle = (@angle - angle_increment) + 360.0
     else
-      @angle -= 1
+      @angle -= angle_increment
     end
   end
 
