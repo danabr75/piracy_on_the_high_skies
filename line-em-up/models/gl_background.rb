@@ -17,21 +17,30 @@ include GLUT
 
 class GLBackground
   # Height map size
+  EXTERIOR_MAP_HEIGHT = 1000
+  EXTERIOR_MAP_WIDTH  = 1000
   POINTS_X = 7
-  MAP_WIDTH = 15
+  VISIBLE_MAP_WIDTH = 15
   POINTS_Y = 7
-  MAP_HEIGHT = 11
-  # Scrolling speed
+  VISIBLE_MAP_HEIGHT = 15
+  # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
   SCROLLING_SPEED = 4
 
+  attr_accessor :player_position_x, :player_position_y, :map_width, :map_height
+
   def initialize
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
     @scrolls = 0.0
-    @height_map = Array.new(MAP_HEIGHT) { Array.new(MAP_WIDTH) { rand } }
-    @movement_y = 0.0
-    @movement_x = 0.0
+    @height_map = Array.new(VISIBLE_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH) { rand } }
+    @local_map_movement_x = 0
+    @local_map_movement_y = 0
+
+    @map_height = EXTERIOR_MAP_HEIGHT
+    @map_width  = EXTERIOR_MAP_WIDTH
+    @player_position_x = EXTERIOR_MAP_HEIGHT / 2.0
+    @player_position_y = EXTERIOR_MAP_WIDTH  / 2.0
   end
 
   # def scroll factor = 1, movement_x, movement_y
@@ -42,17 +51,41 @@ class GLBackground
   #     @height_map.push Array.new(POINTS_X) { rand }
   #   end
   # end
-  
+
+  # movement x and y reset for the map
+  # player x and y does not.
   def scroll factor = 1, movement_x, movement_y
+    # puts "GPS: #{@player_position_y}"
+
+    # if movement_y + @player_position_y >= @map_height
+    #   @player_position_y = @map_height
+    #   movement_y = 0 if movement_y > 0
+    # elsif movement_y + @player_position_y < 0.0
+    #   @player_position_y = 0.0
+    #   movement_y = 0 if movement_y < 0
+    # else
+    #   @player_position_y = movement_y
+    # end
+
+    # if movement_x + @player_position_x >= @map_width
+    #   @player_position_x = @map_width
+    #   movement_x = 0 if movement_x > 0
+    # elsif movement_x + @player_position_x < 0.0
+    #   @player_position_x = 0.0
+    #   movement_x = 0 if movement_x < 0
+    # else
+    #   @player_position_x += movement_x
+    # end
+
     # @scrolls += 1.0 * factor
     if movement_y >= SCROLLS_PER_STEP
       @height_map.shift
-      @height_map.push Array.new(MAP_WIDTH) { rand }
+      @height_map.push Array.new(VISIBLE_MAP_WIDTH) { rand }
       movement_y = 0
     end
     if movement_y <= -SCROLLS_PER_STEP
       @height_map.pop
-      @height_map.unshift(Array.new(MAP_WIDTH) { rand })
+      @height_map.unshift(Array.new(VISIBLE_MAP_HEIGHT) { rand })
       movement_y = 0
     end
 
@@ -73,11 +106,12 @@ class GLBackground
       movement_x = 0
     end
 
+    @local_map_movement_y = movement_y
+    @local_map_movement_x = movement_x
 
-    @movement_y = movement_y
-    @movement_x = movement_x
-    return [movement_x, movement_y]
+    return [movement_x, movement_y, @player_position_x, @player_position_y]
   end
+
   
   # Not needed
   def draw(z)
@@ -127,15 +161,18 @@ class GLBackground
     # puts "SCROLLS AND PER STEP: #{@scrolls / SCROLLS_PER_STEP}"
     # puts "SCROLL AND STEP: #{@scrolls} and #{SCROLLS_PER_STEP}"
     # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
-    offs_y = 1.0 * @movement_y / SCROLLS_PER_STEP
-    offs_x = 1.0 * @movement_x / SCROLLS_PER_STEP
+    # @local_terrain_movement_y = 0.0
+    # @local_terrain_movement_x = 0.0
+    offs_y = 1.0 * @local_map_movement_y / SCROLLS_PER_STEP
+    offs_x = 1.0 * @local_map_movement_x / SCROLLS_PER_STEP
+    # puts "OFFSX: #{offs_x} - OFFSY: #{offs_y}"
 
 
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
     # Offset keeps screen from clipping into blackness on the left side.
     offs_x = offs_x + 1
-    0.upto(MAP_HEIGHT - 2) do |y|
-      0.upto(MAP_WIDTH - 2) do |x|
+    0.upto(VISIBLE_MAP_HEIGHT - 2) do |y|
+      0.upto(VISIBLE_MAP_WIDTH - 2) do |x|
         glBegin(GL_TRIANGLE_STRIP)
           z = @height_map[y][x] || 0.0
           # raise "no Z" if z.nil?

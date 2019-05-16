@@ -30,7 +30,13 @@ class Player < GeneralObject
   SPECIAL_POWER = 'laser'
   SPECIAL_POWER_KILL_MAX = 50
 
-  def initialize(scale, x, y, screen_width, screen_height, options = {})
+  attr_accessor :location_x, :location_y
+
+  # x and y is graphical representation of object
+  # location x and y where it exists on the global map.
+  def initialize(scale, x, y, screen_width, screen_height, location_x, location_y, map_width, map_height, options = {})
+    @location_x, @location_y = [location_x, location_y]
+    @map_width, @map_height  = [map_width, map_height]
     super(scale, x, y, screen_width, screen_height, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
@@ -283,14 +289,30 @@ class Player < GeneralObject
   end
   
   def accelerate movement_x = 0, movement_y = 0
+    puts "PLAYER GPS Y: #{@location_y} - #{@map_height}"
     # @y = @ship.accelerate
-    puts "ACCELLERATE"
-    return [movement_x, movement_y + 1.0]
+
+    # map_width, map_height
+    # @location_x, @location_y = [location_x, location_y]
+
+    if @location_y + 1 > @map_height
+      return [movement_x, movement_y]
+    else
+      @location_y += 1
+      return [movement_x, movement_y + 1.0]
+    end
   end
   
   def brake movement_x = 0, movement_y = 0
     # @y = @ship.brake
-    return [movement_x, movement_y - 1.0]
+    # return [movement_x, movement_y - 1.0]
+
+    if @location_y - 1 < 0
+      return [movement_x, movement_y]
+    else
+      @location_y -= 1
+      return [movement_x, movement_y - 1.0]
+    end
   end
 
 
