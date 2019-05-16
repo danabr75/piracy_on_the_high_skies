@@ -40,7 +40,7 @@ class Hardpoint < GeneralObject
     end
     @image_hardpoint_width_half = @image_hardpoint.width  / 2
     @image_hardpoint_height_half = @image_hardpoint.height  / 2
-    @image_angle = options[:image_angle] || 0
+    @image_angle = options[:image_angle] || 0# 180
     start_point = OpenStruct.new(:x => x,        :y => y)
     end_point   = OpenStruct.new(:x => x_offset, :y => y_offset)
     @angle = calc_angle(start_point, end_point)
@@ -117,7 +117,8 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.reject! { |item| item.draw }
 
     # if @image_angle != nil
-      @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, @image_angle + @angle, 0.5, 0.5, @scale, @scale)
+    angle = @angle# + @image_angle
+      @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, angle, 0.5, 0.5, @scale, @scale)
     # else
     #   @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
     # end

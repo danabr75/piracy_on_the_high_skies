@@ -117,7 +117,7 @@ class PilotableShip < GeneralObject
       options[:image_angle] = 270
       @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], options)
     end
-
+    @theta = nil
   end
 
   # right broadside
@@ -125,7 +125,7 @@ class PilotableShip < GeneralObject
     puts "RIGHT HERE: rotate_hardpoints_counterclockwise"
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        hp.decrement_angle
+        hp.increment_angle
         hp.x = Math.cos(hp.angle) * hp.radius + @x
         hp.y = Math.sin(hp.angle) * hp.radius + @y
 
@@ -143,11 +143,20 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_clockwise
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        puts "RADIUS: #{hp.radius} and angle: #{hp.angle}"
+        puts "RADIUS: #{hp.radius} and angle: #{hp.angle} and player angle: #{@angle}"
         puts "PRE  X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
-        hp.increment_angle
-        hp.x = Math.cos(hp.angle) * hp.radius + hp.center_x
-        hp.y = Math.sin(hp.angle) * hp.radius + hp.center_y
+        # @theta = 0 if @theta.nil?
+        # @theta += 1
+
+        hp.decrement_angle
+        step = (Math::PI/180 * hp.angle) + 90
+        hp.x = Math.cos(step) * hp.radius + hp.center_x
+        hp.y = Math.sin(step) * hp.radius + hp.center_y
+
+        # hp.x = hp.radius * Math.cos(@angle) + hp.center_x
+
+        # hp.y = hp.radius * Math.sin(@angle) + hp.center_y
+
 
         # X := originX + cos(angle)*radius;
         # Y := originY + sin(angle)*radius;
