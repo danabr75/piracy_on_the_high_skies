@@ -21,10 +21,10 @@ class BasicShip < PilotableShip
   MAX_HEALTH = 200
 
   FRONT_HARDPOINT_LOCATIONS = [
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
-    },
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
+    # },
     {
       slot_type: :generic, 
       x_offset: lambda { |image, scale| -((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
@@ -32,39 +32,39 @@ class BasicShip < PilotableShip
   ]
   RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = [
     # Bottom One
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 7)}, y_offset: lambda { |image, scale| (image.height * scale) / 4 }   
-    },
-    # Middle One
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| 0 } 
-    },
-    # Top One
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 6)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4) }
-    }
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| ((image.width * scale) / 7)}, y_offset: lambda { |image, scale| (image.height * scale) / 4 }   
+    # },
+    # # Middle One
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| 0 } 
+    # },
+    # # Top One
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| ((image.width * scale) / 6)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4) }
+    # }
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]
 
   LEFT_BROADSIDE_HARDPOINT_LOCATIONS = [
     # Bottom One
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 7)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4 }   
-    },
-    # Middle One
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| 0 } 
-    },
-    # Top One
-    {
-      slot_type: :generic, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 6)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4) }
-    }
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| -((image.width * scale) / 7)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4 }   
+    # },
+    # # Middle One
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| 0 } 
+    # },
+    # # Top One
+    # {
+    #   slot_type: :generic, 
+    #   x_offset: lambda { |image, scale| -((image.width * scale) / 6)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4) }
+    # }
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]
 

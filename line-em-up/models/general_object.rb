@@ -72,6 +72,11 @@ class GeneralObject
     nil
   end
 
+  def self.calc_angle(point1, point2)
+    bearing = (180/Math::PI)*Math.atan2(point1.y-point2.y, point2.x-point1.x)
+    return bearing
+  end
+
 
   def draw
     # Will generate error if class name is not listed on ZOrder

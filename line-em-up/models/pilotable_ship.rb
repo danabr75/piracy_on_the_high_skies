@@ -26,8 +26,10 @@ class PilotableShip < GeneralObject
 
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
-  def initialize(scale, x, y, screen_width, screen_height, options = {})
+  attr_accessor :angle
+  def initialize(scale, x, y, screen_width, screen_height, angle, options = {})
     puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
+    @angle = angle
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
     # @right_image = self.class.get_right_image(path)
@@ -123,24 +125,42 @@ class PilotableShip < GeneralObject
     puts "RIGHT HERE: rotate_hardpoints_counterclockwise"
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        hp.image_angle = (hp.image_angle || 0) - 90
-        hp_y_offset = hp.y_offset
-        hp_x_offset = hp.x_offset
-        hp.y_offset = hp_x_offset * -1
-        hp.x_offset = hp_y_offset
+        hp.decrement_angle
+        hp.x = Math.cos(hp.angle) * hp.radius + @x
+        hp.y = Math.sin(hp.angle) * hp.radius + @y
+
+        hp.image_angle = (hp.image_angle || 0) - 1
+        # hp_y_offset = hp.y_offset
+        # hp_x_offset = hp.x_offset
+        # hp.y_offset = hp_x_offset * -1
+        # hp.x_offset = hp_y_offset
       end
     end
   end
 
   # left broadside
+  # Key: E
   def rotate_hardpoints_clockwise
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        hp.image_angle = (hp.image_angle || 0) + 90
-        hp_y_offset = hp.y_offset
-        hp_x_offset = hp.x_offset
-        hp.y_offset = hp_x_offset
-        hp.x_offset = hp_y_offset * -1
+        puts "RADIUS: #{hp.radius} and angle: #{hp.angle}"
+        puts "PRE  X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
+        hp.increment_angle
+        hp.x = Math.cos(hp.angle) * hp.radius + hp.center_x
+        hp.y = Math.sin(hp.angle) * hp.radius + hp.center_y
+
+        # X := originX + cos(angle)*radius;
+        # Y := originY + sin(angle)*radius;
+
+
+        puts "POST X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
+        puts "POST RADIUS: #{hp.radius} and angle: #{hp.angle}"
+
+        hp.image_angle = (hp.image_angle || 0) + 1
+        # hp_y_offset = hp.y_offset
+        # hp_x_offset = hp.x_offset
+        # hp.y_offset = hp_x_offset
+        # hp.x_offset = hp_y_offset * -1
       end
     end
   end
@@ -236,82 +256,84 @@ class PilotableShip < GeneralObject
     # puts "rotate_counterclockwise"
     # puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
     # puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
-    trigger_rotation = false
-    if @right_broadside_mode
-      # Do nothing
-    elsif @left_broadside_mode
-      trigger_rotation = true
-      @left_broadside_mode = false
-    else
-      trigger_rotation = true
-      @right_broadside_mode = true
-    end
+    # trigger_rotation = false
+    # if @right_broadside_mode
+    #   # Do nothing
+    # elsif @left_broadside_mode
+    #   trigger_rotation = true
+    #   @left_broadside_mode = false
+    # else
+    #   trigger_rotation = true
+    #   @right_broadside_mode = true
+    # end
     # puts "POST-right_broadside_mode: #{@right_broadside_mode}"
     # puts "POST-left_broadside_mode: #{@left_broadside_mode}"
         
 
     # @right_broadside_mode = !@right_broadside_mode
-    if @right_broadside_mode
-      @image_width_half  = (@right_broadside_image.width * @scale) / 2
-      @image_height_half = (@right_broadside_image.height * @scale) / 2
-    elsif @left_broadside_mode
-      @image_width_half  = (@left_broadside_image.width * @scale) / 2
-      @image_height_half = (@left_broadside_image.height * @scale) / 2
-    else
-      @image_width_half  = (@image.width * @scale) / 2
-      @image_height_half = (@image.height * @scale) / 2
-    end
+    # if @right_broadside_mode
+    #   @image_width_half  = (@right_broadside_image.width * @scale) / 2
+    #   @image_height_half = (@right_broadside_image.height * @scale) / 2
+    # elsif @left_broadside_mode
+    #   @image_width_half  = (@left_broadside_image.width * @scale) / 2
+    #   @image_height_half = (@left_broadside_image.height * @scale) / 2
+    # else
+    #   @image_width_half  = (@image.width * @scale) / 2
+    #   @image_height_half = (@image.height * @scale) / 2
+    # end
 
-    rotate_hardpoints_counterclockwise if trigger_rotation
+    rotate_hardpoints_counterclockwise# if trigger_rotation
     # puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
     # @image = self.get_image if trigger_rotation
 
-    if @right_broadside_mode
-      return 1
-    elsif @left_broadside_mode
-      # Logically, this would never be true
-      return 1
-    else
-      return 1
-    end
+    # if @right_broadside_mode
+    #   return 1
+    # elsif @left_broadside_mode
+    #   # Logically, this would never be true
+    #   return 1
+    # else
+    #   return 1
+    # end
+    return 1
   end
    # Show right broadside
   def rotate_clockwise
-    trigger_rotation = false
-    if @left_broadside_mode
-      # Do nothing
-    elsif @right_broadside_mode
-      trigger_rotation = true
-      @right_broadside_mode = false
-    else
-      trigger_rotation = true
-      @left_broadside_mode = true
-    end
+    # trigger_rotation = false
+    # if @left_broadside_mode
+    #   # Do nothing
+    # elsif @right_broadside_mode
+    #   trigger_rotation = true
+    #   @right_broadside_mode = false
+    # else
+    #   trigger_rotation = true
+    #   @left_broadside_mode = true
+    # end
         
-    # @right_broadside_mode = !@right_broadside_mode
-    if @right_broadside_mode
-      # Logically, this would never be true
-      @image_width_half  = (@right_broadside_image.width * @scale) / 2
-      @image_height_half = (@right_broadside_image.height * @scale) / 2
-    elsif @left_broadside_mode
-      @image_width_half  = (@left_broadside_image.width * @scale) / 2
-      @image_height_half = (@left_broadside_image.height * @scale) / 2
-    else
-      @image_width_half  = (@image.width * @scale) / 2
-      @image_height_half = (@image.height * @scale) / 2
-    end
+    # # @right_broadside_mode = !@right_broadside_mode
+    # if @right_broadside_mode
+    #   # Logically, this would never be true
+    #   @image_width_half  = (@right_broadside_image.width * @scale) / 2
+    #   @image_height_half = (@right_broadside_image.height * @scale) / 2
+    # elsif @left_broadside_mode
+    #   @image_width_half  = (@left_broadside_image.width * @scale) / 2
+    #   @image_height_half = (@left_broadside_image.height * @scale) / 2
+    # else
+    #   @image_width_half  = (@image.width * @scale) / 2
+    #   @image_height_half = (@image.height * @scale) / 2
+    # end
 
-    rotate_hardpoints_clockwise if trigger_rotation
+    rotate_hardpoints_clockwise# if trigger_rotation
     # @image = self.get_image if trigger_rotation
 
-    if @right_broadside_mode
-      # Logically, this would never be true
-      return 1
-    elsif @left_broadside_mode
-      return 1
-    else
-      return 1
-    end
+    # if @right_broadside_mode
+    #   # Logically, this would never be true
+    #   return 1
+    # elsif @left_broadside_mode
+    #   return 1
+    # else
+    #   return 1
+    # end
+    return 1
   end
  
 
@@ -494,7 +516,8 @@ class PilotableShip < GeneralObject
     # end
     # super
     # puts "DRAWING PLAYER: image_height_half: #{@image_height_half} and image_width_half: #{@image_width_half}"
-    image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+    image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @scale, @scale)
+    # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @scale, @scale)
     @turn_right = false
     @turn_left = false
   end

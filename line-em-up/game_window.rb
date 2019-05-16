@@ -455,12 +455,12 @@ class GameWindow < Gosu::Window
       end
 
      if Gosu.button_down?(Gosu::KB_Q) && @can_toggle_scroll_factor
-        @can_toggle_scroll_factor = false
+        # @can_toggle_scroll_factor = false
         @scroll_factor = @player.rotate_counterclockwise
       end
 
      if Gosu.button_down?(Gosu::KB_E) && @can_toggle_scroll_factor
-        @can_toggle_scroll_factor = false
+        # @can_toggle_scroll_factor = false
         @scroll_factor = @player.rotate_clockwise
       end
 
