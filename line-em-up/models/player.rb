@@ -317,13 +317,15 @@ class Player < GeneralObject
   # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
 
   def move_left movement_x = 0, movement_y = 0
-    # @x = @ship.move_left
-    return [movement_x - 1.0, movement_y]
+    new_speed = (@speed  / (@mass.to_f)) * -1.5
+    x_diff, y_diff = self.movement(new_speed, @angle + 90)
+    return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def move_right movement_x = 0, movement_y = 0
-    # @x = @ship.move_right
-    return [movement_x + 1.0, movement_y]
+    new_speed = (@speed  / (@mass.to_f)) * -1.5
+    x_diff, y_diff = self.movement(new_speed, @angle - 90)
+    return [movement_x - x_diff, movement_y - y_diff]
   end
   
   # Calculate W movement
@@ -332,79 +334,52 @@ class Player < GeneralObject
     # @max_momentum = @mass
     # @speed = 10 / (@mass / 2)
     # @rotation_speed = 2
-  def forward_movement speed, opts = {}
-    # puts "MOMENTUM FORWARD MOMENY HERE" if opts[:debug]
+  def movement speed, angle
     base = speed
-
-    # @y = @ship.accelerate
-
-    # map_width, map_height
-    # @location_x, @location_y = [location_x, location_y]
-    # puts "AMG:E #{@angle}"
-    step = (Math::PI/180 * (@angle + 90))# - 180
-    # step = step.round(5)
+    step = (Math::PI/180 * (angle + 90))# - 180
     new_x = Math.cos(step) * base + @location_x
     new_y = Math.sin(step) * base + @location_y
     x_diff = (@location_x - new_x) * -1
     y_diff = @location_y - new_y
-    # y_diff = y_diff.round
-    # x_diff = x_diff.round
-
-    # puts "Y_DIFF: #{y_diff} = #{@location_y} - #{new_y}"
-
-    # movement_y = nil
 
     if @location_y - y_diff > @map_height
-      # puts 'CAse 1'
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)
     elsif @location_y - y_diff < 0
-      # puts 'CAse 2'
       y_diff = y_diff + (@location_y + y_diff)
     else
-      # puts 'CAse 3'
-      # y_diff = @location_y + y_diff
     end
 
     if @location_x - x_diff > @map_width
-      # puts 'CAse 1'
       x_diff = x_diff - ((@location_x + x_diff) - @location_x)
     elsif @location_x - x_diff < 0
-      # puts 'CAse 2'
       x_diff = x_diff + (@location_x + x_diff)
     else
-      # puts 'CAse 3'
     end
 
     @location_y -= y_diff
     @location_x -= x_diff
 
-      # else
-      # @location_y += base
     return [x_diff, y_diff]
   end
 
   def accelerate movement_x = 0, movement_y = 0
-    puts "REGULAR SPEED: #{@speed / (@mass.to_f)}"
-    x_diff, y_diff = self.forward_movement( @speed / (@mass.to_f) )
+    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle )
 
     if @current_momentum <= @max_momentum
       @current_momentum += 3
-      puts " NEW MOMENTUM: #{@current_momentum}"
     end
 
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def brake movement_x = 0, movement_y = 0
-    # @y = @ship.brake
-    # return [movement_x, movement_y - 1.0]
+    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180 )
 
-    if @location_y - 1 < 0
-      return [movement_x, movement_y]
-    else
-      @location_y -= 1
-      return [movement_x, movement_y - 1.0]
+    if @current_momentum >= -@max_momentum
+      @current_momentum -= 1.5
     end
+
+    return [movement_x - x_diff, movement_y - y_diff]
   end
 
 
@@ -464,11 +439,16 @@ class Player < GeneralObject
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
 
-    if @current_momentum > 0
+    if @current_momentum > 0.0
       speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
-      puts "MOMENTUM SPEED: #{speed}"
-      x_diff, y_diff = self.forward_movement(speed)
+      x_diff, y_diff = self.movement(speed, @angle)
       @current_momentum -= 1
+      @current_momentum = 0 if @current_momentum < 0
+    elsif @current_momentum < 0.0
+      speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      x_diff, y_diff = self.movement(-speed, @angle + 180)
+      @current_momentum += 1
+      @current_momentum = 0 if @current_momentum > 0
     else
       x_diff, y_diff = [0,0]
     end

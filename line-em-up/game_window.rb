@@ -304,9 +304,9 @@ class GameWindow < Gosu::Window
     if (id == Gosu::KB_TAB)
       @can_toggle_secondary = true
     end
-    if (id == Gosu::KB_Q || id == Gosu::KB_E)
-      @can_toggle_scroll_factor = true
-    end
+    # if (id == Gosu::KB_Q || id == Gosu::KB_E)
+    #   @can_toggle_scroll_factor = true
+    # end
 
     if id == Gosu::KB_RETURN
       @can_toggle_fullscreen_a = true
@@ -449,17 +449,17 @@ class GameWindow < Gosu::Window
       end
 
 
-      if Gosu.button_down?(Gosu::KB_TAB) && @can_toggle_secondary
+      if Gosu.button_down?(Gosu::KB_TAB) || Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)
         @can_toggle_secondary = false
         @player.toggle_secondary
       end
 
-     if Gosu.button_down?(Gosu::KB_Q) && @can_toggle_scroll_factor
+      if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
         @scroll_factor = @player.rotate_clockwise
         # @can_toggle_scroll_factor = false
       end
 
-     if Gosu.button_down?(Gosu::KB_E) && @can_toggle_scroll_factor
+      if Gosu.button_down?(Gosu::KB_D) && @can_toggle_scroll_factor
         # @can_toggle_scroll_factor = false
         @scroll_factor = @player.rotate_counterclockwise
       end
@@ -467,8 +467,8 @@ class GameWindow < Gosu::Window
       if @player.is_alive && !@game_pause && !@menu_open
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
         # puts "FIRST: #{@movement_x} and #{@movement_y}"
-        @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
-        @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)
+        @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
+        @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
