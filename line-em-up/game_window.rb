@@ -455,13 +455,13 @@ class GameWindow < Gosu::Window
       end
 
      if Gosu.button_down?(Gosu::KB_Q) && @can_toggle_scroll_factor
+        @scroll_factor = @player.rotate_clockwise
         # @can_toggle_scroll_factor = false
-        @scroll_factor = @player.rotate_counterclockwise
       end
 
      if Gosu.button_down?(Gosu::KB_E) && @can_toggle_scroll_factor
         # @can_toggle_scroll_factor = false
-        @scroll_factor = @player.rotate_clockwise
+        @scroll_factor = @player.rotate_counterclockwise
       end
 
       if @player.is_alive && !@game_pause && !@menu_open
@@ -569,7 +569,7 @@ class GameWindow < Gosu::Window
         
 
         if !@boss_killed && !@boss_active
-          @buildings.push(Building.new(@scale, @width, @height)) if rand(100) == 0
+          # @buildings.push(Building.new(@scale, @width, @height)) if rand(100) == 0
         end
 
         # Temp

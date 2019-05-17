@@ -322,7 +322,7 @@ class Player < GeneralObject
   
   # Calculate W movement
   def accelerate movement_x = 0, movement_y = 0
-    puts "PLAYER GPS Y: #{@location_y} - #{@map_height}"
+    puts "PLAYER GPS: #{@location_y} - #{@location_x}"
     puts "INCOMING MOVEMENT: #{movement_x} - #{movement_y}"
     base = 2.0
     # @y = @ship.accelerate
@@ -334,29 +334,46 @@ class Player < GeneralObject
     # step = step.round(5)
     new_x = Math.cos(step) * base + @location_x
     new_y = Math.sin(step) * base + @location_y
-    x_diff = @location_x - new_x
+    x_diff = (@location_x - new_x) * -1
     y_diff = @location_y - new_y
+    # y_diff = y_diff.round
+    # x_diff = x_diff.round
 
     puts "Y_DIFF: #{y_diff} = #{@location_y} - #{new_y}"
 
     # movement_y = nil
 
-    # if @location_y + y_diff > @map_height
-    #   puts 'CAse 1'
-    #   movement_y = y_diff - ((@location_y + y_diff) - @location_y)
-    # elsif @location_y + y_diff < 0
-    #   puts 'CAse 2'
-    #   movement_y = y_diff + (@location_y + y_diff)
-    # else
-    #   puts 'CAse 3'
-    #   movement_y = @location_y + y_diff
-    #   puts "#{movement_y} = #{@location_y} + #{y_diff}"
-    # end
+    if @location_y - y_diff > @map_height
+      puts 'CAse 1'
+      y_diff = y_diff - ((@location_y + y_diff) - @location_y)
+    elsif @location_y - y_diff < 0
+      puts 'CAse 2'
+      y_diff = y_diff + (@location_y + y_diff)
+    else
+      puts 'CAse 3'
+      # y_diff = @location_y + y_diff
+      puts "#{movement_y} = #{@location_y} + #{y_diff}"
+    end
+
+    if @location_x - x_diff > @map_width
+      puts 'CAse 1'
+      x_diff = x_diff - ((@location_x + x_diff) - @location_x)
+    elsif @location_x - x_diff < 0
+      puts 'CAse 2'
+      x_diff = x_diff + (@location_x + x_diff)
+    else
+      puts 'CAse 3'
+      # y_diff = @location_y + y_diff
+      puts "#{movement_y} = #{@location_y} + #{y_diff}"
+    end
+
+    @location_y -= y_diff
+    @location_x -= x_diff
 
       # else
       # @location_y += base
     puts "MOVEMENT_Y: #{movement_y}"
-    return [movement_x, movement_y - y_diff]
+    return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def brake movement_x = 0, movement_y = 0
