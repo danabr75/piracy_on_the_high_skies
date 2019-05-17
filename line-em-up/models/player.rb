@@ -320,19 +320,43 @@ class Player < GeneralObject
     return [movement_x + 1.0, movement_y]
   end
   
+  # Calculate W movement
   def accelerate movement_x = 0, movement_y = 0
     puts "PLAYER GPS Y: #{@location_y} - #{@map_height}"
+    puts "INCOMING MOVEMENT: #{movement_x} - #{movement_y}"
+    base = 2.0
     # @y = @ship.accelerate
 
     # map_width, map_height
     # @location_x, @location_y = [location_x, location_y]
+    puts "AMG:E #{@angle}"
+    step = (Math::PI/180 * (@angle + 90))# - 180
+    # step = step.round(5)
+    new_x = Math.cos(step) * base + @location_x
+    new_y = Math.sin(step) * base + @location_y
+    x_diff = @location_x - new_x
+    y_diff = @location_y - new_y
 
-    if @location_y + 1 > @map_height
-      return [movement_x, movement_y]
-    else
-      @location_y += 1
-      return [movement_x, movement_y + 1.0]
-    end
+    puts "Y_DIFF: #{y_diff} = #{@location_y} - #{new_y}"
+
+    # movement_y = nil
+
+    # if @location_y + y_diff > @map_height
+    #   puts 'CAse 1'
+    #   movement_y = y_diff - ((@location_y + y_diff) - @location_y)
+    # elsif @location_y + y_diff < 0
+    #   puts 'CAse 2'
+    #   movement_y = y_diff + (@location_y + y_diff)
+    # else
+    #   puts 'CAse 3'
+    #   movement_y = @location_y + y_diff
+    #   puts "#{movement_y} = #{@location_y} + #{y_diff}"
+    # end
+
+      # else
+      # @location_y += base
+    puts "MOVEMENT_Y: #{movement_y}"
+    return [movement_x, movement_y - y_diff]
   end
   
   def brake movement_x = 0, movement_y = 0

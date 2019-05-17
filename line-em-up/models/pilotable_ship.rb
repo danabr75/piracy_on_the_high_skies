@@ -130,7 +130,7 @@ class PilotableShip < GeneralObject
         puts "ID: #{hp.id}"
         puts "PRE - CC ANGLE: #{hp.angle}"
         step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
-        step = step.round(5)
+        # step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
@@ -156,7 +156,7 @@ class PilotableShip < GeneralObject
         puts "ID: #{hp.id}"
         puts "PRE - C ANGLE: #{hp.angle}"
         step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
-        step = step.round(5)
+        # step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
