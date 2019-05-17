@@ -335,25 +335,30 @@ class Player < GeneralObject
     # @speed = 10 / (@mass / 2)
     # @rotation_speed = 2
   def movement speed, angle
+    # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
     base = speed
+    
+    map_edge = 50
+
     step = (Math::PI/180 * (angle + 90))# - 180
     new_x = Math.cos(step) * base + @location_x
     new_y = Math.sin(step) * base + @location_y
     x_diff = (@location_x - new_x) * -1
     y_diff = @location_y - new_y
 
-    if @location_y - y_diff > @map_height
+    if (@location_y - y_diff) > @map_height
+      # Block progress along top of map Y 
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)
     elsif @location_y - y_diff < 0
+      # Block progress along bottom of map Y 
       y_diff = y_diff + (@location_y + y_diff)
-    else
     end
 
     if @location_x - x_diff > @map_width
+      # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_width}"
       x_diff = x_diff - ((@location_x + x_diff) - @location_x)
     elsif @location_x - x_diff < 0
       x_diff = x_diff + (@location_x + x_diff)
-    else
     end
 
     @location_y -= y_diff
@@ -399,22 +404,6 @@ class Player < GeneralObject
     @ship.deactivate_group_2
   end
 
-
-  # def trigger_secondary_attack pointer
-  #   return_projectiles = []
-  #   if self.secondary_cooldown_wait <= 0 && self.get_secondary_ammo_count > 0
-  #     results = @ship.secondary_attack(pointer)
-  #     projectiles = results[:projectiles]
-  #     cooldown = results[:cooldown]
-  #     self.secondary_cooldown_wait = cooldown.to_f.fdiv(self.attack_speed)
-
-  #     projectiles.each do |projectile|
-  #       return_projectiles.push(projectile)
-  #     end
-  #   end
-  #   return return_projectiles
-  # end
-
   def get_draw_ordering
     ZOrder::Player
   end
@@ -437,6 +426,7 @@ class Player < GeneralObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
+    # puts "PLAYER: #{@location_x} - #{@location_y}"
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
 
     if @current_momentum > 0.0

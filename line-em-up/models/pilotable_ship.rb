@@ -127,15 +127,15 @@ class PilotableShip < GeneralObject
         # hp.increment_angle
         # hp.x = Math.cos(hp.angle) * hp.radius + @x
         # hp.y = Math.sin(hp.angle) * hp.radius + @y
-        puts "ID: #{hp.id}"
-        puts "PRE - CC ANGLE: #{hp.angle}"
+        # puts "ID: #{hp.id}"
+        # puts "PRE - CC ANGLE: #{hp.angle}"
         step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
         # step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
         hp.increment_angle(angle_increment)
-        puts "POST - CC ANGLE: #{hp.angle}"
+        # puts "POST - CC ANGLE: #{hp.angle}"
 
 
         # hp.image_angle = (hp.image_angle || 0) - 1
@@ -153,15 +153,15 @@ class PilotableShip < GeneralObject
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
         # 90 and 45 should probably from from hp.. image angle?
-        puts "ID: #{hp.id}"
-        puts "PRE - C ANGLE: #{hp.angle}"
+        # puts "ID: #{hp.id}"
+        # puts "PRE - C ANGLE: #{hp.angle}"
         step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
         # step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
         hp.decrement_angle(angle_increment)
-        puts "POST - C ANGLE: #{hp.angle}"
+        # puts "POST - C ANGLE: #{hp.angle}"
         # hp.image_angle = (hp.image_angle || 0) + 1
         # hp_y_offset = hp.y_offset
         # hp_x_offset = hp.x_offset

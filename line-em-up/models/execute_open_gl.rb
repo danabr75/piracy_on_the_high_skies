@@ -47,7 +47,7 @@ class ExecuteOpenGl
       # glMatrixMode(GL_MODELVIEW)  #see lesson 01
       # glLoadIdentity              #see lesson 01
       # glTranslatef(0, 0, -13)   #see lesson 01
-      background.exec_gl
+      background.exec_gl(player.location_x, player.location_y)
 
       glShadeModel(GL_SMOOTH) # selects smooth shading
       glLoadIdentity              #see lesson 01

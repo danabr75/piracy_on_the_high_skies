@@ -5,9 +5,6 @@ module ConfigSetting
     # puts "HERE: #{file_location} and #{setting_name} and #{setting_value}"
     create_file_if_non_existent(file_location)
     if setting_value
-      # File.open('xxx.txt').each do |line|
-      #   print "#{line_num += 1} #{line}"
-      # end
       if File.readlines(file_location).grep(/#{setting_name}:/).size > 0
         text = File.read(file_location)
         puts "READ TEXT IN FILE: #{text}"
@@ -17,20 +14,6 @@ module ConfigSetting
           f << "\n#{setting_name}: #{setting_value};"
         end
       end
-
-      # if File.readlines(file_location).grep(/#{setting_name}:/).size > 0
-      #   # puts "FOUND SETTING"
-      #   text = File.read(file_location)
-      #   # puts "FOUDN IN FILE: #{text.inspect}"
-      #   replace = text.gsub(/^#{setting_name}: ([^$]*)$/, setting_value)
-      #   # replace = replace.gsub(/bbb/, "Replace bbb with 222")
-      #   File.open(file_location, "w") {|file| file.puts "#{setting_name}: #{replace}"}
-      # else
-      #   # puts "COULDNT FIND SETTING"
-      #   File.open(file_location, 'a') do |f|
-      #     f << "#{setting_name}: #{setting_value}"
-      #   end
-      # end
     end
   end
 
@@ -60,9 +43,6 @@ module ConfigSetting
     puts setting_value
     create_file_if_non_existent(file_location)
     if setting_names.any?
-      # File.open('xxx.txt').each do |line|
-      #   print "#{line_num += 1} #{line}"
-      # end
       setting_name = setting_names.shift
       text = (File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }).first
       if text
@@ -72,18 +52,6 @@ module ConfigSetting
         text = text.first if text
         data = ::JSON.parse(text)
         indexing_values = data
-        # puts "FOUND IT"
-        # text = File.read(file_location)
-        # data = JSON.parse(text.sub(/;$/, '')).with_indifferent_access
-        # indexer = setting_names.shift
-        # while setting_names.any?
-        #   data = data[indexer]
-        #   indexer = setting_names.shift
-        # end
-        # puts 'GOT DATA HERE'
-        # puts data.inspect
-        # data[indexer] = setting_value
-
         indexer = setting_names.shift
         while indexer
           puts "indexing_values: #{indexing_values}"
@@ -103,18 +71,18 @@ module ConfigSetting
           indexer = setting_names.shift
           indexer = indexer.to_s if indexer
         end
-        puts 'PUTTING IN DATA: '
-        puts data
-        puts "SUBBING IN SETTING NAME: #{setting_name}"
-        puts "WITH"
-        puts "#{setting_name}: #{data.to_json};"
+        # puts 'PUTTING IN DATA: '
+        # puts data
+        # puts "SUBBING IN SETTING NAME: #{setting_name}"
+        # puts "WITH"
+        # puts "#{setting_name}: #{data.to_json};"
         full_text = File.read(file_location)
         File.open(file_location, 'w+'){|f| f << full_text.sub(/^#{setting_name}: ([^;]*);$/, "#{setting_name}: #{data.to_json};") }
         return data
 
         # File.open(file_location, 'w+'){|f| f << text.sub(/^#{setting_name}: ([^;]*);$/, "#{setting_name}: #{setting_value};") }
       else
-        puts "DIDIT FIND IT- setting_name: #{setting_name}"
+        # puts "DIDIT FIND IT- setting_name: #{setting_name}"
         root_values = {}
         values = root_values
         indexer = setting_names.shift
@@ -155,8 +123,8 @@ module ConfigSetting
     create_file_if_non_existent(file_location)
     setting_name = setting_names.shift
     text = (File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }).first
-    puts "TEST HERE"
-    puts text.inspect
+    # puts "TEST HERE"
+    # puts text.inspect
     if text
       text = text.scan(/^#{setting_name}: ([^;]*);$/).first
       text = text.first if text
@@ -164,13 +132,13 @@ module ConfigSetting
       # data = data.with_indifferent_access
       indexer = setting_names.shift
       while indexer && data
-        puts "DATA index"
+        # puts "DATA index"
         data = data[indexer]
-        puts data
+        # puts data
         indexer = setting_names.shift
         indexer = indexer.to_s if indexer
       end
-      puts "FOUND DATA: #{data}"
+      # puts "FOUND DATA: #{data}"
       if data
         return data
       else

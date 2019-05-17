@@ -141,7 +141,9 @@ class GameWindow < Gosu::Window
 
     self.caption = "OpenGL Integration"
     
-    @gl_background = GLBackground.new
+    player_location_x, player_location_y = [100, 100]
+
+    @gl_background = GLBackground.new(player_location_x, player_location_y)
     
     @grappling_hook = nil
     
@@ -183,9 +185,15 @@ class GameWindow < Gosu::Window
       @boss_active_at_enemies_killed = 700
       @handicap = 1
     end
+
+    # @player = Player.new(
+    #   @scale, @width / 2, @height / 2, @width, @height,
+    #   @gl_background.player_position_x, @gl_background.player_position_y, @gl_background.map_width, @gl_background.map_height,
+    #   {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
+
     @player = Player.new(
       @scale, @width / 2, @height / 2, @width, @height,
-      @gl_background.player_position_x, @gl_background.player_position_y, @gl_background.map_width, @gl_background.map_height,
+      player_location_x, player_location_y, @gl_background.map_width, @gl_background.map_height,
       {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
     )
     @scroll_factor = 1
@@ -564,8 +572,8 @@ class GameWindow < Gosu::Window
           end
         end
 
-
-        @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y)
+        # puts "GET: @player.location_x, @player.location_y = #{@player.location_x}, #{@player.location_y}"
+        @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y, @player.location_x, @player.location_y)
         
 
         if !@boss_killed && !@boss_active
