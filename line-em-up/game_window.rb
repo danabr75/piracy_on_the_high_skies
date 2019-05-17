@@ -465,7 +465,7 @@ class GameWindow < Gosu::Window
       end
 
       if @player.is_alive && !@game_pause && !@menu_open
-        @player.update(self.mouse_x, self.mouse_y, @player)
+        @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
         # puts "FIRST: #{@movement_x} and #{@movement_y}"
         @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || Gosu.button_down?(Gosu::KB_A)
         @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || Gosu.button_down?(Gosu::KB_D)

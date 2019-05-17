@@ -13,7 +13,7 @@ include GLUT
 class Player < GeneralObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
-  SPEED = 7
+  # SPEED = 7
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
@@ -81,6 +81,12 @@ class Player < GeneralObject
     else
       @ship = BasicShip.new(scale, x, y, screen_width, screen_height, @angle, options)
     end
+    # Get details from ship
+    @mass = 100 # Get from ship
+    @current_momentum = 0
+    @max_momentum = @mass # speed here?
+    @speed = 20 #/ (@mass / 2)
+    @rotation_speed = 2
   end
 
   def get_kill_count_max
@@ -210,7 +216,7 @@ class Player < GeneralObject
   # end
 
   def rotate_counterclockwise
-    increment = 1
+    increment = @rotation_speed
     if @angle + increment >= 360
       @angle = (@angle + increment) - 360
     else
@@ -222,7 +228,7 @@ class Player < GeneralObject
   end
 
   def rotate_clockwise
-    increment = 1
+    increment = @rotation_speed
     if @angle - increment <= 0
       @angle = (@angle - increment) + 360
     else
@@ -321,15 +327,20 @@ class Player < GeneralObject
   end
   
   # Calculate W movement
-  def accelerate movement_x = 0, movement_y = 0
-    puts "PLAYER GPS: #{@location_y} - #{@location_x}"
-    puts "INCOMING MOVEMENT: #{movement_x} - #{movement_y}"
-    base = 2.0
+    # @mass = 50 # Get from ship
+    # @current_momentum = 0
+    # @max_momentum = @mass
+    # @speed = 10 / (@mass / 2)
+    # @rotation_speed = 2
+  def forward_movement speed, opts = {}
+    # puts "MOMENTUM FORWARD MOMENY HERE" if opts[:debug]
+    base = speed
+
     # @y = @ship.accelerate
 
     # map_width, map_height
     # @location_x, @location_y = [location_x, location_y]
-    puts "AMG:E #{@angle}"
+    # puts "AMG:E #{@angle}"
     step = (Math::PI/180 * (@angle + 90))# - 180
     # step = step.round(5)
     new_x = Math.cos(step) * base + @location_x
@@ -339,32 +350,29 @@ class Player < GeneralObject
     # y_diff = y_diff.round
     # x_diff = x_diff.round
 
-    puts "Y_DIFF: #{y_diff} = #{@location_y} - #{new_y}"
+    # puts "Y_DIFF: #{y_diff} = #{@location_y} - #{new_y}"
 
     # movement_y = nil
 
     if @location_y - y_diff > @map_height
-      puts 'CAse 1'
+      # puts 'CAse 1'
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)
     elsif @location_y - y_diff < 0
-      puts 'CAse 2'
+      # puts 'CAse 2'
       y_diff = y_diff + (@location_y + y_diff)
     else
-      puts 'CAse 3'
+      # puts 'CAse 3'
       # y_diff = @location_y + y_diff
-      puts "#{movement_y} = #{@location_y} + #{y_diff}"
     end
 
     if @location_x - x_diff > @map_width
-      puts 'CAse 1'
+      # puts 'CAse 1'
       x_diff = x_diff - ((@location_x + x_diff) - @location_x)
     elsif @location_x - x_diff < 0
-      puts 'CAse 2'
+      # puts 'CAse 2'
       x_diff = x_diff + (@location_x + x_diff)
     else
-      puts 'CAse 3'
-      # y_diff = @location_y + y_diff
-      puts "#{movement_y} = #{@location_y} + #{y_diff}"
+      # puts 'CAse 3'
     end
 
     @location_y -= y_diff
@@ -372,7 +380,18 @@ class Player < GeneralObject
 
       # else
       # @location_y += base
-    puts "MOVEMENT_Y: #{movement_y}"
+    return [x_diff, y_diff]
+  end
+
+  def accelerate movement_x = 0, movement_y = 0
+    puts "REGULAR SPEED: #{@speed / (@mass.to_f)}"
+    x_diff, y_diff = self.forward_movement( @speed / (@mass.to_f) )
+
+    if @current_momentum <= @max_momentum
+      @current_momentum += 3
+      puts " NEW MOMENTUM: #{@current_momentum}"
+    end
+
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
@@ -442,8 +461,19 @@ class Player < GeneralObject
     @ship.draw_gl
   end
   
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
+  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
+
+    if @current_momentum > 0
+      speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      puts "MOMENTUM SPEED: #{speed}"
+      x_diff, y_diff = self.forward_movement(speed)
+      @current_momentum -= 1
+    else
+      x_diff, y_diff = [0,0]
+    end
+
+
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
 
@@ -451,6 +481,7 @@ class Player < GeneralObject
     @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
+    return [movement_x - x_diff, movement_y - y_diff]
   end
 
   def collect_pickups(pickups)

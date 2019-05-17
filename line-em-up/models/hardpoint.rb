@@ -52,11 +52,11 @@ class Hardpoint < GeneralObject
     @init_angle = @angle
     @radian = calc_radian(start_point, end_point)
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
-    puts "ID: #{@id}"
-    puts "START POINT : #{@center_x} - #{@center_y}"
-    puts "End POINT : #{@x} - #{@y}"
-    puts "Angle #{@angle} and radius: #{@radius}"
-    puts ""
+    # puts "ID: #{@id}"
+    # puts "START POINT : #{@center_x} - #{@center_y}"
+    # puts "End POINT : #{@x} - #{@y}"
+    # puts "Angle #{@angle} and radius: #{@radius}"
+    # puts ""
   end
 
 
