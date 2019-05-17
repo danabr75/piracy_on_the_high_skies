@@ -193,23 +193,40 @@ class Player < GeneralObject
   # end
 
 
+  # def increment_angle angle_increment
+  #   if @angle + angle_increment >= 360.0
+  #     @angle = (@angle + angle_increment) - 360.0
+  #   else
+  #     @angle += angle_increment
+  #   end
+  # end
+
+  # def decrement_angle angle_increment
+  #   if @angle - angle_increment <= 0.0
+  #     @angle = (@angle - angle_increment) + 360.0
+  #   else
+  #     @angle -= angle_increment
+  #   end
+  # end
+
   def rotate_counterclockwise
-    if @angle == 360
-      @angle = 1
+    increment = 1
+    if @angle + increment >= 360
+      @angle = (@angle + increment) - 360
     else
-      @angle += 1
+      @angle += increment
     end
     @ship.angle = @angle
-    @ship.rotate_hardpoints_counterclockwise
+    @ship.rotate_hardpoints_counterclockwise(increment.to_f)
     return 1
   end
 
   def rotate_clockwise
     increment = 1
-    if @angle == 0
-      @angle = 359
+    if @angle - increment <= 0
+      @angle = (@angle - increment) + 360
     else
-      @angle -= 1
+      @angle -= increment
     end
     @ship.angle = @angle
     @ship.rotate_hardpoints_clockwise(increment.to_f)

@@ -42,13 +42,21 @@ class Hardpoint < GeneralObject
     @image_angle = options[:image_angle] || 0# 180
     # Maybe these are reversed?
     start_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
-    end_point   = OpenStruct.new(:x => @x, :y => @y)
+    # Not sure why the offset is getting switched somewhere...
+    # Maybe the calc Angle function is off somewhere
+    # Without the offset being modified, the hardpoints are flipped across the center x axis
+    end_point   = OpenStruct.new(:x => (x + (@x_offset * -1)), :y => @y)
+    # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
+    # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
     @init_angle = @angle
     @radian = calc_radian(start_point, end_point)
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
     puts "ID: #{@id}"
-    puts "INIT X ANY Y: #{@x} - #{@y} - w/ angle #{@angle} and radius: #{@radius}"
+    puts "START POINT : #{@center_x} - #{@center_y}"
+    puts "End POINT : #{@x} - #{@y}"
+    puts "Angle #{@angle} and radius: #{@radius}"
+    puts ""
   end
 
 

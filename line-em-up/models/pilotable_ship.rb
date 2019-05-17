@@ -121,13 +121,22 @@ class PilotableShip < GeneralObject
   end
 
   # right broadside
-  def rotate_hardpoints_counterclockwise
-    puts "RIGHT HERE: rotate_hardpoints_counterclockwise"
+  def rotate_hardpoints_counterclockwise angle_increment
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        hp.increment_angle
-        hp.x = Math.cos(hp.angle) * hp.radius + @x
-        hp.y = Math.sin(hp.angle) * hp.radius + @y
+        # hp.increment_angle
+        # hp.x = Math.cos(hp.angle) * hp.radius + @x
+        # hp.y = Math.sin(hp.angle) * hp.radius + @y
+        puts "ID: #{hp.id}"
+        puts "PRE - CC ANGLE: #{hp.angle}"
+        step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
+        step = step.round(5)
+        hp.x = Math.cos(step) * hp.radius + hp.center_x
+        hp.y = Math.sin(step) * hp.radius + hp.center_y
+
+        hp.increment_angle(angle_increment)
+        puts "POST - CC ANGLE: #{hp.angle}"
+
 
         # hp.image_angle = (hp.image_angle || 0) - 1
         # hp_y_offset = hp.y_offset
@@ -143,35 +152,16 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_clockwise angle_increment
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        puts "ID: #{hp.id}"
-        puts "RADIUS: #{hp.radius} and angle: #{hp.angle} and player angle: #{@angle}"
-        # puts "PRE  X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
-        puts "PRE  X AND Y : #{hp.x} - #{hp.y}"
-        # @theta = 0 if @theta.nil?
-        # @theta += 1
-
-
         # 90 and 45 should probably from from hp.. image angle?
-        (step = (Math::PI/180 * (hp.angle + 1.0)) + 90.0 + 45.0)# - 180
-        puts "STEP: #{step}"
+        puts "ID: #{hp.id}"
+        puts "PRE - C ANGLE: #{hp.angle}"
+        step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
+        step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
         hp.decrement_angle(angle_increment)
-
-        # hp.x = hp.radius * Math.cos(@angle) + hp.center_x
-
-        # hp.y = hp.radius * Math.sin(@angle) + hp.center_y
-
-
-        # X := originX + cos(angle)*radius;
-        # Y := originY + sin(angle)*radius;
-
-
-        # puts "POST X AND Y OFFSET: #{hp.x_offset} - #{hp.y_offset}"
-        puts "POST  X AND Y : #{hp.x} - #{hp.y}"
-        puts "POST RADIUS: #{hp.radius} and angle: #{hp.angle}"
-
+        puts "POST - C ANGLE: #{hp.angle}"
         # hp.image_angle = (hp.image_angle || 0) + 1
         # hp_y_offset = hp.y_offset
         # hp_x_offset = hp.x_offset
