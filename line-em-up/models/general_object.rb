@@ -263,7 +263,7 @@ class GeneralObject
     middle_x = @screen_width / 2
     middle_y = @screen_height / 2
 
-    ratio = @screen_width.to_f / @screen_height.to_f
+    ratio = @screen_width.to_f / (@screen_height.to_f)
 
     increment_x = (ratio / middle_x) * 0.97
     # The zoom issue maybe, not quite sure why we need the Y offset.

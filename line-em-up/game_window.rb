@@ -474,6 +474,7 @@ class GameWindow < Gosu::Window
 
       if @player.is_alive && !@game_pause && !@menu_open
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
+        @gl_background.update(@player.location_x, @player.location_y)
         # puts "FIRST: #{@movement_x} and #{@movement_y}"
         @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
@@ -573,7 +574,7 @@ class GameWindow < Gosu::Window
         end
 
         # puts "GET: @player.location_x, @player.location_y = #{@player.location_x}, #{@player.location_y}"
-        @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y, @player.location_x, @player.location_y)
+        # @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y, @player.location_x, @player.location_y)
         
 
         if !@boss_killed && !@boss_active
