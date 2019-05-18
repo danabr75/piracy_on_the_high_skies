@@ -317,10 +317,12 @@ class GLBackground
 
         # x_coord = x_coord + opengl_offset_x
 
-        z = x_element['height']
+        # z = x_element['height']
+        z = 0.5# - (0.2 / (x_element['height']))
         #testing
-        # info =  @infos[x_element['terrain_index']]
-        info = @info
+        info =  @infos[x_element['terrain_index']]
+        # info =  @infos[x_index % 2]
+        # info = @info
 
         glBindTexture(GL_TEXTURE_2D, info.tex_name)
         # -.5 ... +.5
