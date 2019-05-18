@@ -143,7 +143,7 @@ class GameWindow < Gosu::Window
     
     player_location_x, player_location_y = [100, 100]
 
-    @gl_background = GLBackground.new(player_location_x, player_location_y)
+    @gl_background = GLBackground.new(player_location_x, player_location_y, default_width, default_height)
     
     @grappling_hook = nil
     

@@ -33,8 +33,16 @@ class GLBackground
 
   attr_accessor :player_position_x, :player_position_y, :map_width, :map_height
 
-  def initialize player_x, player_y
+  def initialize player_x, player_y, screen_width, screen_height
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
+
+    @screen_width = screen_width
+    @screen_height = screen_height
+    @screen_height_half = @screen_height / 2
+    @screen_width_half = @screen_width / 2
+
+
+
     @scrolls = 0.0
     @visible_map = Array.new(VISIBLE_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH) { nil } }
     @local_map_movement_x = 0
@@ -191,8 +199,6 @@ class GLBackground
     glLoadIdentity
     glTranslated(0, 0, -4)
 
-    opengl_increment_y = 1 / VISIBLE_MAP_HEIGHT.to_f
-    opengl_increment_x = 1 / VISIBLE_MAP_WIDTH.to_f
 
 #     # TEST
 
@@ -205,43 +211,111 @@ class GLBackground
 # glBegin(GL_TRIANGLE_STRIP)
 #     glTexCoord2d(@info.left, @info.top)
 #     # puts "VERT ONE: #{opengl_x} X #{opengl_y}"
-#     glVertex3d(-0.25, -0.1, 0.5)
+#     # edges of screen are 0.5?
+#     # 0, 0 is center.
+#     # 1, 1 is top RIGHT
+#     # -1, 1, is TOP LEFT
+#     # 1, -1 is BOTTOM RIGHT
+#     # -1, -1, is bottom LEFT
+
+#     # BOTTOM RIGHT VERT
+#     glVertex3d(0.2, -0.2, 0.5)
 #     glTexCoord2d(@info.left, @info.bottom)
-#     glVertex3d(-0.25, 0.1, 0.5)
+#     # TOP RIGHT VERT
+#     glVertex3d(0.2, 0.2, 0.5)
 #     glTexCoord2d(@info.right, @info.top)
-#     glVertex3d(-0.083, -0.1, 0.5)
+#     # BOTTOM LEFT VERT
+#     glVertex3d(-0.2, -0.2, 0.5)
 #     glTexCoord2d(@info.right, @info.bottom)
-#     glVertex3d(-0.083, 0.1, 0.5)
+#     # TOP LEFT VERT
+#     glVertex3d(-0.2, 0.2, 0.5)
+
+#     # glVertex3d(-0.25, -0.1, 0.5)
+#     # glTexCoord2d(@info.left, @info.bottom)
+#     # glVertex3d(-0.25, 0.1, 0.5)
+#     # glTexCoord2d(@info.right, @info.top)
+#     # glVertex3d(-0.083, -0.1, 0.5)
+#     # glTexCoord2d(@info.right, @info.bottom)
+#     # glVertex3d(-0.083, 0.1, 0.5)
+
 # glEnd
 
 #     # END TEST
+    opengl_offsets = []
+
+    # This is the width and height of each individual terrain segments.
+    opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
+    opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)
 
     glEnable(GL_TEXTURE_2D)
-    y_length = @visible_map.length
+    y_max = @visible_map.length - 1
     @visible_map.each_with_index do |y_row, y_index|
-      x_length = y_row.length
+      x_max = y_row.length - 1
       y_row.each_with_index do |x_element, x_index|
-        y_offset = 0
-        if y_index == 0 
-          y_offset = (1 / VISIBLE_MAP_HEIGHT / 2) 
-        elsif (y_index - VISIBLE_MAP_HEIGHT / 2) == 0
-          y_offset = 0
-        else
-          y_offset = (1 / (y_index - VISIBLE_MAP_HEIGHT / 2))
-        end
-        x_offset = 0
-        if x_index == 0 
-          x_offset = (1 / VISIBLE_MAP_HEIGHT / 2) 
-        elsif (x_index - VISIBLE_MAP_HEIGHT / 2) == 0
-          x_offset = 0
-        else
-          x_offset = (1 / (x_index - VISIBLE_MAP_HEIGHT / 2))
-        end
+        # y_offset = 0.0
+        # if y_index == 0 
+        #   y_offset = (1 / VISIBLE_MAP_HEIGHT.to_f / 2.0) 
+        # elsif (y_index - VISIBLE_MAP_HEIGHT.to_f / 2.0) == 0.0
+        #   y_offset = 0
+        # else
+        #   y_offset = (1 / (y_index - VISIBLE_MAP_HEIGHT.to_f / 2.0))
+        # end
+        # x_offset = 0
+        # if x_index == 0 
+        #   x_offset = (1 / VISIBLE_MAP_WIDTH.to_f / 2.0) 
+        # elsif (x_index - VISIBLE_MAP_WIDTH.to_f / 2.0) == 0.0
+        #   x_offset = 0
+        # else
+        #   x_offset = (1 / (x_index - VISIBLE_MAP_WIDTH.to_f / 2.0))
+        # end
         # x_offset = x_index == 0 ? (1 / VISIBLE_MAP_WIDTH  / 2) : (1 / (x_index - VISIBLE_MAP_WIDTH  / 2))
-        puts "x_element: #{x_element}"
-        opengl_x = (1 / (x_index + 1.0 + x_offset) )
-        opengl_y = (1 / (y_index + 1.0 + y_offset) )
+        # puts "x_element: #{x_element}"
+        # opengl_x = -0.5 + (1 / ((x_index + 1.0) * x_offset) )
+        # opengl_y = -0.5 + (1 / ((y_index + 1.0) * y_offset) )
 
+        # OFFSET IS IN OPEN GL -1..1 territory
+                              
+
+        # splits across middle 0  -7..0..7
+        new_x_index = x_index - (x_max / 2.0)
+        new_y_index = y_index - (y_max / 2.0)
+        # convert to 
+        # split across center index, divided by half of center abs / 2
+        # (-7 / 3.5) / 2.0
+        # (-1 / 3.5) / 2.0
+        # -1
+        opengl_coord_x = (new_x_index / (x_max / 2.0)) / 2
+        opengl_coord_y = (new_y_index / (y_max / 2.0)) / 2
+        #we're reading the map as left to right, top down. So comes out as: -1, -1 (bottom left), but needs to be -1, 1 (TOP LEFT)
+        opengl_coord_y = opengl_coord_y * -1
+        opengl_coord_x = opengl_coord_x * -1
+
+        # opengl_offsets << {x_off: x_offset, y_off: opengl_y}
+
+
+
+        # @screen_height_half = @screen_height / 2
+        # @screen_width_half = @screen_width / 2
+
+
+        # Move to init
+        # !!!!!!!!! NEED TO HANDLE RATIOs at some point
+        # ratio = @screen_width.to_f / (@screen_height.to_f)
+        # increment_x = (ratio / (@screen_width_half))
+        # increment_y = (1.0   / (@screen_height_half))
+
+        # puts "x_coord = (#{x_index} - #{@screen_width_half})  * #{increment_x}"
+        # x_coord = (x_index)  * x_offset
+        # puts "WAS: #{x_coord}"
+        # y_coord = y_index * y_offset
+        # # Inverted Y
+
+        # y_coord = y_coord + opengl_offset_y
+
+        # # y_coord = y_coord * -1
+
+
+        # x_coord = x_coord + opengl_offset_x
 
         z = x_element['height']
         #testing
@@ -250,24 +324,43 @@ class GLBackground
 
         glBindTexture(GL_TEXTURE_2D, info.tex_name)
         # -.5 ... +.5
-        puts "Z: #{z}"
+        # puts "Z: #{z}"
         glBegin(GL_TRIANGLE_STRIP)
           # Apply scale factor here?
+          show_debug = false
+          if y_index == 0 && x_index == 0
+            puts "TOP RIGHT"
+            show_debug = true
+          elsif y_index == y_max && x_index == x_max
+            puts "BOTTOM LEFT"
+            show_debug = true
+          elsif y_index == 0 && x_index == x_max
+            puts "TOP LEFT"
+            show_debug = true
+          elsif y_index == y_max && x_index == 0
+            puts "BOTTOM RIGHT"
+            show_debug = true
+          end
           glTexCoord2d(info.left, info.top)
-          puts "V2 VERT ONE: #{opengl_x} X #{opengl_y}"
-          glVertex3d(opengl_x, opengl_y, z)
+          puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
+          # BOTTOM RIGHT VERT
+          glVertex3d(opengl_coord_x, opengl_coord_y, z)
           glTexCoord2d(info.left, info.bottom)
-          puts "V2 VERT TWO: #{opengl_x} X #{opengl_y} + #{opengl_increment_y}"
-          glVertex3d(opengl_x, opengl_y + opengl_increment_y, z)
+          puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
+          # TOP RIGHT VERT
+          glVertex3d(opengl_coord_x, opengl_coord_y + opengl_increment_y, z)
           glTexCoord2d(info.right, info.top)
-          puts "V2 VERT THREE: #{opengl_x} + #{opengl_increment_x} X #{opengl_y}"
-          glVertex3d(opengl_x + opengl_increment_x, opengl_y, z)
+          puts "V2 VERT THREE: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y}" if show_debug
+          # BOTTOM LEFT VERT
+          glVertex3d(opengl_coord_x + opengl_increment_x, opengl_coord_y, z)
           glTexCoord2d(info.right, info.bottom)
-          puts "V2 VERT FOUR: #{opengl_x} + #{opengl_increment_x} X #{opengl_y} + #{opengl_increment_y}"
-          glVertex3d(opengl_x + opengl_increment_x, opengl_y + opengl_increment_y, z)
+          puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
+          # BOTTOM LEFT VERT
+          glVertex3d(opengl_coord_x + opengl_increment_x, opengl_coord_y + opengl_increment_y, z)
         glEnd
       end
     end
+    # puts opengl_offsets
     # raise "STOP HERE"
 
 
