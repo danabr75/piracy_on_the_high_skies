@@ -22,26 +22,59 @@ class GLBackground
   MAP_WIDTH_EDGE_LEFT  = 80
   EXTERIOR_MAP_HEIGHT = 1000
   EXTERIOR_MAP_WIDTH  = 1000
-  POINTS_X = 7
+  # POINTS_X = 7
   VISIBLE_MAP_WIDTH = 15
-  POINTS_Y = 7
+  # POINTS_Y = 7
   VISIBLE_MAP_HEIGHT = 15
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
   SCROLLING_SPEED = 4
 
-  attr_accessor :player_position_x, :player_position_y, :map_width, :map_height
+  # attr_accessor :player_position_x, :player_position_y
+  attr_accessor :map_width, :map_height
 
   def initialize player_x, player_y, screen_width, screen_height
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
+
+    # These are the width and length of each background tile
+    @opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
+    @opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)
+
+    # background openGLK window size is 0.5 (-.25 .. .25)
+    puts "screen_width: #{screen_width}"
+    # IN OPENGL terms
+    @open_gl_screen_movement_increment_x = 1 / ((screen_width.to_f / VISIBLE_MAP_WIDTH.to_f)  - (screen_width.to_f / VISIBLE_MAP_WIDTH.to_f) / 4.0 )#(screen_width  / VISIBLE_MAP_WIDTH)  / 4
+    @open_gl_screen_movement_increment_y = 1 / ((screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f)  - (screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f) / 4.0 )#(screen_height / VISIBLE_MAP_HEIGHT) / 4
+    @on_screen_movement_increment_x = ((screen_width.to_f  / VISIBLE_MAP_WIDTH.to_f)  / 2)#(screen_width  / VISIBLE_MAP_WIDTH)  / 4
+    @on_screen_movement_increment_y = ((screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f) / 2)#(screen_height / VISIBLE_MAP_HEIGHT) / 4
+    # Need to convert on_screen to GPS
+    puts "INIT: @screen_movement_increment: #{@on_screen_movement_increment_x} - #{@on_screen_movement_increment_y}"
+
+
+    # splits across middle 0  -7..0..7
+    # new_x_index = x_index - (x_max / 2.0)
+    # new_y_index = y_index - (y_max / 2.0)
+    # convert to 
+    # split across center index, divided by half of center abs / 2
+    # (-7 / 3.5) / 2.0
+    # (-1 / 3.5) / 2.0
+    # -1
+
+    # Replace scrolling meter
+    @global_sized_terrain_width = (@opengl_increment_x * 2)
+
 
     @screen_width = screen_width
     @screen_height = screen_height
     @screen_height_half = @screen_height / 2
     @screen_width_half = @screen_width / 2
 
+    # @ratio = @screen_width.to_f / (@screen_height.to_f)
 
+    # increment_x = (ratio / middle_x) * 0.97
+    # # The zoom issue maybe, not quite sure why we need the Y offset.
+    # increment_y = (1.0 / middle_y) * 0.75
 
     @scrolls = 0.0
     @visible_map = Array.new(VISIBLE_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH) { nil } }
@@ -50,10 +83,12 @@ class GLBackground
 
     # @map_height = EXTERIOR_MAP_HEIGHT
     # @map_width  = EXTERIOR_MAP_WIDTH
-    @player_position_x = EXTERIOR_MAP_HEIGHT / 2.0
-    @player_position_y = EXTERIOR_MAP_WIDTH  / 2.0
-    @current_map_center_y = EXTERIOR_MAP_HEIGHT / 2.0
-    @current_map_center_x = EXTERIOR_MAP_WIDTH  / 2.0
+    # @player_position_x = EXTERIOR_MAP_HEIGHT / 2.0
+    # @player_position_y = EXTERIOR_MAP_WIDTH  / 2.0
+    # @current_map_center_y = EXTERIOR_MAP_HEIGHT / 2.0
+    # @current_map_center_x = EXTERIOR_MAP_WIDTH  / 2.0
+    @current_map_center_x = player_x
+    @current_map_center_y = player_y
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/desert.txt").first)
     @terrains = @map["terrains"]
     @images = []
@@ -82,6 +117,8 @@ class GLBackground
   end
 
   def update player_x, player_y
+    # puts "GLBACK: #{player_x} - #{player_y}"
+    # puts "@local_map_movement_y: #{@local_map_movement_y}"
     # (0..VISIBLE_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
     #   (0..VISIBLE_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
     #     y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
@@ -89,24 +126,79 @@ class GLBackground
     #     @visible_map[index_h][index_w] = @map_data[player_y + y_offset][player_x + x_offset]
     #   end
     # end
-
-
+    # puts "PLAYER: #{player_x} - #{player_y}"
     @local_map_movement_y = player_y - @current_map_center_y
+    @local_map_movement_x = player_x - @current_map_center_x
+    # puts "POST: local_map_movement_x: #{@local_map_movement_x}" 
+    # puts "POST: local_map_movement_y: #{@local_map_movement_y}"
+
     # Adding to bottom of map
     # SCROLLS_PER_STEP !!!!! Need to factor in scale factor here!
-    if @local_map_movement_y <= SCROLLS_PER_STEP
-      @visible_map.shift
-      @visible_map.push Array.new(VISIBLE_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
-      @current_map_center_y = player_y
-      @local_map_movement_y = 0
-    end
-
-    # Adding to top of map 
-    if @local_map_movement_y >= -SCROLLS_PER_STEP
+    # NEED TO CONVERT ON SCREEN TO GPS MOVEMENTS
+    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
+    if @local_map_movement_y >= @on_screen_movement_increment_y / 14
+      puts "ADDING IN ARRAY 1"
       @visible_map.pop
       @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
       @current_map_center_y = player_y
       @local_map_movement_y = 0
+      # raise "STOP"
+    end
+
+    # Adding to top of map 
+    # puts "@local_map_movement_y: #{@local_map_movement_y} and @on_screen_movement_increment_y: #{@on_screen_movement_increment_y}"
+    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
+    if @local_map_movement_y <= -@on_screen_movement_increment_y / 14
+      puts "ADDING IN ARRAY 2"
+      @visible_map.shift
+      @visible_map.push Array.new(VISIBLE_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+      @current_map_center_y = player_y
+      @local_map_movement_y = 0
+      # raise "STOP"
+    end
+
+
+    # if movement_x >= SCROLLS_PER_STEP
+    #   # @height_map.shift
+    #   # @height_map.push Array.new(POINTS_X) { rand }
+    #   @height_map.each do |row|
+    #     row.shift
+    #     row.push({height: x_value, terrain_index: rand(2) })
+    #   end
+    #   movement_x = 0
+    # end
+    # if movement_x <= -SCROLLS_PER_STEP
+    #   @height_map.each do |row|
+    #     row.pop
+    #     row.unshift({height: x_value, terrain_index: rand(2) })
+    #   end
+    #   movement_x = 0
+    # end
+
+
+    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
+    if @local_map_movement_x >= @on_screen_movement_increment_x  / 14
+      puts "ADDING IN ARRAY 3"
+      @visible_map.each do |row|
+        row.pop
+        row.unshift({ 'height' => rand, 'terrain_index' => rand(2) })
+      end
+      @current_map_center_x = player_x
+      @local_map_movement_x = 0
+      # raise "STOP"
+    end
+  
+
+    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
+    if @local_map_movement_x <= -@on_screen_movement_increment_x / 14
+      puts "ADDING IN ARRAY 4"
+      @visible_map.each do |row|
+        row.shift
+        row.push({ 'height' => rand, 'terrain_index' => rand(2) })
+      end
+      @current_map_center_x = player_x
+      @local_map_movement_x = 0
+      # raise "STOP"
     end
 
   end
@@ -202,10 +294,10 @@ class GLBackground
 
 #     # TEST
 
-# # VERT ONE: -0.25 X -0.1
-# # VERT TWO: -0.25 X 0.1
-# # VERT THREE: -0.083 X -0.1
-# # VERT FOUR: -0.083 X 0.1
+# VERT ONE: -0.25 X -0.1
+# VERT TWO: -0.25 X 0.1
+# VERT THREE: -0.083 X -0.1
+# VERT FOUR: -0.083 X 0.1
 # glEnable(GL_TEXTURE_2D)
 # glBindTexture(GL_TEXTURE_2D, @info.tex_name)
 # glBegin(GL_TRIANGLE_STRIP)
@@ -219,16 +311,16 @@ class GLBackground
 #     # -1, -1, is bottom LEFT
 
 #     # BOTTOM RIGHT VERT
-#     glVertex3d(0.2, -0.2, 0.5)
+#     glVertex3d(0.25, -0.25, 0.5)
 #     glTexCoord2d(@info.left, @info.bottom)
 #     # TOP RIGHT VERT
-#     glVertex3d(0.2, 0.2, 0.5)
+#     glVertex3d(0.25, 0.25, 0.5)
 #     glTexCoord2d(@info.right, @info.top)
 #     # BOTTOM LEFT VERT
-#     glVertex3d(-0.2, -0.2, 0.5)
+#     glVertex3d(-0.25, -0.25, 0.5)
 #     glTexCoord2d(@info.right, @info.bottom)
 #     # TOP LEFT VERT
-#     glVertex3d(-0.2, 0.2, 0.5)
+#     glVertex3d(-0.25, 0.25, 0.5)
 
 #     # glVertex3d(-0.25, -0.1, 0.5)
 #     # glTexCoord2d(@info.left, @info.bottom)
@@ -240,12 +332,21 @@ class GLBackground
 
 # glEnd
 
-#     # END TEST
+    # END TEST
     opengl_offsets = []
 
     # This is the width and height of each individual terrain segments.
-    opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
-    opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)
+                            # @screen_movement_increment_x == 8 
+    # opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
+    opengl_increment_y = @open_gl_screen_movement_increment_y
+    # opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)
+    opengl_increment_x = @open_gl_screen_movement_increment_x
+
+    # offs_y = 1.0 * @local_map_movement_y / (@screen_movement_increment_y)
+    # offs_x = 1.0 * @local_map_movement_x / (@screen_movement_increment_x)
+    offs_y = 1.0 * @local_map_movement_y / (@on_screen_movement_increment_y)
+    offs_x = 1.0 * @local_map_movement_x / (@on_screen_movement_increment_x)
+    offs_x = offs_x + 0.1
 
     glEnable(GL_TEXTURE_2D)
     y_max = @visible_map.length - 1
@@ -330,35 +431,35 @@ class GLBackground
         glBegin(GL_TRIANGLE_STRIP)
           # Apply scale factor here?
           show_debug = false
-          if y_index == 0 && x_index == 0
-            puts "TOP RIGHT"
-            show_debug = true
-          elsif y_index == y_max && x_index == x_max
-            puts "BOTTOM LEFT"
-            show_debug = true
-          elsif y_index == 0 && x_index == x_max
-            puts "TOP LEFT"
-            show_debug = true
-          elsif y_index == y_max && x_index == 0
-            puts "BOTTOM RIGHT"
-            show_debug = true
-          end
+          # if y_index == 0 && x_index == 0
+          #   puts "TOP RIGHT"
+          #   show_debug = true
+          # elsif y_index == y_max && x_index == x_max
+          #   puts "BOTTOM LEFT"
+          #   show_debug = true
+          # elsif y_index == 0 && x_index == x_max
+          #   puts "TOP LEFT"
+          #   show_debug = true
+          # elsif y_index == y_max && x_index == 0
+          #   puts "BOTTOM RIGHT"
+          #   show_debug = true
+          # end
           glTexCoord2d(info.left, info.top)
           puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
           # BOTTOM RIGHT VERT
-          glVertex3d(opengl_coord_x, opengl_coord_y, z)
+          glVertex3d(opengl_coord_x - offs_x, opengl_coord_y - offs_y, z)
           glTexCoord2d(info.left, info.bottom)
-          puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
+          puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + @opengl_increment_y}" if show_debug
           # TOP RIGHT VERT
-          glVertex3d(opengl_coord_x, opengl_coord_y + opengl_increment_y, z)
+          glVertex3d(opengl_coord_x - offs_x, opengl_coord_y + @opengl_increment_y - offs_y, z)
           glTexCoord2d(info.right, info.top)
-          puts "V2 VERT THREE: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y}" if show_debug
+          puts "V2 VERT THREE: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y}" if show_debug
           # BOTTOM LEFT VERT
-          glVertex3d(opengl_coord_x + opengl_increment_x, opengl_coord_y, z)
+          glVertex3d(opengl_coord_x + @opengl_increment_x - offs_x, opengl_coord_y - offs_y, z)
           glTexCoord2d(info.right, info.bottom)
-          puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
+          puts "V2 VERT FOUR: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y + @opengl_increment_y}" if show_debug
           # BOTTOM LEFT VERT
-          glVertex3d(opengl_coord_x + opengl_increment_x, opengl_coord_y + opengl_increment_y, z)
+          glVertex3d(opengl_coord_x + @opengl_increment_x - offs_x, opengl_coord_y + @opengl_increment_y - offs_y, z)
         glEnd
       end
     end

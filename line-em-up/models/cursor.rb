@@ -26,6 +26,7 @@ class Cursor < GeneralObject
     @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @scale, @scale)
   end
 
+  # THESE ARE ON-SCREEN COORDS, NOT OPENGL COORDS
   def convert_x_and_y_to_opengl_coords
     # puts "convert_x_and_y_to_opengl_coords"
     # puts "@screen_width: #{@screen_width}"

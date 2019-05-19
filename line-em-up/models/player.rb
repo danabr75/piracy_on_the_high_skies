@@ -82,10 +82,10 @@ class Player < GeneralObject
       @ship = BasicShip.new(scale, x, y, screen_width, screen_height, @angle, options)
     end
     # Get details from ship
-    @mass = 100 # Get from ship
+    @mass = 500 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass # speed here?
-    @speed = 20 #/ (@mass / 2)
+    @speed = 30 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
@@ -336,7 +336,8 @@ class Player < GeneralObject
     # @rotation_speed = 2
   def movement speed, angle
     # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
-    base = speed
+    base = speed / 100.0
+    # raise "BASE: #{base}"
     
     map_edge = 50
 
@@ -361,6 +362,8 @@ class Player < GeneralObject
       x_diff = x_diff + (@location_x + x_diff)
     end
 
+    puts "MOVEMNET: #{x_diff} - #{y_diff}"
+
     @location_y -= y_diff
     @location_x -= x_diff
 
@@ -371,7 +374,7 @@ class Player < GeneralObject
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle )
 
     if @current_momentum <= @max_momentum
-      @current_momentum += 3
+      @current_momentum += 2
     end
 
     return [movement_x - x_diff, movement_y - y_diff]
@@ -381,7 +384,7 @@ class Player < GeneralObject
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180 )
 
     if @current_momentum >= -@max_momentum
-      @current_momentum -= 1.5
+      @current_momentum -= 1.2
     end
 
     return [movement_x - x_diff, movement_y - y_diff]

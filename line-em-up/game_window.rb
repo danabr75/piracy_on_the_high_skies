@@ -108,9 +108,11 @@ class GameWindow < Gosu::Window
     width, height = value.split('x')
     @width, @height = [width.to_i, height.to_i]
 
-    default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
+    default_width, default_height = ResolutionSetting::SELECTION[3].split('x')
     # default_width, default_height = default_value.split('x')
-    default_width, default_height = [default_width.to_i, default_height.to_i]
+    puts 'FOR TESTING:'
+    @width, @height = [default_width.to_i, default_height.to_i]
+    # END TESTING
 
 
     # Need to just pull from config file.. and then do scaling.
@@ -143,7 +145,7 @@ class GameWindow < Gosu::Window
     
     player_location_x, player_location_y = [100, 100]
 
-    @gl_background = GLBackground.new(player_location_x, player_location_y, default_width, default_height)
+    @gl_background = GLBackground.new(player_location_x, player_location_y, @width, @height)
     
     @grappling_hook = nil
     
