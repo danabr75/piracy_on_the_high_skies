@@ -1,6 +1,7 @@
 require 'securerandom'
 class GeneralObject
   attr_accessor :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
+  attr_accessor :location_x, :location_y
   LEFT  = 'left'
   RIGHT = 'right'
   SCROLLING_SPEED = 4
@@ -22,8 +23,12 @@ class GeneralObject
     self.class.get_image_path
   end
 
-  def initialize(scale, x, y, screen_width, screen_height, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+    @map_height = map_height
+    @map_width  = map_width
     # Only use ID in debug\test
+    @location_x = location_x # Override?
+    @location_y = location_y # Override?
     @id    = SecureRandom.uuid
     @scale = scale
     @image = options[:image] || get_image
@@ -196,16 +201,18 @@ class GeneralObject
 
   # Which angle is nearest
   def self.nearest_angle angle, min_angle, max_angle
+    puts "NEAREST ANGLE #{angle} - #{min_angle} - #{max_angle}"
     value = nil
     min_angle_diff = angle - min_angle
     max_angle_diff = angle - max_angle
     first_diff = nil
+    puts "WAS NOT: #{min_angle_diff.abs} > #{max_angle_diff.abs}"
     if min_angle_diff.abs > max_angle_diff.abs
-      # puts "CASE 1"
+      puts "CASE 1"
       first_diff = max_angle_diff.abs
       value = max_angle
     else
-      # puts "CASE 2"
+      puts "CASE 2"
       first_diff = min_angle_diff.abs
       value = min_angle
     end
@@ -216,22 +223,23 @@ class GeneralObject
     min_angle_diff = alt_angle - min_angle
     max_angle_diff = alt_angle - max_angle
     second_diff = nil
+    puts "WAS #{min_angle_diff.abs} > #{max_angle_diff.abs}"
     if min_angle_diff.abs > max_angle_diff.abs
-      # puts "CASE 3"
+      puts "CASE 3"
       second_diff = max_angle_diff.abs
       alt_value = max_angle
     else
-      # puts "CASE 4"
+      puts "CASE 4"
       second_diff = min_angle_diff.abs
       alt_value = min_angle
     end
     # puts "VALUE: #{value}"
-
+    puts "FIRST DIFF #{first_diff} and SECOND: #{second_diff}" 
     if first_diff > second_diff
-      # puts "CASE 5"
+      puts "CASE 5"
       value = alt_value
     end
-    # puts "VALUE: #{value}"
+    puts "VALUE: #{value}"
     return value
   end
 
@@ -305,6 +313,47 @@ class GeneralObject
 
   def self.descendants
     ObjectSpace.each_object(Class).select { |klass| klass < self }
+  end
+
+  def movement speed, angle
+    puts "MOVEMENT: #{speed}, #{angle}"
+    # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
+    base = speed / 100.0
+    # raise "BASE: #{base}"
+    
+    map_edge = 50
+
+    step = (Math::PI/180 * (angle + 90))# - 180
+    puts "BASE HERE: #{base}"
+    puts "STEP HERE: #{step}"
+    puts "_____ #{@location_x}   -    #{@location_y}"
+    new_x = Math.cos(step) * base + @location_x
+    new_y = Math.sin(step) * base + @location_y
+    x_diff = (@location_x - new_x) * -1
+    y_diff = @location_y - new_y
+
+    puts "(#{@location_y} - #{y_diff}) > #{@map_height}"
+    if (@location_y - y_diff) > @map_height
+      # Block progress along top of map Y 
+      y_diff = y_diff - ((@location_y + y_diff) - @location_y)
+    elsif @location_y - y_diff < 0
+      # Block progress along bottom of map Y 
+      y_diff = y_diff + (@location_y + y_diff)
+    end
+
+    if @location_x - x_diff > @map_width
+      # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_width}"
+      x_diff = x_diff - ((@location_x + x_diff) - @location_x)
+    elsif @location_x - x_diff < 0
+      x_diff = x_diff + (@location_x + x_diff)
+    end
+
+    puts "MOVEMNET: #{x_diff} - #{y_diff}"
+
+    @location_y -= y_diff
+    @location_x -= x_diff
+
+    return [x_diff, y_diff]
   end
 
 end

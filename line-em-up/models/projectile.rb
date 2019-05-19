@@ -20,14 +20,14 @@ class Projectile < GeneralObject
 
   def draw_gl
   end
-  def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
+  def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, location_x = nil, location_y = nil, map_width = nil, map_height = nil, options = {})
     if options[:x_homing_padding]
       end_point_x = end_point_x + options[:x_homing_padding]
     end
     @damage_increase = options[:damage_increase] || 1
     @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
     options[:relative_object] = object
-    super(scale, nil, nil, screen_width, screen_height, options)
+    super(scale, nil, nil, screen_width, screen_height, location_x, location_y, map_width, map_height, options)
 
     start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
     end_point   = OpenStruct.new(:x => end_point_x - screen_width / 2, :y => end_point_y - screen_height / 2)
@@ -35,8 +35,32 @@ class Projectile < GeneralObject
     @radian = calc_radian(start_point, end_point)
 
     @image_angle = @angle
-    if @angle < 0
-      @angle = 360 - @angle.abs
+    if @angle < 0.0
+      @angle = 360.0 - @angle.abs
+    end
+
+    if angle_min
+      if angle_min < 0.0
+        puts "1ANGLE WAS: #{angle_min}"
+        angle_min = 360 - angle_min.abs
+        puts "1NEW ANGLE: #{angle_min}"
+      elsif angle_min > 360.0
+        puts "2ANGLE WAS: #{angle_min}"
+        angle_min = angle_min - 360
+        puts "2NEW ANGLE: #{angle_min}"
+      end
+    end
+
+    if angle_max
+      if angle_max < 0.0
+        puts "3ANGLE WAS: #{angle_max}"
+        angle_max = 360 - angle_max.abs
+        puts "3NEW ANGLE: #{angle_max}"
+      elsif angle_max > 360.0
+        puts "4ANGLE WAS: #{angle_max}"
+        angle_max = angle_max - 360
+        puts "4NEW ANGLE: #{angle_max}"
+      end
     end
 
     if angle_min.nil? && angle_max.nil?

@@ -1,7 +1,7 @@
 require_relative 'general_object.rb'
 
 class DumbProjectile < GeneralObject
-  attr_accessor :x, :y, :time_alive
+  attr_accessor :x, :y, :time_alive, :initial_angle
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   COOLDOWN_DELAY = 50
   STARTING_SPEED = 3.0
@@ -18,14 +18,15 @@ class DumbProjectile < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def initialize(scale, screen_width, screen_height, object, options = {})
+  def initialize(scale, screen_width, screen_height, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+    @initial_angle = initial_angle
     options[:relative_object] = object
     @damage_increase = options[:damage_increase] || 1
     # if options[:debug] == true
     #   puts "NEW DUMB PROJECTILE: X- #{object.x}"
     #   puts "NEW DUMB PROJECTILE: y- #{object.y}"
     # end
-    super(scale, object.x, object.y, screen_width, screen_height, options)
+    super(scale, object.x, object.y, screen_width, screen_height, location_x, location_y, map_width, map_height, options)
     @current_speed = self.class.get_max_speed * @scale
   end
 

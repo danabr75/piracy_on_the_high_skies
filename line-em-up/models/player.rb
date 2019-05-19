@@ -30,14 +30,13 @@ class Player < GeneralObject
   SPECIAL_POWER = 'laser'
   SPECIAL_POWER_KILL_MAX = 50
 
-  attr_accessor :location_x, :location_y
 
   # x and y is graphical representation of object
   # location x and y where it exists on the global map.
   def initialize(scale, x, y, screen_width, screen_height, location_x, location_y, map_width, map_height, options = {})
-    @location_x, @location_y = [location_x, location_y]
+    # @location_x, @location_y = [location_x, location_y]
     @map_width, @map_height  = [map_width, map_height]
-    super(scale, x, y, screen_width, screen_height, options)
+    super(scale, x, y, screen_width, screen_height, location_x, location_y, @map_width, @map_height, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
@@ -334,41 +333,7 @@ class Player < GeneralObject
     # @max_momentum = @mass
     # @speed = 10 / (@mass / 2)
     # @rotation_speed = 2
-  def movement speed, angle
-    # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
-    base = speed / 100.0
-    # raise "BASE: #{base}"
-    
-    map_edge = 50
 
-    step = (Math::PI/180 * (angle + 90))# - 180
-    new_x = Math.cos(step) * base + @location_x
-    new_y = Math.sin(step) * base + @location_y
-    x_diff = (@location_x - new_x) * -1
-    y_diff = @location_y - new_y
-
-    if (@location_y - y_diff) > @map_height
-      # Block progress along top of map Y 
-      y_diff = y_diff - ((@location_y + y_diff) - @location_y)
-    elsif @location_y - y_diff < 0
-      # Block progress along bottom of map Y 
-      y_diff = y_diff + (@location_y + y_diff)
-    end
-
-    if @location_x - x_diff > @map_width
-      # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_width}"
-      x_diff = x_diff - ((@location_x + x_diff) - @location_x)
-    elsif @location_x - x_diff < 0
-      x_diff = x_diff + (@location_x + x_diff)
-    end
-
-    puts "MOVEMNET: #{x_diff} - #{y_diff}"
-
-    @location_y -= y_diff
-    @location_x -= x_diff
-
-    return [x_diff, y_diff]
-  end
 
   def accelerate movement_x = 0, movement_y = 0
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle )
@@ -392,7 +357,8 @@ class Player < GeneralObject
 
 
   def attack_group_1 pointer
-    @ship.attack_group_1(pointer)
+    raise "NO MAP" if @map_width.nil? || @map_height.nil?
+    @ship.attack_group_1(@angle, @location_x, @location_y, @map_width, @map_height, pointer)
   end
  
   def deactivate_group_1
@@ -400,7 +366,7 @@ class Player < GeneralObject
   end
 
   def attack_group_2 pointer
-    @ship.attack_group_2(pointer)
+    @ship.attack_group_2(@angle, @location_x, @location_y, @map_width, @map_height, pointer)
   end
  
   def deactivate_group_2

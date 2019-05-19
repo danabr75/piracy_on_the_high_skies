@@ -13,14 +13,14 @@ class LaserLauncher < Launcher
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
-  def init_projectile options
-    LaserParticle.new(@scale, @screen_width, @screen_height, self, options)
-  end
+  # def init_projectile init_angle, options
+  #   LaserParticle.new(@scale, @screen_width, @screen_height, self, init_angle, options)
+  # end
 
-  def initialize(scale, screen_width, screen_height, object, options = {})
+  def initialize(scale, screen_width, screen_height, object, map_width, map_height, options = {})
     options[:relative_y_padding] = -(object.image_height_half)
     puts "START LASER BEAM: #{options}"
-    super(scale, screen_width, screen_height, object, options)
+    super(scale, screen_width, screen_height, object, map_width, map_height, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image
@@ -42,14 +42,15 @@ class LaserLauncher < Launcher
   end
 
   # only needed for is-head command
-  def attack pointer
+  def attack initial_angle, location_x, location_y, map_width, map_height, pointer
+    raise "NO MAP" if map_width.nil? || map_height.nil?
     if @cooldown_wait <= 0
       @cooldown_wait = get_cooldown
       options = {damage_increase: @damage_increase}
       if @projectiles.count == 0
         options[:is_head] = true
       end
-      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, self, options)
+      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, self, initial_angle, location_x, location_y, map_width, map_height, options)
       @projectiles << projectile
       return projectile
     end

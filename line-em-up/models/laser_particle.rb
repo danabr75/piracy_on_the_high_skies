@@ -22,11 +22,12 @@ class LaserParticle < DumbProjectile
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
-  def initialize(scale, screen_width, screen_height, object, options = {})
+  def initialize(scale, screen_width, screen_height, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+    @initial_angle = initial_angle
     options[:debug] = true
 
     options[:relative_y_padding] = -(object.image_height_half)
-    super(scale, screen_width, screen_height, object, options)
+    super(scale, screen_width, screen_height, object, initial_angle, location_x, location_y, map_width, map_height, options)
     @active = true
     if options[:is_head]
       @position = :is_head
@@ -73,10 +74,11 @@ class LaserParticle < DumbProjectile
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    if @inited
-      @time_alive += 1
-      @y > 0 && @y < @screen_height
-    end
+    movement(1.0, @initial_angle)
+    # if @inited
+    #   @time_alive += 1
+    #   @y > 0 && @y < @screen_height
+    # end
   end
 
   def parental_update mouse_x = nil, mouse_y = nil, player = nil
@@ -97,10 +99,11 @@ class LaserParticle < DumbProjectile
   # include Glut
 
   def draw
-    if @inited# && !@active
-    #   @image_background.draw(@x - @background_image_width_half, @y - @background_image_height_half, get_draw_ordering, @scale, @scale)
-      @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
-    end
+    self.draw_rot
+    # if @inited# && !@active
+    # #   @image_background.draw(@x - @background_image_width_half, @y - @background_image_height_half, get_draw_ordering, @scale, @scale)
+    #   @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+    # end
   end
 
   def draw_gl

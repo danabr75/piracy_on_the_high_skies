@@ -27,7 +27,7 @@ class Hardpoint < GeneralObject
     @center_y = y
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
-    super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, options)
+    super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, nil, nil, options)
     @main_weapon = nil
     @drawable_items_near_self = []
 
@@ -83,7 +83,7 @@ class Hardpoint < GeneralObject
 
   end
 
-  def attack pointer, opts = {}
+  def attack initial_angle, location_x, location_y, map_width, map_height, pointer, opts = {}
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
     if @main_weapon.nil?
@@ -92,14 +92,14 @@ class Hardpoint < GeneralObject
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       options[:image_angle] = @image_angle
       if @assigned_weapon_class
-        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, options)
+        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, map_width, map_height, options)
         @drawable_items_near_self << @main_weapon
-        attack_projectile = @main_weapon.attack(pointer)
+        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, map_width, map_height, pointer)
       end
     else
       @main_weapon.active = true if @main_weapon.active == false
       @drawable_items_near_self << @main_weapon
-      attack_projectile = @main_weapon.attack(pointer)
+      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, map_width, map_height, pointer)
     end
     if attack_projectile
       return {

@@ -16,9 +16,9 @@ class Launcher < DumbProjectile
   end
 
 
-  def initialize(scale, screen_width, screen_height, object, options = {})
+  def initialize(scale, screen_width, screen_height, object, map_width, map_height, options = {})
     options[:relative_y_padding] = -(object.image_height_half)
-    super(scale, screen_width, screen_height, object, options)
+    super(scale, screen_width, screen_height, object, nil, nil, map_width, map_height, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
@@ -41,7 +41,7 @@ class Launcher < DumbProjectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
   end
 
-  def attack pointer
+  def attack initial_angle, location_x, location_y, pointer
     if @cooldown_wait <= 0
       options = {damage_increase: @damage_increase}
       projectile = init_projectile(options)

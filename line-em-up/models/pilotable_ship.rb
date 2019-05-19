@@ -43,7 +43,7 @@ class PilotableShip < GeneralObject
       @image = self.class.get_image(path)
     end
     options[:image] = @image
-    super(scale, x, y, screen_width, screen_height, options)
+    super(scale, x, y, screen_width, screen_height, nil, nil, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
@@ -92,6 +92,7 @@ class PilotableShip < GeneralObject
     # ConfigSetting.set_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '3'], 'launcher')
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
+    # Update hardpoints location
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
@@ -404,24 +405,25 @@ class PilotableShip < GeneralObject
     return @y
   end
 
-  def attack_group pointer, group
+  def attack_group initial_angle, location_x, location_y, map_width, map_height, pointer, group
     if @left_broadside_mode
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @left_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(pointer) if hp.group_number == group
+        hp.attack(initial_angle, location_x, location_y, map_width, map_height, pointer) if hp.group_number == group
       end
       # puts "Results :#{results}"
     elsif @right_broadside_mode
       results = @right_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(pointer) if hp.group_number == group
+        hp.attack(initial_angle, location_x, location_y, map_width, map_height, pointer) if hp.group_number == group
       end
     else
       # puts "@front_hard_points: #{@front_hard_points}"
       results = @front_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(pointer) if hp.group_number == group
+        raise "NO MAP" if map_width.nil? || map_height.nil?
+        hp.attack(initial_angle, location_x, location_y, map_width, map_height, pointer) if hp.group_number == group
       end
     end
     results.reject!{|v| v.nil?}
@@ -439,12 +441,12 @@ class PilotableShip < GeneralObject
     end
   end
 
-  def attack_group_1 pointer
-    return attack_group(pointer, 1)
+  def attack_group_1 initial_angle, location_x, location_y, map_width, map_height, pointer
+    return attack_group(initial_angle, location_x, location_y, map_width, map_height, pointer, 1)
   end
 
-  def attack_group_2 pointer
-    return attack_group(pointer, 2)
+  def attack_group_2 initial_angle, location_x, location_y, map_width, map_height, pointer
+    return attack_group(initial_angle, location_x, location_y, map_width, map_height, pointer, 2)
   end
 
   def deactivate_group_1
