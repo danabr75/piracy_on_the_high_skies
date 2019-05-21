@@ -108,10 +108,10 @@ class GameWindow < Gosu::Window
     width, height = value.split('x')
     @width, @height = [width.to_i, height.to_i]
 
-    default_width, default_height = ResolutionSetting::SELECTION[3].split('x')
+    default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
     # default_width, default_height = default_value.split('x')
     puts 'FOR TESTING:'
-    @width, @height = [default_width.to_i, default_height.to_i]
+    # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
 
@@ -120,13 +120,16 @@ class GameWindow < Gosu::Window
     if @width == default_width && @height == @default_height
       @width_scale = 1.0
       @height_scale = 1.0
-      @scale = @width / (@height.to_f)
+      # @scale = @width / (@height.to_f)
+      @scale = 1.0
     else
       # original_width, original_height = RESOLUTIONS[0]
-      @width_scale = @width / default_width.to_f
+      @width_scale =  @width / default_width.to_f
       @height_scale = @height / default_height.to_f
       # @scale = (@width_scale + @height_scale) / 2
-      @scale = @width / (@height.to_f)
+      # raise "NEW SCALE: #{@width_scale} x #{@height_scale}"
+      # @scale = @width / (@height.to_f)
+      @scale = 1.0
     end
 
 

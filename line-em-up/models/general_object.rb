@@ -318,23 +318,30 @@ class GeneralObject
   end
 
   def movement speed, angle
-    puts "MOVEMENT: #{speed}, #{angle}"
+    # puts "MOVEMENT: #{speed}, #{angle}"
     # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
     base = speed / 100.0
+    base = base * ((@width_scale + @height_scale) / 2.0)
+    # @width_scale  = width_scale
+    # @height_scale = height_scale
     # raise "BASE: #{base}"
     
     map_edge = 50
 
     step = (Math::PI/180 * (angle + 90))# - 180
-    puts "BASE HERE: #{base}"
-    puts "STEP HERE: #{step}"
-    puts "_____ #{@location_x}   -    #{@location_y}"
+    # puts "BASE HERE: #{base}"
+    # puts "STEP HERE: #{step}"
+    # puts "_____ #{@location_x}   -    #{@location_y}"
     new_x = Math.cos(step) * base + @location_x
     new_y = Math.sin(step) * base + @location_y
+    # puts "PRE MOVE: #{new_x} x #{new_y}"
+    # new_x = new_x * @width_scale
+    # new_y = new_y * @height_scale
+    # puts "POST MOVE: #{new_x} x #{new_y}"
     x_diff = (@location_x - new_x) * -1
     y_diff = @location_y - new_y
 
-    puts "(#{@location_y} - #{y_diff}) > #{@map_height}"
+    # puts "(#{@location_y} - #{y_diff}) > #{@map_height}"
     if (@location_y - y_diff) > @map_height
       # Block progress along top of map Y 
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)
@@ -350,7 +357,7 @@ class GeneralObject
       x_diff = x_diff + (@location_x + x_diff)
     end
 
-    puts "MOVEMNET: #{x_diff} - #{y_diff}"
+    puts "MOVEMNET: #{x_diff.round(3)} - #{y_diff.round(3)}"
 
     @location_y -= y_diff
     @location_x -= x_diff

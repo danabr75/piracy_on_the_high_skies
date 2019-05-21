@@ -51,10 +51,21 @@ class GLBackground
     # background openGLK window size is 0.5 (-.25 .. .25)
     puts "screen_width: #{screen_width}"
     # IN OPENGL terms
-    @open_gl_screen_movement_increment_x = 1 / ((screen_width.to_f / VISIBLE_MAP_WIDTH.to_f)  - (screen_width.to_f / VISIBLE_MAP_WIDTH.to_f) / 4.0 )#(screen_width  / VISIBLE_MAP_WIDTH)  / 4
-    @open_gl_screen_movement_increment_y = 1 / ((screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f)  - (screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f) / 4.0 )#(screen_height / VISIBLE_MAP_HEIGHT) / 4
-    @on_screen_movement_increment_x = ((screen_width.to_f  / VISIBLE_MAP_WIDTH.to_f)  / 2)#(screen_width  / VISIBLE_MAP_WIDTH)  / 4
-    @on_screen_movement_increment_y = ((screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f) / 2)#(screen_height / VISIBLE_MAP_HEIGHT) / 4
+    # @open_gl_screen_movement_increment_x = 1 / ((screen_width.to_f / VISIBLE_MAP_WIDTH.to_f)  - (screen_width.to_f / VISIBLE_MAP_WIDTH.to_f) / 4.0 )#(screen_width  / VISIBLE_MAP_WIDTH)  / 4
+    # @open_gl_screen_movement_increment_y = 1 / ((screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f)  - (screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f) / 4.0 )#(screen_height / VISIBLE_MAP_HEIGHT) / 4
+
+    # SCREEN COORD SYSTEM 480 x 480
+    @on_screen_movement_increment_x = ((screen_width.to_f  / VISIBLE_MAP_WIDTH.to_f)  / 2.0)#(screen_width  / VISIBLE_MAP_WIDTH)  / 4
+    @on_screen_movement_increment_y = ((screen_height.to_f / VISIBLE_MAP_HEIGHT.to_f) / 2.0)#(screen_height / VISIBLE_MAP_HEIGHT) / 4
+
+    # OPENGL SYSTEM -1..1
+    @open_gl_screen_movement_increment_x = (1 / (@on_screen_movement_increment_x))  - (@on_screen_movement_increment_x / 2.0)
+    @open_gl_screen_movement_increment_y = (1 / (@on_screen_movement_increment_y))  - (@on_screen_movement_increment_y / 2.0)
+ 
+    puts "SCREEN W AND H: #{screen_width} - #{screen_height}"
+    puts "SCALES: #{width_scale} and #{height_scale}"
+    puts "MOVEMENT INCREMENTS: #{@on_screen_movement_increment_x} - #{@on_screen_movement_increment_y}"
+    # raise "STOP HERE"
     # Need to convert on_screen to GPS
     puts "INIT: @screen_movement_increment: #{@on_screen_movement_increment_x} - #{@on_screen_movement_increment_y}"
 
@@ -136,16 +147,18 @@ class GLBackground
     #   end
     # end
     # puts "PLAYER: #{player_x} - #{player_y}"
+    # MOVEMENT IS ON GPS COORDS, NEED TO CONVERT TO ONSCREEN COORDS
     @local_map_movement_y = player_y - @current_map_center_y
     @local_map_movement_x = player_x - @current_map_center_x
-    # puts "POST: local_map_movement_x: #{@local_map_movement_x}" 
-    # puts "POST: local_map_movement_y: #{@local_map_movement_y}"
+
+    puts "POST: local_map_movement_x: #{@local_map_movement_x}" 
+    puts "POST: local_map_movement_y: #{@local_map_movement_y}"
 
     # Adding to bottom of map
     # SCROLLS_PER_STEP !!!!! Need to factor in scale factor here!
     # NEED TO CONVERT ON SCREEN TO GPS MOVEMENTS
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_y >= @on_screen_movement_increment_y / 14
+    if @local_map_movement_y >= 1.0 * @height_scale
       puts "ADDING IN ARRAY 1"
       @visible_map.pop
       @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
@@ -157,7 +170,7 @@ class GLBackground
     # Adding to top of map 
     # puts "@local_map_movement_y: #{@local_map_movement_y} and @on_screen_movement_increment_y: #{@on_screen_movement_increment_y}"
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_y <= -@on_screen_movement_increment_y / 14
+    if @local_map_movement_y <= -1.0 * @height_scale
       puts "ADDING IN ARRAY 2"
       @visible_map.shift
       @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
@@ -186,7 +199,7 @@ class GLBackground
 
 
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_x >= @on_screen_movement_increment_x  / 14
+    if @local_map_movement_x >= 1.0 * @width_scale
       puts "ADDING IN ARRAY 3"
       @visible_map.each do |row|
         row.pop
@@ -199,7 +212,7 @@ class GLBackground
   
 
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_x <= -@on_screen_movement_increment_x / 14
+    if @local_map_movement_x <= -1.0 * @width_scale
       puts "ADDING IN ARRAY 4"
       @visible_map.each do |row|
         row.shift
@@ -347,9 +360,9 @@ class GLBackground
     # This is the width and height of each individual terrain segments.
                             # @screen_movement_increment_x == 8 
     # opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
-    opengl_increment_y = @open_gl_screen_movement_increment_y
+    # opengl_increment_y = @open_gl_screen_movement_increment_y
     # opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)
-    opengl_increment_x = @open_gl_screen_movement_increment_x
+    # opengl_increment_x = @open_gl_screen_movement_increment_x
 
     # offs_y = 1.0 * @local_map_movement_y / (@screen_movement_increment_y)
     # offs_x = 1.0 * @local_map_movement_x / (@screen_movement_increment_x)

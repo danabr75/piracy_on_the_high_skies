@@ -5,7 +5,6 @@ class Pickup < GeneralObject
   attr_reader :x, :y
 
   def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
-    raise "ha"
     super(scale, x, y, screen_width, screen_height, width_scale, height_scale, options = {})
     @current_speed = SCROLLING_SPEED * @scale
   end
