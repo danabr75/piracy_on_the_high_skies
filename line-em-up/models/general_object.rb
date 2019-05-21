@@ -361,7 +361,7 @@ class GeneralObject
     y_diff = @location_y - new_y
 
     # puts "(#{@location_y} - #{y_diff}) > #{@map_height}"
-    puts "@map_height: #{@map_height}"
+    # puts "@map_height: #{@map_height}"
     if (@location_y - y_diff) > @map_height
       # Block progress along top of map Y 
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)

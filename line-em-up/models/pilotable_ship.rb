@@ -96,7 +96,7 @@ class PilotableShip < GeneralObject
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_width, map_height, options)
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_width, map_height, options)
       # @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
     # puts "Front hard points"
@@ -106,7 +106,7 @@ class PilotableShip < GeneralObject
       item_klass = eval(item_klass) if item_klass
         options[:image_angle] = 90
         # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_width, map_height, options)
+        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_width, map_height, options)
       # else
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end

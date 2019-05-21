@@ -22,15 +22,15 @@ class Hardpoint < GeneralObject
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_width, map_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
-    @x_offset = x_offset# * scale
-    @y_offset = y_offset# * scale
+    @x_offset = x_offset #* width_scale
+    @y_offset = y_offset #* height_scale
     @center_x = x
     @center_y = y
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
     # raise "HERE: #{width_scale} - #{height_scale}"
-    x_total = x + x_offset * width_scale
-    y_total = y + y_offset * height_scale
+    x_total = x + x_offset #* width_scale
+    y_total = y + y_offset #* height_scale
     super(scale, x_total, y_total, screen_width, screen_height, width_scale, height_scale, nil, nil, map_width, map_height, options)
     @main_weapon = nil
     @drawable_items_near_self = []
@@ -49,12 +49,14 @@ class Hardpoint < GeneralObject
     # Not sure why the offset is getting switched somewhere...
     # Maybe the calc Angle function is off somewhere
     # Without the offset being modified, the hardpoints are flipped across the center x axis
-    end_point   = OpenStruct.new(:x => (x + (@x_offset * -1)) * @width_scale, :y => @y * @height_scale)
+    end_point   = OpenStruct.new(:x => (x + (@x_offset * -1)) * 1.0, :y => @y * 1.0)
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
     @init_angle = @angle
     @radian = calc_radian(start_point, end_point)
+    # @x = @x * width_scale
+    # @y = @y * height_scale
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
     # puts "ID: #{@id}"
     # puts "START POINT : #{@center_x} - #{@center_y}"
