@@ -38,12 +38,15 @@ class GLBackground
   # attr_accessor :player_position_x, :player_position_y
   attr_accessor :map_width, :map_height
 
-  def initialize player_x, player_y, screen_width, screen_height
+  def initialize player_x, player_y, screen_width, screen_height, width_scale, height_scale
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
 
     # These are the width and length of each background tile
     @opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
     @opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)
+
+    @width_scale  = width_scale
+    @height_scale = height_scale
 
     # background openGLK window size is 0.5 (-.25 .. .25)
     puts "screen_width: #{screen_width}"

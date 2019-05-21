@@ -33,10 +33,9 @@ class Player < GeneralObject
 
   # x and y is graphical representation of object
   # location x and y where it exists on the global map.
-  def initialize(scale, x, y, screen_width, screen_height, location_x, location_y, map_width, map_height, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options = {})
     # @location_x, @location_y = [location_x, location_y]
-    @map_width, @map_height  = [map_width, map_height]
-    super(scale, x, y, screen_width, screen_height, location_x, location_y, @map_width, @map_height, options)
+    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
@@ -76,9 +75,9 @@ class Player < GeneralObject
     ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     if ship
       ship_class = eval(ship)
-      @ship = ship_class.new(scale, x, y, screen_width, screen_height, @angle, options)
+      @ship = ship_class.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, options)
     else
-      @ship = BasicShip.new(scale, x, y, screen_width, screen_height, @angle, options)
+      @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, options)
     end
     # Get details from ship
     @mass = 500 # Get from ship

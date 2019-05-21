@@ -8,7 +8,9 @@ class Cursor < GeneralObject
   end
 
   
-  def initialize scale, screenx, screeny
+  def initialize scale, screenx, screeny, width_scale, height_scale
+    @width_scale  = width_scale
+    @height_scale = height_scale
     @screen_width  = screenx
     @screen_height = screeny
     @scale = scale
@@ -23,7 +25,7 @@ class Cursor < GeneralObject
 
 
   def draw
-    @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @scale, @scale)
+    @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @width_scale, @height_scale)
   end
 
   # THESE ARE ON-SCREEN COORDS, NOT OPENGL COORDS

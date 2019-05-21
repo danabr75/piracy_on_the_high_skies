@@ -118,12 +118,15 @@ class GameWindow < Gosu::Window
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
     if @width == default_width && @height == @default_height
-      @scale = 1
+      @width_scale = 1.0
+      @height_scale = 1.0
+      @scale = @width / (@height.to_f)
     else
       # original_width, original_height = RESOLUTIONS[0]
-      width_scale = @width / default_width.to_f
-      height_scale = @height / default_height.to_f
-      @scale = (width_scale + height_scale) / 2
+      @width_scale = @width / default_width.to_f
+      @height_scale = @height / default_height.to_f
+      # @scale = (@width_scale + @height_scale) / 2
+      @scale = @width / (@height.to_f)
     end
 
 
@@ -145,7 +148,7 @@ class GameWindow < Gosu::Window
     
     player_location_x, player_location_y = [100, 100]
 
-    @gl_background = GLBackground.new(player_location_x, player_location_y, @width, @height)
+    @gl_background = GLBackground.new(player_location_x, player_location_y, @width, @height, @width_scale, @height_scale)
     
     @grappling_hook = nil
     
@@ -168,9 +171,9 @@ class GameWindow < Gosu::Window
     # @max_enemies = 4
     @max_enemies = 0
 
-    @pointer = Cursor.new(@scale, @width, @height)
+    @pointer = Cursor.new(@scale, @width, @height, @width_scale, @height_scale)
     @ui_y = 0
-    @footer_bar = FooterBar.new(@scale, @width, @height)
+    @footer_bar = FooterBar.new(@scale, @width, @height, @width_scale, @height_scale)
     reset_font_ui_y
 
     # @boss_active_at_enemies_killed = 500
@@ -195,7 +198,9 @@ class GameWindow < Gosu::Window
 
     @player = Player.new(
       @scale, @width / 2, @height / 2, @width, @height,
-      player_location_x, player_location_y, @gl_background.map_width, @gl_background.map_height,
+      @width_scale, @height_scale,
+      player_location_x, player_location_y,
+      @gl_background.map_width, @gl_background.map_height,
       {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
     )
     @scroll_factor = 1
@@ -589,7 +594,7 @@ class GameWindow < Gosu::Window
 
           if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-              @pickups << RocketLauncherPickup.new(@scale, @width, @height)
+              @pickups << RocketLauncherPickup.new(@scale, @width, @height, @width_scale, @height_scale)
           end
           if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
@@ -629,7 +634,7 @@ class GameWindow < Gosu::Window
         if @boss_active && @boss.nil? && @enemies.count == 0 && @boss_killed == false
           @boss_active = false
           # Activate Boss
-          @boss = Mothership.new(@scale, @width, @height)
+          @boss = Mothership.new(@scale, @width, @height, @width_scale, @height_scale)
           # @enemies.push(@boss)
         end
 

@@ -34,11 +34,11 @@ class Bullet < DumbProjectile
 
   def draw
     # draw nothing
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
   end
 
   def initialize(scale, screen_width, screen_height, object, options = {})
-    super(scale, screen_width, screen_height, object, options)
+    super(scale, screen_width, screen_height, width_scale, height_scale, object, options)
   end
 
   # def convert_x_and_y_to_opengl_coords

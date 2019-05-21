@@ -3,7 +3,7 @@ require_relative 'general_object.rb'
 class FooterBar < GeneralObject
   attr_reader :x, :y, :living_time, :height
 
-  def initialize(scale, screen_width = nil, screen_height = nil, image = nil)
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, image = nil)
     @scale = scale * 0.7
     padding = 10 * @scale
     @health_100 = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_bar_0.png")

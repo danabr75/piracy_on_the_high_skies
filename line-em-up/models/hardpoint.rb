@@ -18,7 +18,7 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(scale, x, y, screen_width, screen_height, group_number, x_offset, y_offset, item, slot_type, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, group_number, x_offset, y_offset, item, slot_type, options = {})
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
     @x_offset = x_offset# * scale
@@ -27,7 +27,7 @@ class Hardpoint < GeneralObject
     @center_y = y
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
-    super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, nil, nil, options)
+    super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, width_scale, height_scale, nil, nil, options)
     @main_weapon = nil
     @drawable_items_near_self = []
 
@@ -94,12 +94,12 @@ class Hardpoint < GeneralObject
       if @assigned_weapon_class
         @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, map_width, map_height, options)
         @drawable_items_near_self << @main_weapon
-        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, map_width, map_height, pointer)
+        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, @map_width, @map_height, pointer)
       end
     else
       @main_weapon.active = true if @main_weapon.active == false
       @drawable_items_near_self << @main_weapon
-      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, map_width, map_height, pointer)
+      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, @map_width, @map_height, pointer)
     end
     if attack_projectile
       return {

@@ -4,8 +4,9 @@ class Pickup < GeneralObject
   POINT_VALUE_BASE = 0
   attr_reader :x, :y
 
-  def initialize(scale, screen_width, screen_height, x = nil, y = nil, options = {})
-    super(scale, x, y, screen_width, screen_height, options = {})
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
+    raise "ha"
+    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, options = {})
     @current_speed = SCROLLING_SPEED * @scale
   end
 
@@ -15,7 +16,7 @@ class Pickup < GeneralObject
 
   # Most classes will want to just override this
   def draw
-    @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, 1, 1)
+    @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @width_scale, @height_scale)
   end
 
 

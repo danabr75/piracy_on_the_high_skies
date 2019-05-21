@@ -5,13 +5,13 @@ require_relative 'pickup.rb'
 class Star < Pickup
   POINT_VALUE_BASE = 2
   
-  def initialize(scale, screen_width, screen_height, x = nil, y = nil, options = {})
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
     # @scale = scale
     # @image = get_image
     # @time_alive = 0
     @x = x || rand(screen_width)
     @y = y || 0
-    super(scale, screen_width, screen_height, @x, @y, options)
+    super(scale, screen_width, screen_height, width_scale, height_scale, @x, @y, options)
     @color = Gosu::Color.new(0xff_000000)
     @color.red = rand(255 - 40) + 40
     @color.green = rand(255 - 40) + 40
@@ -43,7 +43,7 @@ class Star < Pickup
   def draw
     # img = @image[Gosu.milliseconds / 100 % @image.size];
     # img.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @scale, @scale, @color, :add)
-    @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @scale, @scale, @color, :add)
+    @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, @width_scale, @height_scale, @color, :add)
   end
   
   # def update mouse_x = nil, mouse_y = nil, scroll_factor = 1

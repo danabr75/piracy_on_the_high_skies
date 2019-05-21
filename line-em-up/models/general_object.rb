@@ -23,7 +23,9 @@ class GeneralObject
     self.class.get_image_path
   end
 
-  def initialize(scale, x, y, screen_width, screen_height, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+    @width_scale  = width_scale
+    @height_scale = height_scale
     @map_height = map_height
     @map_width  = map_width
     # Only use ID in debug\test
@@ -88,13 +90,13 @@ class GeneralObject
 
   def draw
     # Will generate error if class name is not listed on ZOrder
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @scale, @scale)
+    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def get_height

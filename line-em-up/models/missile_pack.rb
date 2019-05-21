@@ -7,7 +7,7 @@ class MissilePack < Pickup
 
   def draw
     # @image.draw_rot(@x, @y, ZOrder::Pickups, @y, 0.5, 0.5, 1, 1)
-    draw_rot()
+    draw_rot
   end
 
   def collected_by_player player
