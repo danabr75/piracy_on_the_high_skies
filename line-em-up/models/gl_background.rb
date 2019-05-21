@@ -24,8 +24,12 @@ class GLBackground
   EXTERIOR_MAP_WIDTH  = 1000
   # POINTS_X = 7
   VISIBLE_MAP_WIDTH = 15
+  # outside of view padding
+  EXTRA_MAP_WIDTH   = 5
   # POINTS_Y = 7
   VISIBLE_MAP_HEIGHT = 15
+  # outside of view padding
+  EXTRA_MAP_HEIGHT   = 5
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
@@ -77,7 +81,7 @@ class GLBackground
     # increment_y = (1.0 / middle_y) * 0.75
 
     @scrolls = 0.0
-    @visible_map = Array.new(VISIBLE_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH) { nil } }
+    @visible_map = Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { nil } }
     @local_map_movement_x = 0
     @local_map_movement_y = 0
 
@@ -105,10 +109,12 @@ class GLBackground
     @map_data = @map["data"]
     # puts "@map_data : #{@map_data[0][0]}" 
     # @visible_map = []
-    (0..VISIBLE_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
-      (0..VISIBLE_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
+    (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
+      (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
         y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
         x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
+        y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
+        x_offset = x_offset - EXTRA_MAP_WIDTH / 2
         @visible_map[index_h][index_w] = @map_data[player_y + y_offset][player_x + x_offset]
         # puts "MAP GOT: #{@visible_map[index_h][index_w]}" if index_w == 0 && index_h == 0
       end
@@ -139,7 +145,7 @@ class GLBackground
     if @local_map_movement_y >= @on_screen_movement_increment_y / 14
       puts "ADDING IN ARRAY 1"
       @visible_map.pop
-      @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
+      @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
       @current_map_center_y = player_y
       @local_map_movement_y = 0
       # raise "STOP"
@@ -151,7 +157,7 @@ class GLBackground
     if @local_map_movement_y <= -@on_screen_movement_increment_y / 14
       puts "ADDING IN ARRAY 2"
       @visible_map.shift
-      @visible_map.push Array.new(VISIBLE_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+      @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
       @current_map_center_y = player_y
       @local_map_movement_y = 0
       # raise "STOP"
@@ -349,9 +355,9 @@ class GLBackground
     offs_x = offs_x + 0.1
 
     glEnable(GL_TEXTURE_2D)
-    y_max = @visible_map.length - 1
+    y_max = VISIBLE_MAP_HEIGHT - 1 #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
     @visible_map.each_with_index do |y_row, y_index|
-      x_max = y_row.length - 1
+      x_max = VISIBLE_MAP_WIDTH - 1# y_row.length - 1 - (EXTRA_MAP_WIDTH)
       y_row.each_with_index do |x_element, x_index|
         # y_offset = 0.0
         # if y_index == 0 
