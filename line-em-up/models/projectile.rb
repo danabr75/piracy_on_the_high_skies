@@ -127,7 +127,7 @@ class Projectile < GeneralObject
 
   def draw
     # limiting angle extreme by 2
-    @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @scale, @scale)
+    @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def get_draw_ordering

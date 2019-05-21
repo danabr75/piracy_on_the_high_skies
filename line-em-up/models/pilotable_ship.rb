@@ -27,7 +27,7 @@ class PilotableShip < GeneralObject
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, angle, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, angle, map_width, map_height, options = {})
     puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     @angle = angle
     media_path = self.class::SHIP_MEDIA_DIRECTORY
@@ -43,7 +43,7 @@ class PilotableShip < GeneralObject
       @image = self.class.get_image(path)
     end
     options[:image] = @image
-    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, nil, nil, options)
+    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, nil, nil, map_width, map_height, options)
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
@@ -96,7 +96,7 @@ class PilotableShip < GeneralObject
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], options)
+      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_width, map_height, options)
       # @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
     # puts "Front hard points"
@@ -106,7 +106,7 @@ class PilotableShip < GeneralObject
       item_klass = eval(item_klass) if item_klass
         options[:image_angle] = 90
         # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], options)
+        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_width, map_height, options)
       # else
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
@@ -116,7 +116,7 @@ class PilotableShip < GeneralObject
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'left_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
       options[:image_angle] = 270
-      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], options)
+      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_width, map_height, options)
     end
     @theta = nil
   end
@@ -410,20 +410,20 @@ class PilotableShip < GeneralObject
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @left_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, location_x, location_y, map_width, map_height, pointer) if hp.group_number == group
+        hp.attack(initial_angle, location_x, location_y, pointer) if hp.group_number == group
       end
       # puts "Results :#{results}"
     elsif @right_broadside_mode
       results = @right_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, location_x, location_y, map_width, map_height, pointer) if hp.group_number == group
+        hp.attack(initial_angle, location_x, location_y, pointer) if hp.group_number == group
       end
     else
       # puts "@front_hard_points: #{@front_hard_points}"
       results = @front_hard_points.collect do |hp|
         # puts "HP #{hp}"
         raise "NO MAP" if map_width.nil? || map_height.nil?
-        hp.attack(initial_angle, location_x, location_y, map_width, map_height, pointer) if hp.group_number == group
+        hp.attack(initial_angle, location_x, location_y, pointer) if hp.group_number == group
       end
     end
     results.reject!{|v| v.nil?}
@@ -490,8 +490,8 @@ class PilotableShip < GeneralObject
     # end
     # super
     # puts "DRAWING PLAYER: image_height_half: #{@image_height_half} and image_width_half: #{@image_width_half}"
-    image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @scale, @scale)
-    # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @scale, @scale)
+    image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale)
+    # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
     @turn_right = false
     @turn_left = false
   end

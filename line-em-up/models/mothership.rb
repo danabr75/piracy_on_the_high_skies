@@ -34,7 +34,7 @@ class Mothership < GeneralObject
 
   # def draw
   #   # Will generate error if class name is not listed on ZOrder
-  #   @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+  #   @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
   #   # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   # end
 

@@ -45,7 +45,7 @@ class SmallExplosion < GeneralObject
       spin_down = @time_alive * 10
     end
     @smoke.draw_rot(@x, @y, ZOrder::SmallExplosions, (360 - spin_down), 0.5, 0.5, @smoke_scale, @smoke_scale)
-    @image.draw_rot(@x, @y, ZOrder::SmallExplosions, (360 - spin_down), 0.5, 0.5, @scale, @scale) if @image
+    @image.draw_rot(@x, @y, ZOrder::SmallExplosions, (360 - spin_down), 0.5, 0.5, @width_scale, @height_scale) if @image
   end
 
 

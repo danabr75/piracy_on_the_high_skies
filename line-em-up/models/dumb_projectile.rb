@@ -18,7 +18,7 @@ class DumbProjectile < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def initialize(scale, screen_width, screen_height, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
     @initial_angle = initial_angle
     options[:relative_object] = object
     @damage_increase = options[:damage_increase] || 1
@@ -26,7 +26,8 @@ class DumbProjectile < GeneralObject
     #   puts "NEW DUMB PROJECTILE: X- #{object.x}"
     #   puts "NEW DUMB PROJECTILE: y- #{object.y}"
     # end
-    super(scale, object.x, object.y, screen_width, screen_height, location_x, location_y, map_width, map_height, options)
+    # raise "WHAT IS GOING ON HERE: #{scale}, #{object.x}, #{object.y}, #{screen_width}, #{screen_height}, #{width_scale}, #{height_scale}, #{location_x}, #{location_y}, #{map_width}, #{map_height},"
+    super(scale, object.x, object.y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options)
     @current_speed = self.class.get_max_speed * @scale
   end
 

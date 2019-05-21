@@ -23,7 +23,24 @@ class GeneralObject
     self.class.get_image_path
   end
 
+  # X and Y are place on screen.
+  # Location Y and X are where they are on GPS
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+    param_names = %w[scale, width_scale, height_scale]
+    [scale, width_scale, height_scale].each_with_index do |param, index|
+      raise "Parameter was not a Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != NilClass
+    end
+
+    param_names = %w[screen_width, screen_height, map_height, map_width]
+    [screen_width, screen_height, map_height, map_width].each_with_index do |param, index|
+      raise "Parameter was not an Integer. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Integer && param.class != NilClass
+    end
+
+    param_names = %w[x, y, location_x, location_y]
+    [x, y, location_x, location_y].each_with_index do |param, index|
+      raise "Parameter was not an Integer Or Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != Integer && param.class != NilClass
+    end
+
     @width_scale  = width_scale
     @height_scale = height_scale
     @map_height = map_height
@@ -318,6 +335,8 @@ class GeneralObject
   end
 
   def movement speed, angle
+    raise " NO SCALE PRESENT FOR MOVEMENT" if @width_scale.nil? || @height_scale.nil?
+    raise " NO LOCATION PRESENT" if @location_x.nil? || @location_y.nil?
     # puts "MOVEMENT: #{speed}, #{angle}"
     # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
     base = speed / 100.0
@@ -342,6 +361,7 @@ class GeneralObject
     y_diff = @location_y - new_y
 
     # puts "(#{@location_y} - #{y_diff}) > #{@map_height}"
+    puts "@map_height: #{@map_height}"
     if (@location_y - y_diff) > @map_height
       # Block progress along top of map Y 
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)
@@ -357,7 +377,7 @@ class GeneralObject
       x_diff = x_diff + (@location_x + x_diff)
     end
 
-    puts "MOVEMNET: #{x_diff.round(3)} - #{y_diff.round(3)}"
+    # puts "MOVEMNET: #{x_diff.round(3)} - #{y_diff.round(3)}"
 
     @location_y -= y_diff
     @location_x -= x_diff

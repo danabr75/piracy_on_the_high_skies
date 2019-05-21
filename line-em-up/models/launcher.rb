@@ -15,10 +15,10 @@ class Launcher < DumbProjectile
     raise "Override me"
   end
 
-
-  def initialize(scale, screen_width, screen_height, object, map_width, map_height, options = {})
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, map_width, map_height, object, options = {})
     options[:relative_y_padding] = -(object.image_height_half)
-    super(scale, screen_width, screen_height, object, nil, nil, map_width, map_height, options)
+         # (scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+    super(scale, screen_width, screen_height, width_scale, height_scale, object, nil, nil, nil, map_width, map_height, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
@@ -115,9 +115,9 @@ class Launcher < DumbProjectile
       if @active
         if @image_optional
           # if @image_angle != nil
-          #   @image_optional.draw_rot(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @image_angle, 0.5, 0.5, @scale, @scale)
+          #   @image_optional.draw_rot(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @image_angle, 0.5, 0.5, @width_scale, @height_scale)
           # else
-            @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+            @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @width_scale, @height_scale)
           # end
         end
       end

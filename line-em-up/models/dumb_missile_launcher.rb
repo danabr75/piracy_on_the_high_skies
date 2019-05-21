@@ -5,9 +5,9 @@ class DumbMissileLauncher < Launcher
   MISSILE_LAUNCHER_INIT_ANGLE = 90.0
   # COOLDOWN_DELAY = 15
 
-  def init_projectile initial_angle, location_x, location_y, map_width, map_height, pointer, options
+  def init_projectile initial_angle, location_x, location_y, pointer, options
     # Bullet.new(@scale, @screen_width, @screen_height, self, options)
-    Missile.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle, location_x, location_y, map_width, map_height, {damage_increase: @damage_increase})
+    Missile.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle, location_x, location_y, @map_width, @map_height, {damage_increase: @damage_increase})
   end
 
 
@@ -17,7 +17,7 @@ class DumbMissileLauncher < Launcher
   # def draw
   #   if @inited
   #     if @active
-  #       # @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+  #       # @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @width_scale, @height_scale)
   #     end
 
   #     return true
@@ -26,11 +26,11 @@ class DumbMissileLauncher < Launcher
   #   end
   # end
 
-  def attack initial_angle, location_x, location_y, map_width, map_height, pointer
+  def attack initial_angle, location_x, location_y, pointer
     # puts "DUMB MISSILE LAUNCHER ATTACK"
     if @cooldown_wait <= 0
       options = {damage_increase: @damage_increase}
-      projectile = init_projectile(initial_angle, location_x, location_y, map_width, map_height, pointer, options)
+      projectile = init_projectile(initial_angle, location_x, location_y, pointer, options)
       # @projectiles << projectile
       @cooldown_wait = get_cooldown
       return projectile

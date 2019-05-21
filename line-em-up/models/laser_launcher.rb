@@ -17,10 +17,11 @@ class LaserLauncher < Launcher
   #   LaserParticle.new(@scale, @screen_width, @screen_height, self, init_angle, options)
   # end
 
-  def initialize(scale, screen_width, screen_height, object, map_width, map_height, options = {})
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, map_width, map_height, object, options = {})
+    raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_width, map_height].include?(nil)
     options[:relative_y_padding] = -(object.image_height_half)
     puts "START LASER BEAM: #{options}"
-    super(scale, screen_width, screen_height, object, map_width, map_height, options)
+    super(scale, screen_width, screen_height, width_scale, height_scale, map_width, map_height, object, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image
@@ -42,15 +43,15 @@ class LaserLauncher < Launcher
   end
 
   # only needed for is-head command
-  def attack initial_angle, location_x, location_y, map_width, map_height, pointer
-    raise "NO MAP" if map_width.nil? || map_height.nil?
+  def attack initial_angle, location_x, location_y, pointer
     if @cooldown_wait <= 0
       @cooldown_wait = get_cooldown
       options = {damage_increase: @damage_increase}
       if @projectiles.count == 0
         options[:is_head] = true
       end
-      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, self, initial_angle, location_x, location_y, map_width, map_height, options)
+      raise "MISSING OPTIONS HERE #{initial_angle}, #{location_x}, #{location_y}, #{@map_width}, #{@map_height}" if [initial_angle, location_x, location_y, @map_width, @map_height].include?(nil)
+      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, initial_angle, location_x, location_y, @map_width, @map_height, options)
       @projectiles << projectile
       return projectile
     end
@@ -129,7 +130,7 @@ class LaserLauncher < Launcher
   #   if @inited
   #     if @active
   #       if @image_optional
-  #         @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+  #         @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @width_scale, @height_scale)
   #       end
   #     end
 

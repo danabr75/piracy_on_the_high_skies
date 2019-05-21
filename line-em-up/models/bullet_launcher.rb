@@ -11,7 +11,7 @@ class BulletLauncher < Launcher
   def draw
     if @inited
       if @active
-        # @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+        # @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @width_scale, @height_scale)
       end
 
       return true

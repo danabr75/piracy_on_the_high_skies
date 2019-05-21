@@ -134,6 +134,7 @@ class GameWindow < Gosu::Window
 
 
     super(@width, @height)
+    # @width, @height = [@width.to_f, @height.to_f]
     
     @game_pause = false
     @game_pause = false

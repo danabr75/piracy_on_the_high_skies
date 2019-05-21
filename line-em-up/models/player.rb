@@ -75,9 +75,9 @@ class Player < GeneralObject
     ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     if ship
       ship_class = eval(ship)
-      @ship = ship_class.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, options)
+      @ship = ship_class.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
     else
-      @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, options)
+      @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
     end
     # Get details from ship
     @mass = 500 # Get from ship

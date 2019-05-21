@@ -158,7 +158,7 @@ class GLBackground
     # SCROLLS_PER_STEP !!!!! Need to factor in scale factor here!
     # NEED TO CONVERT ON SCREEN TO GPS MOVEMENTS
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_y >= 1.0 * @height_scale
+    if @local_map_movement_y >= 1.0 * @height_scale * 1.1
       puts "ADDING IN ARRAY 1"
       @visible_map.pop
       @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
@@ -170,7 +170,7 @@ class GLBackground
     # Adding to top of map 
     # puts "@local_map_movement_y: #{@local_map_movement_y} and @on_screen_movement_increment_y: #{@on_screen_movement_increment_y}"
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_y <= -1.0 * @height_scale
+    if @local_map_movement_y <= -1.0 * @height_scale * 1.1
       puts "ADDING IN ARRAY 2"
       @visible_map.shift
       @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
@@ -199,7 +199,7 @@ class GLBackground
 
 
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_x >= 1.0 * @width_scale
+    if @local_map_movement_x >= 1.0 * @width_scale * 1.1
       puts "ADDING IN ARRAY 3"
       @visible_map.each do |row|
         row.pop
@@ -212,7 +212,7 @@ class GLBackground
   
 
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_x <= -1.0 * @width_scale
+    if @local_map_movement_x <= -1.0 * @width_scale * 1.1
       puts "ADDING IN ARRAY 4"
       @visible_map.each do |row|
         row.shift

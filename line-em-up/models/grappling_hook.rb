@@ -80,9 +80,9 @@ class GrapplingHook < GeneralObject
       chain_angle = 360 - chain_angle.abs
     end
 
-    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @scale, @scale)
-    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @scale, @scale)
-    @image.draw_rot(@x, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @scale, @scale)
+    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @width_scale, @height_scale)
+    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @width_scale, @height_scale)
 
     chain_x = @x# - (get_width / 2)  - (@chain.width / 2)
     chain_y = @y# - (get_height / 2)  - (@chain.height / 2)
@@ -101,7 +101,7 @@ class GrapplingHook < GeneralObject
 
       chain_x = chain_x + vx
       chain_y = chain_y + vy
-      @chain.draw(chain_x - @chain_width / 2, chain_y - @chain_height / 2, ZOrder::Cursor, @scale, @scale)
+      @chain.draw(chain_x - @chain_width / 2, chain_y - @chain_height / 2, ZOrder::Cursor, @width_scale, @height_scale)
       loop_count += 1
     end
   end

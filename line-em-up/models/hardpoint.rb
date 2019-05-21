@@ -18,7 +18,8 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, group_number, x_offset, y_offset, item, slot_type, options = {})
+  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, group_number, x_offset, y_offset, item, slot_type, map_width, map_height, options = {})
+    # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_width, map_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
     @x_offset = x_offset# * scale
@@ -27,7 +28,10 @@ class Hardpoint < GeneralObject
     @center_y = y
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
-    super(scale, x + @x_offset, y + @y_offset, screen_width, screen_height, width_scale, height_scale, nil, nil, options)
+    # raise "HERE: #{width_scale} - #{height_scale}"
+    x_total = x + x_offset * width_scale
+    y_total = y + y_offset * height_scale
+    super(scale, x_total, y_total, screen_width, screen_height, width_scale, height_scale, nil, nil, map_width, map_height, options)
     @main_weapon = nil
     @drawable_items_near_self = []
 
@@ -45,7 +49,7 @@ class Hardpoint < GeneralObject
     # Not sure why the offset is getting switched somewhere...
     # Maybe the calc Angle function is off somewhere
     # Without the offset being modified, the hardpoints are flipped across the center x axis
-    end_point   = OpenStruct.new(:x => (x + (@x_offset * -1)), :y => @y)
+    end_point   = OpenStruct.new(:x => (x + (@x_offset * -1)) * @width_scale, :y => @y * @height_scale)
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
@@ -83,7 +87,7 @@ class Hardpoint < GeneralObject
 
   end
 
-  def attack initial_angle, location_x, location_y, map_width, map_height, pointer, opts = {}
+  def attack initial_angle, location_x, location_y, pointer, opts = {}
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
     if @main_weapon.nil?
@@ -92,14 +96,14 @@ class Hardpoint < GeneralObject
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       options[:image_angle] = @image_angle
       if @assigned_weapon_class
-        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, self, map_width, map_height, options)
+        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, @map_width, @map_height, self, options)
         @drawable_items_near_self << @main_weapon
-        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, @map_width, @map_height, pointer)
+        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer)
       end
     else
       @main_weapon.active = true if @main_weapon.active == false
       @drawable_items_near_self << @main_weapon
-      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, @map_width, @map_height, pointer)
+      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer)
     end
     if attack_projectile
       return {
@@ -131,9 +135,9 @@ class Hardpoint < GeneralObject
     # angle = @angle + @image_angle
     angle = @image_angle + @angle - @init_angle
     # puts "ANGLE HERE: #{angle}"
-    @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, angle, 0.5, 0.5, @scale, @scale)
+    @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, angle, 0.5, 0.5, @width_scale, @height_scale)
     # else
-    #   @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @scale, @scale)
+    #   @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @width_scale, @height_scale)
     # end
 
   end

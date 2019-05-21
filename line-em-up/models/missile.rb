@@ -32,7 +32,7 @@ class Missile < Projectile
 
   # def draw
   #   z = ZOrder::Projectile
-  #   # @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @scale, @scale)
+  #   # @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
   #   # gl do
   #   # points_x = 3
   #   # pounts_y = 10

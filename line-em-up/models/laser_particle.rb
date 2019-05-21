@@ -22,12 +22,12 @@ class LaserParticle < DumbProjectile
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
-  def initialize(scale, screen_width, screen_height, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+  def initialize(scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
     @initial_angle = initial_angle
     options[:debug] = true
 
     options[:relative_y_padding] = -(object.image_height_half)
-    super(scale, screen_width, screen_height, object, initial_angle, location_x, location_y, map_width, map_height, options)
+    super(scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options)
     @active = true
     if options[:is_head]
       @position = :is_head
@@ -101,8 +101,8 @@ class LaserParticle < DumbProjectile
   def draw
     self.draw_rot
     # if @inited# && !@active
-    # #   @image_background.draw(@x - @background_image_width_half, @y - @background_image_height_half, get_draw_ordering, @scale, @scale)
-    #   @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @scale, @scale)
+    # #   @image_background.draw(@x - @background_image_width_half, @y - @background_image_height_half, get_draw_ordering, @width_scale, @height_scale)
+    #   @image.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @width_scale, @height_scale)
     # end
   end
 
