@@ -20,19 +20,19 @@ class GLBackground
   # MAP_HEIGHT_EDGE = 700
   # MAP_WIDTH_EDGE_RIGHT = 450
   # MAP_WIDTH_EDGE_LEFT  = 80
-  EXTERIOR_MAP_HEIGHT = 200
-  EXTERIOR_MAP_WIDTH  = 200
+  EXTERIOR_MAP_HEIGHT = 150
+  EXTERIOR_MAP_WIDTH  = 150
   # POINTS_X = 7
   VISIBLE_MAP_WIDTH = 15
   # outside of view padding
 
-  EXTRA_MAP_WIDTH   = 1
+  EXTRA_MAP_WIDTH   = 8
   # POINTS_Y = 7
 
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   VISIBLE_MAP_HEIGHT = 15
   # outside of view padding
-  EXTRA_MAP_HEIGHT   = 1
+  EXTRA_MAP_HEIGHT   = 8
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
@@ -155,26 +155,26 @@ class GLBackground
   end
 
   def update player_x, player_y
-    puts "BACKGROUND UPDATE: #{player_x} - #{player_y} - and @y_add_top_tracker: #{@y_add_top_tracker}"
+    puts "BACKGROUND UPDATE: #{player_x} - #{player_y}"
     @time_alive += 1
 
     # puts "PLAYER: #{player_x} - #{player_y}"
     # MOVEMENT IS ON GPS COORDS, NEED TO CONVERT TO ONSCREEN COORDS
     @local_map_movement_y = player_y - @current_map_center_y
-    puts "@local_map_movement_y = player_y - @current_map_center_y"
-    puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_center_y}"
+    # puts "@local_map_movement_y = player_y - @current_map_center_y"
+    # puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_center_y}"
     @local_map_movement_x = player_x - @current_map_center_x
 
     # puts "POST: local_map_movement_x: #{@local_map_movement_x}" 
-    puts "POST: local_map_movement_y: #{@local_map_movement_y}"
+    # puts "POST: local_map_movement_y: #{@local_map_movement_y}"
 
     # Adding to bottom of map
     # SCROLLS_PER_STEP !!!!! Need to factor in scale factor here!
     # NEED TO CONVERT ON SCREEN TO GPS MOVEMENTS
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
     # ADDING TO THE TOP OF THE MAP. GPS will be EXTERIOR_MAP_HEIGHT if at the bottom.
-    puts "@y_add_top_tracker - #{@y_add_top_tracker}" if @time_alive % 100 == 0
-    puts "@y_add_top_tracker.length - #{@y_add_top_tracker.count}" if @time_alive % 100 == 0
+    # puts "@y_add_top_tracker - #{@y_add_top_tracker}" if @time_alive % 100 == 0
+    # puts "@y_add_top_tracker.length - #{@y_add_top_tracker.count}" if @time_alive % 100 == 0
 
     # 1 should be 1 GPS coord unit. No height scale should be on it.
     if @local_map_movement_y >= 1.0# * @height_scale * 1.1
@@ -187,20 +187,26 @@ class GLBackground
       if @current_map_center_y < EXTERIOR_MAP_HEIGHT
         puts "CURRENT WAS LESS THAN EXTERNIOR: #{@current_map_center_y} - #{EXTERIOR_MAP_HEIGHT}"
         @y_top_tracker += 1
-        @y_bottom_tracker -= 1
+        @y_bottom_tracker += 1
+        value = nil
         # @y_add_top_tracker << @y_top_tracker
         # Show edge of map
-        if @y_top_tracker > (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))
+        if @y_top_tracker > (EXTERIOR_MAP_HEIGHT)
           puts "ADDING IN EDGE OF MAP"
           @visible_map.pop
           # puts "@y_top_tracker > (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))"
           # puts "#{@y_top_tracker} > (#{EXTERIOR_MAP_HEIGHT} - #{(EXTRA_MAP_HEIGHT / 2)} - #{(VISIBLE_MAP_HEIGHT / 2)})"
           @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => 1, 'terrain_index' => 2 } })
+          puts "EDGE MAP HERE: (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))"
+          puts "#{(EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))} = (#{EXTERIOR_MAP_HEIGHT} - (#{EXTRA_MAP_HEIGHT} / 2) - (#{VISIBLE_MAP_HEIGHT} / 2))"
+          value = "EDGE MAP"
         else
           puts "ADDING NORMALLY"
           @visible_map.pop
           @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
+          value = "INSIDE MAP"
         end
+        puts "MAP ADDED at #{@current_map_center_y} w/ #{value} - top tracker: #{@y_top_tracker}"
         @current_map_center_y = @current_map_center_y + 1
         @local_map_movement_y = @local_map_movement_y - 1
       else
@@ -227,14 +233,18 @@ class GLBackground
       puts "ADDING IN ARRAY 2"
       if @current_map_center_y > 0
         @y_top_tracker -= 1
-        @y_bottom_tracker += 1
-        if @y_bottom_tracker < ((EXTRA_MAP_HEIGHT / 2) + (VISIBLE_MAP_HEIGHT / 2))
+        @y_bottom_tracker -= 1
+        value = nil
+        if @y_bottom_tracker < 0
           @visible_map.shift
-          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => 2 } }
+          value = "EDGE MAP"
         else
           @visible_map.shift
           @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+          value = "INSIDE MAP"
         end
+        puts "MAP ADDED at #{@current_map_center_y} w/ #{value} - top tracker: #{@y_bottom_tracker}"
         @current_map_center_y = @current_map_center_y - 1
         @local_map_movement_y = @local_map_movement_y - 1
       else
