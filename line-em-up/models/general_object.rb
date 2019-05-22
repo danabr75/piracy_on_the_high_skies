@@ -382,6 +382,18 @@ class GeneralObject
     @location_y -= y_diff
     @location_x -= x_diff
 
+    # Block elements from going off map. Not really working here... y still builds up.
+    # if @location_y > @map_height
+    #   @location_y = @map_height
+    # elsif @location_y < 0
+    #   @location_y = 0
+    # end
+    # if @location_x > @map_width
+    #   @location_x = @map_width
+    # elsif @location_x < 0
+    #   @location_x = 0
+    # end
+
     return [x_diff, y_diff]
   end
 

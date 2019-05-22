@@ -80,7 +80,7 @@ class Player < GeneralObject
       @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
     end
     # Get details from ship
-    @mass = 500 # Get from ship
+    @mass = 180 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass # speed here?
     @speed = 30 #/ (@mass / 2)
@@ -340,7 +340,9 @@ class Player < GeneralObject
     if @current_momentum <= @max_momentum
       @current_momentum += 2
     end
-
+    # puts "PLAYER ACCELETATE:"
+    # puts "[movement_x - x_diff, movement_y - y_diff]"
+    # puts "[#{movement_x} - #{x_diff}, #{movement_y} - #{y_diff}]"
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
@@ -394,7 +396,7 @@ class Player < GeneralObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
-    # puts "PLAYER: #{@location_x} - #{@location_y}"
+    puts "PLAYER: #{@location_x} - #{@location_y}" if @time_alive % 10 == 0
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
 
     if @current_momentum > 0.0
@@ -419,6 +421,22 @@ class Player < GeneralObject
     @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
+
+    # puts "PLAYER: @location_y >= @map_height: #{@location_y} >= #{@map_height}"
+    if @location_y >= @map_height
+      # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
+      @current_momentum = 0
+      @location_y = @map_height
+    elsif @location_y < 0
+      @current_momentum = 0
+      @location_y = 0
+    end
+    if @location_x >= @map_width
+      @current_momentum = 0
+    elsif @location_x < 0
+      @current_momentum = 0
+    end
+
     return [movement_x - x_diff, movement_y - y_diff]
   end
 

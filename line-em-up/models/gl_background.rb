@@ -17,19 +17,22 @@ include GLUT
 
 class GLBackground
   # Height map size
-  MAP_HEIGHT_EDGE = 700
-  MAP_WIDTH_EDGE_RIGHT = 450
-  MAP_WIDTH_EDGE_LEFT  = 80
-  EXTERIOR_MAP_HEIGHT = 1000
-  EXTERIOR_MAP_WIDTH  = 1000
+  # MAP_HEIGHT_EDGE = 700
+  # MAP_WIDTH_EDGE_RIGHT = 450
+  # MAP_WIDTH_EDGE_LEFT  = 80
+  EXTERIOR_MAP_HEIGHT = 200
+  EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
   VISIBLE_MAP_WIDTH = 15
   # outside of view padding
-  EXTRA_MAP_WIDTH   = 5
+
+  EXTRA_MAP_WIDTH   = 1
   # POINTS_Y = 7
+
+  # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   VISIBLE_MAP_HEIGHT = 15
   # outside of view padding
-  EXTRA_MAP_HEIGHT   = 5
+  EXTRA_MAP_HEIGHT   = 1
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
@@ -39,6 +42,8 @@ class GLBackground
   attr_accessor :map_width, :map_height
 
   def initialize player_x, player_y, screen_width, screen_height, width_scale, height_scale
+    @time_alive = 0
+    @y_add_top_tracker = []
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
 
     # These are the width and length of each background tile
@@ -118,85 +123,148 @@ class GLBackground
       @images << image
       @infos  << image.gl_tex_info
     end
-    @map_width = @map["map_width"]
-    @map_height = @map["map_height"]
+    image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
+    @images << image
+    @infos << image.gl_tex_info
+
+    @map_width = EXTERIOR_MAP_WIDTH
+    @map_height = EXTERIOR_MAP_HEIGHT
+    # @map_width = @map["map_width"]
+    # @map_height = @map["map_height"]
     @map_data = @map["data"]
     # puts "@map_data : #{@map_data[0][0]}" 
     # @visible_map = []
+    puts "TOP TRACKERL = player_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)"
+    puts "TOP TRACKERL = #{player_y} + (#{VISIBLE_MAP_HEIGHT} / 2) + (#{EXTRA_MAP_HEIGHT} / 2)"
+    # raise 'stop'
+    @y_top_tracker    = player_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
+    @y_bottom_tracker = player_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
+      y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
+      y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
+      @y_add_top_tracker << (player_y + y_offset)
       (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
-        y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
         x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
-        y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
         x_offset = x_offset - EXTRA_MAP_WIDTH / 2
         @visible_map[index_h][index_w] = @map_data[player_y + y_offset][player_x + x_offset]
         # puts "MAP GOT: #{@visible_map[index_h][index_w]}" if index_w == 0 && index_h == 0
       end
     end
+    @y_add_top_tracker << nil
     # puts @visible_map
   end
 
   def update player_x, player_y
-    # puts "GLBACK: #{player_x} - #{player_y}"
-    # puts "@local_map_movement_y: #{@local_map_movement_y}"
-    # (0..VISIBLE_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
-    #   (0..VISIBLE_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
-    #     y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
-    #     x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
-    #     @visible_map[index_h][index_w] = @map_data[player_y + y_offset][player_x + x_offset]
-    #   end
-    # end
+    puts "BACKGROUND UPDATE: #{player_x} - #{player_y} - and @y_add_top_tracker: #{@y_add_top_tracker}"
+    @time_alive += 1
+
     # puts "PLAYER: #{player_x} - #{player_y}"
     # MOVEMENT IS ON GPS COORDS, NEED TO CONVERT TO ONSCREEN COORDS
     @local_map_movement_y = player_y - @current_map_center_y
+    puts "@local_map_movement_y = player_y - @current_map_center_y"
+    puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_center_y}"
     @local_map_movement_x = player_x - @current_map_center_x
 
-    puts "POST: local_map_movement_x: #{@local_map_movement_x}" 
+    # puts "POST: local_map_movement_x: #{@local_map_movement_x}" 
     puts "POST: local_map_movement_y: #{@local_map_movement_y}"
 
     # Adding to bottom of map
     # SCROLLS_PER_STEP !!!!! Need to factor in scale factor here!
     # NEED TO CONVERT ON SCREEN TO GPS MOVEMENTS
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_y >= 1.0 * @height_scale * 1.1
+    # ADDING TO THE TOP OF THE MAP. GPS will be EXTERIOR_MAP_HEIGHT if at the bottom.
+    puts "@y_add_top_tracker - #{@y_add_top_tracker}" if @time_alive % 100 == 0
+    puts "@y_add_top_tracker.length - #{@y_add_top_tracker.count}" if @time_alive % 100 == 0
+
+    # 1 should be 1 GPS coord unit. No height scale should be on it.
+    if @local_map_movement_y >= 1.0# * @height_scale * 1.1
       puts "ADDING IN ARRAY 1"
-      @visible_map.pop
-      @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
-      @current_map_center_y = player_y
-      @local_map_movement_y = 0
-      # raise "STOP"
+      # y_offset = (VISIBLE_MAP_HEIGHT / 2) + EXTRA_MAP_HEIGHT / 2
+      # y_top_edge = (@current_map_center_y + y_offset)
+      # CEIL is the only way to get the top 1000 row of the map height.
+      # Might just have to ... .round?
+      # puts "TOP EDGE here: #{@y_top_tracker}"
+      if @current_map_center_y < EXTERIOR_MAP_HEIGHT
+        puts "CURRENT WAS LESS THAN EXTERNIOR: #{@current_map_center_y} - #{EXTERIOR_MAP_HEIGHT}"
+        @y_top_tracker += 1
+        @y_bottom_tracker -= 1
+        # @y_add_top_tracker << @y_top_tracker
+        # Show edge of map
+        if @y_top_tracker > (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))
+          puts "ADDING IN EDGE OF MAP"
+          @visible_map.pop
+          # puts "@y_top_tracker > (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))"
+          # puts "#{@y_top_tracker} > (#{EXTERIOR_MAP_HEIGHT} - #{(EXTRA_MAP_HEIGHT / 2)} - #{(VISIBLE_MAP_HEIGHT / 2)})"
+          @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => 1, 'terrain_index' => 2 } })
+        else
+          puts "ADDING NORMALLY"
+          @visible_map.pop
+          @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => rand(2) } })
+        end
+        @current_map_center_y = @current_map_center_y + 1
+        @local_map_movement_y = @local_map_movement_y - 1
+      else
+        # No need to load in new maps, but still need to advance the current_map_center coords.
+        puts "MAP LIMIT REACHED, #{@y_top_tracker} was  #{EXTERIOR_MAP_HEIGHT} -- local movement y: #{@local_map_movement_y}"
+        # if @current_map_center_y < EXTERIOR_MAP_HEIGHT
+        #   @current_map_center_y = @current_map_center_y + 1
+        #   @local_map_movement_y = @local_map_movement_y - 1
+        # else
+          # Without this, you stick to the edge of the map?
+          @local_map_movement_y = 0 if @local_map_movement_y > 0
+          # @local_map_movement_y = 0
+        # end
+      end
     end
 
-    # Adding to top of map 
-    # puts "@local_map_movement_y: #{@local_map_movement_y} and @on_screen_movement_increment_y: #{@on_screen_movement_increment_y}"
-    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
-    if @local_map_movement_y <= -1.0 * @height_scale * 1.1
+
+
+
+
+
+
+    if @local_map_movement_y <= -1.0
       puts "ADDING IN ARRAY 2"
-      @visible_map.shift
-      @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
-      @current_map_center_y = player_y
-      @local_map_movement_y = 0
-      # raise "STOP"
+      if @current_map_center_y > 0
+        @y_top_tracker -= 1
+        @y_bottom_tracker += 1
+        if @y_bottom_tracker < ((EXTRA_MAP_HEIGHT / 2) + (VISIBLE_MAP_HEIGHT / 2))
+          @visible_map.shift
+          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+        else
+          @visible_map.shift
+          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+        end
+        @current_map_center_y = @current_map_center_y - 1
+        @local_map_movement_y = @local_map_movement_y - 1
+      else
+        @local_map_movement_y = 0 if @local_map_movement_y < 0
+      end
     end
 
 
-    # if movement_x >= SCROLLS_PER_STEP
-    #   # @height_map.shift
-    #   # @height_map.push Array.new(POINTS_X) { rand }
-    #   @height_map.each do |row|
-    #     row.shift
-    #     row.push({height: x_value, terrain_index: rand(2) })
-    #   end
-    #   movement_x = 0
-    # end
-    # if movement_x <= -SCROLLS_PER_STEP
-    #   @height_map.each do |row|
-    #     row.pop
-    #     row.unshift({height: x_value, terrain_index: rand(2) })
-    #   end
-    #   movement_x = 0
-    # end
 
+
+
+
+
+
+    # puts "@local_map_movement_y: #{@local_map_movement_y} and @on_screen_movement_increment_y: #{@on_screen_movement_increment_y}"
+    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute
+    # ADDING TO THE BOTTOM OF THE MAP.
+    # if @local_map_movement_y <= -1.0# * @height_scale * 1.1
+    #   if @y_bottom_tracker > 0
+    #     @y_top_tracker -= 1
+    #     @y_bottom_tracker += 1
+    #     puts "ADDING IN ARRAY 2"
+    #     @visible_map.shift
+    #     @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => rand(2) } }
+    #     @current_map_center_y = @current_map_center_y - 1
+    #     @local_map_movement_y = @local_map_movement_y + 1
+    #   else
+    #     puts "MAP LIMIT REACHED, #{@y_bottom_tracker} was  #{0}"
+    #   end
+    # end
 
     # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
     if @local_map_movement_x >= 1.0 * @width_scale * 1.1
@@ -222,64 +290,7 @@ class GLBackground
       @local_map_movement_x = 0
       # raise "STOP"
     end
-
   end
-
-  # def scroll factor = 1, movement_x, movement_y
-  #   @scrolls += 1.0 * factor
-  #   if @scrolls >= SCROLLS_PER_STEP
-  #     @scrolls = 0
-  #     @visible_map.shift
-  #     @visible_map.push Array.new(POINTS_X) { rand }
-  #   end
-  # end
-
-  # movement x and y reset for the map
-  # player x and y does not.
-  # UPDATE SCROLL FROM DATA MAP
-  # def scroll factor = 1, player_x, player_y
-
-  #   # @current_map_center_y
-  #   # @current_map_center_x
-  #   @local_map_movement_y = player_y - @current_map_center_y
-  #   # Adding to bottom of map
-  #   if @local_map_movement_y <= SCROLLS_PER_STEP
-  #     @visible_map.shift
-  #     @visible_map.push Array.new(VISIBLE_MAP_WIDTH) { {'height' rand, :'terrain_index' => rand(2) } }
-  #     @current_map_center_y = player_y
-  #     @local_map_movement_y = 0
-  #   end
-
-  #   # Adding to top of map 
-  #   if @local_map_movement_y >= -SCROLLS_PER_STEP
-  #     @visible_map.pop
-  #     @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT) { {'height' rand, :'terrain_index' => rand(2) } })
-  #     @current_map_center_y = player_y
-  #     @local_map_movement_y = 0
-  #   end
-
-  #   # if movement_x >= SCROLLS_PER_STEP
-  #   #   # @visible_map.shift
-  #   #   # @visible_map.push Array.new(POINTS_X) { rand }
-  #   #   @visible_map.each do |row|
-  #   #     row.shift
-  #   #     row.push({'height' x_value, :'terrain_index' => rand(2) })
-  #   #   end
-  #   #   movement_x = 0
-  #   # end
-  #   # if movement_x <= -SCROLLS_PER_STEP
-  #   #   @visible_map.each do |row|
-  #   #     row.pop
-  #   #     row.unshift({'height' x_value, :'terrain_index' => rand(2) })
-  #   #   end
-  #   #   movement_x = 0
-  #   # end
-
-  #   # @local_map_movement_y = movement_y
-  #   # @local_map_movement_x = movement_x
-
-  #   return nil
-  # end
 
   
   # Not needed
@@ -366,9 +377,9 @@ class GLBackground
 
     # offs_y = 1.0 * @local_map_movement_y / (@screen_movement_increment_y)
     # offs_x = 1.0 * @local_map_movement_x / (@screen_movement_increment_x)
-    offs_y = 1.0 * @local_map_movement_y / (@on_screen_movement_increment_y)
-    offs_x = 1.0 * @local_map_movement_x / (@on_screen_movement_increment_x)
-    offs_x = offs_x + 0.1
+    offs_y = 2.0 * @local_map_movement_y / (@on_screen_movement_increment_y)
+    offs_x = 2.0 * @local_map_movement_x / (@on_screen_movement_increment_x)
+    # offs_x = offs_x + 0.1
 
     glEnable(GL_TEXTURE_2D)
     y_max = VISIBLE_MAP_HEIGHT - 1 #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
