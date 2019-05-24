@@ -396,7 +396,7 @@ class Player < GeneralObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
-    puts "PLAYER: #{@location_x} - #{@location_y}" if @time_alive % 10 == 0
+    # puts "PLAYER: #{@location_x} - #{@location_y}" if @time_alive % 10 == 0
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
 
     if @current_momentum > 0.0
