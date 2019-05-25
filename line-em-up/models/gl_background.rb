@@ -20,8 +20,8 @@ class GLBackground
   # MAP_HEIGHT_EDGE = 700
   # MAP_WIDTH_EDGE_RIGHT = 450
   # MAP_WIDTH_EDGE_LEFT  = 80
-  EXTERIOR_MAP_HEIGHT = 150
-  EXTERIOR_MAP_WIDTH  = 150
+  EXTERIOR_MAP_HEIGHT = 500
+  EXTERIOR_MAP_WIDTH  = 500
   # POINTS_X = 7
   VISIBLE_MAP_WIDTH = 15
   # outside of view padding
@@ -41,6 +41,7 @@ class GLBackground
 
   # attr_accessor :player_position_x, :player_position_y
   attr_accessor :global_map_width, :global_map_height
+  attr_accessor :screen_tile_width, :screen_tile_height
 
   # tile size is 1 GPS (location_x, location_y)
   # Screen size changes. At 900x900, it should be 900 (screen_width) / 15 (VISIBLE_MAP_WIDTH) = 60 pixels
@@ -230,7 +231,7 @@ class GLBackground
       # CEIL is the only way to get the top 1000 row of the map height.
       # Might just have to ... .round?
       # puts "TOP EDGE here: #{@y_top_tracker}"
-      if @current_map_center_y < (@global_map_height)
+      if @current_map_center_y < (@global_map_height) * @screen_tile_height
         # puts "CURRENT WAS LESS THAN EXTERNIOR: #{@current_map_center_y} - #{EXTERIOR_MAP_HEIGHT}"
         @y_top_tracker += 1
         @y_bottom_tracker += 1
@@ -257,7 +258,7 @@ class GLBackground
         @local_map_movement_y = @local_map_movement_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
       else
         # No need to load in new maps, but still need to advance the current_map_center coords.
-        # puts "MAP LIMIT REACHED, #{@y_top_tracker} was  #{EXTERIOR_MAP_HEIGHT} -- local movement y: #{@local_map_movement_y}"
+        puts "MAP LIMIT REACHED, #{@current_map_center_y} was > #(@global_map_height * @screen_tile_height} -- local movement y: #{@local_map_movement_y}"
         # if @current_map_center_y < EXTERIOR_MAP_HEIGHT
         #   @current_map_center_y = @current_map_center_y + 1
         #   @local_map_movement_y = @local_map_movement_y - 1
@@ -442,7 +443,7 @@ class GLBackground
     opengl_offset_x = result[:o_x]
     opengl_offset_y = result[:o_y]
 
-    puts "OFF_Y: #{@local_map_movement_y / (@screen_tile_height ) }= #{@local_map_movement_y} / (#{@screen_tile_height} )" 
+    # puts "OFF_Y: #{@local_map_movement_y / (@screen_tile_height ) }= #{@local_map_movement_y} / (#{@screen_tile_height} )" 
     # offs_x = offs_x + 0.1
 
     glEnable(GL_TEXTURE_2D)

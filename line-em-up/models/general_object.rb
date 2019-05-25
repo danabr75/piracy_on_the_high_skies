@@ -26,6 +26,8 @@ class GeneralObject
   # X and Y are place on screen.
   # Location Y and X are where they are on GPS
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+    @tile_width  = options[:tile_width]
+    @tile_height = options[:tile_height]
     param_names = %w[scale, width_scale, height_scale]
     [scale, width_scale, height_scale].each_with_index do |param, index|
       raise "Parameter was not a Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != NilClass
@@ -341,7 +343,7 @@ class GeneralObject
     raise " NO LOCATION PRESENT" if @location_x.nil? || @location_y.nil?
     # puts "MOVEMENT: #{speed}, #{angle}"
     # puts "PLAYER MOVEMENT map size: #{@global_map_width} - #{@global_map_height}"
-    base = speed / 100.0
+    base = speed# / 100.0
     base = base * ((@width_scale + @height_scale) / 2.0)
     # @width_scale  = width_scale
     # @height_scale = height_scale
@@ -364,19 +366,29 @@ class GeneralObject
 
     # puts "(#{@location_y} - #{y_diff}) > #{@global_map_height}"
     # puts "@global_map_height: #{@global_map_height}"
-    if (@location_y - y_diff) > @global_map_height
-      # Block progress along top of map Y 
-      y_diff = y_diff - ((@location_y + y_diff) - @location_y)
-    elsif @location_y - y_diff < 0
-      # Block progress along bottom of map Y 
-      y_diff = y_diff + (@location_y + y_diff)
-    end
+    if @tile_width && @tile_height
 
-    if @location_x - x_diff > @global_map_width
-      # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@global_map_width}"
-      x_diff = x_diff - ((@location_x + x_diff) - @location_x)
-    elsif @location_x - x_diff < 0
-      x_diff = x_diff + (@location_x + x_diff)
+      if (@location_y - y_diff) > @global_map_height * @tile_height
+        # Block progress along top of map Y 
+        puts "Block progress along top of map Y "
+        y_diff = y_diff - ((@location_y + y_diff) - @location_y)
+      elsif @location_y - y_diff < 0
+        # Block progress along bottom of map Y 
+        puts "Block progress along bottom of map Y "
+        y_diff = y_diff + (@location_y + y_diff)
+      end
+
+      if @location_x - x_diff > @global_map_width * @tile_width
+        # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@global_map_width}"
+        x_diff = x_diff - ((@location_x + x_diff) - @location_x)
+      elsif @location_x - x_diff < 0
+        x_diff = x_diff + (@location_x + x_diff)
+      end
+
+    else
+
+      # IF no global map data.. any other restrictions?
+
     end
 
     # puts "MOVEMNET: #{x_diff.round(3)} - #{y_diff.round(3)}"

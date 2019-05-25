@@ -429,7 +429,7 @@ class Player < GeneralObject
     @time_alive += 1 if self.is_alive
 
     # puts "PLAYER: @location_y >= @global_map_height: #{@location_y} >= #{@global_map_height}"
-    if @location_y >= @global_map_height
+    if @location_y >= @global_map_height * @tile_height
       # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
       @current_momentum = 0
       @location_y = @global_map_height
@@ -437,7 +437,7 @@ class Player < GeneralObject
       @current_momentum = 0
       @location_y = 0
     end
-    if @location_x >= @global_map_width
+    if @location_x >= @global_map_width * @tile_width
       @current_momentum = 0
     elsif @location_x < 0
       @current_momentum = 0
