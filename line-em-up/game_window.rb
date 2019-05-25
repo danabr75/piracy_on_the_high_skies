@@ -491,7 +491,6 @@ class GameWindow < Gosu::Window
 
       if @player.is_alive && !@game_pause && !@menu_open
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
-        @gl_background.update(@player.location_x, @player.location_y)
         # puts "FIRST: #{@movement_x} and #{@movement_y}"
         @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
@@ -499,6 +498,8 @@ class GameWindow < Gosu::Window
         @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
+        @gl_background.update(@player.location_x, @player.location_y)
+        
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
             @grappling_hook = GrapplingHook.new(@scale, @width, @height, @player, self.mouse_x, self.mouse_y)

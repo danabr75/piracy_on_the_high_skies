@@ -52,13 +52,13 @@ class GLBackground
   def convert_screen_to_opengl x, y, w = nil, h = nil
     # puts "convert_screen_to_opengl"
     # puts "#{x} - #{y} - #{w} - #{h}"
-    screen_to_opengl_increment_x = (2.0 / (@screen_width.to_f))
-    screen_to_opengl_increment_y = (2.0 / (@screen_height.to_f))
+    screen_to_opengl_increment_x = (-2.0 / (@screen_width.to_f))
+    screen_to_opengl_increment_y = (-2.0 / (@screen_height.to_f))
     # puts "screen_to_opengl_increment: #{screen_to_opengl_increment_x} - #{screen_to_opengl_increment_y}"
-    opengl_x   = (x * screen_to_opengl_increment_x) - 1
-    opengl_y   = (y * screen_to_opengl_increment_y) - 1
-    opengl_x   = opengl_x * -1
-    opengl_y   = opengl_y * -1
+    opengl_x   = (x * screen_to_opengl_increment_x) + 1
+    opengl_y   = (y * screen_to_opengl_increment_y) + 1
+    # opengl_x   = opengl_x * -1
+    # opengl_y   = opengl_y * -1
     if w && h
       open_gl_w  = (w * screen_to_opengl_increment_x)
       open_gl_h  = (h * screen_to_opengl_increment_y)
@@ -260,7 +260,7 @@ class GLBackground
 
     # 1 should be 1 GPS coord unit. No height scale should be on it.
     if @local_map_movement_y >= @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f# * @height_scale * 1.1
-      puts "ADDING IN ARRAY 1 - local: #{@local_map_movement_y} > #{1.0 / VISIBLE_MAP_HEIGHT.to_f}"
+      puts "ADDING IN ARRAY 1"
       # y_offset = (VISIBLE_MAP_HEIGHT / 2) + EXTRA_MAP_HEIGHT / 2
       # y_top_edge = (@current_map_center_y + y_offset)
       # CEIL is the only way to get the top 1000 row of the map height.
@@ -321,7 +321,7 @@ class GLBackground
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ #{value} - top tracker: #{@y_bottom_tracker}"
         @current_map_center_y = @current_map_center_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_y = @local_map_movement_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_y = @local_map_movement_y + @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
       else
         @local_map_movement_y = 0 if @local_map_movement_y < 0
       end
@@ -366,7 +366,7 @@ class GLBackground
             row.unshift({'height' => rand, 'terrain_index' => 3 } )
           end
         else
-          puts "ASDDING NORMAL MAP EDGE: @x_right_tracker > (@global_map_width) = #{@x_right_tracker} > (#{@global_map_width})"
+          puts "ASDDING NORMAL MAP EDGE:"
           @visible_map.each do |row|
             row.pop
             row.unshift({'height' => rand, 'terrain_index' => 1 + rand(2) } )
@@ -382,7 +382,6 @@ class GLBackground
     end
   
 
-    # Need to fix this GPS to SCREEN CONVERTION - / 14 is a poor substitute    
     if @local_map_movement_x <= -@screen_tile_width# * @width_scale * 1.1
       puts "ADDING IN ARRAY 4"
       if @current_map_center_x > 0
@@ -402,7 +401,7 @@ class GLBackground
           end
         end
         @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_x = @local_map_movement_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
       else
         @local_map_movement_x = 0 if @local_map_movement_x < 0
       end
@@ -496,11 +495,13 @@ class GLBackground
     # offs_x = 1.0 * @local_map_movement_x / (@screen_movement_increment_x)
     gps_offs_y = @local_map_movement_y / (@screen_tile_height )
     gps_offs_x = @local_map_movement_x / (@screen_tile_width )
+    puts "gps_offs_y = @local_map_movement_y / (@screen_tile_height )"
+    puts "#{gps_offs_y} = #{@local_map_movement_y} / (#{@screen_tile_height} )"
     screen_offset_x = @screen_tile_width  * gps_offs_x * -1
     screen_offset_y = @screen_tile_height * gps_offs_y * -1
-    result = convert_screen_to_opengl(screen_offset_x, screen_offset_y)
-    opengl_offset_x = result[:o_x]
-    opengl_offset_y = result[:o_y]
+    offset_result = convert_screen_to_opengl(screen_offset_x, screen_offset_y)
+    opengl_offset_x = offset_result[:o_x]# >= @screen_tile_width ? 0 : offset_result[:o_x]
+    opengl_offset_y = offset_result[:o_y]# >= @screen_tile_height ? 0 : offset_result[:o_y]
 
     # puts "OLD OPENGL: #{opengl_offset_y}"
     # opengl_offset_y = opengl_offset_y * -1
