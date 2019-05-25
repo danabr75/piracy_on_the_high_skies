@@ -150,9 +150,8 @@ class GameWindow < Gosu::Window
 
     self.caption = "OpenGL Integration"
     
-    player_location_x, player_location_y = [100, 100]
 
-    @gl_background = GLBackground.new(player_location_x, player_location_y, @width, @height, @width_scale, @height_scale)
+    @gl_background = GLBackground.new(nil, nil, @width, @height, @width_scale, @height_scale)
     
     @grappling_hook = nil
     
@@ -203,13 +202,17 @@ class GameWindow < Gosu::Window
     @player = Player.new(
       @scale, @width / 2, @height / 2, @width, @height,
       @width_scale, @height_scale,
-      player_location_x, player_location_y,
+      @gl_background.screen_map_width.to_i / 2, @gl_background.screen_map_height.to_i / 2,
       @gl_background.screen_map_width.to_i, @gl_background.screen_map_height.to_i,
       {
         handicap: @handicap, max_movable_height: @height - @footer_bar.height,
         tile_width: @gl_background.screen_tile_width, tile_height: @gl_background.screen_tile_height
       }
     )
+    @gl_background.current_map_center_x = @player.location_x
+    @gl_background.current_map_center_y = @player.location_y
+    @gl_background.init_map
+
     @scroll_factor = 1
     @movement_x = 0.0
     @movement_y = 0.0

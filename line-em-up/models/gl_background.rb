@@ -20,8 +20,8 @@ class GLBackground
   # MAP_HEIGHT_EDGE = 700
   # MAP_WIDTH_EDGE_RIGHT = 450
   # MAP_WIDTH_EDGE_LEFT  = 80
-  EXTERIOR_MAP_HEIGHT = 500
-  EXTERIOR_MAP_WIDTH  = 500
+  EXTERIOR_MAP_HEIGHT = 200
+  EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
   VISIBLE_MAP_WIDTH = 15
   # outside of view padding
@@ -43,6 +43,7 @@ class GLBackground
   attr_accessor :global_map_width, :global_map_height
   attr_accessor :screen_map_width, :screen_map_height
   attr_accessor :screen_tile_width, :screen_tile_height
+  attr_accessor :current_map_center_x, :current_map_center_y
 
   # tile size is 1 GPS (location_x, location_y)
   # Screen size changes. At 900x900, it should be 900 (screen_width) / 15 (VISIBLE_MAP_WIDTH) = 60 pixels
@@ -69,7 +70,7 @@ class GLBackground
 
   def initialize player_x, player_y, screen_width, screen_height, width_scale, height_scale
     @time_alive = 0
-    @y_add_top_tracker = []
+    # @y_add_top_tracker = []
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
 
     # These are the width and length of each background tile
@@ -141,8 +142,8 @@ class GLBackground
     # @player_position_y = EXTERIOR_MAP_WIDTH  / 2.0
     # @current_map_center_y = EXTERIOR_MAP_HEIGHT / 2.0
     # @current_map_center_x = EXTERIOR_MAP_WIDTH  / 2.0
-    @current_map_center_x = player_x
-    @current_map_center_y = player_y
+    @current_map_center_x = player_x || 0
+    @current_map_center_y = player_y || 0
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/desert.txt").first)
     @terrains = @map["terrains"]
     @images = []
@@ -168,25 +169,44 @@ class GLBackground
 
     @screen_map_width  = (EXTERIOR_MAP_WIDTH  * @screen_tile_width )
     @screen_map_height = (EXTERIOR_MAP_HEIGHT * @screen_tile_height)
+    puts "@screen_map_height = (EXTERIOR_MAP_HEIGHT * @screen_tile_height)"
+    puts "#{@screen_map_height} = (#{EXTERIOR_MAP_HEIGHT} * #{@screen_tile_height})"
 
     # @global_map_width = @map["map_width"]
     # @global_map_height = @map["map_height"]
     @map_data = @map["data"]
+
+    @y_top_tracker    = nil
+    @y_bottom_tracker = nil
+
+    @x_right_tracker  = nil
+    @x_left_tracker   = nil
+
+    if player_x && player_y
+      init_map
+    end
+
     # puts "@map_data : #{@map_data[0][0]}" 
     # @visible_map = []
     # puts "TOP TRACKERL = player_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)"
     # puts "TOP TRACKERL = #{player_y} + (#{VISIBLE_MAP_HEIGHT} / 2) + (#{EXTRA_MAP_HEIGHT} / 2)"
     # raise 'stop'
-    @y_top_tracker    = player_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
-    @y_bottom_tracker = player_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
 
-    @x_right_tracker    = player_x + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
-    @x_left_tracker     = player_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)
+    # @y_add_top_tracker << nil
+    # puts @visible_map
+  end
+
+  def init_map
+    @y_top_tracker    = (@current_map_center_y / (@screen_tile_height)).round + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
+    @y_bottom_tracker = (@current_map_center_y / (@screen_tile_height)).round - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
+
+    @x_right_tracker    = (@current_map_center_x / (@screen_tile_width)).round + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
+    @x_left_tracker     = (@current_map_center_x / (@screen_tile_width)).round - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
       y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
       y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
-      @y_add_top_tracker << (player_y + y_offset)
+      # @y_add_top_tracker << (player_y + y_offset)
       (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
         x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
         x_offset = x_offset - EXTRA_MAP_WIDTH / 2
@@ -208,13 +228,13 @@ class GLBackground
         end
       end
     end
-    @y_add_top_tracker << nil
-    # puts @visible_map
   end
 
   def update player_x, player_y
-    puts "MAP SIZE: #{@visible_map[0].length} X #{@visible_map.length}"
-    # puts "BACKGROUND UPDATE: #{player_x} - #{player_y} - top track #{@y_top_tracker} - map length: #{@visible_map.length}" if @time_alive % 100 == 0
+    raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
+    raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
+    # puts "MAP SIZE: #{@visible_map[0].length} X #{@visible_map.length}"
+    puts "BACKGROUND UPDATE: #{player_x} - #{player_y} - top track #{@y_top_tracker}" if @time_alive % 100 == 0
     @time_alive += 1
 
     # puts "PLAYER: #{player_x} - #{player_y}"

@@ -428,6 +428,9 @@ class Player < GeneralObject
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
 
+
+    puts "PLAYER UPDATE: #{@location_x} - #{@location_y} - @screen_map_height #{@screen_map_height}" if @time_alive % 100 == 0
+
     # puts "PLAYER: @location_y >= @screen_map_height: #{@location_y} >= #{@screen_map_height}"
     if @location_y >= @screen_map_height# * @tile_height
       # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
