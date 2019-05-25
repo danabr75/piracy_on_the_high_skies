@@ -28,13 +28,13 @@ class GeneralObject
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
     # @tile_width  = options[:tile_width]
     # @tile_height = options[:tile_height]
-    param_names = %w[scale, width_scale, height_scale, map_height, map_width]
-    [scale, width_scale, height_scale, map_height, map_width].each_with_index do |param, index|
+    param_names = %w[scale, width_scale, height_scale]
+    [scale, width_scale, height_scale].each_with_index do |param, index|
       raise "Parameter was not a Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != NilClass
     end
 
-    param_names = %w[screen_width, screen_height]
-    [screen_width, screen_height].each_with_index do |param, index|
+    param_names = %w[screen_width, screen_height, map_height, map_width]
+    [screen_width, screen_height, map_height, map_width].each_with_index do |param, index|
       raise "Parameter was not an Integer. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Integer && param.class != NilClass
     end
 
