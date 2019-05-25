@@ -7,7 +7,7 @@ class DumbMissileLauncher < Launcher
 
   def init_projectile initial_angle, location_x, location_y, pointer, options
     # Bullet.new(@scale, @screen_width, @screen_height, self, options)
-    Missile.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle, location_x, location_y, @global_map_width, @global_map_height, {damage_increase: @damage_increase})
+    Missile.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle, location_x, location_y, @screen_map_width, @screen_map_height, {damage_increase: @damage_increase})
   end
 
 

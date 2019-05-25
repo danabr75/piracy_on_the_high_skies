@@ -204,7 +204,7 @@ class GameWindow < Gosu::Window
       @scale, @width / 2, @height / 2, @width, @height,
       @width_scale, @height_scale,
       player_location_x, player_location_y,
-      @gl_background.global_map_width, @gl_background.global_map_height,
+      @gl_background.screen_map_width, @gl_background.screen_map_height,
       {
         handicap: @handicap, max_movable_height: @height - @footer_bar.height,
         tile_width: @gl_background.screen_tile_width, tile_height: @gl_background.screen_tile_height

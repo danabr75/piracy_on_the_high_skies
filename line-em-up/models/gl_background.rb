@@ -41,6 +41,7 @@ class GLBackground
 
   # attr_accessor :player_position_x, :player_position_y
   attr_accessor :global_map_width, :global_map_height
+  attr_accessor :screen_map_width, :screen_map_height
   attr_accessor :screen_tile_width, :screen_tile_height
 
   # tile size is 1 GPS (location_x, location_y)
@@ -55,6 +56,8 @@ class GLBackground
     # puts "screen_to_opengl_increment: #{screen_to_opengl_increment_x} - #{screen_to_opengl_increment_y}"
     opengl_x   = (x * screen_to_opengl_increment_x) - 1
     opengl_y   = (y * screen_to_opengl_increment_y) - 1
+    # opengl_x   = opengl_x * -1
+    opengl_y   = opengl_y * -1
     if w && h
       open_gl_w  = (w * screen_to_opengl_increment_x)
       open_gl_h  = (h * screen_to_opengl_increment_y)
@@ -162,6 +165,10 @@ class GLBackground
 
     @global_map_width =  EXTERIOR_MAP_WIDTH
     @global_map_height = EXTERIOR_MAP_HEIGHT
+
+    @screen_map_width  = (EXTERIOR_MAP_WIDTH  * @screen_tile_width )
+    @screen_map_height = (EXTERIOR_MAP_HEIGHT * @screen_tile_height)
+
     # @global_map_width = @map["map_width"]
     # @global_map_height = @map["map_height"]
     @map_data = @map["data"]
@@ -202,7 +209,7 @@ class GLBackground
   end
 
   def update player_x, player_y
-    puts "BACKGROUND UPDATE: #{player_x} - #{player_y}" if @time_alive % 100 == 0
+    puts "BACKGROUND UPDATE: #{player_x} - #{player_y} - top track #{@y_top_tracker} - map length: #{@visible_map.length}" if @time_alive % 100 == 0
     @time_alive += 1
 
     # puts "PLAYER: #{player_x} - #{player_y}"
@@ -438,10 +445,14 @@ class GLBackground
     gps_offs_y = @local_map_movement_y / (@screen_tile_height )
     gps_offs_x = @local_map_movement_x / (@screen_tile_width )
     screen_offset_x = @screen_tile_width  * gps_offs_x
-    screen_offset_y = @screen_tile_height * gps_offs_y
+    screen_offset_y = @screen_tile_height * gps_offs_y * -1
     result = convert_screen_to_opengl(screen_offset_x, screen_offset_y)
     opengl_offset_x = result[:o_x]
     opengl_offset_y = result[:o_y]
+
+    # puts "OLD OPENGL: #{opengl_offset_y}"
+    # opengl_offset_y = opengl_offset_y * -1
+    # puts "NEW OPENGL: #{opengl_offset_y}"
 
     # puts "OFF_Y: #{@local_map_movement_y / (@screen_tile_height ) }= #{@local_map_movement_y} / (#{@screen_tile_height} )" 
     # offs_x = offs_x + 0.1

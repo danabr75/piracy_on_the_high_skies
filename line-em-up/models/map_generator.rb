@@ -5,8 +5,8 @@ class MapGenerator
   attr_accessor :map_height, :map_width, :terrain_image_path, :map_location
 
   def initialize map_save_name, map_height = 1000, map_width = 1000, terrain_image_paths = ["#{MEDIA_DIRECTORY}/earth.png", "#{MEDIA_DIRECTORY}/earth_2.png"]
-    @global_map_height         = map_height
-    @global_map_width          = map_width
+    @screen_map_height         = map_height
+    @screen_map_width          = map_width
     @map_location = "#{MAP_DIRECTORY}/#{map_save_name}.txt"
     @terrain_image_paths = terrain_image_paths
     # @terrain_image = Gosu::Image.new(terrain_image_path, :tileable => true)
@@ -21,12 +21,12 @@ class MapGenerator
     # end
 
     height_rows = []
-    (0..@global_map_height).each do |y|
+    (0..@screen_map_height).each do |y|
       width_rows = []
-      (0..@global_map_width).each do |x|
-        if x < @map_edge || x + @map_edge > @global_map_width
+      (0..@screen_map_width).each do |x|
+        if x < @map_edge || x + @map_edge > @screen_map_width
           height = 3
-        elsif y < @map_edge || y + @map_edge > @global_map_height
+        elsif y < @map_edge || y + @map_edge > @screen_map_height
           height = 3
         else
           height  = rand
@@ -35,7 +35,7 @@ class MapGenerator
       end
       height_rows << width_rows
     end
-    data = {terrains: @terrain_image_paths, map_edge: @map_edge, map_width: @global_map_width, map_height: @global_map_height, data: height_rows}
+    data = {terrains: @terrain_image_paths, map_edge: @map_edge, map_width: @screen_map_width, map_height: @screen_map_height, data: height_rows}
     File.open(@map_location, 'w') do |f|
       f << data.to_json
     end

@@ -98,7 +98,7 @@ class Hardpoint < GeneralObject
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       options[:image_angle] = @image_angle
       if @assigned_weapon_class
-        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, @global_map_width, @global_map_height, self, options)
+        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, @screen_map_width, @screen_map_height, self, options)
         @drawable_items_near_self << @main_weapon
         attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer)
       end
