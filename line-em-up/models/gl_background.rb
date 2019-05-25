@@ -80,6 +80,8 @@ class GLBackground
     @width_scale  = width_scale
     @height_scale = height_scale
 
+    @map_inited = false
+
     # background openGLK window size is 0.5 (-.25 .. .25)
     puts "screen_width: #{screen_width}"
     # IN OPENGL terms
@@ -142,9 +144,13 @@ class GLBackground
     # @player_position_y = EXTERIOR_MAP_WIDTH  / 2.0
     # @current_map_center_y = EXTERIOR_MAP_HEIGHT / 2.0
     # @current_map_center_x = EXTERIOR_MAP_WIDTH  / 2.0
+    # These are in screen units
     @current_map_center_x = player_x || 0
     @current_map_center_y = player_y || 0
-    @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/desert.txt").first)
+    # Global units
+    @gps_map_center_x =  player_x ? (player_x / (@screen_tile_width)).round : 0
+    @gps_map_center_y =  player_y ? (player_y / (@screen_tile_height)).round : 0
+    @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/desert_v2.txt").first)
     @terrains = @map["terrains"]
     @images = []
     @infos = []
@@ -164,11 +170,11 @@ class GLBackground
     @images << image
     @infos << image.gl_tex_info
 
-    @global_map_width =  EXTERIOR_MAP_WIDTH
-    @global_map_height = EXTERIOR_MAP_HEIGHT
+    @global_map_width =  @map["map_width"]
+    @global_map_height = @map["map_height"]
 
-    @screen_map_width  = (EXTERIOR_MAP_WIDTH  * @screen_tile_width )
-    @screen_map_height = (EXTERIOR_MAP_HEIGHT * @screen_tile_height)
+    @screen_map_width  = (@global_map_width  * @screen_tile_width )
+    @screen_map_height = (@global_map_height * @screen_tile_height)
     puts "@screen_map_height = (EXTERIOR_MAP_HEIGHT * @screen_tile_height)"
     puts "#{@screen_map_height} = (#{EXTERIOR_MAP_HEIGHT} * #{@screen_tile_height})"
 
@@ -183,6 +189,7 @@ class GLBackground
     @x_left_tracker   = nil
 
     if player_x && player_y
+
       init_map
     end
 
@@ -196,15 +203,19 @@ class GLBackground
     # puts @visible_map
   end
 
+  # @current_map_center_x and @current_map_center_y must be defined at this point.
   def init_map
     puts "INIT MAP"
-    @y_top_tracker    = (@current_map_center_y / (@screen_tile_height)).round + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
-    @y_bottom_tracker = (@current_map_center_y / (@screen_tile_height)).round - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
+    @gps_map_center_x =  (@current_map_center_x / (@screen_tile_width)).round
+    @gps_map_center_y =  (@current_map_center_y / (@screen_tile_height)).round
 
-    @x_right_tracker    = (@current_map_center_x / (@screen_tile_width)).round + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
-    @x_left_tracker     = (@current_map_center_x / (@screen_tile_width)).round - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)
+    @y_top_tracker    = @gps_map_center_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
+    @y_bottom_tracker = @gps_map_center_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
+
+    @x_right_tracker    = @gps_map_center_x + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
+    @x_left_tracker     = @gps_map_center_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)
     
-    puts "@x_right_tracker: #{@x_right_tracker}"
+    # puts "@x_right_tracker: #{@x_right_tracker}"
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
       y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
@@ -214,30 +225,35 @@ class GLBackground
         x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
         x_offset = x_offset - EXTRA_MAP_WIDTH / 2
         # REAL MAP DATA HERE
-        # @visible_map[index_h][index_w] = @map_data[player_y + y_offset][player_x + x_offset]
+        puts "MAP DATA HEREL #{@map_data.length} and  #{@map_data[0].length}"
+        puts "@map_data[@current_map_center_y + y_offset][@current_map_center_x + x_offset]"
+        puts "@map_data[#{@current_map_center_y} + #{y_offset}][#{@current_map_center_x} + #{x_offset}]"
+        @visible_map[index_h][index_w] = @map_data[@gps_map_center_y + y_offset][@gps_map_center_x + x_offset]
         # TEST DATA HERE
-        if index_h % 2 == 0
-          if index_w  % 2 == 0
-            @visible_map[index_h][index_w] = {'height' => rand, 'terrain_index' => 2 }
-          else
-            @visible_map[index_h][index_w] = {'height' => rand, 'terrain_index' => 0 }
-          end
-        else
-          if index_w  % 2 == 0
-            @visible_map[index_h][index_w] = {'height' => rand, 'terrain_index' => 3 }
-          else
-            @visible_map[index_h][index_w] = {'height' => rand, 'terrain_index' => 1 }
-          end
-        end
+        # if index_h % 2 == 0
+        #   if index_w  % 2 == 0
+        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 2 }
+        #   else
+        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 0 }
+        #   end
+        # else
+        #   if index_w  % 2 == 0
+        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 3 }
+        #   else
+        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 1 }
+        #   end
+        # end
       end
     end
+    @map_inited = true
   end
 
   def update player_x, player_y
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
     # puts "MAP SIZE: #{@visible_map[0].length} X #{@visible_map.length}"
-    puts "BACKGROUND UPDATE: #{player_x} - #{player_y} - top track #{@y_top_tracker}" if @time_alive % 100 == 0
+    puts "SCREEN BACKGROUND UPDATE: #{player_x} - #{player_y}" if @time_alive % 100 == 0
+    puts "GPS    BACKGROUND UPDATE: #{@gps_map_center_x} - #{@gps_map_center_y}" if @time_alive % 100 == 0
     @time_alive += 1
 
     # puts "PLAYER: #{player_x} - #{player_y}"
@@ -278,19 +294,20 @@ class GLBackground
           @visible_map.pop
           # puts "@y_top_tracker > (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))"
           # puts "#{@y_top_tracker} > (#{EXTERIOR_MAP_HEIGHT} - #{(EXTRA_MAP_HEIGHT / 2)} - #{(VISIBLE_MAP_HEIGHT / 2)})"
-          @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => 1, 'terrain_index' => 3 } })
+          @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => 2, 'terrain_index' => 3 } })
           # puts "EDGE MAP HERE: (EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))"
           # puts "#{(EXTERIOR_MAP_HEIGHT - (EXTRA_MAP_HEIGHT / 2) - (VISIBLE_MAP_HEIGHT / 2))} = (#{EXTERIOR_MAP_HEIGHT} - (#{EXTRA_MAP_HEIGHT} / 2) - (#{VISIBLE_MAP_HEIGHT} / 2))"
           # value = "EDGE MAP"
         else
           # puts "ADDING NORMALLY"
           @visible_map.pop
-          @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => rand, 'terrain_index' => 1 + rand(2) } })
+          @visible_map.unshift(Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { {'height' => 1, 'terrain_index' => 1 + rand(2) } })
           # value = "INSIDE MAP"
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ - top tracker: #{@y_top_tracker}"
         @current_map_center_y = @current_map_center_y + @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
         @local_map_movement_y = @local_map_movement_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
+        @gps_map_center_y    += 1
       else
         # Without this, you stick to the edge of the map?
         @local_map_movement_y = 0 if @local_map_movement_y > 0
@@ -312,16 +329,17 @@ class GLBackground
         # value = nil
         if @y_bottom_tracker < 0
           @visible_map.shift
-          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => 3 } }
+          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => 2, 'terrain_index' => 3 } }
           # value = "EDGE MAP"
         else
           @visible_map.shift
-          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => rand, 'terrain_index' => 1 + rand(2) } }
+          @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => 1, 'terrain_index' => 1 + rand(2) } }
           # value = "INSIDE MAP"
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ #{value} - top tracker: #{@y_bottom_tracker}"
         @current_map_center_y = @current_map_center_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
         @local_map_movement_y = @local_map_movement_y + @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
+        @gps_map_center_y    -= 1
       else
         @local_map_movement_y = 0 if @local_map_movement_y < 0
       end
@@ -363,18 +381,19 @@ class GLBackground
 
           @visible_map.each do |row|
             row.pop
-            row.unshift({'height' => rand, 'terrain_index' => 3 } )
+            row.unshift({'height' => 2, 'terrain_index' => 3 } )
           end
         else
           puts "ASDDING NORMAL MAP EDGE:"
           @visible_map.each do |row|
             row.pop
-            row.unshift({'height' => rand, 'terrain_index' => 1 + rand(2) } )
+            row.unshift({'height' => 1, 'terrain_index' => 1 + rand(2) } )
           end
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ - top tracker: #{@y_top_tracker}"
         @current_map_center_x = @current_map_center_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
         @local_map_movement_x = @local_map_movement_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+        @gps_map_center_x    += 1
       else
         # Without this, you stick to the edge of the map?
         @local_map_movement_x = 0 if @local_map_movement_x > 0
@@ -392,16 +411,17 @@ class GLBackground
 
           @visible_map.each do |row|
             row.shift
-            row.push({'height' => rand, 'terrain_index' => 3 })
+            row.push({'height' => 2, 'terrain_index' => 3 })
           end
         else
           @visible_map.each do |row|
             row.shift
-            row.push({'height' => rand, 'terrain_index' => 1 + rand(2) })
+            row.push({'height' => 1, 'terrain_index' => 1 + rand(2) })
           end
         end
         @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
         @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+        @gps_map_center_x    -= 1
       else
         @local_map_movement_x = 0 if @local_map_movement_x < 0
       end
@@ -551,9 +571,12 @@ class GLBackground
         
 
         # z = x_element['height']
-        z = 0.5# - (0.2 / (x_element['height']))
+        # z = 0.5# - (0.2 / (x_element['height']))
         #testing
         info =  @infos[x_element['terrain_index']]
+        # z = x_element['height']
+        z = get_surrounding_average_tile_height(x_index, y_index)
+        puts "puts USING Z: #{z}"
         # info =  @infos[x_index % 2]
         # info = @info
 
@@ -579,25 +602,158 @@ class GLBackground
           glTexCoord2d(info.left, info.top)
           # puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
           # BOTTOM RIGHT VERT
-          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z)
+          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z[0])
           glTexCoord2d(info.left, info.bottom)
           # puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
           # TOP RIGHT VERT
-          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z)
+          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z[1])
           glTexCoord2d(info.right, info.top)
           # puts "V2 VERT THREE: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y}" if show_debug
-          # BOTTOM LEFT VERT
-          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z)
+          # TOP LEFT VERT
+          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z[2])
           glTexCoord2d(info.right, info.bottom)
           # puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
           # BOTTOM LEFT VERT
-          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z)
+          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z[3])
         glEnd
       end
     end
     # puts opengl_offsets
     # raise "STOP HERE"
-
-
   end
+
+
+
+
+  # Need to calc corners of tile, not just the whole tile height!
+  # [
+  #   BOTTOM RIGHT VERT,
+  #   TOP RIGHT VERT,
+  #   TOP LEFT VERT,
+  #   BOTTOM LEFT VERT
+  # ]
+  def get_surrounding_average_tile_height x_index, y_index, x_max = nil, y_max = nil
+    if @map_inited
+      y_max = y_max || VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
+      x_max = x_max || VISIBLE_MAP_WIDTH  + EXTRA_MAP_WIDTH
+
+      heights = @visible_map[y_index][x_index]['calculated_heights']
+      if heights && heights.any?
+        return heights
+      # Don't calculate height for edges of the map.. they don't have neighbors to compare
+      # Assume are map boundaries, high height
+      elsif x_index == 0 || y_index == 0 || x_index == x_max - 1 || y_index == y_max - 1
+        return [2, 2, 2, 2]
+      elsif x_index == 1 || y_index == 1 || x_index == x_max - 2 || y_index == y_max - 2
+        return [2, 2, 2, 2]
+      else
+        heights = []
+        # bottom_right_corner
+        local_heights = []
+        tile_num = 0
+        # Current
+        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index][x_index]['height']
+          tile_num += 1
+        end
+        # below
+        if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index - 1][x_index]['height']
+          tile_num += 1
+        end
+        # below right
+        if y_index - 1 > 0 && y_index - 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+          local_heights << @visible_map[y_index - 1][x_index + 1]['height']
+          tile_num += 1
+        end
+        # right
+        if y_index > 0 && y_index  < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+          local_heights << @visible_map[y_index][x_index + 1]['height']
+          tile_num += 1
+        end
+
+        heights << local_heights.sum / tile_num.to_f
+
+        # TOP RIGHT
+        local_heights = []
+        tile_num = 0
+        # Current
+        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index][x_index]['height']
+          tile_num += 1
+        end
+        # top
+        if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index + 1][x_index]['height']
+          tile_num += 1
+        end
+        # top right
+        if y_index + 1 > 0 && y_index + 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+          local_heights << @visible_map[y_index + 1][x_index + 1]['height']
+          tile_num += 1
+        end
+        # right
+        if y_index > 0 && y_index < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+          local_heights << @visible_map[y_index][x_index + 1]['height']
+          tile_num += 1
+        end
+        heights << local_heights.sum / tile_num.to_f
+
+        # TOP LEFT 
+        local_heights = []
+        tile_num = 0
+        # Current
+        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index][x_index]['height']
+          tile_num += 1
+        end
+        # top
+        if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index + 1][x_index]['height']
+          tile_num += 1
+        end
+        # top left
+        if y_index + 1 > 0 && y_index + 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+          local_heights << @visible_map[y_index + 1][x_index - 1]['height']
+          tile_num += 1
+        end
+        # left
+        if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+          local_heights << @visible_map[y_index][x_index - 1]['height']
+          tile_num += 1
+        end
+        heights << local_heights.sum / tile_num.to_f
+
+        # BOTTOM LEFT 
+        local_heights = []
+        tile_num = 0
+        # Current
+        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index][x_index]['height']
+          tile_num += 1
+        end
+        # bottom
+        if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
+          local_heights << @visible_map[y_index - 1][x_index]['height']
+          tile_num += 1
+        end
+        # bottom left
+        if y_index - 1 > 0 && y_index - 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+          local_heights << @visible_map[y_index - 1][x_index - 1]['height']
+          tile_num += 1
+        end
+        # left
+        if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+          local_heights << @visible_map[y_index][x_index - 1]['height']
+          tile_num += 1
+        end
+        heights << local_heights.sum / tile_num.to_f
+        @visible_map[y_index][x_index]['calculated_heights'] = heights
+        return heights
+      end
+    else
+      return [1, 1, 1, 1]
+    end
+  end
+
 end
