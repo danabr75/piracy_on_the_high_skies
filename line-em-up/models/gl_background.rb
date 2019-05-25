@@ -197,11 +197,14 @@ class GLBackground
   end
 
   def init_map
+    puts "INIT MAP"
     @y_top_tracker    = (@current_map_center_y / (@screen_tile_height)).round + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
     @y_bottom_tracker = (@current_map_center_y / (@screen_tile_height)).round - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
 
     @x_right_tracker    = (@current_map_center_x / (@screen_tile_width)).round + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
     @x_left_tracker     = (@current_map_center_x / (@screen_tile_width)).round - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)
+    
+    puts "@x_right_tracker: #{@x_right_tracker}"
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
       y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
@@ -354,17 +357,19 @@ class GLBackground
       if @current_map_center_x < (@screen_map_width)
         @x_right_tracker += 1
         @x_left_tracker  += 1
-        if @x_right_tracker > (@global_map_height)
+
+        if @x_right_tracker > (@global_map_width)
           puts "ADDING IN RIGHT EDGE OF MAP"
 
           @visible_map.each do |row|
             row.pop
-            row.unshift({'height' => rand, 'terrain_index' => 1 + rand(2) } )
+            row.unshift({'height' => rand, 'terrain_index' => 3 } )
           end
         else
+          puts "ASDDING NORMAL MAP EDGE: @x_right_tracker > (@global_map_width) = #{@x_right_tracker} > (#{@global_map_width})"
           @visible_map.each do |row|
             row.pop
-            row.unshift({'height' => rand, 'terrain_index' => 3 } )
+            row.unshift({'height' => rand, 'terrain_index' => 1 + rand(2) } )
           end
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ - top tracker: #{@y_top_tracker}"
