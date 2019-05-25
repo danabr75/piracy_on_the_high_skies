@@ -33,9 +33,15 @@ class Player < GeneralObject
 
   # x and y is graphical representation of object
   # location x and y where it exists on the global map.
+  # Location x and y became screen movement... 
+  # gps_location_x and gps_location_y is now global map
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options = {})
     # @location_x, @location_y = [location_x, location_y]
     super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options)
+
+    raise "ISSUE" if @global_map_height.nil?
+    raise "ISSUE" if @global_map_width.nil?
+
     # Top of screen
     @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
@@ -83,7 +89,7 @@ class Player < GeneralObject
     @mass = 180 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass # speed here?
-    @speed = 30 #/ (@mass / 2)
+    @speed = 90 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
@@ -358,8 +364,8 @@ class Player < GeneralObject
 
 
   def attack_group_1 pointer
-    raise "NO MAP" if @map_width.nil? || @map_height.nil?
-    @ship.attack_group_1(@angle, @location_x, @location_y, @map_width, @map_height, pointer)
+    raise "NO MAP" if @global_map_width.nil? || @global_map_height.nil?
+    @ship.attack_group_1(@angle, @location_x, @location_y, @global_map_width, @global_map_height, pointer)
   end
  
   def deactivate_group_1
@@ -367,7 +373,7 @@ class Player < GeneralObject
   end
 
   def attack_group_2 pointer
-    @ship.attack_group_2(@angle, @location_x, @location_y, @map_width, @map_height, pointer)
+    @ship.attack_group_2(@angle, @location_x, @location_y, @global_map_width, @global_map_height, pointer)
   end
  
   def deactivate_group_2
@@ -422,16 +428,16 @@ class Player < GeneralObject
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
 
-    # puts "PLAYER: @location_y >= @map_height: #{@location_y} >= #{@map_height}"
-    if @location_y >= @map_height
+    # puts "PLAYER: @location_y >= @global_map_height: #{@location_y} >= #{@global_map_height}"
+    if @location_y >= @global_map_height
       # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
       @current_momentum = 0
-      @location_y = @map_height
+      @location_y = @global_map_height
     elsif @location_y < 0
       @current_momentum = 0
       @location_y = 0
     end
-    if @location_x >= @map_width
+    if @location_x >= @global_map_width
       @current_momentum = 0
     elsif @location_x < 0
       @current_momentum = 0

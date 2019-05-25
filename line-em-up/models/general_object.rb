@@ -41,10 +41,12 @@ class GeneralObject
       raise "Parameter was not an Integer Or Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != Integer && param.class != NilClass
     end
 
+    # raise "ISSUE WITH GO" if map_height.nil?
+
     @width_scale  = width_scale
     @height_scale = height_scale
-    @map_height = map_height
-    @map_width  = map_width
+    @global_map_height = map_height
+    @global_map_width  = map_width
     # Only use ID in debug\test
     @location_x = location_x # Override?
     @location_y = location_y # Override?
@@ -338,7 +340,7 @@ class GeneralObject
     raise " NO SCALE PRESENT FOR MOVEMENT" if @width_scale.nil? || @height_scale.nil?
     raise " NO LOCATION PRESENT" if @location_x.nil? || @location_y.nil?
     # puts "MOVEMENT: #{speed}, #{angle}"
-    # puts "PLAYER MOVEMENT map size: #{@map_width} - #{@map_height}"
+    # puts "PLAYER MOVEMENT map size: #{@global_map_width} - #{@global_map_height}"
     base = speed / 100.0
     base = base * ((@width_scale + @height_scale) / 2.0)
     # @width_scale  = width_scale
@@ -360,9 +362,9 @@ class GeneralObject
     x_diff = (@location_x - new_x) * -1
     y_diff = @location_y - new_y
 
-    # puts "(#{@location_y} - #{y_diff}) > #{@map_height}"
-    # puts "@map_height: #{@map_height}"
-    if (@location_y - y_diff) > @map_height
+    # puts "(#{@location_y} - #{y_diff}) > #{@global_map_height}"
+    # puts "@global_map_height: #{@global_map_height}"
+    if (@location_y - y_diff) > @global_map_height
       # Block progress along top of map Y 
       y_diff = y_diff - ((@location_y + y_diff) - @location_y)
     elsif @location_y - y_diff < 0
@@ -370,8 +372,8 @@ class GeneralObject
       y_diff = y_diff + (@location_y + y_diff)
     end
 
-    if @location_x - x_diff > @map_width
-      # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_width}"
+    if @location_x - x_diff > @global_map_width
+      # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@global_map_width}"
       x_diff = x_diff - ((@location_x + x_diff) - @location_x)
     elsif @location_x - x_diff < 0
       x_diff = x_diff + (@location_x + x_diff)
@@ -383,13 +385,13 @@ class GeneralObject
     @location_x -= x_diff
 
     # Block elements from going off map. Not really working here... y still builds up.
-    # if @location_y > @map_height
-    #   @location_y = @map_height
+    # if @location_y > @global_map_height
+    #   @location_y = @global_map_height
     # elsif @location_y < 0
     #   @location_y = 0
     # end
-    # if @location_x > @map_width
-    #   @location_x = @map_width
+    # if @location_x > @global_map_width
+    #   @location_x = @global_map_width
     # elsif @location_x < 0
     #   @location_x = 0
     # end

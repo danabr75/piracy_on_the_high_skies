@@ -50,8 +50,8 @@ class LaserLauncher < Launcher
       if @projectiles.count == 0
         options[:is_head] = true
       end
-      raise "MISSING OPTIONS HERE #{initial_angle}, #{location_x}, #{location_y}, #{@map_width}, #{@map_height}" if [initial_angle, location_x, location_y, @map_width, @map_height].include?(nil)
-      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, initial_angle, location_x, location_y, @map_width, @map_height, options)
+      raise "MISSING OPTIONS HERE #{initial_angle}, #{location_x}, #{location_y}, #{@global_map_width}, #{@global_map_height}" if [initial_angle, location_x, location_y, @global_map_width, @global_map_height].include?(nil)
+      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, initial_angle, location_x, location_y, @global_map_width, @global_map_height, options)
       @projectiles << projectile
       return projectile
     end
