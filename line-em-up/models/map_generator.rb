@@ -83,7 +83,7 @@ class MapGenerator
           tile_num += 1
         end
 
-        corner_height = heights.sum / tile_num.to_f
+        corner_height = heights.inject(:+) / tile_num.to_f
 
         top_left_tile[:corner_heights][:bottom_right] = corner_height if top_left_tile
         top_right_tile[:corner_heights][:bottom_left] = corner_height if top_right_tile

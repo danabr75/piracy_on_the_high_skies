@@ -515,8 +515,8 @@ class GLBackground
     # offs_x = 1.0 * @local_map_movement_x / (@screen_movement_increment_x)
     gps_offs_y = @local_map_movement_y / (@screen_tile_height )
     gps_offs_x = @local_map_movement_x / (@screen_tile_width )
-    puts "gps_offs_y = @local_map_movement_y / (@screen_tile_height )"
-    puts "#{gps_offs_y} = #{@local_map_movement_y} / (#{@screen_tile_height} )"
+    # puts "gps_offs_y = @local_map_movement_y / (@screen_tile_height )"
+    # puts "#{gps_offs_y} = #{@local_map_movement_y} / (#{@screen_tile_height} )"
     screen_offset_x = @screen_tile_width  * gps_offs_x * -1
     screen_offset_y = @screen_tile_height * gps_offs_y * -1
     offset_result = convert_screen_to_opengl(screen_offset_x, screen_offset_y)
@@ -575,8 +575,14 @@ class GLBackground
         #testing
         info =  @infos[x_element['terrain_index']]
         # z = x_element['height']
-        z = get_surrounding_average_tile_height(x_index, y_index)
-        puts "puts USING Z: #{z}"
+        if x_element['corner_heights']
+          z = x_element['corner_heights']
+        else
+          z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
+        end
+
+        # z = get_surrounding_average_tile_height(x_index, y_index)
+        # puts "puts USING Z: #{z}"
         # info =  @infos[x_index % 2]
         # info = @info
 
@@ -601,20 +607,16 @@ class GLBackground
           # end
           glTexCoord2d(info.left, info.top)
           # puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
-          # BOTTOM RIGHT VERT
-          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z[0])
+          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left'])
           glTexCoord2d(info.left, info.bottom)
           # puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
-          # TOP RIGHT VERT
-          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z[1])
+          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left'])
           glTexCoord2d(info.right, info.top)
           # puts "V2 VERT THREE: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y}" if show_debug
-          # TOP LEFT VERT
-          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z[2])
+          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right'])
           glTexCoord2d(info.right, info.bottom)
           # puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
-          # BOTTOM LEFT VERT
-          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z[3])
+          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right'])
         glEnd
       end
     end
@@ -632,128 +634,128 @@ class GLBackground
   #   TOP LEFT VERT,
   #   BOTTOM LEFT VERT
   # ]
-  def get_surrounding_average_tile_height x_index, y_index, x_max = nil, y_max = nil
-    if @map_inited
-      y_max = y_max || VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
-      x_max = x_max || VISIBLE_MAP_WIDTH  + EXTRA_MAP_WIDTH
+  # def get_surrounding_average_tile_height x_index, y_index, x_max = nil, y_max = nil
+  #   if @map_inited
+  #     y_max = y_max || VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
+  #     x_max = x_max || VISIBLE_MAP_WIDTH  + EXTRA_MAP_WIDTH
 
-      heights = @visible_map[y_index][x_index]['calculated_heights']
-      if heights && heights.any?
-        return heights
-      # Don't calculate height for edges of the map.. they don't have neighbors to compare
-      # Assume are map boundaries, high height
-      elsif x_index == 0 || y_index == 0 || x_index == x_max - 1 || y_index == y_max - 1
-        return [2, 2, 2, 2]
-      elsif x_index == 1 || y_index == 1 || x_index == x_max - 2 || y_index == y_max - 2
-        return [2, 2, 2, 2]
-      else
-        heights = []
-        # bottom_right_corner
-        local_heights = []
-        tile_num = 0
-        # Current
-        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index][x_index]['height']
-          tile_num += 1
-        end
-        # below
-        if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index - 1][x_index]['height']
-          tile_num += 1
-        end
-        # below right
-        if y_index - 1 > 0 && y_index - 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-          local_heights << @visible_map[y_index - 1][x_index + 1]['height']
-          tile_num += 1
-        end
-        # right
-        if y_index > 0 && y_index  < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-          local_heights << @visible_map[y_index][x_index + 1]['height']
-          tile_num += 1
-        end
+  #     heights = @visible_map[y_index][x_index]['calculated_heights']
+  #     if heights && heights.any?
+  #       return heights
+  #     # Don't calculate height for edges of the map.. they don't have neighbors to compare
+  #     # Assume are map boundaries, high height
+  #     elsif x_index == 0 || y_index == 0 || x_index == x_max - 1 || y_index == y_max - 1
+  #       return [2, 2, 2, 2]
+  #     elsif x_index == 1 || y_index == 1 || x_index == x_max - 2 || y_index == y_max - 2
+  #       return [2, 2, 2, 2]
+  #     else
+  #       heights = []
+  #       # bottom_right_corner
+  #       local_heights = []
+  #       tile_num = 0
+  #       # Current
+  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # below
+  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index - 1][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # below right
+  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+  #         local_heights << @visible_map[y_index - 1][x_index + 1]['height']
+  #         tile_num += 1
+  #       end
+  #       # right
+  #       if y_index > 0 && y_index  < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+  #         local_heights << @visible_map[y_index][x_index + 1]['height']
+  #         tile_num += 1
+  #       end
 
-        heights << local_heights.sum / tile_num.to_f
+  #       heights << local_heights.sum / tile_num.to_f
 
-        # TOP RIGHT
-        local_heights = []
-        tile_num = 0
-        # Current
-        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index][x_index]['height']
-          tile_num += 1
-        end
-        # top
-        if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index + 1][x_index]['height']
-          tile_num += 1
-        end
-        # top right
-        if y_index + 1 > 0 && y_index + 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-          local_heights << @visible_map[y_index + 1][x_index + 1]['height']
-          tile_num += 1
-        end
-        # right
-        if y_index > 0 && y_index < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-          local_heights << @visible_map[y_index][x_index + 1]['height']
-          tile_num += 1
-        end
-        heights << local_heights.sum / tile_num.to_f
+  #       # TOP RIGHT
+  #       local_heights = []
+  #       tile_num = 0
+  #       # Current
+  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # top
+  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index + 1][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # top right
+  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+  #         local_heights << @visible_map[y_index + 1][x_index + 1]['height']
+  #         tile_num += 1
+  #       end
+  #       # right
+  #       if y_index > 0 && y_index < y_max && x_index + 1 > 0 && x_index + 1 < x_max
+  #         local_heights << @visible_map[y_index][x_index + 1]['height']
+  #         tile_num += 1
+  #       end
+  #       heights << local_heights.sum / tile_num.to_f
 
-        # TOP LEFT 
-        local_heights = []
-        tile_num = 0
-        # Current
-        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index][x_index]['height']
-          tile_num += 1
-        end
-        # top
-        if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index + 1][x_index]['height']
-          tile_num += 1
-        end
-        # top left
-        if y_index + 1 > 0 && y_index + 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-          local_heights << @visible_map[y_index + 1][x_index - 1]['height']
-          tile_num += 1
-        end
-        # left
-        if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-          local_heights << @visible_map[y_index][x_index - 1]['height']
-          tile_num += 1
-        end
-        heights << local_heights.sum / tile_num.to_f
+  #       # TOP LEFT 
+  #       local_heights = []
+  #       tile_num = 0
+  #       # Current
+  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # top
+  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index + 1][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # top left
+  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+  #         local_heights << @visible_map[y_index + 1][x_index - 1]['height']
+  #         tile_num += 1
+  #       end
+  #       # left
+  #       if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+  #         local_heights << @visible_map[y_index][x_index - 1]['height']
+  #         tile_num += 1
+  #       end
+  #       heights << local_heights.sum / tile_num.to_f
 
-        # BOTTOM LEFT 
-        local_heights = []
-        tile_num = 0
-        # Current
-        if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index][x_index]['height']
-          tile_num += 1
-        end
-        # bottom
-        if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
-          local_heights << @visible_map[y_index - 1][x_index]['height']
-          tile_num += 1
-        end
-        # bottom left
-        if y_index - 1 > 0 && y_index - 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-          local_heights << @visible_map[y_index - 1][x_index - 1]['height']
-          tile_num += 1
-        end
-        # left
-        if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-          local_heights << @visible_map[y_index][x_index - 1]['height']
-          tile_num += 1
-        end
-        heights << local_heights.sum / tile_num.to_f
-        @visible_map[y_index][x_index]['calculated_heights'] = heights
-        return heights
-      end
-    else
-      return [1, 1, 1, 1]
-    end
-  end
+  #       # BOTTOM LEFT 
+  #       local_heights = []
+  #       tile_num = 0
+  #       # Current
+  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # bottom
+  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
+  #         local_heights << @visible_map[y_index - 1][x_index]['height']
+  #         tile_num += 1
+  #       end
+  #       # bottom left
+  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+  #         local_heights << @visible_map[y_index - 1][x_index - 1]['height']
+  #         tile_num += 1
+  #       end
+  #       # left
+  #       if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
+  #         local_heights << @visible_map[y_index][x_index - 1]['height']
+  #         tile_num += 1
+  #       end
+  #       heights << local_heights.sum / tile_num.to_f
+  #       @visible_map[y_index][x_index]['calculated_heights'] = heights
+  #       return heights
+  #     end
+  #   else
+  #     return [1, 1, 1, 1]
+  #   end
+  # end
 
 end
