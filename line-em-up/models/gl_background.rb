@@ -287,6 +287,13 @@ class GLBackground
   # I think this is dependent on the map being square
   def verify_visible_map
     if @map_inited
+
+      @visual_map_of_visible_to_map.each_with_index do |y_row, index|
+        print_visible_map if y_row.nil? || y_row.empty? || y_row.length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1
+        raise "Y Column was nil" if y_row.nil? || y_row.empty?
+        raise "Y Column size wasn't correct. Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH}. GOT: #{y_row.length}" if y_row.length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
+      end
+
       puts "verify_visible_map"
       y_length = @visual_map_of_visible_to_map.length - 1
       x_length = @visual_map_of_visible_to_map[0].length - 1
@@ -342,7 +349,7 @@ class GLBackground
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
  
     puts "BEFORE EVERYTING"
-    print_visible_map
+    # print_visible_map
     puts "BEFORE EVERYTING - V"
     verify_visible_map
     # offset_y = (VISIBLE_MAP_HEIGHT  / 2) + (EXTRA_MAP_HEIGHT / 2)
@@ -473,19 +480,21 @@ class GLBackground
       if @current_map_center_y > 0
         puts "PRE gps_map_center_y: #{@gps_map_center_y}"
         @gps_map_center_y -= 1
+        # Have to increment by one, or else duplicating row
+        local_gps_map_center_y = @gps_map_center_y + 1
         puts "POST gps_map_center_y: #{@gps_map_center_y}"
 
         # @gps_tile_offset_y = VISIBLE_MAP_HEIGHT / 2 + EXTRA_MAP_HEIGHT / 2
         # @gps_tile_offset_x = VISIBLE_MAP_WIDTH/ 2 + EXTRA_MAP_WIDTH / 2
 
         # Show edge of map 
-        if @gps_map_center_y - @gps_tile_offset_y <= 0
+        if local_gps_map_center_y - @gps_tile_offset_y <= 0
           @visible_map.shift
           @visual_map_of_visible_to_map.shift
           @visible_map.push(Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => 2, 'terrain_index' => 3 } })
           @visual_map_of_visible_to_map.push(Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { "N/A" })
-          puts "HERE WHAT WAS IT? visible_map.last.length #{@visible_map.last.length}"
-          puts "HERE WHAT WAS IT? visible_map.last[0].length #{@visible_map.last[0].length}"
+          # puts "HERE WHAT WAS IT? visible_map.last.length #{@visible_map.last.length}"
+          # puts "HERE WHAT WAS IT? visible_map.last[0].length #{@visible_map.last[0].length}"
         else
           puts "ADDING NORMALLY - #{@current_map_center_y} -#{ @gps_tile_offset_y} > 0"
           @visible_map.shift
@@ -496,11 +505,12 @@ class GLBackground
           (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
             x_index = @global_map_width - @gps_map_center_x + visible_width - @gps_tile_offset_x
             if x_index < @global_map_width && x_index >= 0
-              puts "(@global_map_height - ((@gps_map_center_y) - @gps_tile_offset_y)) - 1"
-              puts "(#{@global_map_height} - ((#{@gps_map_center_y}) - #{@gps_tile_offset_y})) - 1"
-              puts "#{(@global_map_height - ((@gps_map_center_y) - @gps_tile_offset_y)) - 1}"
-              # - 1 for array indexing.
-              y_index = (@global_map_height - ((@gps_map_center_y) - @gps_tile_offset_y)) - 1
+              puts "(@global_map_height - ((local_gps_map_center_y ) - @gps_tile_offset_y)) - 1"
+              puts "(#{@global_map_height} - ((#{local_gps_map_center_y }) - #{@gps_tile_offset_y})) - 1"
+              puts "#{(@global_map_height - ((local_gps_map_center_y ) - @gps_tile_offset_y)) - 1}"
+              # - 1 for array indexing. - WRONG
+              # y_index = (@global_map_height - ((local_gps_map_center_y ) - @gps_tile_offset_y)) - 1
+              y_index = (@global_map_height - ((local_gps_map_center_y ) - @gps_tile_offset_y))
               new_array << @map_data[y_index][x_index]
               new_debug_array << "#{y_index}, #{x_index}"
             else
@@ -532,7 +542,7 @@ class GLBackground
     end
 
 
-    # Moving to the Right?
+    # Moving to the RIGHT
     if @local_map_movement_x >= @screen_tile_width
       puts "ADDING IN ARRAY 3 "
       print_visible_map
@@ -601,6 +611,7 @@ class GLBackground
     end
   
 
+    # MOVING TO THE LEFT
     if @local_map_movement_x <= -@screen_tile_width# * @width_scale * 1.1
       puts "ADDING IN ARRAY 4"
     #   if @current_map_center_x > 0
@@ -655,7 +666,7 @@ class GLBackground
           new_array       = []
           new_debug_array = []
           (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_w|
-            y_index = @global_map_height - @gps_map_center_y + visible_height - @gps_tile_offset_x
+            y_index = (@global_map_height - @gps_map_center_y + visible_height - @gps_tile_offset_x)
             # y_offset = visible_height  - VISIBLE_MAP_HEIGHT  / V
             # y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
             # y_index = @global_map_height - @gps_map_center_y + y_offset
