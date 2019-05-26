@@ -23,17 +23,17 @@ class GLBackground
   EXTERIOR_MAP_HEIGHT = 200
   EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
-  VISIBLE_MAP_WIDTH = 15
+  VISIBLE_MAP_WIDTH = 16
   # outside of view padding
 
-  EXTRA_MAP_WIDTH   = 3
+  EXTRA_MAP_WIDTH   = 2
   # POINTS_Y = 7
 
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   # 15 tiles should be on screen
-  VISIBLE_MAP_HEIGHT = 15
+  VISIBLE_MAP_HEIGHT = 16
   # outside of view padding
-  EXTRA_MAP_HEIGHT   = 3
+  EXTRA_MAP_HEIGHT   = 2
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
@@ -138,6 +138,10 @@ class GLBackground
     @local_map_movement_x = 0
     @local_map_movement_y = 0
 
+    # Keeping offsets in pos
+    @tile_offset_y = VISIBLE_MAP_HEIGHT / 2 + EXTRA_MAP_HEIGHT / 2
+    @tile_offset_x = VISIBLE_MAP_WIDTH/ 2 + EXTRA_MAP_WIDTH / 2
+
     # @global_map_height = EXTERIOR_MAP_HEIGHT
     # @global_map_width  = EXTERIOR_MAP_WIDTH
     # @player_position_x = EXTERIOR_MAP_HEIGHT / 2.0
@@ -183,11 +187,11 @@ class GLBackground
     @map_data = @map["data"]
     @visual_map_of_visible_to_map = Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { nil } }
 
-    @y_top_tracker    = nil
-    @y_bottom_tracker = nil
+    # @y_top_tracker    = nil
+    # @y_bottom_tracker = nil
 
-    @x_right_tracker  = nil
-    @x_left_tracker   = nil
+    # @x_right_tracker  = nil
+    # @x_left_tracker   = nil
 
     if player_x && player_y
 
@@ -210,12 +214,28 @@ class GLBackground
     @gps_map_center_x =  (@current_map_center_x / (@screen_tile_width)).round
     @gps_map_center_y =  (@current_map_center_y / (@screen_tile_height)).round
 
-    @y_top_tracker    = @gps_map_center_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
-    @y_bottom_tracker = @gps_map_center_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)
+    # @y_top_tracker    = @gps_map_center_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
+    # # Fix map tester, then uncomment
+    # @y_bottom_tracker = (@gps_map_center_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)) - 1
+    # # @y_bottom_tracker = (@gps_map_center_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2))
 
-    @x_right_tracker    = @gps_map_center_x + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
-    @x_left_tracker     = @gps_map_center_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)
-    
+    # @x_right_tracker    = @gps_map_center_x + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
+    # # @x_left_tracker     = (@gps_map_center_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2))
+    # # Fix map tester, then uncomment
+    # @x_left_tracker     = (@gps_map_center_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)) - 1
+
+    puts "INITTED MAP SEETINGS"
+    puts "@gps_map_center_x =  #{@gps_map_center_x}"
+    puts "@gps_map_center_y =  #{@gps_map_center_y}"
+    puts "ACTUAL: "
+    puts "#{(@current_map_center_x / (@screen_tile_width))}"
+    puts "#{(@current_map_center_y / (@screen_tile_height))}"
+
+    # puts "@y_top_tracker    = #{@y_top_tracker}"
+    # puts "@y_bottom_tracker = #{@y_bottom_tracker}"
+
+    # puts "@x_right_tracker    = #{@x_right_tracker}"
+    # puts "@x_left_tracker     = #{@x_left_tracker}  "
     # puts "@x_right_tracker: #{@x_right_tracker}"
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
@@ -252,7 +272,7 @@ class GLBackground
   end
 
   def print_visible_map
-    puts "print_visible_map"
+    puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
     @visual_map_of_visible_to_map.each do |y_row|
       output = "|"
       y_row.each do |x_row|
@@ -268,25 +288,27 @@ class GLBackground
     puts "verify_visible_map"
     y_length = @visual_map_of_visible_to_map.length - 1
     x_length = @visual_map_of_visible_to_map[0].length - 1
-    (0..y_length).each do |y|
+    element = @visual_map_of_visible_to_map[0][0]
+    comp_y, do_nothing = element.split(', ').collect{|v| v.to_i}
+    (1..y_length).each do |y|
       first_x_element = @visual_map_of_visible_to_map[y][0]
       next if first_x_element == "N/A"
       value_y, value_x = first_x_element.split(', ').collect{|v| v.to_i}
       (1..x_length).each do |x|
         element = @visual_map_of_visible_to_map[y][x]
         next if element == "N/A"
-        comp_y, comp_x = element.split(', ').collect{|v| v.to_i}
+        do_nothing, comp_x = element.split(', ').collect{|v| v.to_i}
         if value_x + x == comp_x
           # All Good
         else
           print_visible_map
-          raise "1ISSUE WITH MAP AT Y: #{y} and X: #{x} - #{value_x + x} != #{comp_x}"
+          raise "1ISSUE WITH MAP AT X value: #{y} and X: #{x} - #{value_x + x} != #{comp_x}"
         end
-        if value_y == comp_y 
+        if value_y == comp_y + y
           # All Good
         else
           print_visible_map
-          raise "2ISSUE WITH MAP AT Y: #{y} and X: #{x} - #{value_y} != #{comp_y}"
+          raise "2ISSUE WITH MAP AT Y Value: #{y} and X: #{x} - #{value_y} != #{comp_y + y}"
         end
       end
     end
@@ -295,6 +317,28 @@ class GLBackground
   def update player_x, player_y
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
+ 
+    puts "BEFORE EVERYTING"
+    print_visible_map
+    puts "BEFORE EVERYTING - V"
+    verify_visible_map
+    # offset_y = (VISIBLE_MAP_HEIGHT  / 2) + (EXTRA_MAP_HEIGHT / 2)
+    # offset_x = (VISIBLE_MAP_WIDTH  / 2) + (EXTRA_MAP_WIDTH / 2)
+
+    # raise "OFFSET IS OFF @y_top_tracker - offset_y != @gps_map_center_y: #{@y_top_tracker} - #{offset_y} != #{@gps_map_center_y}"       if @y_top_tracker     - offset_y != @gps_map_center_y
+    # raise "OFFSET IS OFF @y_bottom_tracker + offset_y != @gps_map_center_y: #{@y_bottom_tracker} + #{offset_y} != #{@gps_map_center_y}" if @y_bottom_tracker  + offset_y != @gps_map_center_y
+    # raise "OFFSET IS OFF @x_right_tracker - offset_x != @gps_map_center_x: #{@x_right_tracker} - #{offset_x} != #{@gps_map_center_x}"   if @x_right_tracker   - offset_x != @gps_map_center_x
+    # raise "OFFSET IS OFF @x_left_tracker + offset_x != @gps_map_center_x: #{@x_left_tracker} + #{offset_x} != #{@gps_map_center_x}"     if @x_left_tracker    + offset_x != @gps_map_center_x
+
+    puts "BEFORE EVERYTING"
+
+    puts "@gps_map_center_y: #{@gps_map_center_y}"
+    puts "@gps_map_center_x: #{@gps_map_center_x}"
+    # puts "OFFSET Y : #{offset_y}"
+    # puts "OFFSET X : #{offset_x}"
+
+
+
     # puts "MAP SIZE: #{@visible_map[0].length} X #{@visible_map.length}"
     # puts "SCREEN BACKGROUND UPDATE: #{player_x} - #{player_y}" if @time_alive % 100 == 0
     # puts "GPS    BACKGROUND UPDATE: #{@gps_map_center_x} - #{@gps_map_center_y}" if @time_alive % 100 == 0
@@ -337,9 +381,7 @@ class GLBackground
       # puts "TOP EDGE here: #{@y_top_tracker}"
       if @current_map_center_y < (@screen_map_height)
         # puts "CURRENT WAS LESS THAN EXTERNIOR: #{@current_map_center_y} - #{EXTERIOR_MAP_HEIGHT}"
-        @y_top_tracker += 1
-        @y_bottom_tracker += 1
-        @gps_map_center_y += 1
+        @gps_map_center_y += 1 # Should this be getting smaller... maybe amybe not
         # value = nil
         # @y_add_top_tracker << @y_top_tracker
         # Show edge of map
@@ -406,33 +448,59 @@ class GLBackground
     if @local_map_movement_y <= -@screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
       puts "ADDING IN ARRAY 2"
       if @current_map_center_y > 0
-        @y_top_tracker -= 1
-        @y_bottom_tracker -= 1
-        @gps_map_center_y    -= 1
-        # value = nil
-        if @y_bottom_tracker < 0
+        puts "PRE gps_map_center_y: #{@gps_map_center_y}"
+        @gps_map_center_y -= 1
+        puts "POST gps_map_center_y: #{@gps_map_center_y}"
+
+        # @tile_offset_y = VISIBLE_MAP_HEIGHT / 2 + EXTRA_MAP_HEIGHT / 2
+        # @tile_offset_x = VISIBLE_MAP_WIDTH/ 2 + EXTRA_MAP_WIDTH / 2
+
+        # Show edge of map 
+        if @gps_map_center_y - @tile_offset_y <= 0
           @visible_map.shift
           @visible_map.push Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { {'height' => 2, 'terrain_index' => 3 } }
-          # value = "EDGE MAP"
         else
+          puts "ADDING NORMALLY - #{@current_map_center_y} -#{ @tile_offset_y} > 0"
           @visible_map.shift
-
+          @visual_map_of_visible_to_map.shift
+          # @y_add_top_tracker << (player_y + y_offset)
           new_array = []
+          new_debug_array = []
           (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
-            x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
-            x_offset = x_offset - EXTRA_MAP_WIDTH / 2
-            # Flipping Y Axis when retrieving from map data
-            new_array << @map_data[( @global_map_height - @y_bottom_tracker )][@gps_map_center_x + x_offset]
+            x_index = @global_map_width - @gps_map_center_x + visible_width - @tile_offset_x
+            if x_index < @global_map_width && x_index >= 0
+              puts "(@global_map_height - ((@gps_map_center_y) - @tile_offset_y)) - 1"
+              puts "(#{@global_map_height} - ((#{@gps_map_center_y}) - #{@tile_offset_y})) - 1"
+              puts "#{(@global_map_height - ((@gps_map_center_y) - @tile_offset_y)) - 1}"
+              # - 1 for array indexing.
+              y_index = (@global_map_height - ((@gps_map_center_y) - @tile_offset_y)) - 1
+              new_array << @map_data[y_index][x_index]
+              new_debug_array << "#{y_index}, #{x_index}"
+            else
+              # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
+              new_debug_array << "N/A"
+              new_array << {'height' => 2, 'terrain_index' => 3 }
+            end
+            # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @global_map_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
 
+          # X is coming in on the wrong side?
+          # new_array.reverse!
+
           @visible_map.push(new_array)
+
+          @visual_map_of_visible_to_map.push(new_debug_array)
+
+          verify_visible_map
+
           # value = "INSIDE MAP"
         end
-        # puts "MAP ADDED at #{@current_map_center_y} w/ #{value} - top tracker: #{@y_bottom_tracker}"
+        # puts "MAP ADDED at #{@current_map_center_y} w/ - top tracker: #{@y_top_tracker}"
         @current_map_center_y = @current_map_center_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
         @local_map_movement_y = @local_map_movement_y + @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
       else
-        @local_map_movement_y = 0 if @local_map_movement_y < 0
+        # Without this, you stick to the edge of the map?
+        @local_map_movement_y = 0 if @local_map_movement_y > 0
       end
     end
 
@@ -445,9 +513,11 @@ class GLBackground
       puts "ADDING IN ARRAY 3 "
       print_visible_map
       if @current_map_center_x < (@screen_map_width)
-        @x_right_tracker += 1
-        @x_left_tracker  += 1
+        @x_right_tracker     += 1
+        @x_left_tracker      += 1
+        puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
         @gps_map_center_x    += 1
+        puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
 
         if @x_right_tracker > (@global_map_width)
           puts "ADDING IN RIGHT EDGE OF MAP"
@@ -459,25 +529,87 @@ class GLBackground
         else
           puts "ASDDING NORMAL MAP EDGE:"
 
-          debug_data = []
-          @visible_map.each_with_index do |row, index|
-            y_offset = index - (VISIBLE_MAP_HEIGHT  / 2) - (EXTRA_MAP_HEIGHT / 2)
+          @visible_map.each do |y_row|
+            y_row.pop
+          end
+          @visual_map_of_visible_to_map.each do |y_row|
+            y_row.pop
+          end
 
-            # Taking off first element in X
-            row.pop
-            test = @map_data[( @global_map_height - (@gps_map_center_y - y_offset) ) ][@global_map_height - @x_right_tracker]
-            debug_data << "#{( @global_map_height - (@gps_map_center_y - y_offset) )}, #{@global_map_height - @x_right_tracker}"
-            # puts "@x_right_tracker: #{@x_right_tracker}"
-            # puts "VISIBLE MAP #{index} X 0 == @map_data[#{( @global_map_height - (clean_gps_map_center_y - y_offset) ) }][#{@global_map_width - @x_right_tracker}]"
-            # puts "VISIBLE MAP #{index} X 0 == @map_data[( #{@global_map_height} - (#{@gps_map_center_y} + #{y_offset}) ) ][#{@global_map_height - @x_right_tracker}]"
-            # puts "VISIBLE MAP #{index} X 0  == @map_data[#{(@global_map_height - (@gps_map_center_y + index + y_offset))}][#{@global_map_height - @x_right_tracker}]"
-            # puts "   VISIBLE MAP #{index} X 0  == @map_data[(@global_map_height - (#{@gps_map_center_y} + #{index} + #{y_offset}))][@global_map_height - @x_right_tracker]"
-            row.unshift(test)
+          new_array       = []
+          new_debug_array = []
+          (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_w|
+            y_offset = visible_height  - VISIBLE_MAP_HEIGHT  / 2
+            y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
+            y_index = @global_map_height - @gps_map_center_y + y_offset
+            puts "y_index = @global_map_height - @gps_map_center_y + y_offset"
+            puts "#{y_index} =#{ @global_map_height} - #{@gps_map_center_y} + #{y_offset}"
+            # 134 != 135
+            # @gps_map_center_y: 124
+            # y_index = @global_map_height - @gps_map_center_y + y_offset
+            # puts "y_index = @global_map_height - @gps_map_center_y + y_offset"
+            # puts "#{y_index} = #{@global_map_height} - #{@gps_map_center_y} + #{y_offset}"
+
+            # GOT: |108, 104|
+            # EXPECTED 124, 104
+            if y_index < @global_map_height && y_index >= 0
+              # Flipping Y Axis when retrieving from map data
+              puts "GPS X #{@gps_map_center_x} and tracker right : #{@x_right_tracker} and offset? #{(VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)}"
+              puts "test1 #{@x_right_tracker}"
+              puts "test2 #{@global_map_width   - @x_right_tracker}"
+              puts "test3 #{@x_left_tracker}"
+              puts "test4 #{@global_map_width   - @x_left_tracker}"
+              new_array << @map_data[y_index][@global_map_width   - @x_right_tracker]
+              new_debug_array << "#{y_index}, #{@global_map_width - @x_right_tracker}"
+            else
+              # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
+              new_debug_array << "N/A"
+              new_array << {'height' => 2, 'terrain_index' => 3 }
+            end
+            # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @global_map_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
-          @visual_map_of_visible_to_map.each_with_index do |row, index|
-            row.pop
-            row.unshift(debug_data[index])
+
+          new_array.each_with_index do |element, index|
+            @visible_map[index].unshift(element)
           end
+          new_debug_array.each_with_index do |element, index|
+            @visual_map_of_visible_to_map[index].unshift(element)
+          end
+          # @visible_map.each_with_index do |row, index|
+
+          #   # x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
+          #   # x_offset = x_offset - EXTRA_MAP_WIDTH / 2
+          #   # x_index = @global_map_width - @gps_map_center_x + x_offset
+
+          #   y_offset = index - (VISIBLE_MAP_HEIGHT  / 2) - (EXTRA_MAP_HEIGHT / 2)
+          #   puts "y_offset = index - (VISIBLE_MAP_HEIGHT  / 2) - (EXTRA_MAP_HEIGHT / 2)"
+          #   puts "#{y_offset} = #{index} - #{(VISIBLE_MAP_HEIGHT  / 2)} - #{(EXTRA_MAP_HEIGHT / 2)}"
+
+          #   # Taking off first element in X
+          #   row.pop
+          #   # y_index is 1 too low?
+          #   # y_index 2 high.. x index 
+          #   # x index is + 2 too high
+          #   y_index = @global_map_height - (@gps_map_center_y - y_offset) 
+          #   puts "y_index = @global_map_height - (@gps_map_center_y + y_offset) "
+          #   puts "#{y_index} =  #{@global_map_height} - (#{@gps_map_center_y} + #{y_offset}) "
+          #   if y_index < @global_map_height && y_index >= 0
+          #     row.unshift(@map_data[y_index][@global_map_width - @x_right_tracker])
+          #     debug_data << "#{y_index}, #{@global_map_width - @x_right_tracker}"
+          #   else
+          #     row.unshift({'height' => 2, 'terrain_index' => 3 })
+          #     debug_data << "N/A"
+          #   end
+          #   # puts "@x_right_tracker: #{@x_right_tracker}"
+          #   # puts "VISIBLE MAP #{index} X 0 == @map_data[#{( @global_map_height - (clean_gps_map_center_y - y_offset) ) }][#{@global_map_width - @x_right_tracker}]"
+          #   # puts "VISIBLE MAP #{index} X 0 == @map_data[( #{@global_map_height} - (#{@gps_map_center_y} + #{y_offset}) ) ][#{@global_map_height - @x_right_tracker}]"
+          #   # puts "VISIBLE MAP #{index} X 0  == @map_data[#{(@global_map_height - (@gps_map_center_y + index + y_offset))}][#{@global_map_height - @x_right_tracker}]"
+          #   # puts "   VISIBLE MAP #{index} X 0  == @map_data[(@global_map_height - (#{@gps_map_center_y} + #{index} + #{y_offset}))][@global_map_height - @x_right_tracker]"
+          # end
+          # @visual_map_of_visible_to_map.each_with_index do |row, index|
+          #   row.pop
+          #   row.unshift(debug_data[index])
+          # end
           verify_visible_map
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ - top tracker: #{@y_top_tracker}"
@@ -491,30 +623,43 @@ class GLBackground
   
 
     if @local_map_movement_x <= -@screen_tile_width# * @width_scale * 1.1
-      puts "ADDING IN ARRAY 4"
-      if @current_map_center_x > 0
-        @x_right_tracker -= 1
-        @x_left_tracker  -= 1
-        # value = nil
-        if @x_left_tracker < 0
+    #   puts "ADDING IN ARRAY 4"
+    #   if @current_map_center_x > 0
+    #     @x_right_tracker -= 1
+    #     @x_left_tracker  -= 1
+    #     # value = nil
+    #     if @x_left_tracker < 0
 
-          @visible_map.each do |row|
-            row.shift
-            row.push({'height' => 2, 'terrain_index' => 3 })
-          end
-        else
-          @visible_map.each do |row|
-            row.shift
-            row.push({'height' => 1, 'terrain_index' => 1 + rand(2) })
-          end
-        end
-        @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-        @gps_map_center_x    -= 1
-      else
-        @local_map_movement_x = 0 if @local_map_movement_x < 0
-      end
+    #       @visible_map.each do |row|
+    #         row.shift
+    #         row.push({'height' => 2, 'terrain_index' => 3 })
+    #       end
+    #     else
+    #       @visible_map.each do |row|
+    #         row.shift
+    #         row.push({'height' => 1, 'terrain_index' => 1 + rand(2) })
+    #       end
+    #     end
+    #     @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+    #     @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+    #     @gps_map_center_x    -= 1
+    #   else
+    #     @local_map_movement_x = 0 if @local_map_movement_x < 0
+    #   end
     end
+
+    puts "aFTER EVERYTING"
+    verify_visible_map
+    puts "aFTER EVERYTING"
+
+    # offset_y = (VISIBLE_MAP_HEIGHT  / 2) + (EXTRA_MAP_HEIGHT / 2)
+    # offset_x = (VISIBLE_MAP_WIDTH  / 2) + (EXTRA_MAP_WIDTH / 2)
+
+    # raise "OFFSET IS OFF @y_top_tracker - offset_y != @gps_map_center_y: #{@y_top_tracker} - #{offset_y} != #{@gps_map_center_y}"       if @y_top_tracker     - offset_y != @gps_map_center_y
+    # raise "OFFSET IS OFF @y_bottom_tracker + offset_y != @gps_map_center_y: #{@y_bottom_tracker} + #{offset_y} != #{@gps_map_center_y}" if @y_bottom_tracker  + offset_y != @gps_map_center_y
+    # raise "OFFSET IS OFF @x_right_tracker - offset_x != @gps_map_center_x: #{@x_right_tracker} - #{offset_x} != #{@gps_map_center_x}"   if @x_right_tracker   - offset_x != @gps_map_center_x
+    # raise "OFFSET IS OFF @x_left_tracker + offset_x != @gps_map_center_x: #{@x_left_tracker} + #{offset_x} != #{@gps_map_center_x}"     if @x_left_tracker    + offset_x != @gps_map_center_x
+
   end
 
   
