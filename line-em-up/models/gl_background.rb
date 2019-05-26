@@ -602,7 +602,7 @@ class GLBackground
   
 
     if @local_map_movement_x <= -@screen_tile_width# * @width_scale * 1.1
-    #   puts "ADDING IN ARRAY 4"
+      puts "ADDING IN ARRAY 4"
     #   if @current_map_center_x > 0
     #     @x_right_tracker -= 1
     #     @x_left_tracker  -= 1
@@ -625,6 +625,67 @@ class GLBackground
     #   else
     #     @local_map_movement_x = 0 if @local_map_movement_x < 0
     #   end
+      print_visible_map
+      if @current_map_center_x < (@screen_map_width)
+        puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
+        @gps_map_center_x    -= 1
+        puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
+
+        if @gps_map_center_x - @gps_tile_offset_x < 0
+          puts "ADDING IN RIGHT EDGE OF MAP"
+          @visible_map.each do |row|
+            row.shift
+            row.push({'height' => 2, 'terrain_index' => 3 } )
+          end
+          @visual_map_of_visible_to_map.each do |y_row|
+            y_row.shift
+            y_row.push("N/A")
+          end
+
+        else
+          puts "ASDDING NORMAL MAP EDGE:"
+
+          @visible_map.each do |y_row|
+            y_row.shift
+          end
+          @visual_map_of_visible_to_map.each do |y_row|
+            y_row.shift
+          end
+
+          new_array       = []
+          new_debug_array = []
+          (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_w|
+            y_index = @global_map_height - @gps_map_center_y + visible_height - @gps_tile_offset_x
+            # y_offset = visible_height  - VISIBLE_MAP_HEIGHT  / V
+            # y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
+            # y_index = @global_map_height - @gps_map_center_y + y_offset
+            if y_index < @global_map_height && y_index >= 0
+              # IMPLEMENT!!!
+              x_index = (@global_map_width - ((@gps_map_center_x) - @gps_tile_offset_x)) - 1
+              new_array << @map_data[y_index][x_index]
+              new_debug_array << "#{y_index}, #{x_index}"
+            else
+              # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
+              new_debug_array << "N/A"
+              new_array << {'height' => 2, 'terrain_index' => 3 }
+            end
+            # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @global_map_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
+          end
+
+          new_array.each_with_index do |element, index|
+            @visible_map[index].push(element)
+          end
+          new_debug_array.each_with_index do |element, index|
+            @visual_map_of_visible_to_map[index].push(element)
+          end
+          verify_visible_map
+        end
+        @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+      else
+        # Without this, you stick to the edge of the map?
+        @local_map_movement_x = 0 if @local_map_movement_x > 0
+      end
     end
 
     puts "aFTER EVERYTING"
