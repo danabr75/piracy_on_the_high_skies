@@ -89,7 +89,7 @@ class Player < GeneralObject
     @mass = 180 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass # speed here?
-    @speed = 90 #/ (@mass / 2)
+    @speed = 0.01 #/ (@mass / 2)
     @rotation_speed = 2
   end
 

@@ -284,39 +284,55 @@ class GLBackground
     end
   end
 
+  # I think this is dependent on the map being square
   def verify_visible_map
-    puts "verify_visible_map"
-    y_length = @visual_map_of_visible_to_map.length - 1
-    x_length = @visual_map_of_visible_to_map[0].length - 1
-    raise "MAP IS TOO SHORT Y: #{@visual_map_of_visible_to_map.length} != #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT}" if @visual_map_of_visible_to_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
-    raise "MAP IS TOO SHORT X: #{@visual_map_of_visible_to_map[0].length} != #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH}" if  @visual_map_of_visible_to_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
-    element = @visual_map_of_visible_to_map[0][0]
-    int = 0
-    while element == "N/A"
-      int += 1
-      element = @visual_map_of_visible_to_map[int][0]
-    end
-    comp_y, do_nothing = element.split(', ').collect{|v| v.to_i}
-    (1..y_length).each do |y|
-      first_x_element = @visual_map_of_visible_to_map[y][0]
-      next if first_x_element == "N/A"
-      value_y, value_x = first_x_element.split(', ').collect{|v| v.to_i}
-      (1..x_length).each do |x|
-        element = @visual_map_of_visible_to_map[y][x]
-        next if element == "N/A"
-        do_nothing, comp_x = element.split(', ').collect{|v| v.to_i}
-        if value_x + x == comp_x
-          # All Good
-        else
-          print_visible_map
-          raise "1ISSUE WITH MAP AT X value Y: #{y} and X: #{x} -> #{value_x + x} != #{comp_x}"
+    if @map_inited
+      puts "verify_visible_map"
+      y_length = @visual_map_of_visible_to_map.length - 1
+      x_length = @visual_map_of_visible_to_map[0].length - 1
+      raise "MAP IS TOO SHORT Y: #{@visual_map_of_visible_to_map.length} != #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT}" if @visual_map_of_visible_to_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
+      raise "MAP IS TOO SHORT X: #{@visual_map_of_visible_to_map[0].length} != #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH}" if  @visual_map_of_visible_to_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
+      element = @visual_map_of_visible_to_map[0][0]
+      int = 0
+      outer_int = 0
+      while element == "N/A" && outer_int <= x_length
+        while element == "N/A" && int < @visual_map_of_visible_to_map.length - 1
+          int += 1
+          puts "OUTER INT #{outer_int}"
+          element = @visual_map_of_visible_to_map[int][outer_int]
         end
-        if value_y == comp_y + y - int
-          # All Good
-        else
-          print_visible_map
-          raise "2ISSUE WITH MAP AT Y Value Y: #{y} and X: #{x} -> #{value_y} != #{comp_y + y - int}"
+        puts "INCREMENTING OUTER INT"
+        outer_int += 1
+        puts "HERE: #{outer_int}"
+      end
+      if element && element != "N/A"
+        comp_y, do_nothing = element.split(', ').collect{|v| v.to_i}
+        (1..y_length).each do |y|
+          first_x_element = @visual_map_of_visible_to_map[y][0]
+          next if first_x_element == "N/A"
+          value_y, value_x = first_x_element.split(', ').collect{|v| v.to_i}
+          (1..x_length).each do |x|
+            element = @visual_map_of_visible_to_map[y][x]
+            next if element == "N/A"
+            do_nothing, comp_x = element.split(', ').collect{|v| v.to_i}
+            if value_x + x == comp_x
+              # All Good
+            else
+              print_visible_map
+              raise "1ISSUE WITH MAP AT X value Y: #{y} and X: #{x} -> #{value_x + x} != #{comp_x}"
+            end
+            if value_y == comp_y + y - int
+              # All Good
+            else
+              print_visible_map
+              raise "2ISSUE WITH MAP AT Y Value Y: #{y} and X: #{x} -> #{value_y} != #{comp_y + y - int}"
+            end
+          end
         end
+      else
+        puts "START MAP NOT VERIFIABLE"
+        print_visible_map
+        puts "END   MAP NOT VERIFIABLE"
       end
     end
   end
@@ -521,13 +537,11 @@ class GLBackground
       puts "ADDING IN ARRAY 3 "
       print_visible_map
       if @current_map_center_x < (@screen_map_width)
-        @x_right_tracker     += 1
-        @x_left_tracker      += 1
         puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
         @gps_map_center_x    += 1
         puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
 
-        if @x_right_tracker > (@global_map_width)
+        if @gps_map_center_x + @gps_tile_offset_x > (@global_map_width)
           puts "ADDING IN RIGHT EDGE OF MAP"
 
           @visible_map.each do |row|
@@ -552,28 +566,15 @@ class GLBackground
           new_array       = []
           new_debug_array = []
           (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_w|
-            y_offset = visible_height  - VISIBLE_MAP_HEIGHT  / 2
-            y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
-            y_index = @global_map_height - @gps_map_center_y + y_offset
-            puts "y_index = @global_map_height - @gps_map_center_y + y_offset"
-            puts "#{y_index} =#{ @global_map_height} - #{@gps_map_center_y} + #{y_offset}"
-            # 134 != 135
-            # @gps_map_center_y: 124
+            y_index = @global_map_height - @gps_map_center_y + visible_height - @gps_tile_offset_x
+            # y_offset = visible_height  - VISIBLE_MAP_HEIGHT  / V
+            # y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
             # y_index = @global_map_height - @gps_map_center_y + y_offset
-            # puts "y_index = @global_map_height - @gps_map_center_y + y_offset"
-            # puts "#{y_index} = #{@global_map_height} - #{@gps_map_center_y} + #{y_offset}"
-
-            # GOT: |108, 104|
-            # EXPECTED 124, 104
             if y_index < @global_map_height && y_index >= 0
-              # Flipping Y Axis when retrieving from map data
-              puts "GPS X #{@gps_map_center_x} and tracker right : #{@x_right_tracker} and offset? #{(VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)}"
-              puts "test1 #{@x_right_tracker}"
-              puts "test2 #{@global_map_width   - @x_right_tracker}"
-              puts "test3 #{@x_left_tracker}"
-              puts "test4 #{@global_map_width   - @x_left_tracker}"
-              new_array << @map_data[y_index][@global_map_width   - @x_right_tracker]
-              new_debug_array << "#{y_index}, #{@global_map_width - @x_right_tracker}"
+              # IMPLEMENT!!!
+              x_index = (@global_map_width - ((@gps_map_center_x) + @gps_tile_offset_x))
+              new_array << @map_data[y_index][x_index]
+              new_debug_array << "#{y_index}, #{x_index}"
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
