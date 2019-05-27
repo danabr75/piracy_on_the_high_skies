@@ -49,6 +49,7 @@ class GLBackground
   # Screen size changes. At 900x900, it should be 900 (screen_width) / 15 (VISIBLE_MAP_WIDTH) = 60 pixels
   # OpenGL size (-1..1) should be (1.0 / 15.0 (VISIBLE_MAP_WIDTH)) - 1.0 
 
+  # This is incorrect.. the map isn't 1..-1 in openGL.. it's more like 0.5..-0.5
   def convert_screen_to_opengl x, y, w = nil, h = nil
     # puts "convert_screen_to_opengl"
     # puts "#{x} - #{y} - #{w} - #{h}"
@@ -57,6 +58,8 @@ class GLBackground
     # puts "screen_to_opengl_increment: #{screen_to_opengl_increment_x} - #{screen_to_opengl_increment_y}"
     opengl_x   = (x * screen_to_opengl_increment_x) + 1
     opengl_y   = (y * screen_to_opengl_increment_y) + 1
+    # opengl_x  = opengl_x / 2.0
+    # opengl_y  = opengl_y / 2.0
     # opengl_x   = opengl_x * -1
     # opengl_y   = opengl_y * -1
     if w && h
@@ -734,7 +737,7 @@ class GLBackground
   
   # include Gl
   
-  def exec_gl player_x, player_y
+  def exec_gl player_x, player_y, projectiles = []
     player_x, player_y = [player_x.to_i, player_y.to_i]
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)
@@ -993,6 +996,16 @@ class GLBackground
           glBindTexture(GL_TEXTURE_2D, info.tex_name)
           # -.5 ... +.5
           # puts "Z: #{z}"
+          # Center light added in
+          # lights = [{pos: [0,0], brightness: 0.2, radius: 0.3}]
+          lights = [{pos: [0,0], brightness: 0.2, radius: 0.3}]
+          # Too slow.. FPS droppage
+          # projectiles.each do |p|
+          #   # Because the screen isn't 1..-1, we're dropping the x and y values by half
+          #   results = convert_screen_to_opengl(p.x, p.y)
+          #   lights << {pos: [(results[:o_x] * -1) / 2.0, (results[:o_y]) / 2.0], brightness: 0.2, radius: 0.1}
+          # end
+
           if @enable_dark_mode
             default_colors = [0.1, 0.1, 0.1, 0.1]
           else
@@ -1001,25 +1014,25 @@ class GLBackground
           glBegin(GL_TRIANGLE_STRIP)
             glTexCoord2d(info.left, info.top)
             vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
             glTexCoord2d(info.left, info.bottom)
             vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
             glTexCoord2d(info.right, info.top)
             vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
             glTexCoord2d(info.right, info.bottom)
             vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
           glEnd
