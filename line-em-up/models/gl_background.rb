@@ -68,15 +68,6 @@ class GLBackground
     end
   end
 
-  def clamp(comp_value, min, max)
-    if comp_value > min && comp_value < max
-      return comp_value
-    elsif comp_value < min
-      return min
-    else
-      return max
-    end
-  end
 
   def initialize player_x, player_y, screen_width, screen_height, width_scale, height_scale
     @time_alive = 0
@@ -141,7 +132,7 @@ class GLBackground
 
     # increment_x = (ratio / middle_x) * 0.97
     # # The zoom issue maybe, not quite sure why we need the Y offset.
-    # increment_y = (1.0 / middle_y) * 0.75
+    # increment_y = (1.0 / middle_y) * 0.55
 
     @scrolls = 0.0
     @visible_map = Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { nil } }
@@ -854,13 +845,21 @@ class GLBackground
     #   glLightfv(GL_LIGHT1, GL_DIFFUSE, [1, 1, 1, 1])
     #   glLightfv(GL_LIGHT1, GL_POSITION, [100, 100, 100,1])
   
-    @enable_dark_mode = true
+    # @enable_dark_mode = true
+    @enable_dark_mode = false
+
     if @enable_dark_mode
       glLightfv(GL_LIGHT6, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
       glLightfv(GL_LIGHT6, GL_DIFFUSE, [0.2, 0.2, 0.2, 1])
       # Dark lighting effect?
       glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
       glEnable(GL_LIGHT6)
+    else
+      # glLightfv(GL_LIGHT6, GL_AMBIENT, [1, 1, 1, 1])
+      # glLightfv(GL_LIGHT6, GL_DIFFUSE, [1, 1, 1, 1])
+      # # Dark lighting effect?
+      # glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
+      # glEnable(GL_LIGHT6)
     end
 
     @test = false
@@ -994,59 +993,33 @@ class GLBackground
           glBindTexture(GL_TEXTURE_2D, info.tex_name)
           # -.5 ... +.5
           # puts "Z: #{z}"
+          if @enable_dark_mode
+            default_colors = [0.1, 0.1, 0.1, 0.1]
+          else
+            default_colors = [1, 1, 1, 1]
+          end
           glBegin(GL_TRIANGLE_STRIP)
-            # Apply scale factor here?
-            # show_debug = false
-            # if y_index == 0 && x_index == 0
-            #   puts "TOP RIGHT"
-            #   show_debug = true
-            # elsif y_index == y_max && x_index == x_max
-            #   puts "BOTTOM LEFT"
-            #   show_debug = true
-            # elsif y_index == 0 && x_index == x_max
-            #   puts "TOP LEFT"
-            #   show_debug = true
-            # elsif y_index == y_max && x_index == 0
-            #   puts "BOTTOM RIGHT"
-            #   show_debug = true
-            # end
             glTexCoord2d(info.left, info.top)
             vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
-            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
-              colors = [0.7, 0.7, 0.7, 0.1]
-            else
-              colors = [0.3, 0.3, 0.3, 0.1]
-            end
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
             glTexCoord2d(info.left, info.bottom)
             vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
-            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
-              colors = [0.7, 0.7, 0.7, 0.1]
-            else
-              colors = [0.3, 0.3, 0.3, 0.1]
-            end
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
             glTexCoord2d(info.right, info.top)
             vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
-            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
-              colors = [0.7, 0.7, 0.7, 0.1]
-            else
-              colors = [0.3, 0.3, 0.3, 0.1]
-            end
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
             glTexCoord2d(info.right, info.bottom)
             vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
-            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
-              colors = [0.7, 0.7, 0.7, 0.1]
-            else
-              colors = [0.3, 0.3, 0.3, 0.1]
-            end
+            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
           glEnd
@@ -1054,4 +1027,44 @@ class GLBackground
       end
     end
   end
+ 
+
+
+
+
+  # All coords are in openGL
+  # Use light attenuation
+  # def apply_lighting colors_array, vertex = [], lights = [{pos: [0,0], brightness: 0.1, radius: 0.3}, {pos: [0,0], brightness: 0.3, radius: 0.1}]
+  def apply_lighting colors_array, vertex = [], lights = [{pos: [0,0], brightness: 0.2, radius: 0.3}]
+    # Operates in screen coords
+    # Gosu.distance(@x, @y, object.x, object.y) < self.get_radius + object.get_radius
+    # Wee ned to operate in opengl coords
+    lights.each do |light|
+      distance = Gosu.distance(vertex[0], vertex[1], light[:pos][0], light[:pos][1])
+
+      if distance <= light[:radius]
+        # Attenuation here
+        new_brightness_factor = light[:brightness] - (light[:brightness] / (light[:radius] / distance))
+        colors_array[0] = clamp_brightness(colors_array[0] + new_brightness_factor)
+        colors_array[1] = clamp_brightness(colors_array[1] + new_brightness_factor)
+        colors_array[2] = clamp_brightness(colors_array[2] + new_brightness_factor)
+      end
+    end
+    return colors_array
+  end
+
+  def clamp_brightness(comp_value)
+    return clamp(comp_value, 0, 1)
+  end
+
+  def clamp(comp_value, min, max)
+    if comp_value >= min && comp_value <= max
+      return comp_value
+    elsif comp_value < min
+      return min
+    else
+      return max
+    end
+  end
+
 end
