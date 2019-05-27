@@ -1011,21 +1011,44 @@ class GLBackground
             #   show_debug = true
             # end
             glTexCoord2d(info.left, info.top)
-            # puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
-            glColor4d(0.3, 0.3, 0.3, 0.1)
-            glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left'])
+            vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
+            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
+              colors = [0.7, 0.7, 0.7, 0.1]
+            else
+              colors = [0.3, 0.3, 0.3, 0.1]
+            end
+            glColor4d(colors[0], colors[1], colors[2], colors[3])
+            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
             glTexCoord2d(info.left, info.bottom)
-            # puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
-            glColor4d(0.3, 0.3, 0.3, 0.1)
-            glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left'])
+            vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
+            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
+              colors = [0.7, 0.7, 0.7, 0.1]
+            else
+              colors = [0.3, 0.3, 0.3, 0.1]
+            end
+            glColor4d(colors[0], colors[1], colors[2], colors[3])
+            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
             glTexCoord2d(info.right, info.top)
-            # puts "V2 VERT THREE: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y}" if show_debug
-            glColor4d(0.3, 0.3, 0.3, 0.1)
-            glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right'])
+            vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
+            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
+              colors = [0.7, 0.7, 0.7, 0.1]
+            else
+              colors = [0.3, 0.3, 0.3, 0.1]
+            end
+            glColor4d(colors[0], colors[1], colors[2], colors[3])
+            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
             glTexCoord2d(info.right, info.bottom)
-            # puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
-            glColor4d(0.3, 0.3, 0.3, 0.1)
-            glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right'])
+            vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
+            if vert_pos[0] >= -0.2 && vert_pos[0] <= 0.2 && vert_pos[1] >= -0.2 && vert_pos[1] <= 0.2 
+              colors = [0.7, 0.7, 0.7, 0.1]
+            else
+              colors = [0.3, 0.3, 0.3, 0.1]
+            end
+            glColor4d(colors[0], colors[1], colors[2], colors[3])
+            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
           glEnd
         end
       end
