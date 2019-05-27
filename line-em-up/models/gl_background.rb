@@ -23,7 +23,7 @@ class GLBackground
   EXTERIOR_MAP_HEIGHT = 200
   EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
-  VISIBLE_MAP_WIDTH = 16
+  VISIBLE_MAP_WIDTH = 26
   # outside of view padding
 
   EXTRA_MAP_WIDTH   = 2
@@ -31,7 +31,7 @@ class GLBackground
 
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   # 15 tiles should be on screen
-  VISIBLE_MAP_HEIGHT = 16
+  VISIBLE_MAP_HEIGHT = 26
   # outside of view padding
   EXTRA_MAP_HEIGHT   = 2
   # Scrolling speed - higher it is, the slower the map moves
@@ -65,6 +65,16 @@ class GLBackground
       return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
     else
       return {o_x: opengl_x, o_y: opengl_y}
+    end
+  end
+
+  def clamp(comp_value, min, max)
+    if comp_value > min && comp_value < max
+      return comp_value
+    elsif comp_value < min
+      return min
+    else
+      return max
     end
   end
 
@@ -198,6 +208,8 @@ class GLBackground
       init_map
     end
 
+    @debug = false
+
     # puts "@map_data : #{@map_data[0][0]}" 
     # @visible_map = []
     # puts "TOP TRACKERL = player_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)"
@@ -272,21 +284,23 @@ class GLBackground
   end
 
   def print_visible_map
-    puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
-    @visual_map_of_visible_to_map.each do |y_row|
-      output = "|"
-      y_row.each do |x_row|
-        output << x_row
-        output << '|'
+    if @debug
+      puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
+      @visual_map_of_visible_to_map.each do |y_row|
+        output = "|"
+        y_row.each do |x_row|
+          output << x_row
+          output << '|'
+        end
+        puts output
+        puts "_" * 80
       end
-      puts output
-      puts "_" * 80
     end
   end
 
   # I think this is dependent on the map being square
   def verify_visible_map
-    if @map_inited
+    if @map_inited && @debug
 
       @visual_map_of_visible_to_map.each_with_index do |y_row, index|
         print_visible_map if y_row.nil? || y_row.empty? || y_row.length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1
@@ -731,10 +745,21 @@ class GLBackground
   
   def exec_gl player_x, player_y
     player_x, player_y = [player_x.to_i, player_y.to_i]
-
-    
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)
+
+        # radius
+        # The radius of the sphere.
+        # slices
+        # The number of subdivisions around the Z axis (similar to lines of longitude).
+        # stacks
+        # The number of subdivisions along the Z axis (similar to lines of latitude).
+    # glMatrixMode(GL_MODELVIEW);
+    # glLoadIdentity
+    # # glutSolidSphere(600,1,2)
+    # glutSolidSphere(1.0, 20, 16)
+
+    
     # glEnable(GL_BLEND)
 
     glMatrixMode(GL_PROJECTION)
@@ -744,7 +769,11 @@ class GLBackground
 
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity
-    glTranslated(0, 0, -4)
+
+    # // Move the scene back so we can see everything
+    # glTranslatef( 0.0f, 0.0f, -100.0f );
+    # -10 is as far back as we can go.
+    glTranslated(0, 0, -5)
 
 
 #     # TEST
@@ -788,7 +817,6 @@ class GLBackground
 # glEnd
 
     # END TEST
-    opengl_offsets = []
 
     # This is the width and height of each individual terrain segments.
                             # @screen_movement_increment_x == 8 
@@ -816,232 +844,191 @@ class GLBackground
     # puts "OFF_Y: #{@local_map_movement_y / (@screen_tile_height ) }= #{@local_map_movement_y} / (#{@screen_tile_height} )" 
     # offs_x = offs_x + 0.1
 
-    glEnable(GL_TEXTURE_2D)
-    tile_row_y_max = @visible_map.length - 1 #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
-    @visible_map.each_with_index do |y_row, y_index|
-      tile_row_x_max = y_row.length - 1# y_row.length - 1 - (EXTRA_MAP_WIDTH)
-      y_row.each_with_index do |x_element, x_index|
+    # Cool lighting
+    # glEnable(GL_LIGHTING)
 
-        # splits across middle 0  -7..0..7
-        new_x_index = x_index - (tile_row_x_max / 2.0)
-        new_y_index = y_index - (tile_row_y_max / 2.0)
+    #   glLightfv(GL_LIGHT0, GL_AMBIENT, [0.5, 0.5, 0.5, 1])
+    #   glLightfv(GL_LIGHT0, GL_DIFFUSE, [1, 1, 1, 1])
+    #   glLightfv(GL_LIGHT0, GL_POSITION, [1, 1, 1,1])
+    #   glLightfv(GL_LIGHT1, GL_AMBIENT, [0.5, 0.5, 0.5, 1])
+    #   glLightfv(GL_LIGHT1, GL_DIFFUSE, [1, 1, 1, 1])
+    #   glLightfv(GL_LIGHT1, GL_POSITION, [100, 100, 100,1])
+  
+    @enable_dark_mode = true
+    if @enable_dark_mode
+      glLightfv(GL_LIGHT6, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
+      glLightfv(GL_LIGHT6, GL_DIFFUSE, [0.2, 0.2, 0.2, 1])
+      # Dark lighting effect?
+      glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
+      glEnable(GL_LIGHT6)
+    end
 
-        # Screen coords width and height here.
-        screen_x = @screen_tile_width   * new_x_index
-        screen_y = @screen_tile_height  * new_y_index
-
-        result = convert_screen_to_opengl(screen_x, screen_y, @screen_tile_width, @screen_tile_height)
-        # puts "X and Y INDEX: #{x_index} - #{y_index}"
-        # puts "RESULT HERE: #{result}"
-        opengl_coord_x = result[:o_x]
-        opengl_coord_y = result[:o_y]
-        # opengl_coord_y = opengl_coord_y * -1
-        # opengl_coord_x = opengl_coord_x * -1
-        opengl_increment_x = result[:o_w]
-        opengl_increment_y = result[:o_h]
+    @test = false
+    if @test
 
 
 
-        # # convert to 
-        # # split across center index, divided by half of center abs / 2
-        # # (-7 / 3.5) / 2.0
-        # # (-1 / 3.5) / 2.0
-        # # -1
-        # opengl_coord_x = (new_x_index / (tile_row_x_max / 2.0)) / 2
-        # opengl_coord_y = (new_y_index / (tile_row_y_max / 2.0)) / 2
-        # #we're reading the map as left to right, top down. So comes out as: -1, -1 (bottom left), but needs to be -1, 1 (TOP LEFT)
-        # opengl_coord_y = opengl_coord_y * -1
-        # opengl_coord_x = opengl_coord_x * -1
+      # glEnable(GL_LIGHT0)
+      # glEnable(GL_LIGHT1)
+      if true
+
+        glLightfv(GL_LIGHT1, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+        glLightfv(GL_LIGHT1, GL_POSITION, [0, 0, 1.0, 1.0])
+        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.5)
+        glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5)
+        glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2)
 
 
-        
+        glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15.0)
+        glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, [-1.0, -1.0, 0.0])
+        glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0)
+        glEnable(GL_LIGHT1)
+      end
+      glMaterialfv(GL_FRONT, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+      glMaterialfv(GL_FRONT, GL_SHININESS, [50.0])
 
-        # z = x_element['height']
-        # z = 0.5# - (0.2 / (x_element['height']))
-        #testing
-        info =  @infos[x_element['terrain_index']]
-        # z = x_element['height']
-        if x_element['corner_heights']
-          z = x_element['corner_heights']
-        else
-          z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
+
+      glShadeModel( GL_SMOOTH )
+
+      # // Renormalize scaled normals so that lighting still works properly.
+      glEnable( GL_NORMALIZE )
+      glEnable(GL_COLOR_MATERIAL)
+
+     glBegin(GL_TRIANGLES);
+      # glTexCoord2d(info.left, info.top)
+      glColor4d(0, 0, 1, 1)
+      glVertex3f(-0.2, 0.2, 1); 
+      # glTexCoord2d(info.left, info.bottom)
+      glColor4d(0, 1, 0, 1)
+      glVertex3f(-0.2, -0.2, 1); 
+      # glTexCoord2d(info.right, info.top)
+      glColor4d(1, 0, 1, 1)
+      glVertex3f(0.2, 0, 3); 
+      # glTexCoord2d(info.right, info.bottom)
+      # glColor4d(1, 1, 1, 1)
+      # glVertex3f(0.5, -0.5, 3); 
+     glEnd
+   end
+
+    # START Documentation!
+    #                                    # 3 These change colors. 
+    #                                       # RGBA - The alpha parameter is a number between 0.0 (fully transparent) and 1.0 (fully opaque).
+    #   glLightfv(GL_LIGHT2, GL_AMBIENT, [1, 1, 1, 1])
+    #                                    # 3 These change colors. 
+    #                                       # RGBA - The alpha parameter is a number between 0.0 (fully transparent) and 1.0 (fully opaque).
+    #   glLightfv(GL_LIGHT2, GL_DIFFUSE, [1, 1, 1, 1])
+    #   glLightfv(GL_LIGHT2, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0]);
+
+    #   # The vector has values x, y, z, and w.  If w is 1.0, we are defining a light at a point in space.  If w is 0.0, the light is at infinity.  As an example, try adding this code right after you enable the light:
+    #   # w is not really a dimension but a scaling factor (used to get some matrix stuff easier done - means you can calculate translations by matrix multiplication instead of an addition)
+    #   # kartesian coordiantes its:
+    #   # x’=x/w
+    #   # y’=y/w
+    #   # z’=z/w
+    #   glLightfv(GL_LIGHT2, GL_POSITION, [0, 0,0,1])
+
+    #   glEnable(GL_LIGHT2)
+    # END Documentation
+
+
+    # SET MAX LIGHTS HERE
+    # glGetIntegerv( GL_MAX_LIGHTS, 1 );
+
+    if !@test
+      glEnable(GL_TEXTURE_2D)
+      tile_row_y_max = @visible_map.length - 1 #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
+      @visible_map.each_with_index do |y_row, y_index|
+        tile_row_x_max = y_row.length - 1# y_row.length - 1 - (EXTRA_MAP_WIDTH)
+        y_row.each_with_index do |x_element, x_index|
+
+          # splits across middle 0  -7..0..7
+          new_x_index = x_index - (tile_row_x_max / 2.0)
+          new_y_index = y_index - (tile_row_y_max / 2.0)
+
+          # Screen coords width and height here.
+          screen_x = @screen_tile_width   * new_x_index
+          screen_y = @screen_tile_height  * new_y_index
+
+          result = convert_screen_to_opengl(screen_x, screen_y, @screen_tile_width, @screen_tile_height)
+          # puts "X and Y INDEX: #{x_index} - #{y_index}"
+          # puts "RESULT HERE: #{result}"
+          opengl_coord_x = result[:o_x]
+          opengl_coord_y = result[:o_y]
+          # opengl_coord_y = opengl_coord_y * -1
+          # opengl_coord_x = opengl_coord_x * -1
+          opengl_increment_x = result[:o_w]
+          opengl_increment_y = result[:o_h]
+
+
+
+          # # convert to 
+          # # split across center index, divided by half of center abs / 2
+          # # (-7 / 3.5) / 2.0
+          # # (-1 / 3.5) / 2.0
+          # # -1
+          # opengl_coord_x = (new_x_index / (tile_row_x_max / 2.0)) / 2
+          # opengl_coord_y = (new_y_index / (tile_row_y_max / 2.0)) / 2
+          # #we're reading the map as left to right, top down. So comes out as: -1, -1 (bottom left), but needs to be -1, 1 (TOP LEFT)
+          # opengl_coord_y = opengl_coord_y * -1
+          # opengl_coord_x = opengl_coord_x * -1
+
+
+          
+
+          # z = x_element['height']
+          # z = 0.5# - (0.2 / (x_element['height']))
+          #testing
+          info =  @infos[x_element['terrain_index']]
+          # z = x_element['height']
+          if x_element['corner_heights']
+            z = x_element['corner_heights']
+          else
+            z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
+          end
+
+          # z = get_surrounding_average_tile_height(x_index, y_index)
+          # puts "puts USING Z: #{z}"
+          # info =  @infos[x_index % 2]
+          # info = @info
+
+          glBindTexture(GL_TEXTURE_2D, info.tex_name)
+          # -.5 ... +.5
+          # puts "Z: #{z}"
+          glBegin(GL_TRIANGLE_STRIP)
+            # Apply scale factor here?
+            # show_debug = false
+            # if y_index == 0 && x_index == 0
+            #   puts "TOP RIGHT"
+            #   show_debug = true
+            # elsif y_index == y_max && x_index == x_max
+            #   puts "BOTTOM LEFT"
+            #   show_debug = true
+            # elsif y_index == 0 && x_index == x_max
+            #   puts "TOP LEFT"
+            #   show_debug = true
+            # elsif y_index == y_max && x_index == 0
+            #   puts "BOTTOM RIGHT"
+            #   show_debug = true
+            # end
+            glTexCoord2d(info.left, info.top)
+            # puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
+            glColor4d(0.3, 0.3, 0.3, 0.1)
+            glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left'])
+            glTexCoord2d(info.left, info.bottom)
+            # puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
+            glColor4d(0.3, 0.3, 0.3, 0.1)
+            glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left'])
+            glTexCoord2d(info.right, info.top)
+            # puts "V2 VERT THREE: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y}" if show_debug
+            glColor4d(0.3, 0.3, 0.3, 0.1)
+            glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right'])
+            glTexCoord2d(info.right, info.bottom)
+            # puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
+            glColor4d(0.3, 0.3, 0.3, 0.1)
+            glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right'])
+          glEnd
         end
-
-        # z = get_surrounding_average_tile_height(x_index, y_index)
-        # puts "puts USING Z: #{z}"
-        # info =  @infos[x_index % 2]
-        # info = @info
-
-        glBindTexture(GL_TEXTURE_2D, info.tex_name)
-        # -.5 ... +.5
-        # puts "Z: #{z}"
-        glBegin(GL_TRIANGLE_STRIP)
-          # Apply scale factor here?
-          # show_debug = false
-          # if y_index == 0 && x_index == 0
-          #   puts "TOP RIGHT"
-          #   show_debug = true
-          # elsif y_index == y_max && x_index == x_max
-          #   puts "BOTTOM LEFT"
-          #   show_debug = true
-          # elsif y_index == 0 && x_index == x_max
-          #   puts "TOP LEFT"
-          #   show_debug = true
-          # elsif y_index == y_max && x_index == 0
-          #   puts "BOTTOM RIGHT"
-          #   show_debug = true
-          # end
-          glTexCoord2d(info.left, info.top)
-          # puts "V2 VERT ONE: #{opengl_coord_x} X #{opengl_coord_y}" if show_debug
-          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left'])
-          glTexCoord2d(info.left, info.bottom)
-          # puts "V2 VERT TWO: #{opengl_coord_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
-          glVertex3d(opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left'])
-          glTexCoord2d(info.right, info.top)
-          # puts "V2 VERT THREE: #{opengl_coord_x + @opengl_increment_x} X #{opengl_coord_y}" if show_debug
-          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right'])
-          glTexCoord2d(info.right, info.bottom)
-          # puts "V2 VERT FOUR: #{opengl_coord_x + opengl_increment_x} X #{opengl_coord_y + opengl_increment_y}" if show_debug
-          glVertex3d(opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right'])
-        glEnd
       end
     end
-    # puts opengl_offsets
-    # raise "STOP HERE"
   end
-
-
-
-
-  # Need to calc corners of tile, not just the whole tile height!
-  # [
-  #   BOTTOM RIGHT VERT,
-  #   TOP RIGHT VERT,
-  #   TOP LEFT VERT,
-  #   BOTTOM LEFT VERT
-  # ]
-  # def get_surrounding_average_tile_height x_index, y_index, x_max = nil, y_max = nil
-  #   if @map_inited
-  #     y_max = y_max || VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
-  #     x_max = x_max || VISIBLE_MAP_WIDTH  + EXTRA_MAP_WIDTH
-
-  #     heights = @visible_map[y_index][x_index]['calculated_heights']
-  #     if heights && heights.any?
-  #       return heights
-  #     # Don't calculate height for edges of the map.. they don't have neighbors to compare
-  #     # Assume are map boundaries, high height
-  #     elsif x_index == 0 || y_index == 0 || x_index == x_max - 1 || y_index == y_max - 1
-  #       return [2, 2, 2, 2]
-  #     elsif x_index == 1 || y_index == 1 || x_index == x_max - 2 || y_index == y_max - 2
-  #       return [2, 2, 2, 2]
-  #     else
-  #       heights = []
-  #       # bottom_right_corner
-  #       local_heights = []
-  #       tile_num = 0
-  #       # Current
-  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # below
-  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index - 1][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # below right
-  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-  #         local_heights << @visible_map[y_index - 1][x_index + 1]['height']
-  #         tile_num += 1
-  #       end
-  #       # right
-  #       if y_index > 0 && y_index  < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-  #         local_heights << @visible_map[y_index][x_index + 1]['height']
-  #         tile_num += 1
-  #       end
-
-  #       heights << local_heights.sum / tile_num.to_f
-
-  #       # TOP RIGHT
-  #       local_heights = []
-  #       tile_num = 0
-  #       # Current
-  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # top
-  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index + 1][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # top right
-  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-  #         local_heights << @visible_map[y_index + 1][x_index + 1]['height']
-  #         tile_num += 1
-  #       end
-  #       # right
-  #       if y_index > 0 && y_index < y_max && x_index + 1 > 0 && x_index + 1 < x_max
-  #         local_heights << @visible_map[y_index][x_index + 1]['height']
-  #         tile_num += 1
-  #       end
-  #       heights << local_heights.sum / tile_num.to_f
-
-  #       # TOP LEFT 
-  #       local_heights = []
-  #       tile_num = 0
-  #       # Current
-  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # top
-  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index + 1][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # top left
-  #       if y_index + 1 > 0 && y_index + 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-  #         local_heights << @visible_map[y_index + 1][x_index - 1]['height']
-  #         tile_num += 1
-  #       end
-  #       # left
-  #       if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-  #         local_heights << @visible_map[y_index][x_index - 1]['height']
-  #         tile_num += 1
-  #       end
-  #       heights << local_heights.sum / tile_num.to_f
-
-  #       # BOTTOM LEFT 
-  #       local_heights = []
-  #       tile_num = 0
-  #       # Current
-  #       if y_index > 0 && y_index < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # bottom
-  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index > 0 && x_index < x_max
-  #         local_heights << @visible_map[y_index - 1][x_index]['height']
-  #         tile_num += 1
-  #       end
-  #       # bottom left
-  #       if y_index - 1 > 0 && y_index - 1 < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-  #         local_heights << @visible_map[y_index - 1][x_index - 1]['height']
-  #         tile_num += 1
-  #       end
-  #       # left
-  #       if y_index > 0 && y_index < y_max && x_index - 1 > 0 && x_index - 1 < x_max
-  #         local_heights << @visible_map[y_index][x_index - 1]['height']
-  #         tile_num += 1
-  #       end
-  #       heights << local_heights.sum / tile_num.to_f
-  #       @visible_map[y_index][x_index]['calculated_heights'] = heights
-  #       return heights
-  #     end
-  #   else
-  #     return [1, 1, 1, 1]
-  #   end
-  # end
-
 end

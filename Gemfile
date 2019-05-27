@@ -15,7 +15,7 @@ gem 'luit'
 # FORKED from opengl (0.10.0)
 # gem 'danabr75-opengl'
 gem 'opengl'
-# gem 'ashton'
+# gem 'ashton', '0.1.6'
 
 # gem 'opengl-bindings'
 # gem 'ashton'
