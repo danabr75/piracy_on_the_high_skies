@@ -23,16 +23,20 @@ class GLBackground
   EXTERIOR_MAP_HEIGHT = 200
   EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
-  VISIBLE_MAP_WIDTH = 26
+  # HAVE TO BE EVEN NUMBERS
+  VISIBLE_MAP_WIDTH = 6
   # outside of view padding
 
+  # HAVE TO BE EVEN NUMBERS
   EXTRA_MAP_WIDTH   = 2
   # POINTS_Y = 7
 
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   # 15 tiles should be on screen
-  VISIBLE_MAP_HEIGHT = 26
+  # HAVE TO BE EVEN NUMBERS
+  VISIBLE_MAP_HEIGHT = 6
   # outside of view padding
+  # HAVE TO BE EVEN NUMBERS
   EXTRA_MAP_HEIGHT   = 2
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
@@ -50,23 +54,40 @@ class GLBackground
   # OpenGL size (-1..1) should be (1.0 / 15.0 (VISIBLE_MAP_WIDTH)) - 1.0 
 
   # This is incorrect.. the map isn't 1..-1 in openGL.. it's more like 0.5..-0.5
+  # 225.0, 675.0, 450.0 , 450.0
+  # screen_to_opengl_increment: -0.0022222222222222222 - -0.0022222222222222222
+  # outputs: {:o_x=>0.5, :o_y=>-0.5, :o_w=>-1.0, :o_h=>-1.0}
+
+
+  #   convert_screen_to_opengl
+  # 225.0, 675.0, 450.0 , 450.0
+  # RETURNING: {:o_x=>-0.5, :o_y=>0.5, :o_w=>0.0, :o_h=>0.0}
   def convert_screen_to_opengl x, y, w = nil, h = nil
     # puts "convert_screen_to_opengl"
+    # puts "#{x}, #{y}, #{w} , #{h}"
+    # puts "convert_screen_to_opengl"
     # puts "#{x} - #{y} - #{w} - #{h}"
-    screen_to_opengl_increment_x = (-2.0 / (@screen_width.to_f))
-    screen_to_opengl_increment_y = (-2.0 / (@screen_height.to_f))
-    # puts "screen_to_opengl_increment: #{screen_to_opengl_increment_x} - #{screen_to_opengl_increment_y}"
-    opengl_x   = (x * screen_to_opengl_increment_x) + 1
-    opengl_y   = (y * screen_to_opengl_increment_y) + 1
+    # convert 0..900 to 0..2 (-1..1) 
+    # 450 / 900.0
+    # screen_to_opengl_increment_x = (-2.0 / (@screen_width.to_f))
+    # screen_to_opengl_increment_y = (-2.0 / (@screen_height.to_f))
+    # opengl_x   = (x * screen_to_opengl_increment_x) + 1
+    # opengl_y   = (y * screen_to_opengl_increment_y) + 1
+    opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
+    opengl_y   = ((y / (@screen_height.to_f)) * 2.0) - 1
     # opengl_x  = opengl_x / 2.0
     # opengl_y  = opengl_y / 2.0
     # opengl_x   = opengl_x * -1
     # opengl_y   = opengl_y * -1
     if w && h
-      open_gl_w  = (w * screen_to_opengl_increment_x)
-      open_gl_h  = (h * screen_to_opengl_increment_y)
+      open_gl_w  = ((w / (@screen_width.to_f )) * 2.0)
+      # open_gl_w = open_gl_w - opengl_x
+      open_gl_h  = ((h / (@screen_height.to_f )) * 2.0)
+      # open_gl_h = open_gl_h - opengl_y
+      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}}"
       return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
     else
+      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y}}"
       return {o_x: opengl_x, o_y: opengl_y}
     end
   end
@@ -158,7 +179,11 @@ class GLBackground
     # Global units
     @gps_map_center_x =  player_x ? (player_x / (@screen_tile_width)).round : 0
     @gps_map_center_y =  player_y ? (player_y / (@screen_tile_height)).round : 0
-    @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/desert_v2_small.txt").first)
+    @map_name = "desert_v2_small"
+    @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
+    @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
+    @active_map_objects = []
+
     @terrains = @map["terrains"]
     @images = []
     @infos = []
@@ -220,29 +245,9 @@ class GLBackground
     @gps_map_center_x =  (@current_map_center_x / (@screen_tile_width)).round
     @gps_map_center_y =  (@current_map_center_y / (@screen_tile_height)).round
 
-    # @y_top_tracker    = @gps_map_center_y + (VISIBLE_MAP_HEIGHT / 2) + (EXTRA_MAP_HEIGHT / 2)
-    # # Fix map tester, then uncomment
-    # @y_bottom_tracker = (@gps_map_center_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2)) - 1
-    # # @y_bottom_tracker = (@gps_map_center_y - (VISIBLE_MAP_HEIGHT / 2) - (EXTRA_MAP_HEIGHT / 2))
-
-    # @x_right_tracker    = @gps_map_center_x + (VISIBLE_MAP_WIDTH / 2) + (EXTRA_MAP_WIDTH / 2)
-    # # @x_left_tracker     = (@gps_map_center_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2))
-    # # Fix map tester, then uncomment
-    # @x_left_tracker     = (@gps_map_center_x - (VISIBLE_MAP_WIDTH / 2) - (EXTRA_MAP_WIDTH / 2)) - 1
-
-    puts "INITTED MAP SEETINGS"
-    puts "@gps_map_center_x =  #{@gps_map_center_x}"
-    puts "@gps_map_center_y =  #{@gps_map_center_y}"
-    puts "ACTUAL: "
-    puts "#{(@current_map_center_x / (@screen_tile_width))}"
-    puts "#{(@current_map_center_y / (@screen_tile_height))}"
-
-    # puts "@y_top_tracker    = #{@y_top_tracker}"
-    # puts "@y_bottom_tracker = #{@y_bottom_tracker}"
-
-    # puts "@x_right_tracker    = #{@x_right_tracker}"
-    # puts "@x_left_tracker     = #{@x_left_tracker}  "
-    # puts "@x_right_tracker: #{@x_right_tracker}"
+    @buildings = []
+    @enemies = []
+    @pickups = []
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
       y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
@@ -251,30 +256,33 @@ class GLBackground
       (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
         x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
         x_offset = x_offset - EXTRA_MAP_WIDTH / 2
-        # REAL MAP DATA HERE
-        # puts "MAP DATA HEREL #{@map_data.length} and  #{@map_data[0].length}"
-        # puts "@map_data[@current_map_center_y + y_offset][@current_map_center_x + x_offset]"
-        # puts "@map_data[#{@current_map_center_y} + #{y_offset}][#{@current_map_center_x} + #{x_offset}]"
-        # puts "VISIBLE MAP #{index_h} X #{index_w} == @map_data[#{@gps_map_center_y + y_offset}][#{@gps_map_center_x + x_offset}]"
-        @visible_map[index_h][index_w] = @map_data[@gps_map_center_y + y_offset][@gps_map_center_x + x_offset]
-        @visual_map_of_visible_to_map[index_h][index_w] = "#{@gps_map_center_y + y_offset}, #{@gps_map_center_x + x_offset}"
-        # TEST DATA HERE
-        # if index_h % 2 == 0
-        #   if index_w  % 2 == 0
-        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 2 }
-        #   else
-        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 0 }
-        #   end
-        # else
-        #   if index_w  % 2 == 0
-        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 3 }
-        #   else
-        #     @visible_map[index_h][index_w] = {'height' => 1, 'terrain_index' => 1 }
-        #   end
-        # end
+        y_index = @gps_map_center_y + y_offset
+        x_index = @gps_map_center_x + x_offset
+        @visible_map[index_h][index_w] = @map_data[y_index][x_index]
+        @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
+        if @map_objects["buildings"] && @map_objects["buildings"][y_index.to_s] && @map_objects["buildings"][y_index.to_s][x_index.to_s]
+          building_data = @map_objects["buildings"][y_index.to_s][x_index.to_s]
+          puts "building DATA - #{y_index} - #{x_index}"
+          puts building_data
+          # raise "STOP HERE"
+          # klass = eval(building_data["klass_name"])
+          # klass.new(@scale, x, y, @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @map_height, @map_width)
+          # @buildings << 
+        end
       end
     end
     @map_inited = true
+    # @only return active objects?
+    # Except enemies, cause they can have movement outside of the visible map?
+    return {enemies: @enemies, pickups: @pickups, buildings: @buildings}
+  end
+
+  def convert_gps_to_screen
+  end
+
+  # How to draw enemies that can move?
+  def draw_objects_relative_to_map
+    
   end
 
   def print_visible_map
@@ -351,6 +359,7 @@ class GLBackground
       end
     end
   end
+
 
   def update player_x, player_y
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
@@ -767,7 +776,7 @@ class GLBackground
     # // Move the scene back so we can see everything
     # glTranslatef( 0.0f, 0.0f, -100.0f );
     # -10 is as far back as we can go.
-    glTranslated(0, 0, -5)
+    glTranslated(0, 0, -10)
 
 
 #     # TEST
@@ -938,18 +947,23 @@ class GLBackground
 
     if !@test
       glEnable(GL_TEXTURE_2D)
-      tile_row_y_max = @visible_map.length - 1 #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
+      tile_row_y_max = @visible_map.length #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
       @visible_map.each_with_index do |y_row, y_index|
-        tile_row_x_max = y_row.length - 1# y_row.length - 1 - (EXTRA_MAP_WIDTH)
+        tile_row_x_max = y_row.length # y_row.length - 1 - (EXTRA_MAP_WIDTH)
         y_row.each_with_index do |x_element, x_index|
+          # puts "element - #{x_index} #{y_index} "
 
-          # splits across middle 0  -7..0..7
+          # splits across middle 0  -7..0..7 if visible map is 15
           new_x_index = x_index - (tile_row_x_max / 2.0)
           new_y_index = y_index - (tile_row_y_max / 2.0)
 
           # Screen coords width and height here.
           screen_x = @screen_tile_width   * new_x_index
+          # puts "screen_x = @screen_tile_width   * new_x_index"
+          # puts "#{screen_x} = #{@screen_tile_width}   * #{new_x_index}"
           screen_y = @screen_tile_height  * new_y_index
+          # puts "screen_y = @screen_tile_height  * new_y_index"
+          # puts "#{screen_y} = #{@screen_tile_height}  * #{new_y_index}"
 
           result = convert_screen_to_opengl(screen_x, screen_y, @screen_tile_width, @screen_tile_height)
           # puts "X and Y INDEX: #{x_index} - #{y_index}"
@@ -998,13 +1012,12 @@ class GLBackground
           # puts "Z: #{z}"
           # Center light added in
           # lights = [{pos: [0,0], brightness: 0.2, radius: 0.3}]
-          lights = [{pos: [0,0], brightness: 0.2, radius: 0.3}]
+          lights = [{pos: [0,0], brightness: 0.4, radius: 0.5}]
           # Too slow.. FPS droppage
-          # projectiles.each do |p|
-          #   # Because the screen isn't 1..-1, we're dropping the x and y values by half
-          #   results = convert_screen_to_opengl(p.x, p.y)
-          #   lights << {pos: [(results[:o_x] * -1) / 2.0, (results[:o_y]) / 2.0], brightness: 0.2, radius: 0.1}
-          # end
+          projectiles.each do |p|
+            results = convert_screen_to_opengl(p.x, p.y)
+            lights << {pos: [(results[:o_x]), (results[:o_y] * -1)], brightness: 0.3, radius: 0.5}
+          end
 
           if @enable_dark_mode
             default_colors = [0.1, 0.1, 0.1, 0.1]

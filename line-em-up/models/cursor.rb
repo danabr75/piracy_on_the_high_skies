@@ -21,12 +21,75 @@ class Cursor < GeneralObject
     @image_height_half = @image_height / 2
     @x = 0
     @y = 0
+
+    # # TEST
+    # @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
+    # @info = @image.gl_tex_info
+
   end
 
 
   def draw
     @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @width_scale, @height_scale)
   end
+
+  def draw_gl
+    # glBindTexture(GL_TEXTURE_2D, @info.tex_name)
+    # info = @info
+    # result = convert_screen_to_opengl(@x, @y, @image_width, @image_height)
+    # # puts "X and Y INDEX: #{x_index} - #{y_index}"
+    # # puts "RESULT HERE: #{result}"
+    # opengl_coord_x = result[:o_x]
+    # opengl_coord_y = result[:o_y]
+    # puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y}"
+    # # opengl_coord_y = opengl_coord_y * -1
+    # # opengl_coord_x = opengl_coord_x * -1
+    # opengl_increment_x = result[:o_w]
+    # opengl_increment_y = result[:o_h]
+
+    # opengl_offset_x = 0
+    # opengl_offset_y = 0
+
+    # default_colors = [1, 1, 1, 1]
+    # glBegin(GL_TRIANGLE_STRIP)
+    #   glTexCoord2d(info.left, info.top)
+    #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, 1]
+    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+    #   glTexCoord2d(info.left, info.bottom)
+    #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, 1]
+    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+    #   glTexCoord2d(info.right, info.top)
+    #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, 1]
+    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+    #   glTexCoord2d(info.right, info.bottom)
+    #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, 1]
+    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+    # glEnd
+
+  end
+
+  # def convert_screen_to_opengl x, y, w = nil, h = nil
+  #   opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
+  #   opengl_y   = ((y / (@screen_height.to_f)) * 2.0) - 1
+  #   if w && h
+  #     open_gl_w  = ((w / (@screen_width.to_f )) * 2.0)
+  #     open_gl_h  = ((h / (@screen_height.to_f )) * 2.0)
+  #     return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
+  #   else
+  #     return {o_x: opengl_x, o_y: opengl_y}
+  #   end
+  # end
 
   # THESE ARE ON-SCREEN COORDS, NOT OPENGL COORDS
   def convert_x_and_y_to_opengl_coords

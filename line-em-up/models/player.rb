@@ -89,7 +89,7 @@ class Player < GeneralObject
     @mass = 90 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass # speed here?
-    @speed = 2 #/ (@mass / 2)
+    @speed = 50 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
@@ -339,8 +339,8 @@ class Player < GeneralObject
     # @speed = 10 / (@mass / 2)
     # @rotation_speed = 2
 
-
-  def accelerate movement_x = 0, movement_y = 0
+  # Figure out why these got switched later, accelerate and brake
+  def brake movement_x = 0, movement_y = 0
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle )
 
     if @current_momentum <= @max_momentum
@@ -352,7 +352,7 @@ class Player < GeneralObject
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
-  def brake movement_x = 0, movement_y = 0
+  def accelerate movement_x = 0, movement_y = 0
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180 )
 
     if @current_momentum >= -@max_momentum

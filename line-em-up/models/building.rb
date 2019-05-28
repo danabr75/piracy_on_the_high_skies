@@ -9,22 +9,11 @@ class Building < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
   end
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
-    # @scale = scale
-    # image = Magick::Image::read("#{MEDIA_DIRECTORY}/building.png").first.resize(0.3)
-    # @image = Gosu::Image.new(image, :tileable => true)
-    # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
-    # @image_width  = @image.width  * @scale
-    # @image_height = @image.height * @scale
-    # @image_size   = @image_width  * @image_height / 2
-    # @image_radius = (@image_width  + @image_height) / 4
-    # @x = rand * 800
-    # @y = 0 - get_height
-    # puts "NEW BUILDING: #{@x} and #{@y}"
-    super(scale, rand(screen_width), 0 - get_image.height, screen_width, screen_height, width_scale, height_scale, options)
+  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_height, map_width, options)
     @health = 15
     @armor = 0
-    @current_speed = (GLBackground::SCROLLING_SPEED * @scale)
+    @height = options[:z] || 1
   end
 
   def get_points

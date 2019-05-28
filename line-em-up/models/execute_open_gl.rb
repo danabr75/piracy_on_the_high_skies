@@ -31,7 +31,7 @@ class ExecuteOpenGl
   # include Glu 
   # include Glut
 
-  def draw background, projectiles, player
+  def draw background, projectiles, player, pointer
     # @zoom = -14
     Gosu.gl do
       # init_scene
@@ -49,15 +49,16 @@ class ExecuteOpenGl
       # glTranslatef(0, 0, -13)   #see lesson 01
       background.exec_gl(player.location_x, player.location_y, projectiles)
 
-      glShadeModel(GL_SMOOTH) # selects smooth shading
-      glLoadIdentity              #see lesson 01
-      # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
-      glTranslatef(0, 0, -13)   #see lesson 01
-      @ambient_light = [0.5, 0.5, 0.5, 1]
-      mat_shininess = [50]
-      glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
-      glLightfv(GL_LIGHT1, GL_AMBIENT, @ambient_light) # sets ambient light for light source
-      glEnable(GL_LIGHT1)
+      # glShadeModel(GL_SMOOTH) # selects smooth shading
+      # glLoadIdentity              #see lesson 01
+      # # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
+      # glTranslatef(0, 0, -13)   #see lesson 01
+      # @ambient_light = [0.5, 0.5, 0.5, 1]
+      # mat_shininess = [50]
+      # glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess)
+      # glLightfv(GL_LIGHT1, GL_AMBIENT, @ambient_light) # sets ambient light for light source
+      # glEnable(GL_LIGHT1)
+
 
 
       projectiles.each_with_index do |projectile, i|
@@ -68,6 +69,13 @@ class ExecuteOpenGl
         # glTranslatef(0, 0, -14)   #see lesson 01
         projectile.draw_gl
       end
+      
+      # glMatrixMode(GL_MODELVIEW)  #see lesson 01
+      # glLoadIdentity              #see lesson 01
+      # # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
+      # glTranslatef(0, 0, -13)   #see lesson 01
+      # pointer.draw_gl
+
       player.draw_gl_list.each do |item|
         glMatrixMode(GL_MODELVIEW)  #see lesson 01
         glLoadIdentity              #see lesson 01
