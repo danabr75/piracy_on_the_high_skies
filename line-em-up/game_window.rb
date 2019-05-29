@@ -211,7 +211,8 @@ class GameWindow < Gosu::Window
     )
     @gl_background.current_map_center_x = @player.location_x
     @gl_background.current_map_center_y = @player.location_y
-    @gl_background.init_map
+    values = @gl_background.init_map
+    @buildings = values[:buildings]
 
     @scroll_factor = 1
     @movement_x = 0.0
@@ -498,7 +499,7 @@ class GameWindow < Gosu::Window
         @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
-        @gl_background.update(@player.location_x, @player.location_y)
+        @gl_background.update(@player.location_x, @player.location_y, @buildings)
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0

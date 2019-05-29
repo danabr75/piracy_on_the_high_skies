@@ -9,7 +9,10 @@ class Building < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
   end
 
+  # X and Y are place on screen.
+  # Location Y and X are where they are on GPS
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+    puts "BUILDING NEW"
     super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_height, map_width, options)
     @health = 15
     @armor = 0
@@ -43,13 +46,19 @@ class Building < GeneralObject
     ZOrder::Building
   end
 
+  def draw
+    puts "BUILDING DRAW"
+    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
+  end
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
+    puts "BUILDING UPDATE"
     if is_alive
-      @y += @current_speed * scroll_factor
-      @y < @screen_height + get_height
-    else
-      false
+    #   @y += @current_speed * scroll_factor
+    #   @y < @screen_height + get_height
+    # else
+    #   false
     end
+    true
   end
 end

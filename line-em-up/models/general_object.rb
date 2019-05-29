@@ -25,11 +25,12 @@ class GeneralObject
 
   # X and Y are place on screen.
   # Location Y and X are where they are on GPS
+  # Scale has been deprecated in favor of height scale and width scale.
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
     # @tile_width  = options[:tile_width]
     # @tile_height = options[:tile_height]
-    param_names = %w[scale, width_scale, height_scale]
-    [scale, width_scale, height_scale].each_with_index do |param, index|
+    param_names = %w[width_scale, height_scale]
+    [width_scale, height_scale].each_with_index do |param, index|
       raise "Parameter was not a Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != NilClass
     end
 
@@ -81,8 +82,8 @@ class GeneralObject
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     @health = 0
-    @image_width  = @image.width  * @scale
-    @image_height = @image.height * @scale
+    @image_width  = @image.width  * (@width_scale || @scale)
+    @image_height = @image.height * (@height_scale || @scale)
     @image_size   = @image_width  * @image_height / 2
     @image_radius = (@image_width  + @image_height) / 4
 

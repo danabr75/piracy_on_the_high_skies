@@ -105,88 +105,88 @@ class FooterBar < GeneralObject
   end
 
   def draw player
-    health_level = player.health
-    if health_level >= 200
-      health_image = @green_health_100
-    elsif health_level >= 190
-      health_image = @green_health_90
-    elsif health_level >= 180
-      health_image = @green_health_80
-    elsif health_level >= 170
-      health_image = @green_health_70
-    elsif health_level >= 160
-      health_image = @green_health_60
-    elsif health_level >= 150
-      health_image = @green_health_50
-    elsif health_level >= 140
-      health_image = @green_health_40
-    elsif health_level >= 130
-      health_image = @green_health_30
-    elsif health_level >= 120
-      health_image = @green_health_20
-    elsif health_level >= 110
-      health_image = @green_health_10
-    elsif health_level >= 100
-      health_image = @health_100
-    elsif health_level >= 90
-      health_image = @health_90
-    elsif health_level >= 80
-      health_image = @health_80
-    elsif health_level >= 70
-      health_image = @health_70
-    elsif health_level >= 60
-      health_image = @health_60
-    elsif health_level >= 50
-      health_image = @health_50
-    elsif health_level >= 40
-      health_image = @health_40
-    elsif health_level >= 30
-      health_image = @health_30
-    elsif health_level >= 20
-      health_image = @health_20
-    elsif health_level >= 10
-      health_image = @health_10
-    else
-      health_image = @health_00
-    end
-
-    health_image.draw(@health_bar_x, @health_bar_y, get_draw_ordering, @width_scale, @height_scale)
-
-
-
-    # progress_bar = []
-    # progress_bar_increments = 20
-    # (0..20).each do |i|
-    #   progress_bar << Gosu::Image.new("#{MEDIA_DIRECTORY}/progress_bar_#{i}.png")
+    # health_level = player.health
+    # if health_level >= 200
+    #   health_image = @green_health_100
+    # elsif health_level >= 190
+    #   health_image = @green_health_90
+    # elsif health_level >= 180
+    #   health_image = @green_health_80
+    # elsif health_level >= 170
+    #   health_image = @green_health_70
+    # elsif health_level >= 160
+    #   health_image = @green_health_60
+    # elsif health_level >= 150
+    #   health_image = @green_health_50
+    # elsif health_level >= 140
+    #   health_image = @green_health_40
+    # elsif health_level >= 130
+    #   health_image = @green_health_30
+    # elsif health_level >= 120
+    #   health_image = @green_health_20
+    # elsif health_level >= 110
+    #   health_image = @green_health_10
+    # elsif health_level >= 100
+    #   health_image = @health_100
+    # elsif health_level >= 90
+    #   health_image = @health_90
+    # elsif health_level >= 80
+    #   health_image = @health_80
+    # elsif health_level >= 70
+    #   health_image = @health_70
+    # elsif health_level >= 60
+    #   health_image = @health_60
+    # elsif health_level >= 50
+    #   health_image = @health_50
+    # elsif health_level >= 40
+    #   health_image = @health_40
+    # elsif health_level >= 30
+    #   health_image = @health_30
+    # elsif health_level >= 20
+    #   health_image = @health_20
+    # elsif health_level >= 10
+    #   health_image = @health_10
+    # else
+    #   health_image = @health_00
     # end
-    # @progress_bar_width  = (progress_bar.first.width  * @scale)
-    # @progress_bar_height = (progress_bar.first.height * @scale)
-    index = player.kill_count * @progress_bar_increments / player.get_kill_count_max
-    current_progress_bar = @progress_bar[index]
-    current_progress_bar.draw(@progress_bar_x, @progress_bar_y, get_draw_ordering, @width_scale, @height_scale)
+
+    # health_image.draw(@health_bar_x, @health_bar_y, get_draw_ordering, @width_scale, @height_scale)
+
+
+
+    # # progress_bar = []
+    # # progress_bar_increments = 20
+    # # (0..20).each do |i|
+    # #   progress_bar << Gosu::Image.new("#{MEDIA_DIRECTORY}/progress_bar_#{i}.png")
+    # # end
+    # # @progress_bar_width  = (progress_bar.first.width  * @scale)
+    # # @progress_bar_height = (progress_bar.first.height * @scale)
+    # index = player.kill_count * @progress_bar_increments / player.get_kill_count_max
+    # current_progress_bar = @progress_bar[index]
+    # current_progress_bar.draw(@progress_bar_x, @progress_bar_y, get_draw_ordering, @width_scale, @height_scale)
 
 
 
 
-    @bomb_hud.draw(@bomb_hud_x, @bomb_hud_y, get_draw_ordering, @width_scale, @height_scale)
-    # @bomb_hud_width_half  = @bomb_hud_width / 2
-    # @bomb_hud_height_half = @bomb_hud_height /2
-    if player.get_secondary_name == 'Bomb'
-      bomb_color = @current_color
-    else
-      bomb_color = @red_color
-    end
-    @font.draw("#{player.bombs}", @bomb_hud_x + @bomb_hud_width_half - (@font.text_width("#{player.bombs}")), @bomb_hud_y + @bomb_hud_height_half, ZOrder::UI, @width_scale, @height_scale, bomb_color)
-    # local_width  = @font.text_width('>')
-    # local_height = @font.height
-    @missile_hud.draw(@missile_hud_x, @missile_hud_y, get_draw_ordering, @width_scale, @height_scale)
-    # draw(text, x, y, z, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    if player.get_secondary_name == 'Rocket'
-      rocket_color = @current_color
-    else
-      rocket_color = @red_color
-    end
-    @font.draw("#{player.rockets}", @missile_hud_x + @missile_hud_width_half - (@font.text_width("#{player.rockets}")), @missile_hud_y - 5 +  @missile_hud_height_half, ZOrder::UI, @width_scale, @height_scale, rocket_color)
+    # @bomb_hud.draw(@bomb_hud_x, @bomb_hud_y, get_draw_ordering, @width_scale, @height_scale)
+    # # @bomb_hud_width_half  = @bomb_hud_width / 2
+    # # @bomb_hud_height_half = @bomb_hud_height /2
+    # if player.get_secondary_name == 'Bomb'
+    #   bomb_color = @current_color
+    # else
+    #   bomb_color = @red_color
+    # end
+    # @font.draw("#{player.bombs}", @bomb_hud_x + @bomb_hud_width_half - (@font.text_width("#{player.bombs}")), @bomb_hud_y + @bomb_hud_height_half, ZOrder::UI, @width_scale, @height_scale, bomb_color)
+    # # local_width  = @font.text_width('>')
+    # # local_height = @font.height
+    # @missile_hud.draw(@missile_hud_x, @missile_hud_y, get_draw_ordering, @width_scale, @height_scale)
+    # # draw(text, x, y, z, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+    # if player.get_secondary_name == 'Rocket'
+    #   rocket_color = @current_color
+    # else
+    #   rocket_color = @red_color
+    # end
+    # @font.draw("#{player.rockets}", @missile_hud_x + @missile_hud_width_half - (@font.text_width("#{player.rockets}")), @missile_hud_y - 5 +  @missile_hud_height_half, ZOrder::UI, @width_scale, @height_scale, rocket_color)
 
   end
 

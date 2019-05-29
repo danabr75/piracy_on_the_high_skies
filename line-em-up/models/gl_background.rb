@@ -94,6 +94,9 @@ class GLBackground
 
 
   def initialize player_x, player_y, screen_width, screen_height, width_scale, height_scale
+    @debug = true
+    # @debug = false
+
     @time_alive = 0
     # @y_add_top_tracker = []
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
@@ -214,6 +217,13 @@ class GLBackground
     # @global_map_width = @map["map_width"]
     # @global_map_height = @map["map_height"]
     @map_data = @map["data"]
+    if @debug
+      @map_data.each_with_index do |e, y|
+        e.each_with_index do |v, x|
+          @map_data[y][x] = @map_data[y][x].merge({'gps_y' => @global_map_height - y, 'gps_x' => @global_map_width - x})
+        end
+      end
+    end
     @visual_map_of_visible_to_map = Array.new(VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT) { Array.new(VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH) { nil } }
 
     # @y_top_tracker    = nil
@@ -223,11 +233,14 @@ class GLBackground
     # @x_left_tracker   = nil
 
     if player_x && player_y
-
+      raise "This case is no longer supported. Can't return objects like buildings from initialize"
       init_map
     end
 
-    @debug = false
+
+    if @debug
+      @font = Gosu::Font.new(20)
+    end
 
     # puts "@map_data : #{@map_data[0][0]}" 
     # @visible_map = []
@@ -248,6 +261,8 @@ class GLBackground
     @buildings = []
     @enemies = []
     @pickups = []
+    puts "@map_objects"
+    puts @map_objects.inspect
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
       y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
@@ -261,28 +276,67 @@ class GLBackground
         @visible_map[index_h][index_w] = @map_data[y_index][x_index]
         @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
         if @map_objects["buildings"] && @map_objects["buildings"][y_index.to_s] && @map_objects["buildings"][y_index.to_s][x_index.to_s]
-          building_data = @map_objects["buildings"][y_index.to_s][x_index.to_s]
-          puts "building DATA - #{y_index} - #{x_index}"
-          puts building_data
-          # raise "STOP HERE"
-          # klass = eval(building_data["klass_name"])
-          # klass.new(@scale, x, y, @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @map_height, @map_width)
-          # @buildings << 
+          building_datas = @map_objects["buildings"][y_index.to_s][x_index.to_s] || []
+          building_datas.each do |building_data|
+            puts "building DATA - #{y_index} - #{x_index}"
+            puts building_data
+            puts building_data.class
+            # raise "STOP HERE"
+            puts building_data["klass_name"]
+            klass = eval(building_data["klass_name"])
+            results = gps_tile_coords_to_center_screen_coords(@global_map_width - x_index, @global_map_height - y_index)
+            # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
+            puts "CREATED BUILDING HERE"
+            if results
+              puts "GOT HERE: #{[@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width]}"
+              @buildings << klass.new(@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width)
+            else
+              raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
+            end
+          end
         end
       end
     end
     @map_inited = true
     # @only return active objects?
     # Except enemies, cause they can have movement outside of the visible map?
+    puts "RETURING BUILDINGS: #{@buildings}"
     return {enemies: @enemies, pickups: @pickups, buildings: @buildings}
   end
 
   def convert_gps_to_screen
   end
 
+  def convert_opengl_to_screen opengl_x, opengl_y
+    x = ((opengl_x + 1) / 2.0) * @screen_width.to_f
+    y = ((opengl_y + 1) / 2.0) * @screen_height.to_f
+    return [x, y]
+  end
+
   # How to draw enemies that can move?
-  def draw_objects_relative_to_map
+  def update_objects_relative_to_map local_map_movement_x, local_map_movement_y, objects
     
+  end
+
+  # Don't factor in x or y offset here.
+  def gps_tile_coords_to_center_screen_coords tile_x, tile_y
+    # @gps_map_center_y
+    # @gps_map_center_x
+
+    x_offset = (VISIBLE_MAP_WIDTH  / 2.0) + (EXTRA_MAP_WIDTH  / 2.0)
+    y_offset = (VISIBLE_MAP_HEIGHT / 2.0) + (EXTRA_MAP_HEIGHT / 2.0)
+    if tile_x < @gps_map_center_x - x_offset && tile_x > @gps_map_center_x + x_offset
+      return nil
+    else
+      # location - Left GPS edge of map. Should be in Integers
+      distance_from_left = tile_x - (@gps_map_center_x - x_offset) - 1
+      # Not sure if the
+      distance_from_top  = tile_y - (@gps_map_center_y - y_offset) - 1
+
+      x = (distance_from_left * @screen_tile_width ) + @screen_tile_width  / 2.0
+      y = (distance_from_top  * @screen_tile_height) + @screen_tile_height / 2.0
+      return [x, y]
+    end
   end
 
   def print_visible_map
@@ -305,7 +359,7 @@ class GLBackground
     if @map_inited && @debug
 
       @visual_map_of_visible_to_map.each_with_index do |y_row, index|
-        print_visible_map if y_row.nil? || y_row.empty? || y_row.length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1
+        # print_visible_map if y_row.nil? || y_row.empty? || y_row.length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1
         raise "Y Column was nil" if y_row.nil? || y_row.empty?
         raise "Y Column size wasn't correct. Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH}. GOT: #{y_row.length}" if y_row.length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
       end
@@ -361,14 +415,15 @@ class GLBackground
   end
 
 
-  def update player_x, player_y
+  def update player_x, player_y, relative_objects
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
  
-    puts "BEFORE EVERYTING"
-    # print_visible_map
-    puts "BEFORE EVERYTING - V"
-    verify_visible_map
+
+    # puts "BEFORE EVERYTING"
+    # # print_visible_map
+    # puts "BEFORE EVERYTING - V"
+    # verify_visible_map
     # offset_y = (VISIBLE_MAP_HEIGHT  / 2) + (EXTRA_MAP_HEIGHT / 2)
     # offset_x = (VISIBLE_MAP_WIDTH  / 2) + (EXTRA_MAP_WIDTH / 2)
 
@@ -379,8 +434,10 @@ class GLBackground
 
     puts "BEFORE EVERYTING"
 
-    puts "@gps_map_center_y: #{@gps_map_center_y}"
-    puts "@gps_map_center_x: #{@gps_map_center_x}"
+    if @debug
+      puts "@gps_map_center_y: #{@gps_map_center_y}"
+      puts "@gps_map_center_x: #{@gps_map_center_x}"
+    end
     # puts "OFFSET Y : #{offset_y}"
     # puts "OFFSET X : #{offset_x}"
 
@@ -420,7 +477,7 @@ class GLBackground
     # 1 should be 1 GPS coord unit. No height scale should be on it.
     if @local_map_movement_y >= @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f# * @height_scale * 1.1
       puts "ADDING IN ARRAY 1"
-      print_visible_map
+      # print_visible_map
       # y_offset = (VISIBLE_MAP_HEIGHT / 2) + EXTRA_MAP_HEIGHT / 2
       # y_top_edge = (@current_map_center_y + y_offset)
       # CEIL is the only way to get the top 1000 row of the map height.
@@ -472,7 +529,7 @@ class GLBackground
 
           @visual_map_of_visible_to_map.unshift(new_debug_array)
 
-          verify_visible_map
+          # verify_visible_map
 
           # value = "INSIDE MAP"
         end
@@ -545,7 +602,7 @@ class GLBackground
 
           @visual_map_of_visible_to_map.push(new_debug_array)
 
-          verify_visible_map
+          # verify_visible_map
 
           # value = "INSIDE MAP"
         end
@@ -562,7 +619,7 @@ class GLBackground
     # Moving to the RIGHT
     if @local_map_movement_x >= @screen_tile_width
       puts "ADDING IN ARRAY 3 "
-      print_visible_map
+      # print_visible_map
       if @current_map_center_x < (@screen_map_width)
         puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
         @gps_map_center_x    += 1
@@ -616,7 +673,7 @@ class GLBackground
           new_debug_array.each_with_index do |element, index|
             @visual_map_of_visible_to_map[index].unshift(element)
           end
-          verify_visible_map
+          # verify_visible_map
         end
         # puts "MAP ADDED at #{@current_map_center_y} w/ - top tracker: #{@y_top_tracker}"
         @current_map_center_x = @current_map_center_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
@@ -631,29 +688,7 @@ class GLBackground
     # MOVING TO THE LEFT
     if @local_map_movement_x <= -@screen_tile_width# * @width_scale * 1.1
       puts "ADDING IN ARRAY 4"
-    #   if @current_map_center_x > 0
-    #     @x_right_tracker -= 1
-    #     @x_left_tracker  -= 1
-    #     # value = nil
-    #     if @x_left_tracker < 0
-
-    #       @visible_map.each do |row|
-    #         row.shift
-    #         row.push({'height' => 2, 'terrain_index' => 3 })
-    #       end
-    #     else
-    #       @visible_map.each do |row|
-    #         row.shift
-    #         row.push({'height' => 1, 'terrain_index' => 1 + rand(2) })
-    #       end
-    #     end
-    #     @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-    #     @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-    #     @gps_map_center_x    -= 1
-    #   else
-    #     @local_map_movement_x = 0 if @local_map_movement_x < 0
-    #   end
-      print_visible_map
+      # print_visible_map
       if @current_map_center_x < (@screen_map_width)
         puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
         @gps_map_center_x    -= 1
@@ -706,7 +741,7 @@ class GLBackground
           new_debug_array.each_with_index do |element, index|
             @visual_map_of_visible_to_map[index].push(element)
           end
-          verify_visible_map
+          # verify_visible_map
         end
         @current_map_center_x = @current_map_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
         @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
@@ -716,19 +751,20 @@ class GLBackground
       end
     end
 
-    puts "aFTER EVERYTING"
-    print_visible_map
+    # puts "aFTER EVERYTING"
+    # print_visible_map
     verify_visible_map
-    puts "aFTER EVERYTING"
+    # puts "aFTER EVERYTING"
 
-    # offset_y = (VISIBLE_MAP_HEIGHT  / 2) + (EXTRA_MAP_HEIGHT / 2)
-    # offset_x = (VISIBLE_MAP_WIDTH  / 2) + (EXTRA_MAP_WIDTH / 2)
+    # Reject here or in game_window, if off of map? Still need to update enemies that can move while off-screen
+    relative_objects = update_objects_relative_to_map(@local_map_movement_x, @local_map_movement_y, relative_objects)
+    # relative_objects.reject!{|ro| ro == false }
 
     # raise "OFFSET IS OFF @y_top_tracker - offset_y != @gps_map_center_y: #{@y_top_tracker} - #{offset_y} != #{@gps_map_center_y}"       if @y_top_tracker     - offset_y != @gps_map_center_y
     # raise "OFFSET IS OFF @y_bottom_tracker + offset_y != @gps_map_center_y: #{@y_bottom_tracker} + #{offset_y} != #{@gps_map_center_y}" if @y_bottom_tracker  + offset_y != @gps_map_center_y
     # raise "OFFSET IS OFF @x_right_tracker - offset_x != @gps_map_center_x: #{@x_right_tracker} - #{offset_x} != #{@gps_map_center_x}"   if @x_right_tracker   - offset_x != @gps_map_center_x
     # raise "OFFSET IS OFF @x_left_tracker + offset_x != @gps_map_center_x: #{@x_left_tracker} + #{offset_x} != #{@gps_map_center_x}"     if @x_left_tracker    + offset_x != @gps_map_center_x
-
+    return relative_objects
   end
 
   
@@ -763,7 +799,9 @@ class GLBackground
     # glutSolidSphere(1.0, 20, 16)
 
     
-    # glEnable(GL_BLEND)
+    glEnable(GL_BLEND)
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity
@@ -861,11 +899,11 @@ class GLBackground
     @enable_dark_mode = false
 
     if @enable_dark_mode
-      glLightfv(GL_LIGHT6, GL_AMBIENT, [0.2, 0.2, 0.2, 1])
-      glLightfv(GL_LIGHT6, GL_DIFFUSE, [0.2, 0.2, 0.2, 1])
-      # Dark lighting effect?
-      glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
-      glEnable(GL_LIGHT6)
+      # glLightfv(GL_LIGHT6, GL_AMBIENT, [0.5, 0.5, 0.5, 1])
+      # glLightfv(GL_LIGHT6, GL_DIFFUSE, [0.5, 0.5, 0.5, 1])
+      # # Dark lighting effect?
+      # glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
+      # glEnable(GL_LIGHT6)
     else
       # glLightfv(GL_LIGHT6, GL_AMBIENT, [1, 1, 1, 1])
       # glLightfv(GL_LIGHT6, GL_DIFFUSE, [1, 1, 1, 1])
@@ -947,6 +985,10 @@ class GLBackground
 
     if !@test
       glEnable(GL_TEXTURE_2D)
+      # Not sure the next 3 methods do anything
+      # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
+      # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
+      # glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE)
       tile_row_y_max = @visible_map.length #@visible_map.length - 1 - (EXTRA_MAP_HEIGHT)
       @visible_map.each_with_index do |y_row, y_index|
         tile_row_x_max = y_row.length # y_row.length - 1 - (EXTRA_MAP_WIDTH)
@@ -976,6 +1018,11 @@ class GLBackground
           opengl_increment_y = result[:o_h]
 
 
+          if @debug
+            # puts "x_element: #{x_element}"
+            x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
+            @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", x, y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+          end
 
           # # convert to 
           # # split across center index, divided by half of center abs / 2
@@ -1020,7 +1067,7 @@ class GLBackground
           end
 
           if @enable_dark_mode
-            default_colors = [0.1, 0.1, 0.1, 0.1]
+            default_colors = [0.3, 0.3, 0.3, 0.3]
           else
             default_colors = [1, 1, 1, 1]
           end
@@ -1030,6 +1077,8 @@ class GLBackground
             colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+
 
             glTexCoord2d(info.left, info.bottom)
             vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
@@ -1049,6 +1098,10 @@ class GLBackground
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
           glEnd
+          error = glGetError
+          if error != 0
+            puts "FOUND ERROR: #{error}"
+          end
         end
       end
     end
