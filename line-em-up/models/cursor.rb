@@ -22,9 +22,9 @@ class Cursor < GeneralObject
     @x = 0
     @y = 0
 
-    # # TEST
-    # @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
-    # @info = @image.gl_tex_info
+    # TEST
+    # @image2 = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
+    # @info2 = @image2.gl_tex_info
 
   end
 
@@ -34,62 +34,78 @@ class Cursor < GeneralObject
   end
 
   def draw_gl
-    # glBindTexture(GL_TEXTURE_2D, @info.tex_name)
-    # info = @info
-    # result = convert_screen_to_opengl(@x, @y, @image_width, @image_height)
+    # # Y is reversed?
+    # result = convert_screen_to_opengl(@x, @screen_height - (@y), 10, 10)
     # # puts "X and Y INDEX: #{x_index} - #{y_index}"
     # # puts "RESULT HERE: #{result}"
     # opengl_coord_x = result[:o_x]
     # opengl_coord_y = result[:o_y]
-    # puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y}"
     # # opengl_coord_y = opengl_coord_y * -1
     # # opengl_coord_x = opengl_coord_x * -1
     # opengl_increment_x = result[:o_w]
     # opengl_increment_y = result[:o_h]
+    # puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y} - w and h: #{opengl_increment_x} - #{opengl_increment_y}"
 
-    # opengl_offset_x = 0
-    # opengl_offset_y = 0
+    # z = 1
 
-    # default_colors = [1, 1, 1, 1]
+    # colors = [1, 0.5, 1, 1]
+    # # glBindTexture(GL_TEXTURE_2D, @info2.tex_name)
+    # # info = @info2
+    # # glBegin(GL_TRIANGLE_STRIP)
+    # #   glTexCoord2d(info.left, info.top)
+    # #   vert_pos = [opengl_coord_x , opengl_coord_y , z]
+    # #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    # #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+    # #   glTexCoord2d(info.left, info.bottom)
+    # #   vert_pos = [opengl_coord_x , opengl_coord_y + opengl_increment_y , z]
+    # #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    # #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+    # #   glTexCoord2d(info.right, info.top)
+    # #   vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y , z]
+    # #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    # #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+
+    # #   glTexCoord2d(info.right, info.bottom)
+    # #   vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y + opengl_increment_y , z]
+    # #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    # #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+    # # glEnd
+
     # glBegin(GL_TRIANGLE_STRIP)
-    #   glTexCoord2d(info.left, info.top)
-    #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, 1]
-    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   vert_pos = [opengl_coord_x , opengl_coord_y , z]
     #   glColor4d(colors[0], colors[1], colors[2], colors[3])
     #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
-    #   glTexCoord2d(info.left, info.bottom)
-    #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, 1]
-    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   vert_pos = [opengl_coord_x , opengl_coord_y + opengl_increment_y , z]
     #   glColor4d(colors[0], colors[1], colors[2], colors[3])
     #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
-    #   glTexCoord2d(info.right, info.top)
-    #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, 1]
-    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y , z]
     #   glColor4d(colors[0], colors[1], colors[2], colors[3])
     #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
-    #   glTexCoord2d(info.right, info.bottom)
-    #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, 1]
-    #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+    #   vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y + opengl_increment_y , z]
     #   glColor4d(colors[0], colors[1], colors[2], colors[3])
     #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
     # glEnd
 
   end
 
-  # def convert_screen_to_opengl x, y, w = nil, h = nil
-  #   opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
-  #   opengl_y   = ((y / (@screen_height.to_f)) * 2.0) - 1
-  #   if w && h
-  #     open_gl_w  = ((w / (@screen_width.to_f )) * 2.0)
-  #     open_gl_h  = ((h / (@screen_height.to_f )) * 2.0)
-  #     return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
-  #   else
-  #     return {o_x: opengl_x, o_y: opengl_y}
-  #   end
-  # end
+  def convert_screen_to_opengl x, y, w = nil, h = nil
+    opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
+    opengl_x   = opengl_x * 1.2 # Needs to be boosted for some odd reason - Screen is not entirely 1..-1
+    opengl_y   = ((y / (@screen_height.to_f)) * 2.0) - 1
+    opengl_y   = opengl_y * 0.92
+    if w && h
+      open_gl_w  = ((w / (@screen_width.to_f )) * 2.0)
+      open_gl_h  = ((h / (@screen_height.to_f )) * 2.0)
+      return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
+    else
+      return {o_x: opengl_x, o_y: opengl_y}
+    end
+  end
 
   # THESE ARE ON-SCREEN COORDS, NOT OPENGL COORDS
   def convert_x_and_y_to_opengl_coords

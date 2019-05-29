@@ -3,6 +3,7 @@ require_relative 'general_object.rb'
 class Building < GeneralObject
   POINT_VALUE_BASE = 1
   attr_accessor :health, :armor, :x, :y
+  attr_accessor :x_offset, :y_offset
 
 
   def get_image
@@ -12,11 +13,13 @@ class Building < GeneralObject
   # X and Y are place on screen.
   # Location Y and X are where they are on GPS
   def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
-    puts "BUILDING NEW"
+    # puts "BUILDING NEW"
     super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_height, map_width, options)
     @health = 15
     @armor = 0
-    @height = options[:z] || 1
+    @z = options[:z] || 1
+    @x_offset = 0
+    @y_offset = 0
   end
 
   def get_points
@@ -47,12 +50,12 @@ class Building < GeneralObject
   end
 
   def draw
-    puts "BUILDING DRAW"
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
+    # puts "BUILDING DRAW - #{@z}"
+    @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, @z, @width_scale, @height_scale)
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    puts "BUILDING UPDATE"
+    # puts "BUILDING UPDATE"
     if is_alive
     #   @y += @current_speed * scroll_factor
     #   @y < @screen_height + get_height

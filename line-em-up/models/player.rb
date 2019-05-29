@@ -86,10 +86,12 @@ class Player < GeneralObject
       @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
     end
     # Get details from ship
-    @mass = 90 # Get from ship
+    # @mass = 90 # Get from ship
+    @mass = 300 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass # speed here?
-    @speed = 50 #/ (@mass / 2)
+    # @speed = 50 #/ (@mass / 2)
+    @speed = 100 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
@@ -344,7 +346,7 @@ class Player < GeneralObject
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle )
 
     if @current_momentum <= @max_momentum
-      @current_momentum += 2
+      @current_momentum += 1.2
     end
     # puts "PLAYER ACCELETATE:"
     # puts "[movement_x - x_diff, movement_y - y_diff]"
@@ -356,7 +358,7 @@ class Player < GeneralObject
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180 )
 
     if @current_momentum >= -@max_momentum
-      @current_momentum -= 1.2
+      @current_momentum -= 2
     end
 
     return [movement_x - x_diff, movement_y - y_diff]
