@@ -1,7 +1,7 @@
 {
   "buildings":{
     "125":{
-      "126":[
+      "124":[
         {"klass_name":"Store","data":null}
       ]
     }

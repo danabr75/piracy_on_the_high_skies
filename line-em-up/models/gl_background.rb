@@ -297,9 +297,9 @@ class GLBackground
             # # raise "STOP HERE"
             # puts building_data["klass_name"]
             klass = eval(building_data["klass_name"])
-            results = gps_tile_coords_to_center_screen_coords(@global_map_width - x_index, @global_map_height - y_index)
+            results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
             # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
-            puts "CREATED BUILDING HERE"
+            puts "CREATED BUILDING HERE - #{results}"
             if results
               puts "GOT HERE: #{[@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width]}"
               @buildings << klass.new(@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width, {z: @visible_map[index_h][index_w]['height']})
@@ -356,22 +356,22 @@ class GLBackground
     # @gps_map_center_y
     # @gps_map_center_x
 
-    x_offset = (VISIBLE_MAP_WIDTH  / 2.0) + (EXTRA_MAP_WIDTH  / 2.0)
-    y_offset = (VISIBLE_MAP_HEIGHT / 2.0) + (EXTRA_MAP_HEIGHT / 2.0)
+    x_offset = (VISIBLE_MAP_WIDTH  / 2.0)
+    y_offset = (VISIBLE_MAP_HEIGHT / 2.0)
     if tile_x < @gps_map_center_x - x_offset && tile_x > @gps_map_center_x + x_offset
       return nil
     else
       # location - Left GPS edge of map. Should be in Integers
-      distance_from_left = tile_x - (@gps_map_center_x - x_offset) - 1
-      puts "distance_from_left = tile_x - (@gps_map_center_x - x_offset) - 1"
-      puts "#{distance_from_left} = #{tile_x} - (#{@gps_map_center_x} - #{x_offset}) - 1"
+      distance_from_left = (@gps_map_center_x + x_offset) - (tile_x)
+      puts "distance_from_left = tile_x - (@gps_map_center_x + x_offset)"
+      puts "#{distance_from_left} = #{tile_x} - (#{@gps_map_center_x} + #{x_offset})"
 
       # bUILDING LOCATION ON TRIGGER : 126 - 125
       # distance_from_left = tile_x - (@gps_map_center_x - x_offset) - 1
       # 5.0 = 126 - (124 - 4.0) - 1
 
       # Not sure if the
-      distance_from_top  = tile_y - (@gps_map_center_y - y_offset) - 1
+      distance_from_top  = tile_y - (@gps_map_center_y - y_offset)
 
       x = (distance_from_left * @screen_tile_width ) + @screen_tile_width  / 2.0
       y = (distance_from_top  * @screen_tile_height) + @screen_tile_height / 2.0
@@ -802,7 +802,7 @@ class GLBackground
     # Reject here or in game_window, if off of map? Still need to update enemies that can move while off-screen
 
     # ADD BACK IN AFTER MAP FIXED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # relative_objects = update_objects_relative_to_map(@local_map_movement_x, @local_map_movement_y * -1, relative_objects, tile_movement)
+    relative_objects = update_objects_relative_to_map(@local_map_movement_x, @local_map_movement_y * -1, relative_objects, tile_movement)
 
     # relative_objects.reject!{|ro| ro == false }
 
