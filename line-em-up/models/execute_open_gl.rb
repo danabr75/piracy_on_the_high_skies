@@ -65,21 +65,21 @@ class ExecuteOpenGl
         glMatrixMode(GL_MODELVIEW)  #see lesson 01
         glLoadIdentity              #see lesson 01
         # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
-        glTranslatef(0, 0, -13)   #see lesson 01
+        glTranslatef(0, 0, -10)   #see lesson 01
         # glTranslatef(0, 0, -14)   #see lesson 01
         projectile.draw_gl
       end
-      
+
       glMatrixMode(GL_MODELVIEW)  #see lesson 01
       glLoadIdentity              #see lesson 01
       # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
-      glTranslatef(0, 0, -13)   #see lesson 01
+      glTranslatef(0, 0, 0)   #see lesson 01
       pointer.draw_gl
 
       player.draw_gl_list.each do |item|
         glMatrixMode(GL_MODELVIEW)  #see lesson 01
         glLoadIdentity              #see lesson 01
-        glTranslatef(0, 0, -13)   #see lesson 01
+        glTranslatef(0, 0, -10)   #see lesson 01
         item.draw_gl
       end
 

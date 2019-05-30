@@ -1143,6 +1143,13 @@ class GLBackground
             z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
           end
 
+          # puts "XELEMENT: #{x_element}"
+          # puts x_element
+          # raise "STOP"
+
+# XELEMENT: {"height"=>0.570810370974101, "terrain_index"=>0, "corner_heights"=>{"top_left"=>0.5, "top_right"=>0.75, "bottom_left"=>0.75, "bottom_right"=>1.25}, "gps_y"=>128, "gps_x"=>128}
+# {"height"=>0.570810370974101, "terrain_index"=>0, "corner_heights"=>{"top_left"=>0.5, "top_right"=>0.75, "bottom_left"=>0.75, "bottom_right"=>1.25}, "gps_y"=>128, "gps_x"=>128}
+
           # z = get_surrounding_average_tile_height(x_index, y_index)
           # puts "puts USING Z: #{z}"
           # info =  @infos[x_index % 2]
@@ -1165,37 +1172,65 @@ class GLBackground
           else
             default_colors = [1, 1, 1, 1]
           end
+          vert_pos1, vert_pos2, vert_pos3, vert_pos4 = [nil,nil,nil,nil]
           glBegin(GL_TRIANGLE_STRIP)
             glTexCoord2d(info.left, info.top)
-            vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
+            vert_pos1 = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
             colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+            glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
 
 
 
             glTexCoord2d(info.left, info.bottom)
-            vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
+            vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
             colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+            glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
 
             glTexCoord2d(info.right, info.top)
-            vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
+            vert_pos3 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
             colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+            glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
 
             glTexCoord2d(info.right, info.bottom)
-            vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
+            vert_pos4 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
             colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
             glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+            glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
           glEnd
+
+          puts "TEST HERE"
+          puts @map_objects["buildings"]
+          puts "HJAHAHA  #{x_element['gps_x'].to_s} - #{x_element['gps_y'].to_s }"
+          puts @map_objects["buildings"][x_element['gps_y'].to_s]
+          if @map_objects["buildings"] && @map_objects["buildings"][x_element['gps_y'].to_s] && @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s]
+            puts @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s]
+
+            # raise "STOP HERE"
+
+            building_datas = @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s] || []
+
+            building_datas.each do |building_data|
+              klass = eval(building_data["klass_name"])
+              # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
+              # if results
+               puts "ALT DRAWING"
+               puts "opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, x_element['height'], opengl_increment_x, opengl_increment_y"
+               puts "#{opengl_coord_x - opengl_offset_x}, #{opengl_coord_y - opengl_offset_y}, #{x_element['height']}, #{opengl_increment_x}, #{opengl_increment_y}"
+                klass.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+              # else
+              #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
+              # end
+            end
+          end
+
           error = glGetError
           if error != 0
             puts "FOUND ERROR: #{error}"
           end
+
         end
       end
     end

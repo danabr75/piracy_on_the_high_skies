@@ -722,7 +722,7 @@ class GameWindow < Gosu::Window
 
   def draw
     # Adding pointer as a opengl coord test
-    @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles, @player, @pointer)
+    @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles + @buildings, @player, @pointer)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw if @menu
     @footer_bar.draw(@player)
