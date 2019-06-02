@@ -61,7 +61,7 @@ class Building < GeneralObject
 
   def draw
     # puts "BUILDING DRAW - #{@z}"
-    # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, @z, @width_scale, @height_scale)
+    @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, @z, @width_scale, @height_scale)
   end
 
 
@@ -103,17 +103,9 @@ class Building < GeneralObject
     # RETURNING2: [562.5, 149.2124999999923, 1]
 
   def self.drawv4(ox, oy, oz, view_matrix, projection_matrix, viewport)
-    if true
-      # loy = oy * -1.0
-      @image3 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building_2.png")
-      # puts "BUILDING DRAW - #{@z}"
-      puts "DRAWV4 - #{[ox, oy, oz]}"
-      # oy = oy * -1
-      x, y, z = get2dPoint(ox, oy, oz, view_matrix, projection_matrix, viewport)
-      # z = 1
-      puts "RETURNING2: #{[x, y, z]}"
-      @image3.draw(x, 900.0 - y, z, 2, 2)
-    end
+    @image3 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building_2.png")
+    x, y, z = convert3DTo2D(ox, oy, oz, view_matrix, projection_matrix, viewport)
+    @image3.draw(x, 900.0 - y, z, 2, 2)
   end
 
   # def self.drawv5(ox, oy, oz)
@@ -131,32 +123,6 @@ class Building < GeneralObject
   # end
 
          # gluProject(ox, oy, oz, mdl_mtx, prj_mtx, vport, &wx, &wy, &wz) 
-  def self.get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
-    puts "HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-    puts "INCOMING: #{[o_x, o_y, o_z]}"
-    # puts method(:gluProject).to_source
-    puts value = gluProject(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
-    # raise 'Stop'
-    return value
-    if false
-      # o_y = o_y * -1
-      # Eye Coordinates
-      viewProjectionMatrix = projectionMatrix * viewMatrix;
-      point3D = viewProjectionMatrix.vector_mult([o_x, o_y, o_z, 1])
-
-
-      x = ((( point3D[0] + 1 ) / 2.0) * screen_width )
-      # x = x / point3D[2]
-      # //we calculate -point3D.getY() because the screen Y axis is
-      # //oriented top->down 
-      y = ((( 1 - point3D[1] ) / 2.0) * screen_height )
-      # y = y / point3D[2]
-      # x = x * 0.1
-      # y = y * 0.1
-      # doesn't point3D[2] do anything? Depth?
-      return [x, y];
-    end
-  end
 
 
   # def self.convert_opengl_to_screen opengl_x, opengl_y, opengl_z, include_adjustments_for_not_exact_opengl_dimensions = false

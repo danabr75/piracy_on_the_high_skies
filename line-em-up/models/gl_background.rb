@@ -802,7 +802,8 @@ class GLBackground
     # Reject here or in game_window, if off of map? Still need to update enemies that can move while off-screen
 
     # ADD BACK IN AFTER MAP FIXED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    relative_objects = update_objects_relative_to_map(@local_map_movement_x, @local_map_movement_y * -1, relative_objects, tile_movement)
+    # Not buildings though, they are updated elsewhere
+    # relative_objects = update_objects_relative_to_map(@local_map_movement_x, @local_map_movement_y * -1, relative_objects, tile_movement)
 
     # relative_objects.reject!{|ro| ro == false }
 
@@ -1209,43 +1210,16 @@ class GLBackground
           # puts glGetFloatv(GL_MODELVIEW_MATRIX)
 
           # puts gluProject(vert_pos1[0], vert_pos1[1], vert_pos1[2],GL_MODELVIEW_MATRIX,GL_PROJECTION_MATRIX)
-          puts "TEST 4"
 
 
           # puts "TEST HERE"
           # puts @map_objects["buildings"]
           # puts "HJAHAHA  #{x_element['gps_x'].to_s} - #{x_element['gps_y'].to_s }"
           # puts @map_objects["buildings"][x_element['gps_y'].to_s]
-          if @map_objects["buildings"] && @map_objects["buildings"][x_element['gps_y'].to_s] && @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s]
-            puts @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s]
-
-            # raise "STOP HERE"
-
-            building_datas = @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s] || []
-
-            building_datas.each do |building_data|
-              klass = eval(building_data["klass_name"])
-              # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
-              # if results
-               puts "ALT DRAWING"
-               puts "opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, x_element['height'], opengl_increment_x, opengl_increment_y"
-               puts "#{opengl_coord_x - opengl_offset_x}, #{opengl_coord_y - opengl_offset_y}, #{x_element['height']}, #{opengl_increment_x}, #{opengl_increment_y}"
-                klass.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
-                puts "HMMMM"
-                # puts glMatrixMode(GL_PROJECTION)
-                # puts glLoadIdentity
-                # projection = glOrtho(0.0, 900, 900, 0.0, 0.0, 1.0);
-                # puts "PROJECTION: #{projection}"
-                puts "END HERE"
-                # puts glOrtho(0, 900, 0, 900)
-                klass.drawv4(vert_pos1[0], vert_pos1[1], vert_pos1[2], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
-                # gluUnProject
-                # klass.drawv5(vert_pos1[0], vert_pos1[1], vert_pos1[2])
-                # klass.alt_alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
-              # else
-              #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
-              # end
-            end
+          @buildings.each do |building|
+            next if building.location_x != x_element['gps_x'] || building.location_y != x_element['gps_y']
+            building.update_from_3D(vert_pos1[0], vert_pos1[1], vert_pos1[2], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            building.class.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
           end
 
           error = glGetError

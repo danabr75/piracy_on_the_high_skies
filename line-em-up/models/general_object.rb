@@ -144,8 +144,6 @@ class GeneralObject
     return is_on_screen?
   end
 
-  protected
-  
   def self.get_max_speed
     self::MAX_SPEED
   end
@@ -412,4 +410,18 @@ class GeneralObject
     return [x_diff, y_diff]
   end
 
+  def update_from_3D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+    x, y, z = convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+    y = @screen_height - y
+    @x = x
+    @y = y
+  end
+
+  def convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+    return self.class.convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+  end
+
+  def self.convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+    return gluProject(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+  end
 end
