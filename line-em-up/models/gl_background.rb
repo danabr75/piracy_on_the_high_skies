@@ -1170,6 +1170,7 @@ class GLBackground
           else
             default_colors = [1, 1, 1, 1]
           end
+          # left-top, left-bottom, right-top, right-bottom
           vert_pos1, vert_pos2, vert_pos3, vert_pos4 = [nil,nil,nil,nil]
           glBegin(GL_TRIANGLE_STRIP)
             glTexCoord2d(info.left, info.top)
@@ -1218,7 +1219,7 @@ class GLBackground
           # puts @map_objects["buildings"][x_element['gps_y'].to_s]
           @buildings.each do |building|
             next if building.location_x != x_element['gps_x'] || building.location_y != x_element['gps_y']
-            building.update_from_3D(vert_pos1[0], vert_pos1[1], vert_pos1[2], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
             building.class.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
           end
 

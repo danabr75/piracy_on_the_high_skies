@@ -410,8 +410,14 @@ class GeneralObject
     return [x_diff, y_diff]
   end
 
-  def update_from_3D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
-    x, y, z = convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+  def update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
+    # left-top, left-bottom, right-top, right-bottom
+    ox = vert0[0] - (vert0[0] - vert2[0])
+    oy = vert2[1] + (vert2[1] - vert3[1])
+    puts "update_from_3D: #{[ox, oy, oz]}"
+    # oz = z
+    oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
+    x, y, z = convert3DTo2D(vert0[0] - (vert0[0] - vert2[0]) / 2, vert2[1] - (vert2[1] - vert3[1]) / 2, oz2, viewMatrix, projectionMatrix, viewport)
     y = @screen_height - y
     @x = x
     @y = y
