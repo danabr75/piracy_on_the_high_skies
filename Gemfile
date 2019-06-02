@@ -32,7 +32,7 @@ gem "glut"
 # gem 'glfw', '1.0.2'
 
 gem "pry"
-
+gem 'sourcify'
 # gem 'rb2exe'
 
 # Project of the Day screenshot

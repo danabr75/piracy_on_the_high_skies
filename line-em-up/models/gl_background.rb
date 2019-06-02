@@ -24,7 +24,7 @@ class GLBackground
   EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
   # HAVE TO BE EVEN NUMBERS
-  VISIBLE_MAP_WIDTH = 4
+  VISIBLE_MAP_WIDTH = 8
   # outside of view padding
 
   # HAVE TO BE EVEN NUMBERS
@@ -34,7 +34,7 @@ class GLBackground
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   # 15 tiles should be on screen
   # HAVE TO BE EVEN NUMBERS
-  VISIBLE_MAP_HEIGHT = 4
+  VISIBLE_MAP_HEIGHT = 8
   # outside of view padding
   # HAVE TO BE EVEN NUMBERS
   EXTRA_MAP_HEIGHT   = 2
@@ -827,6 +827,10 @@ class GLBackground
   end
   
   # include Gl
+  NEAR_VALUE = 1
+  FAR_VALUE  = 100
+  NDC_X_LENGTH  = 0.1
+  NDC_Y_LENGTH  = 0.075
   
   def exec_gl player_x, player_y, projectiles = []
     player_x, player_y = [player_x.to_i, player_y.to_i]
@@ -851,7 +855,16 @@ class GLBackground
 
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity
-    glFrustum(-0.10, 0.10, -0.075, 0.075, 1, 100)
+    # void glFrustum( GLdouble left,
+    #   GLdouble right,
+    #   GLdouble bottom,
+    #   GLdouble top,
+    #   GLdouble nearVal,
+    #   GLdouble farVal);
+
+    # nearVal = 1
+    # farVal = 100
+    glFrustum(-NDC_X_LENGTH, NDC_X_LENGTH, -NDC_Y_LENGTH, NDC_Y_LENGTH, NEAR_VALUE, FAR_VALUE)
     # gluPerspective(45.0, 800 / 600 , 0.1, 100.0)
 
     glMatrixMode(GL_MODELVIEW)
@@ -1028,6 +1041,59 @@ class GLBackground
 
     # SET MAX LIGHTS HERE
     # glGetIntegerv( GL_MAX_LIGHTS, 1 );
+    # @test = true
+
+    # gluProject(world_coords[0], world_coords[1], world_coords[2],
+    # modelview.data(), projection.data(),
+    # screen_coords.data(), screen_coords.data() + 1, screen_coords.data() + 2);
+
+    # test = []
+    # puts 'test111'
+    # puts glGetFloatv(GL_PROJECTION_MATRIX)
+    # puts glGetFloatv(GL_PROJECTION_MATRIX).length
+    # # it's 4 x 4
+    # # 10.0
+    # # 0.0
+    # # 0.0
+    # # 0.0
+
+    # # 0.0
+    # # 13.333333015441895
+    # # 0.0
+    # # 0.0
+
+    # # 0.0
+    # # 0.0
+    # # -1.0202020406723022
+    # # -1.0
+
+    # # -0.0
+    # # -0.0
+    # # -2.0202019214630127
+    # # -0.0
+    # puts 'test222'
+    # puts glGetFloatv(GL_MODELVIEW_MATRIX)
+    # puts glGetFloatv(GL_MODELVIEW_MATRIX).length
+    # # 1.0
+    # # 0.0
+    # # 0.0
+    # # 0.0
+    # # 0.0
+    # # 1.0
+    # # 0.0
+    # # 0.0
+    # # 0.0
+    # # 0.0
+    # # 1.0
+    # # 0.0
+    # # 0.0
+    # # 0.0
+    # # -10.0
+    # # 1.0
+    # puts "test333"
+    # gluProject
+
+
 
     if !@test
       glEnable(GL_TEXTURE_2D)
@@ -1064,102 +1130,33 @@ class GLBackground
           opengl_increment_y = result[:o_h]
 
 
-          if @debug
-            # puts "x_element: #{x_element}"
-            # puts "CONVERTING OPENGL TO SCREEN"
-            # puts "OX: #{opengl_coord_x - opengl_offset_x} = #{opengl_coord_x} - #{opengl_offset_x}"
-            # puts "OY: #{opengl_coord_y - opengl_offset_y} = #{opengl_coord_y} - #{opengl_offset_y}"
-            x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
-            # puts "@font: x, y = #{x}, #{y}"
-            @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", x, @screen_height - y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-            # z = -1
-            # colors = [1, 0.5, 1, 0.5]
-            # glBegin(GL_TRIANGLE_STRIP)
-            #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z]
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-
-            #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z]
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-
-            #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z]
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-
-            #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z]
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-            # glEnd
-            # glBegin(GL_TRIANGLE_STRIP)
-            #   glTexCoord2d(info.left, info.top)
-            #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z]
-            #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-
-            #   glTexCoord2d(info.left, info.bottom)
-            #   vert_pos = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z]
-            #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-
-            #   glTexCoord2d(info.right, info.top)
-            #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z]
-            #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-
-            #   glTexCoord2d(info.right, info.bottom)
-            #   vert_pos = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z]
-            #   colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            #   glColor4d(colors[0], colors[1], colors[2], colors[3])
-            #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-            # glEnd
-          end
-
-          # # convert to 
-          # # split across center index, divided by half of center abs / 2
-          # # (-7 / 3.5) / 2.0
-          # # (-1 / 3.5) / 2.0
-          # # -1
-          # opengl_coord_x = (new_x_index / (tile_row_x_max / 2.0)) / 2
-          # opengl_coord_y = (new_y_index / (tile_row_y_max / 2.0)) / 2
-          # #we're reading the map as left to right, top down. So comes out as: -1, -1 (bottom left), but needs to be -1, 1 (TOP LEFT)
-          # opengl_coord_y = opengl_coord_y * -1
-          # opengl_coord_x = opengl_coord_x * -1
-
-
           
-
-          # z = x_element['height']
-          # z = 0.5# - (0.2 / (x_element['height']))
-          #testing
           info =  @infos[x_element['terrain_index']]
-          # z = x_element['height']
+
           if x_element['corner_heights']
             z = x_element['corner_heights']
           else
             z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
           end
 
-          # puts "XELEMENT: #{x_element}"
-          # puts x_element
-          # raise "STOP"
+          if @debug
+            # puts "x_element: #{x_element}"
+            # puts "CONVERTING OPENGL TO SCREEN"
+            # puts "OX: #{opengl_coord_x - opengl_offset_x} = #{opengl_coord_x} - #{opengl_offset_x}"
+            # puts "OY: #{opengl_coord_y - opengl_offset_y} = #{opengl_coord_y} - #{opengl_offset_y}"
+            # x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
+            # puts "@font: x, y = #{x}, #{y}"
+
+            # get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_width, screen_height)
+            # result = get2dPoint(x, y , x_element["height"], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), @screen_width, @screen_height)
+            # @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", result[0], @screen_height - result[1], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+          end
 
 # XELEMENT: {"height"=>0.570810370974101, "terrain_index"=>0, "corner_heights"=>{"top_left"=>0.5, "top_right"=>0.75, "bottom_left"=>0.75, "bottom_right"=>1.25}, "gps_y"=>128, "gps_x"=>128}
 # {"height"=>0.570810370974101, "terrain_index"=>0, "corner_heights"=>{"top_left"=>0.5, "top_right"=>0.75, "bottom_left"=>0.75, "bottom_right"=>1.25}, "gps_y"=>128, "gps_x"=>128}
 
-          # z = get_surrounding_average_tile_height(x_index, y_index)
-          # puts "puts USING Z: #{z}"
-          # info =  @infos[x_index % 2]
-          # info = @info
-
           glBindTexture(GL_TEXTURE_2D, info.tex_name)
-          # -.5 ... +.5
-          # puts "Z: #{z}"
-          # Center light added in
-          # lights = [{pos: [0,0], brightness: 0.2, radius: 0.3}]
+
           lights = [{pos: [0,0], brightness: 0.4, radius: 0.5}]
           # Too slow.. FPS droppage
           projectiles.each do |p|
@@ -1200,11 +1197,25 @@ class GLBackground
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
           glEnd
+          # puts "TEST5"
+          # puts 'test111'
+          # puts glGetFloatv(GL_PROJECTION_MATRIX)
+          # puts glGetFloatv(GL_PROJECTION_MATRIX).length
+          # puts glGetFloatv(GL_MODELVIEW_MATRIX)
+          # puts glGetFloatv(GL_MODELVIEW_MATRIX).length
+          # puts "test333"
+          # puts "RIGHT HERE"
+          # puts glGetFloatv(GL_MODELVIEW_MATRIX).class
+          # puts glGetFloatv(GL_MODELVIEW_MATRIX)
 
-          puts "TEST HERE"
-          puts @map_objects["buildings"]
-          puts "HJAHAHA  #{x_element['gps_x'].to_s} - #{x_element['gps_y'].to_s }"
-          puts @map_objects["buildings"][x_element['gps_y'].to_s]
+          # puts gluProject(vert_pos1[0], vert_pos1[1], vert_pos1[2],GL_MODELVIEW_MATRIX,GL_PROJECTION_MATRIX)
+          puts "TEST 4"
+
+
+          # puts "TEST HERE"
+          # puts @map_objects["buildings"]
+          # puts "HJAHAHA  #{x_element['gps_x'].to_s} - #{x_element['gps_y'].to_s }"
+          # puts @map_objects["buildings"][x_element['gps_y'].to_s]
           if @map_objects["buildings"] && @map_objects["buildings"][x_element['gps_y'].to_s] && @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s]
             puts @map_objects["buildings"][x_element['gps_y'].to_s][x_element['gps_x'].to_s]
 
@@ -1220,6 +1231,17 @@ class GLBackground
                puts "opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, x_element['height'], opengl_increment_x, opengl_increment_y"
                puts "#{opengl_coord_x - opengl_offset_x}, #{opengl_coord_y - opengl_offset_y}, #{x_element['height']}, #{opengl_increment_x}, #{opengl_increment_y}"
                 klass.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+                puts "HMMMM"
+                # puts glMatrixMode(GL_PROJECTION)
+                # puts glLoadIdentity
+                # projection = glOrtho(0.0, 900, 900, 0.0, 0.0, 1.0);
+                # puts "PROJECTION: #{projection}"
+                puts "END HERE"
+                # puts glOrtho(0, 900, 0, 900)
+                klass.drawv4(vert_pos1[0], vert_pos1[1], vert_pos1[2], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+                # gluUnProject
+                # klass.drawv5(vert_pos1[0], vert_pos1[1], vert_pos1[2])
+                # klass.alt_alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
               # else
               #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
               # end
@@ -1236,9 +1258,135 @@ class GLBackground
     end
   end
  
+  def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_width, screen_height)
+    puts "viewMatrix"
+    viewMatrix.matrix_to_s
+    puts "projectionMatrix"
+    projectionMatrix.matrix_to_s
+    viewProjectionMatrix = projectionMatrix * viewMatrix;
+    # //transform world to clipping coordinates
+    puts "viewProjectionMatrix"
+    puts viewProjectionMatrix.matrix_to_s
+    puts "VECTOR HERE: #{[o_x, o_y, o_z]}"
+    point3D = viewProjectionMatrix.vector_mult([o_x, o_y, o_z, 0.999])
+    x = ((( point3D[0] + 1 ) / 2.0) * screen_width )
+    x = x / point3D[3]
+    # //we calculate -point3D.getY() because the screen Y axis is
+    # //oriented top->down 
+    y = ((( 1 - point3D[1] ) / 2.0) * screen_height )
+    y = y / point3D[3]
+    # doesn't point3D[2] do anything? Depth?
+    puts "RETURNING: #{[x, y]}"
+    return [x, y];
+  end
 
+# def orldToScreen(vector = [1,2,3], )
+#     {
+#       Matrix4 model, proj;
+#       int[] view = new int[4];
 
+#       GL.GetFloat(GetPName.ModelviewMatrix, out model);
+#       GL.GetFloat(GetPName.ProjectionMatrix, out proj);
+#       GL.GetInteger(GetPName.Viewport, view);
 
+#       double wx = 0, wy = 0, wz = 0;
+
+#       int d = Glu.gluProject
+#                       (
+#                         p.X, 
+#                         p.Y, 
+#                         p.Z, 
+#                         model, 
+#                         proj, 
+#                         view, 
+#                         ref wx, 
+#                         ref wy, 
+#                         ref wz
+#                       );
+
+#       return new Point((int)wx, (int)wy);
+#     }
+# int gluProject
+#   (
+#    float objx, 
+#    float objy, 
+#    float objz, 
+#    Matrix4 modelMatrix, 
+#    Matrix4 projMatrix, 
+#    int[] viewport, 
+#    ref double winx, 
+#    ref double winy, 
+#    ref double winz
+#   )
+#   {
+#       Vector4 _in;
+#       Vector4 _out;
+
+#       _in.X = objx;
+#       _in.Y = objy;
+#       _in.Z = objz;
+#       _in.W = 1.0f;
+#       //__gluMultMatrixVecd(modelMatrix, in, out); // Commented out by code author
+#       //__gluMultMatrixVecd(projMatrix, out, in);  // Commented out by code author
+#       //TODO: check if multiplication is in right order
+#       _out = Vector4.Transform(_in, modelMatrix);
+#       _in = Vector4.Transform(_out, projMatrix);
+
+#       if (_in.W == 0.0)
+#         return (0);
+#       _in.X /= _in.W;
+#       _in.Y /= _in.W;
+#       _in.Z /= _in.W;
+#       /* Map x, y and z to range 0-1 */
+#       _in.X = _in.X * 0.5f + 0.5f;
+#       _in.Y = _in.Y * 0.5f + 0.5f;
+#       _in.Z = _in.Z * 0.5f + 0.5f;
+
+#       /* Map x,y to viewport */
+#       _in.X = _in.X * viewport[2] + viewport[0];
+#       _in.Y = _in.Y * viewport[3] + viewport[1];
+
+#       winx = _in.X;
+#       winy = _in.Y;
+#       winz = _in.Z;
+#       return (1);
+#   }
+
+#   test1 = [
+#     [1, 2, 0],
+#     [0, 1, 1],
+#     [2, 0, 1]
+#   ]
+
+#   test2 = [
+#     [1, 1, 2],
+#     [2, 1, 1],
+#     [1, 2, 1]
+#   ]
+#   test3 = test1 * test2
+# # class Array
+# #   def * array2
+# #     max_length = array1.length
+# #     new_array = Array.new(max_length) { Array.new(max_length) { nil } }
+
+# #     # for (c = 0; c < m; c++) {
+# #     (0..max_length - 1) do |c|
+# #       # for (d = 0; d < q; d++) {
+# #       (0..max_length - 1) do |d|
+# #         # for (k = 0; k < p; k++) {
+# #         sum = 0
+# #         (0..max_length - 1) do |k|
+# #           sum += self[c][k] * array2[k][d];
+# #         end
+ 
+# #         new_array[c][d] = sum;
+# #         sum = 0;
+# #       end
+# #     end
+
+# #     return new_array
+# #   end
+# # end
 
   # All coords are in openGL
   # Use light attenuation

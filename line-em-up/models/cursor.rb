@@ -35,13 +35,14 @@ class Cursor < GeneralObject
 
   def draw_gl
     # # Y is reversed?
-    result = convert_screen_to_opengl(@x, @screen_height - (@y), 20, 20)
+    result = convert_screen_to_opengl(@x, @screen_height - (@y), 10, 10)
     opengl_coord_x = result[:o_x]
     opengl_coord_y = result[:o_y]
     opengl_increment_x = result[:o_w]
     opengl_increment_y = result[:o_h]
     puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y} - w and h: #{opengl_increment_x} - #{opengl_increment_y}"
 
+    # z = -10 makes us even at the x axis
     z = -10
 
     colors = [1, 0.5, 1, 1]
@@ -65,6 +66,19 @@ class Cursor < GeneralObject
     glEnd
 
   end
+
+  def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_width, screen_height)
+    viewProjectionMatrix = projectionMatrix * viewMatrix
+    # //transform world to clipping coordinates
+    point3D = viewProjectionMatrix.vector_mult([o_x, o_y, o_z]);
+    x = Math.round((( point3D[0] + 1 ) / 2.0) * screen_width );
+    # //we calculate -point3D.getY() because the screen Y axis is
+    # //oriented top->down 
+    y = Math.round((( 1 - point3D[1] ) / 2.0) * screen_height );
+    # doesn't point3D[2] do anything? Depth?
+    return [x, y];
+  end
+
 
   def convert_screen_to_opengl x, y, w = nil, h = nil
     opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
