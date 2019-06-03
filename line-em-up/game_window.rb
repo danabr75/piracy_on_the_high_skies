@@ -606,10 +606,10 @@ class GameWindow < Gosu::Window
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
         if !@boss_active && !@boss && !@boss_killed
 
-          if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
-              # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-              @pickups << RocketLauncherPickup.new(@scale, @width, @height, @width_scale, @height_scale)
-          end
+          # if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
+          #     # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+          #     @pickups << RocketLauncherPickup.new(@scale, @width, @height, @width_scale, @height_scale)
+          # end
           if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
               # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
               # swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)

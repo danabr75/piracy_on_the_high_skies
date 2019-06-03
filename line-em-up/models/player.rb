@@ -86,12 +86,12 @@ class Player < GeneralObject
       @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
     end
     # Get details from ship
-    # @mass = 90 # Get from ship
-    @mass = 300 # Get from ship
+    @mass = 50 # Get from ship
+    # @mass = 300 # Get from ship
     @current_momentum = 0
-    @max_momentum = @mass # speed here?
-    # @speed = 50 #/ (@mass / 2)
-    @speed = 100 #/ (@mass / 2)
+    @max_momentum = @mass * 3 # speed here?
+    @speed = 3 #/ (@mass / 2)
+    # @speed = 100 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
