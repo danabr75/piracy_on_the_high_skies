@@ -3,11 +3,11 @@ require_relative 'general_object.rb'
 class Pickup < GeneralObject
   POINT_VALUE_BASE = 0
   attr_reader :x, :y
-
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
-    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, nil, nil, nil, nil, options = {})
-    @current_speed = SCROLLING_SPEED * @scale
-  end
+  # def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
+  #   super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_height, map_width, options)
+  #   super(scale, x, y, screen_width, screen_height, width_scale, height_scale, nil, nil, nil, nil, options = {})
+  #   @current_speed = SCROLLING_SPEED * @scale
+  # end
 
   def get_draw_ordering
     ZOrder::Pickups
@@ -20,9 +20,10 @@ class Pickup < GeneralObject
 
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    @y += @current_speed * scroll_factor
+    # @y += @current_speed * scroll_factor
 
-    super(mouse_x, mouse_y)
+    # super(mouse_x, mouse_y)
+    true
   end
 
   def collected_by_player player

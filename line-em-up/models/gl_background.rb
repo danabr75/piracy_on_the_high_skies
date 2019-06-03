@@ -269,9 +269,9 @@ class GLBackground
     @gps_map_center_x =  (@current_map_center_x / (@screen_tile_width)).round
     @gps_map_center_y =  (@current_map_center_y / (@screen_tile_height)).round
 
-    @buildings = []
-    @enemies = []
-    @pickups = []
+    buildings = []
+    enemies = []
+    pickups = []
     puts "@map_objects"
     puts @map_objects.inspect
 
@@ -302,7 +302,7 @@ class GLBackground
             puts "CREATED BUILDING HERE - #{results}"
             if results
               puts "GOT HERE: #{[@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width]}"
-              @buildings << klass.new(@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width, {z: @visible_map[index_h][index_w]['height']})
+              buildings << klass.new(@scale, results[0], results[1], @screen_width, @screen_height, @width_scale, @height_scale, x_index, y_index, @global_map_height, @global_map_width, {z: @visible_map[index_h][index_w]['height']})
             else
               raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
             end
@@ -314,7 +314,7 @@ class GLBackground
     # @only return active objects?
     # Except enemies, cause they can have movement outside of the visible map?
     puts "RETURING BUILDINGS: #{@buildings}"
-    return {enemies: @enemies, pickups: @pickups, buildings: @buildings}
+    return {enemies: enemies, pickups: pickups, buildings: buildings}
   end
 
   def convert_gps_to_screen
@@ -455,7 +455,7 @@ class GLBackground
   end
 
 
-  def update player_x, player_y, relative_objects
+  def update player_x, player_y, buildings, pickups
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
  
@@ -802,7 +802,7 @@ class GLBackground
     # Reject here or in game_window, if off of map? Still need to update enemies that can move while off-screen
 
     # ADD BACK IN AFTER MAP FIXED!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    # Not buildings though, they are updated elsewhere
+    # Not buildings though, they are updated elsewhere - in exec_gl
     # relative_objects = update_objects_relative_to_map(@local_map_movement_x, @local_map_movement_y * -1, relative_objects, tile_movement)
 
     # relative_objects.reject!{|ro| ro == false }
@@ -811,7 +811,7 @@ class GLBackground
     # raise "OFFSET IS OFF @y_bottom_tracker + offset_y != @gps_map_center_y: #{@y_bottom_tracker} + #{offset_y} != #{@gps_map_center_y}" if @y_bottom_tracker  + offset_y != @gps_map_center_y
     # raise "OFFSET IS OFF @x_right_tracker - offset_x != @gps_map_center_x: #{@x_right_tracker} - #{offset_x} != #{@gps_map_center_x}"   if @x_right_tracker   - offset_x != @gps_map_center_x
     # raise "OFFSET IS OFF @x_left_tracker + offset_x != @gps_map_center_x: #{@x_left_tracker} + #{offset_x} != #{@gps_map_center_x}"     if @x_left_tracker    + offset_x != @gps_map_center_x
-    return relative_objects
+    return {pickups: pickups, buildings: buildings}
   end
 
   
@@ -833,7 +833,7 @@ class GLBackground
   NDC_X_LENGTH  = 0.1
   NDC_Y_LENGTH  = 0.075
   
-  def exec_gl player_x, player_y, projectiles = []
+  def exec_gl player_x, player_y, projectiles, buildings, pickups
     player_x, player_y = [player_x.to_i, player_y.to_i]
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)
@@ -1048,54 +1048,6 @@ class GLBackground
     # modelview.data(), projection.data(),
     # screen_coords.data(), screen_coords.data() + 1, screen_coords.data() + 2);
 
-    # test = []
-    # puts 'test111'
-    # puts glGetFloatv(GL_PROJECTION_MATRIX)
-    # puts glGetFloatv(GL_PROJECTION_MATRIX).length
-    # # it's 4 x 4
-    # # 10.0
-    # # 0.0
-    # # 0.0
-    # # 0.0
-
-    # # 0.0
-    # # 13.333333015441895
-    # # 0.0
-    # # 0.0
-
-    # # 0.0
-    # # 0.0
-    # # -1.0202020406723022
-    # # -1.0
-
-    # # -0.0
-    # # -0.0
-    # # -2.0202019214630127
-    # # -0.0
-    # puts 'test222'
-    # puts glGetFloatv(GL_MODELVIEW_MATRIX)
-    # puts glGetFloatv(GL_MODELVIEW_MATRIX).length
-    # # 1.0
-    # # 0.0
-    # # 0.0
-    # # 0.0
-    # # 0.0
-    # # 1.0
-    # # 0.0
-    # # 0.0
-    # # 0.0
-    # # 0.0
-    # # 1.0
-    # # 0.0
-    # # 0.0
-    # # 0.0
-    # # -10.0
-    # # 1.0
-    # puts "test333"
-    # gluProject
-
-
-
     if !@test
       glEnable(GL_TEXTURE_2D)
       # Not sure the next 3 methods do anything
@@ -1199,28 +1151,16 @@ class GLBackground
             glColor4d(colors[0], colors[1], colors[2], colors[3])
             glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
           glEnd
-          # puts "TEST5"
-          # puts 'test111'
-          # puts glGetFloatv(GL_PROJECTION_MATRIX)
-          # puts glGetFloatv(GL_PROJECTION_MATRIX).length
-          # puts glGetFloatv(GL_MODELVIEW_MATRIX)
-          # puts glGetFloatv(GL_MODELVIEW_MATRIX).length
-          # puts "test333"
-          # puts "RIGHT HERE"
-          # puts glGetFloatv(GL_MODELVIEW_MATRIX).class
-          # puts glGetFloatv(GL_MODELVIEW_MATRIX)
 
-          # puts gluProject(vert_pos1[0], vert_pos1[1], vert_pos1[2],GL_MODELVIEW_MATRIX,GL_PROJECTION_MATRIX)
-
-
-          # puts "TEST HERE"
-          # puts @map_objects["buildings"]
-          # puts "HJAHAHA  #{x_element['gps_x'].to_s} - #{x_element['gps_y'].to_s }"
-          # puts @map_objects["buildings"][x_element['gps_y'].to_s]
-          @buildings.each do |building|
+          buildings.each do |building|
             next if building.location_x != x_element['gps_x'] || building.location_y != x_element['gps_y']
             building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
             building.class.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+          end
+
+          pickups.each do |pickup|
+            next if pickup.location_x != x_element['gps_x'] || pickup.location_y != x_element['gps_y']
+            pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 
           error = glGetError

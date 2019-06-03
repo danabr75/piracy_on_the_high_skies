@@ -499,7 +499,9 @@ class GameWindow < Gosu::Window
         @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
-        @gl_background.update(@player.location_x, @player.location_y, @buildings)
+        results = @gl_background.update(@player.location_x, @player.location_y, @buildings, @pickups)
+        @buildings = results[:buildings]
+        @pickups = results[:pickups]
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
@@ -722,7 +724,7 @@ class GameWindow < Gosu::Window
 
   def draw
     # Adding pointer as a opengl coord test
-    @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles + @buildings, @player, @pointer)
+    @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw if @menu
     @footer_bar.draw(@player)

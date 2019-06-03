@@ -45,14 +45,15 @@ class Building < GeneralObject
   end
 
   def drops
-    rand_num = rand(10)
-    if rand(10) == 9
-      [HealthPack.new(@scale, @screen_width, @screen_height, @x, @y)]
-    elsif rand(10) == 8
-      [BombPack.new(@scale, @screen_width, @screen_height, @x, @y)]
-    else
-      [MissilePack.new(@scale, @screen_width, @screen_height, @x, @y)]
-    end
+    # rand_num = rand(10)
+    # if rand(10) == 9
+      [HealthPack.new(@scale, @x, @y, @screen_width, @screen_height, @width_scale, @height_scale, @location_x, @location_y, @map_height, @map_width, {z: @z})]
+      # raise "STOP"
+    # elsif rand(10) == 8
+    #   [BombPack.new(@scale, @screen_width, @screen_height, @x, @y)]
+    # else
+    #   [MissilePack.new(@scale, @screen_width, @screen_height, @x, @y)]
+    # end
   end
 
   def get_draw_ordering
@@ -61,7 +62,8 @@ class Building < GeneralObject
 
   def draw
     # puts "BUILDING DRAW - #{@z}"
-    @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, @z, @width_scale, @height_scale)
+    # No need to have be drawn
+    # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, @z, @width_scale, @height_scale)
   end
 
 
@@ -102,11 +104,11 @@ class Building < GeneralObject
     # DRAWV4 - [0.25, -0.6684166666666838, 1.25]
     # RETURNING2: [562.5, 149.2124999999923, 1]
 
-  def self.drawv4(ox, oy, oz, view_matrix, projection_matrix, viewport)
-    @image3 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building_2.png")
-    x, y, z = convert3DTo2D(ox, oy, oz, view_matrix, projection_matrix, viewport)
-    @image3.draw(x, 900.0 - y, z, 2, 2)
-  end
+  # def self.drawv4(ox, oy, oz, view_matrix, projection_matrix, viewport)
+  #   @image3 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building_2.png")
+  #   x, y, z = convert3DTo2D(ox, oy, oz, view_matrix, projection_matrix, viewport)
+  #   @image3.draw(x, 900.0 - y, z, 2, 2)
+  # end
 
   # def self.drawv5(ox, oy, oz)
   #   oy = oy * -1.0
@@ -245,7 +247,9 @@ class Building < GeneralObject
     #   @y < @screen_height + get_height
     # else
     #   false
+      return true
+    else
+      return false
     end
-    true
   end
 end
