@@ -18,7 +18,7 @@ class DumbProjectile < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
     @initial_angle = initial_angle
     options[:relative_object] = object
     @damage_increase = options[:damage_increase] || 1
@@ -27,7 +27,7 @@ class DumbProjectile < GeneralObject
     #   puts "NEW DUMB PROJECTILE: y- #{object.y}"
     # end
     # raise "WHAT IS GOING ON HERE: #{scale}, #{object.x}, #{object.y}, #{screen_width}, #{screen_height}, #{width_scale}, #{height_scale}, #{location_x}, #{location_y}, #{map_width}, #{map_height},"
-    super(scale, object.x, object.y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options)
+    super(scale, object.x, object.y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, location_x, location_y, map_pixel_width, map_pixel_height, options)
     @current_speed = self.class.get_max_speed * @scale
   end
 
@@ -36,7 +36,7 @@ class DumbProjectile < GeneralObject
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     @y -= @current_speed * scroll_factor
-    @y > 0 && @y < @screen_height
+    @y > 0 && @y < @screen_pixel_height
   end
 
 

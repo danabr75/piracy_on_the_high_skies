@@ -22,8 +22,8 @@ class Missile < Projectile
   #   super(object_groups)
   # end
 
-  # def initialize(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
-  #   super(scale, screen_width, screen_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
+  # def initialize(scale, screen_pixel_width, screen_pixel_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
+  #   super(scale, screen_pixel_width, screen_pixel_height, object, end_point_x, end_point_y, angle_min, angle_max, angle_init, options)
   #   # puts "MYYYY MISSILE ANGLE: #{@angle}"
   # end
   # include Gl
@@ -69,7 +69,7 @@ class Missile < Projectile
 
   def drops
     [
-      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+      SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
     ]
   end
 

@@ -14,14 +14,14 @@ class LaserLauncher < Launcher
   MAX_SPEED      = 15
 
   # def init_projectile init_angle, options
-  #   LaserParticle.new(@scale, @screen_width, @screen_height, self, init_angle, options)
+  #   LaserParticle.new(@scale, @screen_pixel_width, @screen_pixel_height, self, init_angle, options)
   # end
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, map_width, map_height, object, options = {})
-    raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_width, map_height].include?(nil)
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, object, options = {})
+    raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     options[:relative_y_padding] = -(object.image_height_half)
     puts "START LASER BEAM: #{options}"
-    super(scale, screen_width, screen_height, width_scale, height_scale, map_width, map_height, object, options)
+    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, object, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image
@@ -51,7 +51,7 @@ class LaserLauncher < Launcher
         options[:is_head] = true
       end
       raise "MISSING OPTIONS HERE #{initial_angle}, #{location_x}, #{location_y}, #{@screen_map_width}, #{@screen_map_height}" if [initial_angle, location_x, location_y, @screen_map_width, @screen_map_height].include?(nil)
-      projectile = LaserParticle.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, self, initial_angle, location_x, location_y, @screen_map_width, @screen_map_height, options)
+      projectile = LaserParticle.new(@scale, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, self, initial_angle, location_x, location_y, @screen_map_width, @screen_map_height, options)
       @projectiles << projectile
       return projectile
     end
@@ -143,9 +143,9 @@ class LaserLauncher < Launcher
   def draw_gl
     if @inited
       z = ZOrder::Projectile
-      new_width1, new_height1, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x - @image_width_half/8, @y - @image_height_half/2, @screen_width         , @screen_height)
-      new_width2, new_height2, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/8, @screen_width         , @screen_height)
-      new_width3, new_height3, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x + @image_width_half/8, @y - @image_height_half/2, @screen_width         , @screen_height)
+      new_width1, new_height1, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x - @image_width_half/8, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
+      new_width2, new_height2, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/8, @screen_pixel_width         , @screen_pixel_height)
+      new_width3, new_height3, increment_x, increment_y = GeneralObject.convert_x_and_y_to_opengl_coords(@x + @image_width_half/8, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
 
       glEnable(GL_BLEND)
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
@@ -164,10 +164,10 @@ class LaserLauncher < Launcher
       #     image_width_half = image.width  / 2
       #     image_height_half = image.height  / 2
 
-      #     new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - image_width_half/4, @y - image_height_half/2, @screen_width, @screen_height)
-      #     new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - image_width_half/4, furthest_laser_particle.y + image_height_half/2, @screen_width, @screen_height)
-      #     new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + image_width_half/4, @y - image_height_half/2, @screen_width, @screen_height)
-      #     new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + image_width_half/4, furthest_laser_particle.y + image_height_half/2, @screen_width, @screen_height)
+      #     new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - image_width_half/4, @y - image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+      #     new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - image_width_half/4, furthest_laser_particle.y + image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+      #     new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + image_width_half/4, @y - image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+      #     new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + image_width_half/4, furthest_laser_particle.y + image_height_half/2, @screen_pixel_width, @screen_pixel_height)
 
       #     # glEnable(GL_BLEND)
       #     # glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

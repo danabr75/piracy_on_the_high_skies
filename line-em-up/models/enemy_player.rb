@@ -13,8 +13,8 @@ class EnemyPlayer < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/airship1_color1_reverse.png")
   end
 
-  def initialize scale, screen_width, screen_height, x = nil, y = nil, options = {}
-    super(scale, x || rand(screen_width), y || 0, screen_width, screen_height, options)
+  def initialize scale, screen_pixel_width, screen_pixel_height, x = nil, y = nil, options = {}
+    super(scale, x || rand(screen_pixel_width), y || 0, screen_pixel_width, screen_pixel_height, options)
     @cooldown_wait = 0
     @attack_speed = 0.5
     @health = 25
@@ -37,7 +37,7 @@ class EnemyPlayer < GeneralObject
 
   def attack player
     return {
-      projectiles: [EnemyBullet.new(@scale, @screen_width, @screen_height, self)],
+      projectiles: [EnemyBullet.new(@scale, @screen_pixel_width, @screen_pixel_height, self)],
       cooldown: EnemyBullet::COOLDOWN_DELAY
     }
   end
@@ -45,8 +45,8 @@ class EnemyPlayer < GeneralObject
 
   def drops
     [
-      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, @image),
-      Star.new(@scale, @screen_width, @screen_height, @x, @y)
+      SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, @image),
+      Star.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y)
     ]
   end
 
@@ -73,7 +73,7 @@ class EnemyPlayer < GeneralObject
         if rand(2).even?
           @y += get_speed
 
-          @y = @screen_height / 2 if @y > @screen_height / 2
+          @y = @screen_pixel_height / 2 if @y > @screen_pixel_height / 2
         else
           @y -= get_speed
 
@@ -82,14 +82,14 @@ class EnemyPlayer < GeneralObject
       end
       if rand(2).even?
         @x += get_speed
-        @x = @screen_width if @x > @screen_width
+        @x = @screen_pixel_width if @x > @screen_pixel_width
       else
         @x -= get_speed
         @x = 0 + (get_width / 2) if @x < 0 + (get_width / 2)
       end
 
 
-      @y < @screen_height + (get_height / 2)
+      @y < @screen_pixel_height + (get_height / 2)
     else
       false
     end

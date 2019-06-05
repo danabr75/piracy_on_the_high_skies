@@ -1,7 +1,6 @@
 require_relative 'pickup.rb'
 
 class HealthPack < Pickup
-  attr_reader :x, :y
 
   HEALTH_BOOST = 25
 
@@ -26,7 +25,6 @@ class HealthPack < Pickup
     if player.health + value > player.class::MAX_HEALTH 
       player.health = player.class::MAX_HEALTH
     else
-
       player.health += value
     end
   end

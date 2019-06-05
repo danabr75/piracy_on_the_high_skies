@@ -6,11 +6,11 @@ class MapGenerator
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   MAP_DIRECTORY   = File.expand_path('../', __FILE__) + "/../maps"
 
-  attr_accessor :map_height, :map_width, :terrain_image_path, :map_location
+  attr_accessor :map_tile_height, :map_tile_width, :terrain_image_path, :map_location
 
-  def initialize map_save_name, map_height = 1000, map_width = 1000, terrain_image_paths = ["#{MEDIA_DIRECTORY}/earth_0.png", "#{MEDIA_DIRECTORY}/earth.png", "#{MEDIA_DIRECTORY}/earth_2.png"], out_of_bounds_terrain_path = "#{MEDIA_DIRECTORY}/earth_3.png"
-    @screen_map_height         = map_height
-    @screen_map_width          = map_width
+  def initialize map_save_name, map_tile_height = 1000, map_tile_width = 1000, terrain_image_paths = ["#{MEDIA_DIRECTORY}/earth_0.png", "#{MEDIA_DIRECTORY}/earth.png", "#{MEDIA_DIRECTORY}/earth_2.png"], out_of_bounds_terrain_path = "#{MEDIA_DIRECTORY}/earth_3.png"
+    @map_tile_height         = map_tile_height
+    @map_tile_width          = map_tile_width
     @map_location = "#{MAP_DIRECTORY}/#{map_save_name}.txt"
     @terrain_image_paths = terrain_image_paths
     @out_of_bounds_terrain_path = out_of_bounds_terrain_path
@@ -27,10 +27,10 @@ class MapGenerator
     # end
 
     height_rows = []
-    (0..@screen_map_height - 1).each do |y|
+    (0..@map_tile_height - 1).each do |y|
       width_rows = []
-      (0..@screen_map_width - 1).each do |x|
-        if x == 0 || x == @screen_map_width - 1 || y == 0 || y == @screen_map_height - 1 
+      (0..@map_tile_width - 1).each do |x|
+        if x == 0 || x == @map_tile_width - 1 || y == 0 || y == @map_tile_height - 1 
           height = 1 + rand
         else
           height = rand
@@ -40,8 +40,8 @@ class MapGenerator
       height_rows << width_rows
     end
 
-    (-1..@screen_map_height - 1).each do |y_index|
-      (-1..@screen_map_width - 1).each_with_index do |x_index|
+    (-1..@map_tile_height - 1).each do |y_index|
+      (-1..@map_tile_width - 1).each_with_index do |x_index|
         heights = []
         tile_num = 0
 
@@ -50,7 +50,7 @@ class MapGenerator
         # Add TOP LEFT
         local_y_index = y_index
         local_x_index = x_index
-        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @screen_map_height - 1 && local_x_index <= @screen_map_width - 1
+        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @map_tile_height - 1 && local_x_index <= @map_tile_width - 1
           top_left_tile = height_rows[local_y_index][local_x_index]
           heights << top_left_tile[:terrain_index]
           tile_num += 1
@@ -59,7 +59,7 @@ class MapGenerator
         # Top Right
         local_y_index = y_index
         local_x_index = x_index + 1
-        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @screen_map_height - 1 && local_x_index <= @screen_map_width - 1
+        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @map_tile_height - 1 && local_x_index <= @map_tile_width - 1
           top_right_tile = height_rows[local_y_index][local_x_index]
           heights << top_right_tile[:terrain_index]
           tile_num += 1
@@ -68,7 +68,7 @@ class MapGenerator
         # Add Bottom LEFT
         local_y_index = y_index + 1
         local_x_index = x_index
-        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @screen_map_height - 1 && local_x_index <= @screen_map_width - 1
+        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @map_tile_height - 1 && local_x_index <= @map_tile_width - 1
           bottom_left_tile = height_rows[local_y_index][local_x_index]
           heights << bottom_left_tile[:terrain_index]
           tile_num += 1
@@ -77,7 +77,7 @@ class MapGenerator
         # Add Bottom RIGHT
         local_y_index = y_index + 1
         local_x_index = x_index + 1
-        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @screen_map_height - 1 && local_x_index <= @screen_map_width - 1
+        if local_y_index >= 0 && local_x_index >= 0 && local_y_index <= @map_tile_height - 1 && local_x_index <= @map_tile_width - 1
           bottom_right_tile = height_rows[local_y_index][local_x_index]
           heights << bottom_right_tile[:terrain_index]
           tile_num += 1
@@ -94,7 +94,7 @@ class MapGenerator
 
     data = {
       terrains: @terrain_image_paths, out_of_bounds_terrain_path: @out_of_bounds_terrain_path,
-      map_width: @screen_map_width, map_height: @screen_map_height,
+      map_tile_width: @map_tile_width, map_tile_height: @map_tile_height,
       data: height_rows
     }
     File.open(@map_location, 'w') do |f|

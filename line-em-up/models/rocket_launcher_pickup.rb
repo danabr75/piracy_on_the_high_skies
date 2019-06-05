@@ -4,10 +4,10 @@ class RocketLauncherPickup < Pickup
 
   NAME = 'rocket_launcher'
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
-    @x = x || rand(screen_width)
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, x = nil, y = nil, options = {})
+    @x = x || rand(screen_pixel_width)
     @y = y || 0
-    super(scale, screen_width, screen_height, width_scale, height_scale, @x, @y, options)
+    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, @x, @y, options)
   end
 
   def get_image

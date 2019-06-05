@@ -19,9 +19,9 @@ class SemiGuidedMissile < Projectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/tiny_missile.png")
   end
 
-  def initialize(scale, screen_width, screen_height, object, homing_object, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, object, homing_object, angle_min = nil, angle_max = nil, angle_init = nil, options = {})
     options[:relative_object] = object
-    super(scale, screen_width, screen_height, object, homing_object.x, homing_object.y, angle_min, angle_max, angle_init, options)
+    super(scale, screen_pixel_width, screen_pixel_height, object, homing_object.x, homing_object.y, angle_min, angle_max, angle_init, options)
     @health = 5
     # puts "CUSTOM DELAY: #{@custom_initial_delay}"
   end
@@ -36,7 +36,7 @@ class SemiGuidedMissile < Projectile
 
   def drops
     [
-      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+      SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
     ]
   end
 

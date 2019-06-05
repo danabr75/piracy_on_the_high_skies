@@ -174,9 +174,9 @@ class GameWindow < Gosu::Window
     # @max_enemies = 4
     @max_enemies = 0
 
-    @pointer = Cursor.new(@scale, @width, @height, @width_scale, @height_scale)
+    @pointer = Cursor.new(@width, @height, @width_scale, @height_scale)
     @ui_y = 0
-    @footer_bar = FooterBar.new(@scale, @width, @height, @width_scale, @height_scale)
+    @footer_bar = FooterBar.new(@width, @height, @width_scale, @height_scale)
     reset_font_ui_y
 
     # @boss_active_at_enemies_killed = 500
@@ -200,18 +200,18 @@ class GameWindow < Gosu::Window
     #   {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
 
     @player = Player.new(
-      @scale, @width / 2, @height / 2, @width, @height,
+      @width, @height,
       @width_scale, @height_scale,
-      @gl_background.screen_map_width.to_i / 2, @gl_background.screen_map_height.to_i / 2,
-      @gl_background.screen_map_width.to_i, @gl_background.screen_map_height.to_i,
+      #(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
+      nil, nil,
+      @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2,
+      @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       {
         handicap: @handicap, max_movable_height: @height - @footer_bar.height,
         tile_width: @gl_background.screen_tile_width, tile_height: @gl_background.screen_tile_height
       }
     )
-    @gl_background.current_map_center_x = @player.location_x
-    @gl_background.current_map_center_y = @player.location_y
-    values = @gl_background.init_map
+    values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
 
     @scroll_factor = 1
@@ -499,9 +499,11 @@ class GameWindow < Gosu::Window
         @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
-        results = @gl_background.update(@player.location_x, @player.location_y, @buildings, @pickups)
+        results = @gl_background.update(@player, @player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @projectiles, @enemy_projectiles)
         @buildings = results[:buildings]
         @pickups = results[:pickups]
+        @enemy_projectiles = results[:enemy_projectiles]
+        @projectiles = results[:projectiles]
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0

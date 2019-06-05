@@ -20,8 +20,8 @@ class Mothership < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/mothership.png")
   end
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, options = {})
-    super(scale, screen_width / 2, get_image.height, screen_width, screen_height, width_scale, height_scale, options)
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, options = {})
+    super(scale, screen_pixel_width / 2, get_image.height, screen_pixel_width, screen_pixel_height, width_scale, height_scale, options)
 
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
@@ -55,9 +55,9 @@ class Mothership < GeneralObject
   def attack player
     return {
       projectiles: [
-        EnemyBullet.new(@scale, @screen_width, @screen_height, self, {side: 'left',  relative_object: self }),
-        EnemyBullet.new(@scale, @screen_width, @screen_height, self, {side: 'right', relative_object: self }),
-        EnemyBullet.new(@scale, @screen_width, @screen_height, self)
+        EnemyBullet.new(@scale, @screen_pixel_width, @screen_pixel_height, self, {side: 'left',  relative_object: self }),
+        EnemyBullet.new(@scale, @screen_pixel_width, @screen_pixel_height, self, {side: 'right', relative_object: self }),
+        EnemyBullet.new(@scale, @screen_pixel_width, @screen_pixel_height, self)
       ],
       cooldown: EnemyBullet::COOLDOWN_DELAY
     }
@@ -67,8 +67,8 @@ class Mothership < GeneralObject
     return {
       projectiles: [
         # relative_object not required yet for these
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self }),
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self })
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self }),
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self })
       ],
       cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }
@@ -77,7 +77,7 @@ class Mothership < GeneralObject
 
   def tertiary_attack player
     return {
-      projectiles: [EnemyBomb.new(@scale, @screen_width, @screen_height, self, player.x, player.y)],
+      projectiles: [EnemyBomb.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player.x, player.y)],
       cooldown: EnemyBomb::COOLDOWN_DELAY
     }
   end
@@ -85,7 +85,7 @@ class Mothership < GeneralObject
 
   def drops
     [
-      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, @image)
+      SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, @image)
       # Star.new(@scale, @x, @y)
     ]
   end
@@ -111,7 +111,7 @@ class Mothership < GeneralObject
         if rand(2).even?
           @y += @current_speed
 
-          @y = @screen_height / 2 if @y > @screen_height / 2
+          @y = @screen_pixel_height / 2 if @y > @screen_pixel_height / 2
         else
           @y -= @current_speed
 
@@ -120,13 +120,13 @@ class Mothership < GeneralObject
       end
       if rand(2).even?
         @x += @current_speed
-        @x = @screen_width if @x > @screen_width
+        @x = @screen_pixel_width if @x > @screen_pixel_width
       else
         @x -= @current_speed
         @x = 0 + (get_width / 2) if @x < 0 + (get_width / 2)
       end
 
-      @y < @screen_height + (get_height / 2)
+      @y < @screen_pixel_height + (get_height / 2)
     else
       false
     end

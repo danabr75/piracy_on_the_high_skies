@@ -5,13 +5,13 @@ require_relative 'pickup.rb'
 class Star < Pickup
   POINT_VALUE_BASE = 2
   
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, x = nil, y = nil, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, x = nil, y = nil, options = {})
     # @scale = scale
     # @image = get_image
     # @time_alive = 0
-    @x = x || rand(screen_width)
+    @x = x || rand(screen_pixel_width)
     @y = y || 0
-    super(scale, screen_width, screen_height, width_scale, height_scale, @x, @y, options)
+    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, @x, @y, options)
     @color = Gosu::Color.new(0xff_000000)
     @color.red = rand(255 - 40) + 40
     @color.green = rand(255 - 40) + 40

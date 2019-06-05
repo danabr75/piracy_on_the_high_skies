@@ -1,7 +1,10 @@
 require 'securerandom'
 class GeneralObject
   attr_accessor :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
-  attr_accessor :location_x, :location_y
+  attr_accessor :current_map_pixel_x, :current_map_pixel_y
+  attr_accessor :current_map_tile_x,  :current_map_tile_y
+  attr_accessor :x_offset, :y_offset
+  # attr_accessor :x_offset_base, :y_offset_base
   LEFT  = 'left'
   RIGHT = 'right'
   SCROLLING_SPEED = 4
@@ -23,65 +26,35 @@ class GeneralObject
     self.class.get_image_path
   end
 
-  # X and Y are place on screen.
+  # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
+  # # Nevermind, they are useful for figuring out first-time placement
+  # X and Y are place on screen. Maybe have the objects themselves figure out where the x and y is... based on other data.
+  # Location Y and X are used when fixed to ground tiles
   # Location Y and X are where they are on GPS
+  # screen_x and screen_y are used when object is fixed to the map, but are 2D, not 3D.
   # Scale has been deprecated in favor of height scale and width scale.
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
-    # @tile_width  = options[:tile_width]
-    # @tile_height = options[:tile_height]
-    param_names = %w[width_scale, height_scale]
-    [width_scale, height_scale].each_with_index do |param, index|
-      raise "Parameter was not a Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != NilClass
-    end
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
+    # validate_array([], self.class.name, __callee__)
+    # validate_string([], self.class.name, __callee__)
+    # validate_float([], self.class.name, __callee__)
+    # validate_int([], self.class.name, __callee__)
+    # validate_not_nil([], self.class.name, __callee__)
 
-    param_names = %w[screen_width, screen_height, map_height, map_width]
-    [screen_width, screen_height, map_height, map_width].each_with_index do |param, index|
-      raise "Parameter was not an Integer. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Integer && param.class != NilClass
-    end
-
-    param_names = %w[x, y, location_x, location_y]
-    [x, y, location_x, location_y].each_with_index do |param, index|
-      raise "Parameter was not an Integer Or Float. Found for parameter: #{param_names[index]} the following value: #{param}" if param.class != Float && param.class != Integer && param.class != NilClass
-    end
-
-    # raise "ISSUE WITH GO" if map_height.nil?
+    validate_float([width_scale, height_scale],  self.class.name, __callee__)
+    validate_int([screen_pixel_width, screen_pixel_height], self.class.name, __callee__)
+    validate_not_nil([width_scale, height_scale, screen_pixel_width, screen_pixel_height], self.class.name, __callee__)
 
     @width_scale  = width_scale
     @height_scale = height_scale
-    @screen_map_height = map_height
-    @screen_map_width  = map_width
-    # Only use ID in debug\test
-    @location_x = location_x # Override?
-    @location_y = location_y # Override?
+
+    @screen_pixel_width  = screen_pixel_width
+    @screen_pixel_height = screen_pixel_height
+
     @id    = SecureRandom.uuid
-    @scale = scale
     @image = options[:image] || get_image
-
-
-    if options[:relative_object]
-      if LEFT == options[:side]
-        @x = options[:relative_object].x - (options[:relative_object].get_width / 2)
-        @y = options[:relative_object].y
-      elsif RIGHT == options[:side]
-        @x = (options[:relative_object].x + options[:relative_object].get_width / 2)
-        @y = options[:relative_object].y
-      else
-        @x = options[:relative_object].x
-        @y = options[:relative_object].y
-      end
-    else
-      @x = x
-      @y = y
-    end
-    @x = @x + options[:relative_x_padding] if options[:relative_x_padding]
-    @y = @y + options[:relative_y_padding] if options[:relative_y_padding]
-    # if options[:relative_y_padding]
-      # puts "options[:relative_y_padding]: #{options[:relative_y_padding]}"
-    # end
 
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
-    @health = 0
     @image_width  = @image.width  * (@width_scale || @scale)
     @image_height = @image.height * (@height_scale || @scale)
     @image_size   = @image_width  * @image_height / 2
@@ -90,12 +63,27 @@ class GeneralObject
     @image_width_half  = @image_width  / 2
     @image_height_half = @image_height / 2
 
-
-
-    @screen_width  = screen_width
-    @screen_height = screen_height
-    @off_screen = screen_height + screen_height
     @inited = true
+    # Don't need these values assigned.
+    @x = -50
+    @y = -50
+    # Not sure if keeping these
+    @x_offset = 0
+    @y_offset = 0
+  end   
+
+  def get_x_with_offset
+    @x + (@x_offset)
+  end
+
+  def get_y_with_offset
+    @y + (@y_offset)
+  end
+
+  # For enemies and projectiles... maybe using this
+  def update_offsets x_offset, y_offset
+    @x_offset = x_offset
+    @y_offset = y_offset
   end
 
   # If using a different class for ZOrder than it has for model name, or if using subclass (from subclass or parent)
@@ -137,6 +125,21 @@ class GeneralObject
     @image_radius
   end
 
+  def is_alive
+    @health > 0
+  end
+
+  def take_damage damage
+    @health -= damage
+  end
+
+  HEALTH = 0
+
+  def self.get_initial_health
+    self::HEALTH
+  end
+
+
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
@@ -150,7 +153,7 @@ class GeneralObject
 
   def is_on_screen?
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
-    @y > (0 - get_height) && @y < (@screen_height + get_height) && @x > (0 - get_width) && @x < (@screen_width + get_width)
+    @y > (0 - get_height) && @y < (@screen_pixel_height + get_height) && @x > (0 - get_width) && @x < (@screen_pixel_width + get_width)
   end
 
 
@@ -269,13 +272,13 @@ class GeneralObject
     GeneralObject.nearest_angle(angle, min_angle, max_angle)
   end
 
-# # new_pos_x = @x / @screen_width.to_f * (AXIS_X_MAX - AXIS_X_MIN) + AXIS_X_MIN;
-# # new_pos_y = (1 - @y / @screen_height.to_f) * (AXIS_Y_MAX - AXIS_Y_MIN) + AXIS_Y_MIN;
+# # new_pos_x = @x / @screen_pixel_width.to_f * (AXIS_X_MAX - AXIS_X_MIN) + AXIS_X_MIN;
+# # new_pos_y = (1 - @y / @screen_pixel_height.to_f) * (AXIS_Y_MAX - AXIS_Y_MIN) + AXIS_Y_MIN;
 #   # This isn't exactly right, objects are drawn farther away from center than they should be.
 #   def convert_x_and_y_to_opengl_coords
 #     # Don't have to recalce these 4 variables on each draw, save to singleton somewhere?
-#     middle_x = (@screen_width.to_f) / 2.0
-#     middle_y = (@screen_height.to_f) / 2.0
+#     middle_x = (@screen_pixel_width.to_f) / 2.0
+#     middle_y = (@screen_pixel_height.to_f) / 2.0
 #     increment_x = 1.0 / middle_x
 #     increment_y = 1.0 / middle_y
 #     new_pos_x = (@x.to_f - middle_x) * increment_x
@@ -290,10 +293,10 @@ class GeneralObject
 
   # This isn't exactly right, objects are drawn farther away from center than they should be.
   def convert_x_and_y_to_opengl_coords
-    middle_x = @screen_width / 2
-    middle_y = @screen_height / 2
+    middle_x = @screen_pixel_width / 2
+    middle_y = @screen_pixel_height / 2
 
-    ratio = @screen_width.to_f / (@screen_height.to_f)
+    ratio = @screen_pixel_width.to_f / (@screen_pixel_height.to_f)
 
     increment_x = (ratio / middle_x) * 0.97
     # The zoom issue maybe, not quite sure why we need the Y offset.
@@ -307,11 +310,11 @@ class GeneralObject
     return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
-  def self.convert_x_and_y_to_opengl_coords(x, y, screen_width, screen_height)
-    middle_x = screen_width.to_f / 2.0
-    middle_y = screen_height.to_f / 2.0
+  def self.convert_x_and_y_to_opengl_coords(x, y, screen_pixel_width, screen_pixel_height)
+    middle_x = screen_pixel_width.to_f / 2.0
+    middle_y = screen_pixel_height.to_f / 2.0
 
-    ratio = screen_width.to_f / screen_height.to_f
+    ratio = screen_pixel_width.to_f / screen_pixel_height.to_f
 
     increment_x = (ratio / middle_x) * 0.97
     # The zoom issue maybe, not quite sure why we need the Y offset.
@@ -325,7 +328,7 @@ class GeneralObject
 
 
   def y_is_on_screen
-    @y >= 0 && @y <= @screen_height
+    @y >= 0 && @y <= @screen_pixel_height
   end
 
   def collision_triggers
@@ -339,9 +342,9 @@ class GeneralObject
 
   def movement speed, angle
     raise " NO SCALE PRESENT FOR MOVEMENT" if @width_scale.nil? || @height_scale.nil?
-    raise " NO LOCATION PRESENT" if @location_x.nil? || @location_y.nil?
+    raise " NO LOCATION PRESENT" if @current_map_pixel_x.nil? || @current_map_pixel_y.nil?
     # puts "MOVEMENT: #{speed}, #{angle}"
-    # puts "PLAYER MOVEMENT map size: #{@screen_map_width} - #{@screen_map_height}"
+    # puts "PLAYER MOVEMENT map size: #{@map_pixel_width} - #{@map_pixel_height}"
     base = speed# / 100.0
     base = base * ((@width_scale + @height_scale) / 2.0)
     # @width_scale  = width_scale
@@ -353,35 +356,35 @@ class GeneralObject
     step = (Math::PI/180 * (angle + 90))# - 180
     # puts "BASE HERE: #{base}"
     # puts "STEP HERE: #{step}"
-    # puts "_____ #{@location_x}   -    #{@location_y}"
-    new_x = Math.cos(step) * base + @location_x
-    new_y = Math.sin(step) * base + @location_y
+    # puts "_____ #{@location_x}   -    #{@current_map_pixel_y}"
+    new_x = Math.cos(step) * base + @current_map_pixel_x
+    new_y = Math.sin(step) * base + @current_map_pixel_y
     # puts "PRE MOVE: #{new_x} x #{new_y}"
     # new_x = new_x * @width_scale
     # new_y = new_y * @height_scale
     # puts "POST MOVE: #{new_x} x #{new_y}"
-    x_diff = (@location_x - new_x) * -1
-    y_diff = @location_y - new_y
+    x_diff = (@current_map_pixel_x - new_x) * -1
+    y_diff = @current_map_pixel_y - new_y
 
-    # puts "(#{@location_y} - #{y_diff}) > #{@screen_map_height}"
-    # puts "@screen_map_height: #{@screen_map_height}"
+    # puts "(#{@current_map_pixel_y} - #{y_diff}) > #{@map_pixel_height}"
+    # puts "@map_pixel_height: #{@map_pixel_height}"
     # if @tile_width && @tile_height
 
-      if (@location_y - y_diff) > @screen_map_height
+      if (@current_map_pixel_y - y_diff) > @map_pixel_height
         # Block progress along top of map Y 
         puts "Block progress along top of map Y "
-        y_diff = y_diff - ((@location_y + y_diff) - @location_y)
-      elsif @location_y - y_diff < 0
+        y_diff = y_diff - ((@current_map_pixel_y + y_diff) - @current_map_pixel_y)
+      elsif @current_map_pixel_y - y_diff < 0
         # Block progress along bottom of map Y 
         puts "Block progress along bottom of map Y "
-        y_diff = y_diff + (@location_y + y_diff)
+        y_diff = y_diff + (@current_map_pixel_y + y_diff)
       end
 
-      if @location_x - x_diff > @screen_map_width
-        # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@screen_map_width}"
-        x_diff = x_diff - ((@location_x + x_diff) - @location_x)
-      elsif @location_x - x_diff < 0
-        x_diff = x_diff + (@location_x + x_diff)
+      if @current_map_pixel_x - x_diff > @map_pixel_width
+        # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_pixel_width}"
+        x_diff = x_diff - ((@current_map_pixel_x + x_diff) - @current_map_pixel_x)
+      elsif @current_map_pixel_x - x_diff < 0
+        x_diff = x_diff + (@current_map_pixel_x + x_diff)
       end
 
     # else
@@ -392,17 +395,17 @@ class GeneralObject
 
     # puts "MOVEMNET: #{x_diff.round(3)} - #{y_diff.round(3)}"
 
-    @location_y -= y_diff
-    @location_x -= x_diff
+    @current_map_pixel_y -= y_diff
+    @current_map_pixel_x -= x_diff
 
     # Block elements from going off map. Not really working here... y still builds up.
-    # if @location_y > @screen_map_height
-    #   @location_y = @screen_map_height
+    # if @location_y > @map_pixel_height
+    #   @location_y = @map_pixel_height
     # elsif @location_y < 0
     #   @location_y = 0
     # end
-    # if @location_x > @screen_map_width
-    #   @location_x = @screen_map_width
+    # if @location_x > @map_pixel_width
+    #   @location_x = @map_pixel_width
     # elsif @location_x < 0
     #   @location_x = 0
     # end
@@ -414,11 +417,11 @@ class GeneralObject
     # left-top, left-bottom, right-top, right-bottom
     ox = vert0[0] - (vert0[0] - vert2[0])
     oy = vert2[1] + (vert2[1] - vert3[1])
-    puts "update_from_3D: #{[ox, oy, oz]}"
+    # puts "update_from_3D: #{[ox, oy, oz]}"
     # oz = z
     oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
     x, y, z = convert3DTo2D(vert0[0] - (vert0[0] - vert2[0]) / 2, vert2[1] - (vert2[1] - vert3[1]) / 2, oz2, viewMatrix, projectionMatrix, viewport)
-    y = @screen_height - y
+    y = @screen_pixel_height - y
     @x = x
     @y = y
   end
@@ -429,5 +432,34 @@ class GeneralObject
 
   def self.convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
     return gluProject(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+  end
+
+  def validate_array parameters, klass_name, method_name
+    validate(parameters, method_name, klass_name, Array)
+  end
+
+  def validate_string parameters, klass_name, method_name
+    validate(parameters, method_name, klass_name, String)
+  end
+
+  def validate_float parameters, klass_name, method_name
+    validate(parameters, method_name, klass_name, Float)
+  end
+
+  def validate_int parameters, klass_name, method_name
+    validate(parameters, method_name, klass_name, Integer)
+  end
+
+  def validate_not_nil parameters, klass_name, method_name
+    parameters.each_with_index do |param, index|
+      raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected not Nil. Got Nil" if param.nil?
+    end
+  end
+
+  def validate parameters, method_name, klass_name, class_type
+    parameters.each_with_index do |param, index|
+      next if param.nil?
+      raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class}" if param.class != class_type
+    end
   end
 end

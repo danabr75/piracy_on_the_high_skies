@@ -37,15 +37,15 @@ class Bullet < DumbProjectile
     @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
   end
 
-  def initialize(scale, screen_width, screen_height, object, options = {})
-    super(scale, screen_width, screen_height, width_scale, height_scale, object, options)
+  def initialize(scale, screen_pixel_width, screen_pixel_height, object, options = {})
+    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, options)
   end
 
   # def convert_x_and_y_to_opengl_coords
   #   # Don't have to recalce these 4 variables on each draw, save to singleton somewhere?
-  #   middle_x = @screen_width / 2
-  #   puts "CREEN HIEGHT: #{ @screen_height}"
-  #   middle_y = @screen_height / 2
+  #   middle_x = @screen_pixel_width / 2
+  #   puts "CREEN HIEGHT: #{ @screen_pixel_height}"
+  #   middle_y = @screen_pixel_height / 2
   #   increment_x = 1.0 / middle_x
   #   increment_y = 1.0 / middle_y
   #   new_pos_x = (@x - middle_x) * increment_x
@@ -89,10 +89,10 @@ class Bullet < DumbProjectile
   def draw_gl
 #     height = 20 * @scale
 #     width = 30 * @scale
-#     new_pos_x, new_pos_y, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x, @y, @screen_width, @screen_height)
-#     new_width1, new_height1, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x + width / 2, @y, @screen_width, @screen_height)
-#     new_width2, new_height2, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x, @y + height, @screen_width, @screen_height)
-#     new_width3, new_height3, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x - width / 2, @y, @screen_width, @screen_height)
+#     new_pos_x, new_pos_y, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x, @y, @screen_pixel_width, @screen_pixel_height)
+#     new_width1, new_height1, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x + width / 2, @y, @screen_pixel_width, @screen_pixel_height)
+#     new_width2, new_height2, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x, @y + height, @screen_pixel_width, @screen_pixel_height)
+#     new_width3, new_height3, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x - width / 2, @y, @screen_pixel_width, @screen_pixel_height)
 
 #     # height = 55 * increment_y * @scale
 #     # width  = 55 * increment_x * @scale
@@ -117,9 +117,9 @@ class Bullet < DumbProjectile
 #     #   glVertex3f(new_width2, new_height1 + 0.1, 0.0)
 #     # glEnd
 
-#     new_width1, new_height1, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x - width / 2, @y + height, @screen_width         , @screen_height)
-#     new_width2, new_height2, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x            , @y         , @screen_width, @screen_height)
-#     new_width3, new_height3, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x + width / 2, @y + height, @screen_width         , @screen_height)
+#     new_width1, new_height1, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x - width / 2, @y + height, @screen_pixel_width         , @screen_pixel_height)
+#     new_width2, new_height2, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x            , @y         , @screen_pixel_width, @screen_pixel_height)
+#     new_width3, new_height3, increment_x, increment_y = Bullet.convert_x_and_y_to_opengl_coords(@x + width / 2, @y + height, @screen_pixel_width         , @screen_pixel_height)
 #     glBegin(GL_TRIANGLES)
 #       glColor4f(0.5, 1, 0.5, get_draw_ordering)
 #       glVertex3f(new_width1, new_height1, 0.0)

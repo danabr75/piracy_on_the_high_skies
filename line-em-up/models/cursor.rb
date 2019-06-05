@@ -8,15 +8,15 @@ class Cursor < GeneralObject
   end
 
   
-  def initialize scale, screenx, screeny, width_scale, height_scale
+  def initialize screenx, screeny, width_scale, height_scale
     @width_scale  = width_scale
     @height_scale = height_scale
-    @screen_width  = screenx
-    @screen_height = screeny
-    @scale = scale
+    @screen_pixel_width  = screenx
+    @screen_pixel_height = screeny
+    @scale = (height_scale + width_scale) / 2
     @image = get_image
-    @image_width  = @image.width  * @scale
-    @image_height = @image.height * @scale
+    @image_width  = @image.width  * width_scale
+    @image_height = @image.height * height_scale
     @image_width_half  = @image_width  / 2
     @image_height_half = @image_height / 2
     @x = 0
@@ -35,12 +35,12 @@ class Cursor < GeneralObject
 
   def draw_gl
     # # Y is reversed?
-    result = convert_screen_to_opengl(@x, @screen_height - (@y), 10, 10)
+    result = convert_screen_to_opengl(@x, @screen_pixel_height - (@y), 10, 10)
     opengl_coord_x = result[:o_x]
     opengl_coord_y = result[:o_y]
     opengl_increment_x = result[:o_w]
     opengl_increment_y = result[:o_h]
-    puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y} - w and h: #{opengl_increment_x} - #{opengl_increment_y}"
+    # puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y} - w and h: #{opengl_increment_x} - #{opengl_increment_y}"
 
     # z = -10 makes us even at the x axis
     z = -10
@@ -67,7 +67,7 @@ class Cursor < GeneralObject
 
   end
 
-  def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_width, screen_height)
+  def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
     viewProjectionMatrix = projectionMatrix * viewMatrix
     # //transform world to clipping coordinates
     point3D = viewProjectionMatrix.vector_mult([o_x, o_y, o_z]);
@@ -81,13 +81,13 @@ class Cursor < GeneralObject
 
 
   def convert_screen_to_opengl x, y, w = nil, h = nil
-    opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
+    opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
     # opengl_x   = opengl_x * 1.2 # Needs to be boosted for some odd reason - Screen is not entirely 1..-1
-    opengl_y   = ((y / (@screen_height.to_f)) * 2.0) - 1
+    opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
     # opengl_y   = opengl_y * 0.92
     if w && h
-      open_gl_w  = ((w / (@screen_width.to_f )) * 2.0)
-      open_gl_h  = ((h / (@screen_height.to_f )) * 2.0)
+      open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
+      open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
       return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
     else
       return {o_x: opengl_x, o_y: opengl_y}
@@ -96,9 +96,9 @@ class Cursor < GeneralObject
 
   # THESE ARE ON-SCREEN COORDS, NOT OPENGL COORDS
   def convert_x_and_y_to_opengl_coords
-    middle_x = @screen_width.to_f / 2.0
+    middle_x = @screen_pixel_width.to_f / 2.0
 
-    middle_y = @screen_height.to_f / 2.0
+    middle_y = @screen_pixel_height.to_f / 2.0
     increment_x = 1.0 / middle_x
     # The zoom issue maybe, not quite sure why we need the Y offset.
     increment_y = (1.0 / middle_y)

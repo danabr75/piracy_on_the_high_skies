@@ -27,9 +27,23 @@ class PilotableShip < GeneralObject
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, angle, map_width, map_height, options = {})
+  # BasicShip.new(screen_pixel_width, screen_pixel_height, width_scale, height_scale, options)
+  def initialize(x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, angle = nil, options = {})
+    # validate_array([], self.class.name, __callee__)
+    # validate_string([], self.class.name, __callee__)
+    # validate_float([], self.class.name, __callee__)
+    # validate_int([], self.class.name, __callee__)
+    # validate_not_nil([], self.class.name, __callee__)
+
+    validate_int([x, y, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle], self.class.name, __callee__)
+    validate_float([width_scale, height_scale], self.class.name, __callee__)
+    validate_not_nil([x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height], self.class.name, __callee__)
+
+
+    @x = x
+    @y = y
     puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
-    @angle = angle
+    @angle = angle || 0
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
     # @right_image = self.class.get_right_image(path)
@@ -43,11 +57,11 @@ class PilotableShip < GeneralObject
       @image = self.class.get_image(path)
     end
     options[:image] = @image
-    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, nil, nil, map_width, map_height, options)
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
     # Top of screen
-    @min_moveable_height = options[:min_moveable_height] || 0
+    # @min_moveable_height = options[:min_moveable_height] || 0
     # Bottom of the screen
-    @max_movable_height = options[:max_movable_height] || screen_height
+    # @max_movable_height = options[:max_movable_height] || screen_pixel_height
     @score = 0
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
@@ -96,8 +110,11 @@ class PilotableShip < GeneralObject
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-      @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_width, map_height, options)
-      # @front_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
+      @front_hard_points << Hardpoint.new(
+        x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0),
+        location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options
+      )
+      # @front_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
     end
     # puts "Front hard points"
     self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
@@ -105,18 +122,18 @@ class PilotableShip < GeneralObject
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'right_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
         options[:image_angle] = 90
-        # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-        @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_width, map_height, options)
+        # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+        @right_broadside_hard_points << Hardpoint.new(x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options)
       # else
-      #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+      #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
     end
     self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
-      # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
+      # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'left_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
       options[:image_angle] = 270
-      @left_broadside_hard_points << Hardpoint.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_width, map_height, options)
+      @left_broadside_hard_points << Hardpoint.new(x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options)
     end
     @theta = nil
   end
@@ -125,11 +142,6 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_counterclockwise angle_increment
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        # hp.increment_angle
-        # hp.x = Math.cos(hp.angle) * hp.radius + @x
-        # hp.y = Math.sin(hp.angle) * hp.radius + @y
-        # puts "ID: #{hp.id}"
-        # puts "PRE - CC ANGLE: #{hp.angle}"
         step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
         # step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
@@ -138,12 +150,6 @@ class PilotableShip < GeneralObject
         hp.increment_angle(angle_increment)
         # puts "POST - CC ANGLE: #{hp.angle}"
 
-
-        # hp.image_angle = (hp.image_angle || 0) - 1
-        # hp_y_offset = hp.y_offset
-        # hp_x_offset = hp.x_offset
-        # hp.y_offset = hp_x_offset * -1
-        # hp.x_offset = hp_y_offset
       end
     end
   end
@@ -154,55 +160,15 @@ class PilotableShip < GeneralObject
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
         # 90 and 45 should probably from from hp.. image angle?
-        # puts "ID: #{hp.id}"
-        # puts "PRE - C ANGLE: #{hp.angle}"
         step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
         # step = step.round(5)
         hp.x = Math.cos(step) * hp.radius + hp.center_x
         hp.y = Math.sin(step) * hp.radius + hp.center_y
 
         hp.decrement_angle(angle_increment)
-        # puts "POST - C ANGLE: #{hp.angle}"
-        # hp.image_angle = (hp.image_angle || 0) + 1
-        # hp_y_offset = hp.y_offset
-        # hp_x_offset = hp.x_offset
-        # hp.y_offset = hp_x_offset
-        # hp.x_offset = hp_y_offset * -1
       end
     end
   end
-
-  # def toggle_hardpoint_broadside
-  #   if @right_broadside_mode
-  #     @broadside_hard_points.each do |hp|
-  #       hp_y_offset = hp.y_offset
-  #       hp_x_offset = hp.x_offset
-  #       hp.y_offset = hp_x_offset * -1
-  #       hp.x_offset = hp_y_offset
-  #     end
-  #     @front_hard_points.each do |hp|
-  #       hp_y_offset = hp.y_offset
-  #       hp_x_offset = hp.x_offset
-  #       hp.y_offset = hp_x_offset * -1
-  #       hp.x_offset = hp_y_offset
-  #     end
-  #   elsif @left_broadside_mode
-      
-  #   else
-  #     @broadside_hard_points.each do |hp|
-  #       hp_y_offset = hp.y_offset
-  #       hp_x_offset = hp.x_offset
-  #       hp.y_offset = hp_x_offset
-  #       hp.x_offset = hp_y_offset * -1
-  #     end
-  #     @front_hard_points.each do |hp|
-  #       hp_y_offset = hp.y_offset
-  #       hp_x_offset = hp.x_offset
-  #       hp.y_offset = hp_x_offset
-  #       hp.x_offset = hp_y_offset * -1
-  #     end
-  #   end
-  # end
 
 
   def add_hard_point hard_point
@@ -256,61 +222,6 @@ class PilotableShip < GeneralObject
     "#{path}/default.png"
   end
 
-
-  #slow scrolling speed here
-  # Show right broadside
-  # def rotate_counterclockwise
-  #   # puts "rotate_counterclockwise"
-  #   # puts "PRE-right_broadside_mode: #{@right_broadside_mode}"
-  #   # puts "PRE-left_broadside_mode: #{@left_broadside_mode}"
-  #   # trigger_rotation = false
-  #   # if @right_broadside_mode
-  #   #   # Do nothing
-  #   # elsif @left_broadside_mode
-  #   #   trigger_rotation = true
-  #   #   @left_broadside_mode = false
-  #   # else
-  #   #   trigger_rotation = true
-  #   #   @right_broadside_mode = true
-  #   # end
-  #   # puts "POST-right_broadside_mode: #{@right_broadside_mode}"
-  #   # puts "POST-left_broadside_mode: #{@left_broadside_mode}"
-        
-
-  #   # @right_broadside_mode = !@right_broadside_mode
-  #   # if @right_broadside_mode
-  #   #   @image_width_half  = (@right_broadside_image.width * @scale) / 2
-  #   #   @image_height_half = (@right_broadside_image.height * @scale) / 2
-  #   # elsif @left_broadside_mode
-  #   #   @image_width_half  = (@left_broadside_image.width * @scale) / 2
-  #   #   @image_height_half = (@left_broadside_image.height * @scale) / 2
-  #   # else
-  #   #   @image_width_half  = (@image.width * @scale) / 2
-  #   #   @image_height_half = (@image.height * @scale) / 2
-  #   # end
-
-  #   rotate_hardpoints_counterclockwise# if trigger_rotation
-  #   # puts "IMAGE SHOULD ROTATE: IS DEFAULT #{!(@right_broadside_mode && @left_broadside_mode)}" if trigger_rotation
-  #   # @image = self.get_image if trigger_rotation
-
-  #   # if @right_broadside_mode
-  #   #   return 1
-  #   # elsif @left_broadside_mode
-  #   #   # Logically, this would never be true
-  #   #   return 1
-  #   # else
-  #   #   return 1
-  #   # end
-  #   return 1
-  # end
-   # Show right broadside
-  # def rotate_clockwise
-  #   rotate_hardpoints_clockwise
-  #   return 1
-  # end
- 
-
-
   def take_damage damage
     @health -= damage * @damage_reduction
   end
@@ -345,85 +256,84 @@ class PilotableShip < GeneralObject
     health > 0
   end
 
-  def get_speed
-    if @left_broadside_mode || @right_broadside_mode
-      speed = self.class::SPEED * 0.3
-    else
-      speed = self.class::SPEED
-    end
-    (speed * @scale).round
-  end
+  # def get_speed
+  #   if @left_broadside_mode || @right_broadside_mode
+  #     speed = self.class::SPEED * 0.3
+  #   else
+  #     speed = self.class::SPEED
+  #   end
+  #   (speed * @scale).round
+  # end
 
-  def move_left
-    @turn_left = true
-    @x = [@x - get_speed, (get_width/3)].max
+  # def move_left
+  #   @turn_left = true
+  #   @x = [@x - get_speed, (get_width/3)].max
 
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        hp.x = @x + hp.x_offset
-      end
-    end
-    return @x
-  end
+  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #     group.each do |hp|
+  #       hp.x = @x + hp.x_offset
+  #     end
+  #   end
+  #   return @x
+  # end
   
-  def move_right
-    @turn_right = true
-    @x = [@x + get_speed, (@screen_width - (get_width/3))].min
+  # def move_right
+  #   @turn_right = true
+  #   @x = [@x + get_speed, (@screen_pixel_width - (get_width/3))].min
 
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        hp.x = @x + hp.x_offset
-      end
-    end
-    return @x
-  end
+  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #     group.each do |hp|
+  #       hp.x = @x + hp.x_offset
+  #     end
+  #   end
+  #   return @x
+  # end
   
-  def accelerate
-    # # Top of screen
-    # @min_moveable_height = options[:min_moveable_height] || 0
-    # # Bottom of the screen
-    # @max_movable_height = options[:max_movable_height] || screen_height
+  # def accelerate
+  #   # # Top of screen
+  #   # @min_moveable_height = options[:min_moveable_height] || 0
+  #   # # Bottom of the screen
+  #   # @max_movable_height = options[:max_movable_height] || screen_pixel_height
 
-    @y = [@y - get_speed, @min_moveable_height + (get_height/2)].max
+  #   @y = [@y - get_speed, @min_moveable_height + (get_height/2)].max
 
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        hp.y = @y + hp.y_offset
-      end
-    end
-    return @y
-  end
+  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #     group.each do |hp|
+  #       hp.y = @y + hp.y_offset
+  #     end
+  #   end
+  #   return @y
+  # end
   
-  def brake
-    @y = [@y + get_speed, @max_movable_height - (get_height/2)].min
+  # def brake
+  #   @y = [@y + get_speed, @max_movable_height - (get_height/2)].min
 
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        hp.y = @y + hp.y_offset
-      end
-    end
-    return @y
-  end
+  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #     group.each do |hp|
+  #       hp.y = @y + hp.y_offset
+  #     end
+  #   end
+  #   return @y
+  # end
 
-  def attack_group initial_angle, location_x, location_y, map_width, map_height, pointer, group
+  def attack_group initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, group, relative_object_offset_x, relative_object_offset_y
     if @left_broadside_mode
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @left_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, location_x, location_y, pointer) if hp.group_number == group
+        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, relative_object_offset_x, relative_object_offset_y) if hp.group_number == group
       end
       # puts "Results :#{results}"
     elsif @right_broadside_mode
       results = @right_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, location_x, location_y, pointer) if hp.group_number == group
+        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, relative_object_offset_x, relative_object_offset_y) if hp.group_number == group
       end
     else
       # puts "@front_hard_points: #{@front_hard_points}"
       results = @front_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        raise "NO MAP" if map_width.nil? || map_height.nil?
-        hp.attack(initial_angle, location_x, location_y, pointer) if hp.group_number == group
+        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, relative_object_offset_x, relative_object_offset_y) if hp.group_number == group
       end
     end
     results.reject!{|v| v.nil?}
@@ -441,12 +351,12 @@ class PilotableShip < GeneralObject
     end
   end
 
-  def attack_group_1 initial_angle, location_x, location_y, map_width, map_height, pointer
-    return attack_group(initial_angle, location_x, location_y, map_width, map_height, pointer, 1)
+  def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, relative_object_offset_x, relative_object_offset_y
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, 1, relative_object_offset_x, relative_object_offset_y)
   end
 
-  def attack_group_2 initial_angle, location_x, location_y, map_width, map_height, pointer
-    return attack_group(initial_angle, location_x, location_y, map_width, map_height, pointer, 2)
+  def attack_group_2 initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, relative_object_offset_x, relative_object_offset_y
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, 2, relative_object_offset_x, relative_object_offset_y)
   end
 
   def deactivate_group_1
@@ -489,7 +399,8 @@ class PilotableShip < GeneralObject
     #   end
     # end
     # super
-    # puts "DRAWING PLAYER: image_height_half: #{@image_height_half} and image_width_half: #{@image_width_half}"
+    puts "DRAWING PLAYER: #{[@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale]}"
+    # DRAWING PLAYER: [450, 450, 8, {:handicap=>1, :max_movable_height=>-27960.0, :tile_width=>112.5, :tile_height=>112.5}, 0.5, 0.5, 1.875, 1.875]
     image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
     @turn_right = false
@@ -530,10 +441,10 @@ class PilotableShip < GeneralObject
     
     # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
     # offs_y = 1
-    new_width1, new_height1, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width, @screen_height)
-    new_width2, new_height2, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_width, @screen_height)
-    new_width3, new_height3, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width, @screen_height)
-    new_width4, new_height4, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_width, @screen_height)
+    new_width1, new_height1, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    new_width2, new_height2, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    new_width3, new_height3, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    new_width4, new_height4, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
 
     glEnable(GL_TEXTURE_2D)
     glBindTexture(GL_TEXTURE_2D, info.tex_name)

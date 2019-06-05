@@ -1,5 +1,5 @@
-require_relative 'general_object.rb'
-require_relative 'rocket_launcher_pickup.rb'
+require_relative 'screen_map_fixed_object.rb'
+# require_relative 'rocket_launcher_pickup.rb'
 require_relative '../lib/config_setting.rb'
 require 'gosu'
 
@@ -10,12 +10,12 @@ require 'glut'
 include OpenGL
 include GLUT
 
-class Player < GeneralObject
+class Player < ScreenMapFixedObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   # SPEED = 7
   MAX_ATTACK_SPEED = 3.0
-  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
+  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
@@ -30,25 +30,17 @@ class Player < GeneralObject
   SPECIAL_POWER = 'laser'
   SPECIAL_POWER_KILL_MAX = 50
 
-
   # x and y is graphical representation of object
   # location x and y where it exists on the global map.
   # Location x and y became screen movement... 
   # gps_location_x and gps_location_y is now global map
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options = {})
-    # @location_x, @location_y = [location_x, location_y]
-    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options)
+  # def initialize(scale, x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
+ # def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
+  def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
+    super(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options)
+    @x = screen_pixel_width  / 2
+    @y = screen_pixel_height / 2
 
-    raise "ISSUE" if @screen_map_height.nil?
-    raise "ISSUE" if @screen_map_width.nil?
-
-    # Top of screen
-    @min_moveable_height = options[:min_moveable_height] || 0
-    # Bottom of the screen
-    @max_movable_height = options[:max_movable_height] || screen_height
-    # @right_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_right.png")
-    # @left_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_left.png")
-    # @broadside_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/spaceship_broadside.png")
     @score = 0
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
@@ -74,17 +66,17 @@ class Player < GeneralObject
     @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
     @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
     @kill_count = 0
-    @main_weapon = nil
     # @drawable_items_near_self = []
-    @broadside_mode = false
     @angle = 0
     ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     if ship
       ship_class = eval(ship)
-      @ship = ship_class.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
+      @ship = ship_class.new(@x, @y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, nil, options)
     else
-      @ship = BasicShip.new(scale, x, y, screen_width, screen_height, width_scale, height_scale, @angle, map_width, map_height, options)
+      @ship = BasicShip.new(@x, @y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, nil, options)
     end
+    @ship.x = @x
+    @ship.y = @y
     # Get details from ship
     @mass = 50 # Get from ship
     # @mass = 300 # Get from ship
@@ -110,7 +102,7 @@ class Player < GeneralObject
     object_groups.each do |group|
       group.each do |object|
         next if object.nil?
-          projectiles << Missile.new(@scale, @screen_width, @screen_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
+          projectiles << Missile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
       end
     end
     return projectiles
@@ -124,7 +116,7 @@ class Player < GeneralObject
     # object_groups.each do |group|
     #   group.each do |object|
     #     next if object.nil?
-    #       projectiles << Missile.new(@scale, @screen_width, @screen_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
+    #       projectiles << Missile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
     #   end
     # end
 
@@ -140,7 +132,7 @@ class Player < GeneralObject
       y  =  @y + r * Math.sin(theta)
       if y < @y
 
-        projectiles << Missile.new(@scale, @screen_width, @screen_height, self, x, y, nil, nil, nil, {damage_increase: @damage_increase})
+        projectiles << Missile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, x, y, nil, nil, nil, {damage_increase: @damage_increase})
 
       end
       theta += 5
@@ -249,7 +241,7 @@ class Player < GeneralObject
   #   if @main_weapon.nil?
   #     # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
   #     options = {damage_increase: @damage_increase}
-  #     @main_weapon = LaserBeam.new(@scale, @screen_width, @screen_height, self, options)
+  #     @main_weapon = LaserBeam.new(@scale, @screen_pixel_width, @screen_pixel_height, self, options)
   #     @drawable_items_near_self << @main_weapon
   #     return {
   #       projectiles: [@main_weapon.attack],
@@ -308,13 +300,6 @@ class Player < GeneralObject
     end
   end
 
-  def get_x
-    @x
-  end
-  def get_y
-    @y
-  end
-
   def is_alive
     @ship.is_alive
     # health > 0
@@ -323,13 +308,15 @@ class Player < GeneralObject
   # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
 
   def move_left movement_x = 0, movement_y = 0
-    new_speed = (@speed  / (@mass.to_f)) * -1.5
+    # new_speed = (@speed  / (@mass.to_f)) * -1.5
+    new_speed = (@speed  / (@mass.to_f)) * -100
     x_diff, y_diff = self.movement(new_speed, @angle + 90)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def move_right movement_x = 0, movement_y = 0
-    new_speed = (@speed  / (@mass.to_f)) * -1.5
+    # new_speed = (@speed  / (@mass.to_f)) * -1.5
+    new_speed = (@speed  / (@mass.to_f)) * -100
     x_diff, y_diff = self.movement(new_speed, @angle - 90)
     return [movement_x - x_diff, movement_y - y_diff]
   end
@@ -366,8 +353,7 @@ class Player < GeneralObject
 
 
   def attack_group_1 pointer
-    raise "NO MAP" if @screen_map_width.nil? || @screen_map_height.nil?
-    @ship.attack_group_1(@angle, @location_x, @location_y, @screen_map_width, @screen_map_height, pointer)
+    @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, pointer)
   end
  
   def deactivate_group_1
@@ -375,7 +361,7 @@ class Player < GeneralObject
   end
 
   def attack_group_2 pointer
-    @ship.attack_group_2(@angle, @location_x, @location_y, @screen_map_width, @screen_map_height, pointer)
+    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, pointer)
   end
  
   def deactivate_group_2
@@ -404,7 +390,7 @@ class Player < GeneralObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
-    # puts "PLAYER: #{@location_x} - #{@location_y}" if @time_alive % 10 == 0
+    # puts "PLAYER: #{@current_map_pixel_x} - #{@current_map_pixel_y}" if @time_alive % 10 == 0
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
 
     if @current_momentum > 0.0
@@ -431,20 +417,20 @@ class Player < GeneralObject
     @time_alive += 1 if self.is_alive
 
 
-    puts "PLAYER UPDATE: #{@location_x} - #{@location_y} - @screen_map_height #{@screen_map_height}" if @time_alive % 100 == 0
+    puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height}" if @time_alive % 100 == 0
 
-    # puts "PLAYER: @location_y >= @screen_map_height: #{@location_y} >= #{@screen_map_height}"
-    if @location_y >= @screen_map_height# * @tile_height
+    # puts "PLAYER: @current_map_pixel_y >= @map_pixel_height: #{@current_map_pixel_y} >= #{@map_pixel_height}"
+    if @current_map_pixel_y >= @map_pixel_height# * @tile_height
       # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
       @current_momentum = 0
-      @location_y = @screen_map_height
-    elsif @location_y < 0
+      @current_map_pixel_y = @map_pixel_height
+    elsif @current_map_pixel_y < 0
       @current_momentum = 0
-      @location_y = 0
+      @current_map_pixel_y = 0
     end
-    if @location_x >= @screen_map_width# * @tile_width
+    if @current_map_pixel_x >= @map_pixel_width# * @tile_width
       @current_momentum = 0
-    elsif @location_x < 0
+    elsif @current_map_pixel_x < 0
       @current_momentum = 0
     end
 

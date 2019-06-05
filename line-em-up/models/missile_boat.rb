@@ -17,8 +17,8 @@ class MissileBoat < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/missile_boat_reverse.png")
   end
 
-  def initialize(scale, screen_width, screen_height, x = nil, y = nil, options = {})
-    super(scale, x || rand(screen_width), y || 0, screen_width, screen_height, options)
+  def initialize(scale, screen_pixel_width, screen_pixel_height, x = nil, y = nil, options = {})
+    super(scale, x || rand(screen_pixel_width), y || 0, screen_pixel_width, screen_pixel_height, options)
     @cooldown_wait = 0
     @attack_speed = 0.5
     @health = 10
@@ -45,9 +45,9 @@ class MissileBoat < GeneralObject
     x_padding_2 = -(5 * @scale)
     return {
       projectiles: [
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2, damage_increase: @damage_factor}),
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1, damage_increase: @damage_factor}),
-        SemiGuidedMissile.new(@scale, @screen_width, @screen_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2, damage_increase: @damage_factor})
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2, damage_increase: @damage_factor}),
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1, damage_increase: @damage_factor}),
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2, damage_increase: @damage_factor})
       ],
       cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }
@@ -56,8 +56,8 @@ class MissileBoat < GeneralObject
 
   def drops
     [
-      SmallExplosion.new(@scale, @screen_width, @screen_height, @x, @y, @image),
-      Star.new(@scale, @screen_width, @screen_height, @x, @y)
+      SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, @image),
+      Star.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y)
     ]
   end
 
@@ -80,7 +80,7 @@ class MissileBoat < GeneralObject
         if rand(2).even?
           @y += @current_speed
 
-          @y = @screen_height / 2 if @y > @screen_height / 2
+          @y = @screen_pixel_height / 2 if @y > @screen_pixel_height / 2
         else
           @y -= @current_speed
 
@@ -89,13 +89,13 @@ class MissileBoat < GeneralObject
       end
       if rand(2).even?
         @x += @current_speed
-        @x = @screen_width if @x > @screen_width
+        @x = @screen_pixel_width if @x > @screen_pixel_width
       else
         @x -= @current_speed
         @x = 0 + (get_width / 2) if @x < 0 + (get_width / 2)
       end
 
-      @y < @screen_height + (get_height / 2)
+      @y < @screen_pixel_height + (get_height / 2)
     else
       false
     end

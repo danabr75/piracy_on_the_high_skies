@@ -12,6 +12,8 @@ class Projectile < GeneralObject
   MAX_CURSOR_FOLLOW = 5 # Do we need this if we have a max speed?
   ADVANCED_HIT_BOX_DETECTION = false
 
+  MAX_TILE_TRAVEL = 20
+
 
   def get_image
     puts "override get_image!"
@@ -20,14 +22,15 @@ class Projectile < GeneralObject
 
   def draw_gl
   end
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, location_x = nil, location_y = nil, map_width = nil, map_height = nil, options = {})
+
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, location_x = nil, location_y = nil, map_pixel_width = nil, map_pixel_height = nil, relative_object_offset_x = nil, relative_object_offset_y = nil, options = {})
     if options[:x_homing_padding]
       end_point_x = end_point_x + options[:x_homing_padding]
     end
     @damage_increase = options[:damage_increase] || 1
     @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
     options[:relative_object] = object
-    super(scale, nil, nil, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_width, map_height, options)
+    super(scale, nil, nil, screen_pixel_width, screen_pixel_height, width_scale, height_scale, location_x, location_y, map_pixel_width, map_pixel_height, relative_object_offset_x, relative_object_offset_y, options)
 
     start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
     end_point   = OpenStruct.new(:x => end_point_x - screen_width / 2, :y => end_point_y - screen_height / 2)
@@ -127,7 +130,7 @@ class Projectile < GeneralObject
 
   def draw
     # limiting angle extreme by 2
-    @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(get_x_with_offset,get_y_with_offset, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def get_draw_ordering

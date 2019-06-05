@@ -3,10 +3,10 @@ require_relative 'general_object.rb'
 class FooterBar < GeneralObject
   attr_reader :x, :y, :living_time, :height
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, image = nil)
+  def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, image = nil)
+    @scale = (screen_pixel_height + width_scale) / 2
     @width_scale  = width_scale
     @height_scale = height_scale
-    @scale = scale * 0.7
     padding = 10 * @scale
     @health_100 = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_bar_0.png")
     @health_90 = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_bar_1.png")
@@ -42,9 +42,9 @@ class FooterBar < GeneralObject
     @progress_bar_height = (@progress_bar.first.height * @scale)
 
     # Right in the middle of the screen
-    @progress_bar_x = (screen_width / 2) - @progress_bar_width / 2
+    @progress_bar_x = (screen_pixel_width / 2) - @progress_bar_width / 2
     # Lets see how it looks without padding
-    @progress_bar_y = screen_height - @progress_bar_height # - padding
+    @progress_bar_y = screen_pixel_height - @progress_bar_height # - padding
 
 
     @bomb_hud = Gosu::Image.new("#{MEDIA_DIRECTORY}/bomb_pack_hud.png")
@@ -65,24 +65,24 @@ class FooterBar < GeneralObject
 
     # @image_width_half  = 
     # @image_height_half = 
-    @health_bar_x = screen_width - @health_bar_width - padding
-    @health_bar_y = screen_height- @health_bar_height - padding
+    @health_bar_x = screen_pixel_width - @health_bar_width - padding
+    @health_bar_y = screen_pixel_height- @health_bar_height - padding
 
     @bomb_hud_width    = (@bomb_hud.width  * @scale)
     @bomb_hud_height   = (@bomb_hud.height * @scale)
     @bomb_hud_width_half  = @bomb_hud_width / 2
     @bomb_hud_height_half = @bomb_hud_height /2
 
-    @bomb_hud_x = screen_width - @health_bar_width - padding  - @bomb_hud_width - padding
-    @bomb_hud_y = screen_height - @bomb_hud_height - padding
+    @bomb_hud_x = screen_pixel_width - @health_bar_width - padding  - @bomb_hud_width - padding
+    @bomb_hud_y = screen_pixel_height - @bomb_hud_height - padding
 
     @missile_hud_width    = (@missile_hud.width  * @scale)
     @missile_hud_height   = (@missile_hud.height * @scale)
     @missile_hud_width_half  = @missile_hud_width / 2
     @missile_hud_height_half = @missile_hud_height /2
 
-    @missile_hud_x = screen_width - @health_bar_width - padding  - @bomb_hud_width - padding - @missile_hud_width - padding
-    @missile_hud_y = screen_height - @missile_hud_height - padding
+    @missile_hud_x = screen_pixel_width - @health_bar_width - padding  - @bomb_hud_width - padding - @missile_hud_width - padding
+    @missile_hud_y = screen_pixel_height - @missile_hud_height - padding
 
     @font = Gosu::Font.new(20)
     @red_color = Gosu::Color.new(0xff_000000)

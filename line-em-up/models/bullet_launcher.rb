@@ -1,7 +1,7 @@
 require_relative 'launcher.rb'
 class BulletLauncher < Launcher
   def init_projectile options
-    Bullet.new(@scale, @screen_width, @screen_height, self, options)
+    Bullet.new(@scale, @screen_pixel_width, @screen_pixel_height, self, options)
   end
 
 

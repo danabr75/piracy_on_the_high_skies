@@ -4,7 +4,7 @@ class SmallExplosion < GeneralObject
   attr_reader :x, :y, :living_time
   TIME_TO_LIVE = 50
 
-  def initialize(scale, screen_width, screen_height, x = nil, y = nil, image = nil, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, x = nil, y = nil, image = nil, options = {})
     @scale = scale
     if options[:third_scale]
       @scale = @scale / 3
@@ -29,8 +29,8 @@ class SmallExplosion < GeneralObject
     end
     @current_speed = (SCROLLING_SPEED - 1) * @scale
     
-    @screen_width  = screen_width
-    @screen_height = screen_height
+    @screen_pixel_width  = screen_width
+    @screen_pixel_height = screen_height
     @off_screen = screen_height + screen_height
 
     @time_to_live = options[:ttl] || TIME_TO_LIVE

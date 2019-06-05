@@ -15,10 +15,10 @@ class Launcher < DumbProjectile
     raise "Override me"
   end
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, map_width, map_height, object, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, object, options = {})
     options[:relative_y_padding] = -(object.image_height_half)
-         # (scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
-    super(scale, screen_width, screen_height, width_scale, height_scale, object, nil, nil, nil, map_width, map_height, options)
+         # (scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
+    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, nil, nil, nil, map_pixel_width, map_pixel_height, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
@@ -131,9 +131,9 @@ class Launcher < DumbProjectile
   def draw_gl
     # if @inited
     #   z = ZOrder::Projectile
-    #   new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
-    #   new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_width         , @screen_height)
-    #   new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_width         , @screen_height)
+    #   new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
+    #   new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
+    #   new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
 
     #   glEnable(GL_BLEND)
     #   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)

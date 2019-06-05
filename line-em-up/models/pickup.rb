@@ -1,13 +1,6 @@
-require_relative 'general_object.rb'
+require_relative 'background_fixed_object.rb'
 
-class Pickup < GeneralObject
-  POINT_VALUE_BASE = 0
-  attr_reader :x, :y
-  # def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
-  #   super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_height, map_width, options)
-  #   super(scale, x, y, screen_width, screen_height, width_scale, height_scale, nil, nil, nil, nil, options = {})
-  #   @current_speed = SCROLLING_SPEED * @scale
-  # end
+class Pickup < BackgroundFixedObject
 
   def get_draw_ordering
     ZOrder::Pickups

@@ -18,8 +18,8 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, group_number, x_offset, y_offset, item, slot_type, map_width, map_height, options = {})
-    # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_width, map_height].include?(nil)
+  def initialize(x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, group_number, x_offset, y_offset, item, slot_type, map_pixel_width, map_pixel_height, options = {})
+    # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
     @x_offset = x_offset #* width_scale
@@ -29,9 +29,13 @@ class Hardpoint < GeneralObject
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
     # raise "HERE: #{width_scale} - #{height_scale}"
-    x_total = x + x_offset #* width_scale
-    y_total = y + y_offset #* height_scale
-    super(scale, x_total, y_total, screen_width, screen_height, width_scale, height_scale, nil, nil, map_width, map_height, options)
+    @x = x + x_offset #* width_scale
+    @y = y + y_offset #* height_scale
+#def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
+# initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
+    @map_pixel_width = map_pixel_width
+    @map_pixel_height = map_pixel_height
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
     @main_weapon = nil
     @drawable_items_near_self = []
 
@@ -89,7 +93,7 @@ class Hardpoint < GeneralObject
 
   end
 
-  def attack initial_angle, location_x, location_y, pointer, opts = {}
+  def attack initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y, opts = {}
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
     if @main_weapon.nil?
@@ -98,14 +102,14 @@ class Hardpoint < GeneralObject
       options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       options[:image_angle] = @image_angle
       if @assigned_weapon_class
-        @main_weapon = @assigned_weapon_class.new(@scale, @screen_width, @screen_height, @width_scale, @height_scale, @screen_map_width, @screen_map_height, self, options)
+        @main_weapon = @assigned_weapon_class.new(@scale, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, @screen_map_width, @screen_map_height, self, options)
         @drawable_items_near_self << @main_weapon
-        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer)
+        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y)
       end
     else
       @main_weapon.active = true if @main_weapon.active == false
       @drawable_items_near_self << @main_weapon
-      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer)
+      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y)
     end
     if attack_projectile
       return {

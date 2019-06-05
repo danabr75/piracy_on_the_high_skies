@@ -1,4 +1,4 @@
-require_relative 'general_object.rb'
+require_relative 'background_fixed_object.rb'
 
 require 'opengl'
 require 'glut'
@@ -7,53 +7,21 @@ include OpenGL
 include GLUT
 include GLU # - defined gluProject
 
-class Building < GeneralObject
+class Building < BackgroundFixedObject
   POINT_VALUE_BASE = 1
   HEALTH = 100
-  attr_accessor :health, :armor, :x, :y, :z
-  attr_accessor :x_offset, :y_offset
 
 
-  def get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
-  end
-
-  # X and Y are place on screen.
-  # Location Y and X are where they are on GPS
-  def initialize(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x = nil, location_y = nil, map_height = nil, map_width = nil, options = {})
-    # puts "BUILDING NEW"
-    super(scale, x, y, screen_width, screen_height, width_scale, height_scale, location_x, location_y, map_height, map_width, options)
-    @health = HEALTH
-    @armor = 0
-    @z = options[:z] || 1
-    # raise "Z HERE: #{@z}"
-    @x_offset = 0
-    @y_offset = 0
-    @image2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png", :tileable => true)
-    @info = @image2.gl_tex_info
-  end
-
-  def get_points
-    return POINT_VALUE_BASE
-  end
-
-  def is_alive
-    @health > 0
-  end
-
-  def take_damage damage
-    @health -= damage
-  end
 
   def drops
     # rand_num = rand(10)
     # if rand(10) == 9
-      [HealthPack.new(@scale, @x, @y, @screen_width, @screen_height, @width_scale, @height_scale, @location_x, @location_y, @map_height, @map_width, {z: @z})]
+      [HealthPack.new(@scale, @x, @y, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, @location_x, @location_y, @map_height, @map_width, {z: @z})]
       # raise "STOP"
     # elsif rand(10) == 8
-    #   [BombPack.new(@scale, @screen_width, @screen_height, @x, @y)]
+    #   [BombPack.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y)]
     # else
-    #   [MissilePack.new(@scale, @screen_width, @screen_height, @x, @y)]
+    #   [MissilePack.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y)]
     # end
   end
 
@@ -67,13 +35,13 @@ class Building < GeneralObject
   end
 
   def convert_screen_to_opengl x, y, w = nil, h = nil
-    opengl_x   = ((x / (@screen_width.to_f )) * 2.0) - 1
+    opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
     opengl_x   = opengl_x * 1.2 # Needs to be boosted for some odd reason - Screen is not entirely 1..-1
-    opengl_y   = ((y / (@screen_height.to_f)) * 2.0) - 1
+    opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
     opengl_y   = opengl_y * 0.92
     if w && h
-      open_gl_w  = ((w / (@screen_width.to_f )) * 2.0)
-      open_gl_h  = ((h / (@screen_height.to_f )) * 2.0)
+      open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
+      open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
       return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
     else
       return {o_x: opengl_x, o_y: opengl_y}
@@ -106,20 +74,21 @@ class Building < GeneralObject
     glEnd
   end
 
-  def self.alt_alt_draw_gl v1, v2, v3, v4
+  # def self.alt_alt_draw_gl v1, v2, v3, v4
 
-    @image3 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
-    # @info = @image2.gl_tex_info
+  #   @image3 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
+  #   # @info = @image2.gl_tex_info
 
 
-    x, y = convert_opengl_to_screen(v1[0], v1[0])
+  #   x, y = convert_opengl_to_screen(v1[0], v1[0])
 
-    @image3.draw((x - @image3.width / 2), (y - @image3.height / 2), ZOrder::Building, 2, 2)
+  #   @image3.draw((x - @image3.width / 2), (y - @image3.height / 2), ZOrder::Building, 2, 2)
 
-  end
+  # end
 
 
   def draw_gl
+    # Draw nothing here
   end
 
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1

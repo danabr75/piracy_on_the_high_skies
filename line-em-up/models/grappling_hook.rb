@@ -18,7 +18,7 @@ class GrapplingHook < GeneralObject
     COOLDOWN_DELAY
   end
 
-  def initialize(scale, screen_width, screen_height, object, mouse_x, mouse_y, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, object, mouse_x, mouse_y, options = {})
     # object.grapple_hook_cooldown_wait = COOLDOWN_DELAY
     @scale = scale
 
@@ -65,8 +65,8 @@ class GrapplingHook < GeneralObject
     @chain_size   = @chain_width  * @chain_height / 2
     @chain_radius = ((@chain_height + @chain_width) / 4) * @scale
 
-    # @screen_width  = screen_width
-    # @screen_height = screen_height
+    # @screen_pixel_width  = screen_width
+    # @screen_pixel_height = screen_height
     # @off_screen = screen_height + screen_height
   end
 

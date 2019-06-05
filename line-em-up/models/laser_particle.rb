@@ -22,12 +22,12 @@ class LaserParticle < DumbProjectile
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
-  def initialize(scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options = {})
+  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
     @initial_angle = initial_angle
     options[:debug] = true
 
     options[:relative_y_padding] = -(object.image_height_half)
-    super(scale, screen_width, screen_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_width, map_height, options)
+    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options)
     @active = true
     if options[:is_head]
       @position = :is_head
@@ -77,7 +77,7 @@ class LaserParticle < DumbProjectile
     movement(1.0, @initial_angle)
     # if @inited
     #   @time_alive += 1
-    #   @y > 0 && @y < @screen_height
+    #   @y > 0 && @y < @screen_pixel_height
     # end
   end
 
@@ -85,7 +85,7 @@ class LaserParticle < DumbProjectile
     if @inited
       @y -= @current_speed
       @x = player.x if player && @active
-      @y > 0 && @y < @screen_height
+      @y > 0 && @y < @screen_pixel_height
     end
   end
 
@@ -108,10 +108,10 @@ class LaserParticle < DumbProjectile
 
   def draw_gl
     # if @inited# && !@active
-    #   new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/8, @y - @image_height_half/2, @screen_width, @screen_height)
-    #   new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/8, @y + @image_height_half/2, @screen_width, @screen_height)
-    #   new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/8, @y - @image_height_half/2, @screen_width, @screen_height)
-    #   new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/8, @y + @image_height_half/2, @screen_width, @screen_height)
+    #   new_width1, new_height1, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/8, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    #   new_width2, new_height2, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x - @image_width_half/8, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    #   new_width3, new_height3, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/8, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    #   new_width4, new_height4, increment_x, increment_y = LaserParticle.convert_x_and_y_to_opengl_coords(@x + @image_width_half/8, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
 
     #   glEnable(GL_BLEND)
     #   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
