@@ -1,9 +1,11 @@
 require 'securerandom'
+require_relative '../lib/global_variables.rb'
+
 class GeneralObject
-  attr_accessor :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
-  attr_accessor :current_map_pixel_x, :current_map_pixel_y
-  attr_accessor :current_map_tile_x,  :current_map_tile_y
-  attr_accessor :x_offset, :y_offset
+  attr_reader :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
+  attr_reader :current_map_pixel_x, :current_map_pixel_y
+  attr_reader :current_map_tile_x,  :current_map_tile_y
+  attr_reader :x_offset, :y_offset
   # attr_accessor :x_offset_base, :y_offset_base
   LEFT  = 'left'
   RIGHT = 'right'
@@ -26,6 +28,23 @@ class GeneralObject
     self.class.get_image_path
   end
 
+  include GlobalVariables
+
+  attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
+  attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height
+  def init_global_vars
+    @tile_pixel_width    = GlobalVariables.tile_pixel_width
+    @tile_pixel_height   = GlobalVariables.tile_pixel_height
+    @map_pixel_width     = GlobalVariables.map_pixel_width
+    @map_pixel_height    = GlobalVariables.map_pixel_height
+    @map_tile_width      = GlobalVariables.map_tile_width
+    @map_tile_height     = GlobalVariables.map_tile_height
+    @width_scale         = GlobalVariables.width_scale
+    @height_scale        = GlobalVariables.height_scale
+    @screen_pixel_width  = GlobalVariables.screen_pixel_width
+    @screen_pixel_height = GlobalVariables.screen_pixel_height
+  end
+
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
   # # Nevermind, they are useful for figuring out first-time placement
   # X and Y are place on screen. Maybe have the objects themselves figure out where the x and y is... based on other data.
@@ -33,22 +52,20 @@ class GeneralObject
   # Location Y and X are where they are on GPS
   # screen_x and screen_y are used when object is fixed to the map, but are 2D, not 3D.
   # Scale has been deprecated in favor of height scale and width scale.
-  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
+  def initialize(options = {})
+    init_global_vars
+
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
     # validate_int([], self.class.name, __callee__)
     # validate_not_nil([], self.class.name, __callee__)
+    puts "@tile_pixel_width: #{@tile_pixel_width}"
+    validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
 
-    validate_float([width_scale, height_scale],  self.class.name, __callee__)
-    validate_int([screen_pixel_width, screen_pixel_height], self.class.name, __callee__)
-    validate_not_nil([width_scale, height_scale, screen_pixel_width, screen_pixel_height], self.class.name, __callee__)
-
-    @width_scale  = width_scale
-    @height_scale = height_scale
-
-    @screen_pixel_width  = screen_pixel_width
-    @screen_pixel_height = screen_pixel_height
+    validate_float([@width_scale, @height_scale],  self.class.name, __callee__)
+    validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+    validate_not_nil([@width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
 
     @id    = SecureRandom.uuid
     @image = options[:image] || get_image
@@ -341,12 +358,14 @@ class GeneralObject
   end
 
   def movement speed, angle
+    # puts "MOVEMENT"
+    # raise "ISSUE6" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     raise " NO SCALE PRESENT FOR MOVEMENT" if @width_scale.nil? || @height_scale.nil?
     raise " NO LOCATION PRESENT" if @current_map_pixel_x.nil? || @current_map_pixel_y.nil?
     # puts "MOVEMENT: #{speed}, #{angle}"
     # puts "PLAYER MOVEMENT map size: #{@map_pixel_width} - #{@map_pixel_height}"
-    base = speed# / 100.0
-    base = base * ((@width_scale + @height_scale) / 2.0)
+    # base = speed# / 100.0
+    base = speed * ((@width_scale + @height_scale) / 2.0)
     # @width_scale  = width_scale
     # @height_scale = height_scale
     # raise "BASE: #{base}"
@@ -359,6 +378,8 @@ class GeneralObject
     # puts "_____ #{@location_x}   -    #{@current_map_pixel_y}"
     new_x = Math.cos(step) * base + @current_map_pixel_x
     new_y = Math.sin(step) * base + @current_map_pixel_y
+    # puts "new_y = Math.sin(step) * base + @current_map_pixel_y"
+    # puts "#{new_y} = Math.sin(#{step}) * #{base} + #{@current_map_pixel_y}"
     # puts "PRE MOVE: #{new_x} x #{new_y}"
     # new_x = new_x * @width_scale
     # new_y = new_y * @height_scale
@@ -370,21 +391,30 @@ class GeneralObject
     # puts "@map_pixel_height: #{@map_pixel_height}"
     # if @tile_width && @tile_height
 
+    # puts "(@current_map_pixel_y - y_diff)"
+    # puts "(@#{current_map_pixel_y} - #{y_diff})"
       if (@current_map_pixel_y - y_diff) > @map_pixel_height
         # Block progress along top of map Y 
-        puts "Block progress along top of map Y "
+        # puts "Block progress along bottom of map Y "
+        # puts "y_diff = y_diff - ((@current_map_pixel_y + y_diff) - @current_map_pixel_y)"
+        # puts "#{y_diff} = #{y_diff} - ((#{@current_map_pixel_y + y_diff}) - #{@current_map_pixel_y})"
+        # -27.649999999997817 = -27.649999999997817 - ((28096.762499999866) - 28124.412499999864)
         y_diff = y_diff - ((@current_map_pixel_y + y_diff) - @current_map_pixel_y)
+        @current_momentum = 0
       elsif @current_map_pixel_y - y_diff < 0
         # Block progress along bottom of map Y 
-        puts "Block progress along bottom of map Y "
+        # puts "Block progress along top of map Y "
         y_diff = y_diff + (@current_map_pixel_y + y_diff)
+        @current_momentum = 0
       end
 
       if @current_map_pixel_x - x_diff > @map_pixel_width
         # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_pixel_width}"
         x_diff = x_diff - ((@current_map_pixel_x + x_diff) - @current_map_pixel_x)
+        @current_momentum = 0
       elsif @current_map_pixel_x - x_diff < 0
         x_diff = x_diff + (@current_map_pixel_x + x_diff)
+        @current_momentum = 0
       end
 
     # else
@@ -397,6 +427,8 @@ class GeneralObject
 
     @current_map_pixel_y -= y_diff
     @current_map_pixel_x -= x_diff
+    # PLAYER MOVEMENT: 14118.0 - 28124.412499999864
+    # puts "PLAYER MOVEMENT: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
 
     # Block elements from going off map. Not really working here... y still builds up.
     # if @location_y > @map_pixel_height
@@ -446,6 +478,10 @@ class GeneralObject
     validate(parameters, method_name, klass_name, Float)
   end
 
+  def validate_float_or_int parameters, klass_name, method_name
+    validate(parameters, method_name, klass_name, [Float, Integer])
+  end
+
   def validate_int parameters, klass_name, method_name
     validate(parameters, method_name, klass_name, Integer)
   end
@@ -457,9 +493,10 @@ class GeneralObject
   end
 
   def validate parameters, method_name, klass_name, class_type
+    class_type = [class_type] unless class_type.class == Array
     parameters.each_with_index do |param, index|
       next if param.nil?
-      raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class}" if param.class != class_type
+      raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class}" if !class_type.include?(param.class)
     end
   end
 end

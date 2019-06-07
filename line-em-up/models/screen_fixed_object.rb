@@ -2,8 +2,8 @@
 # Only uses X and Y for pixel placement.
 # Used by menu (maybe), player, HUD. NOT LASERS.
 class ScreenFixedObject < GeneralObject
- # def initialize(current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, options = {})
- def initialize(x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, options = {})
+ # def initialize(current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
+ def initialize(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
@@ -12,7 +12,7 @@ class ScreenFixedObject < GeneralObject
 
     validate_int([x, y, screen_pixel_width, screen_pixel_height], self.class.name, __callee__)
     validate_float([width_scale, height_scale], self.class.name, __callee__)
-    validate_not_nil([yx, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale], self.class.name, __callee__)
+    validate_not_nil([yx, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height], self.class.name, __callee__)
 
     super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
     if options[:relative_object]

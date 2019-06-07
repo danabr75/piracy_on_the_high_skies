@@ -38,7 +38,7 @@ class Bullet < DumbProjectile
   end
 
   def initialize(scale, screen_pixel_width, screen_pixel_height, object, options = {})
-    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, options)
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, options)
   end
 
   # def convert_x_and_y_to_opengl_coords

@@ -23,14 +23,14 @@ class Projectile < GeneralObject
   def draw_gl
   end
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, location_x = nil, location_y = nil, map_pixel_width = nil, map_pixel_height = nil, relative_object_offset_x = nil, relative_object_offset_y = nil, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, location_x = nil, location_y = nil, map_pixel_width = nil, map_pixel_height = nil, relative_object_offset_x = nil, relative_object_offset_y = nil, options = {})
     if options[:x_homing_padding]
       end_point_x = end_point_x + options[:x_homing_padding]
     end
     @damage_increase = options[:damage_increase] || 1
     @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
     options[:relative_object] = object
-    super(scale, nil, nil, screen_pixel_width, screen_pixel_height, width_scale, height_scale, location_x, location_y, map_pixel_width, map_pixel_height, relative_object_offset_x, relative_object_offset_y, options)
+    super(scale, nil, nil, width_scale, height_scale, screen_pixel_width, screen_pixel_height, location_x, location_y, map_pixel_width, map_pixel_height, relative_object_offset_x, relative_object_offset_y, options)
 
     start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
     end_point   = OpenStruct.new(:x => end_point_x - screen_width / 2, :y => end_point_y - screen_height / 2)

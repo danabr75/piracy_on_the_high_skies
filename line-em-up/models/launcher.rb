@@ -4,7 +4,7 @@ require 'opengl'
 require 'glu'
 require 'glut'
 
-class Launcher < DumbProjectile
+class Launcher < GeneralObject
   attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited, :cooldown_wait
   # DAMAGE = 0.001
   COOLDOWN_DELAY = 15
@@ -15,10 +15,11 @@ class Launcher < DumbProjectile
     raise "Override me"
   end
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, object, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
     options[:relative_y_padding] = -(object.image_height_half)
-         # (scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
-    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, nil, nil, nil, map_pixel_width, map_pixel_height, options)
+         # (width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
+    # initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, tile_pixel_width = nil, tile_pixel_height = nil, options = {})
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")

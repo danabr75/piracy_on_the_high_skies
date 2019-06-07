@@ -34,10 +34,11 @@ class Player < ScreenMapFixedObject
   # location x and y where it exists on the global map.
   # Location x and y became screen movement... 
   # gps_location_x and gps_location_y is now global map
-  # def initialize(scale, x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
- # def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
-  def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
-    super(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options)
+  # def initialize(scale, x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
+ # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options = {})
+    raise "error" if screen_pixel_width.class == Float
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options)
     @x = screen_pixel_width  / 2
     @y = screen_pixel_height / 2
 
@@ -71,19 +72,19 @@ class Player < ScreenMapFixedObject
     ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     if ship
       ship_class = eval(ship)
-      @ship = ship_class.new(@x, @y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, nil, options)
+      @ship = ship_class.new(@x, @y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, nil, tile_pixel_width, tile_pixel_height, options)
     else
-      @ship = BasicShip.new(@x, @y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, nil, options)
+      @ship = BasicShip.new(@x, @y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, nil, tile_pixel_width, tile_pixel_height, options)
     end
     @ship.x = @x
     @ship.y = @y
     # Get details from ship
-    @mass = 50 # Get from ship
-    # @mass = 300 # Get from ship
+    # @mass = 50 # Get from ship
+    @mass = 300 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass * 3 # speed here?
-    @speed = 3 #/ (@mass / 2)
-    # @speed = 100 #/ (@mass / 2)
+    # @speed = 3 #/ (@mass / 2)
+    @speed = 100 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
@@ -338,22 +339,23 @@ class Player < ScreenMapFixedObject
     # puts "PLAYER ACCELETATE:"
     # puts "[movement_x - x_diff, movement_y - y_diff]"
     # puts "[#{movement_x} - #{x_diff}, #{movement_y} - #{y_diff}]"
-    return [movement_x - x_diff, movement_y - y_diff]
+    return [(movement_x - x_diff), (movement_y - y_diff)]
   end
   
   def accelerate movement_x = 0, movement_y = 0
+    # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
+    # puts "ACCELERATE: #{movement_x} - #{movement_y}"
     x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180 )
 
     if @current_momentum >= -@max_momentum
       @current_momentum -= 2
     end
 
-    return [movement_x - x_diff, movement_y - y_diff]
+    return [(movement_x - x_diff), (movement_y - y_diff)]
   end
 
-
   def attack_group_1 pointer
-    @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, pointer)
+    @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, 0, 0, pointer)
   end
  
   def deactivate_group_1
@@ -361,7 +363,7 @@ class Player < ScreenMapFixedObject
   end
 
   def attack_group_2 pointer
-    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, pointer)
+    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, 0, 0, pointer)
   end
  
   def deactivate_group_2
@@ -390,6 +392,10 @@ class Player < ScreenMapFixedObject
   end
   
   def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
+    # raise "ISSUE" if movement_x.class != Integer || movement_y.class != Integer 
+    # puts "HERE: #{@current_map_pixel_x.class} - #{@current_map_pixel_y.class}"
+    # puts "HERE2: #{[@current_map_pixel_x , @current_map_pixel_y]}"
+    # raise "ISSUE2" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER: #{@current_map_pixel_x} - #{@current_map_pixel_y}" if @time_alive % 10 == 0
     @ship.update(mouse_x, mouse_y, player, scroll_factor)
 
@@ -416,25 +422,32 @@ class Player < ScreenMapFixedObject
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
 
-
-    puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height}" if @time_alive % 100 == 0
+    puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height} - #{@map_pixel_width}" if @time_alive % 100 == 0
 
     # puts "PLAYER: @current_map_pixel_y >= @map_pixel_height: #{@current_map_pixel_y} >= #{@map_pixel_height}"
     if @current_map_pixel_y >= @map_pixel_height# * @tile_height
+      # puts "CASE 1"
       # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
       @current_momentum = 0
       @current_map_pixel_y = @map_pixel_height
     elsif @current_map_pixel_y < 0
+      # puts "CASE 2"
       @current_momentum = 0
       @current_map_pixel_y = 0
     end
     if @current_map_pixel_x >= @map_pixel_width# * @tile_width
+      # puts "CASE 3"
       @current_momentum = 0
+      @current_map_pixel_x = @map_pixel_width
     elsif @current_map_pixel_x < 0
+      # puts "CASE 4"
       @current_momentum = 0
+      @current_map_pixel_x = 0
     end
 
-    return [movement_x - x_diff, movement_y - y_diff]
+    # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
+
+    return [(movement_x - x_diff), (movement_y - y_diff)]
   end
 
   def collect_pickups(pickups)

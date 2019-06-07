@@ -22,12 +22,12 @@ class LaserParticle < DumbProjectile
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
     @initial_angle = initial_angle
     options[:debug] = true
 
     options[:relative_y_padding] = -(object.image_height_half)
-    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options)
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options)
     @active = true
     if options[:is_head]
       @position = :is_head

@@ -17,11 +17,11 @@ class LaserLauncher < Launcher
   #   LaserParticle.new(@scale, @screen_pixel_width, @screen_pixel_height, self, init_angle, options)
   # end
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, object, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, object, options = {})
     raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     options[:relative_y_padding] = -(object.image_height_half)
     puts "START LASER BEAM: #{options}"
-    super(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, map_pixel_width, map_pixel_height, object, options)
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, object, options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image

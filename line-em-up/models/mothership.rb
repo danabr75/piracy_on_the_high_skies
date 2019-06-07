@@ -20,8 +20,8 @@ class Mothership < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/mothership.png")
   end
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, options = {})
-    super(scale, screen_pixel_width / 2, get_image.height, screen_pixel_width, screen_pixel_height, width_scale, height_scale, options)
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
+    super(scale, screen_pixel_width / 2, get_image.height, width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
 
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0

@@ -1,6 +1,6 @@
-require_relative 'general_object.rb'
+require_relative 'screen_map_fixed_object.rb'
 
-class DumbProjectile < GeneralObject
+class DumbProjectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :initial_angle
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   COOLDOWN_DELAY = 50
@@ -18,7 +18,7 @@ class DumbProjectile < GeneralObject
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, width_scale, height_scale, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options = {})
     @initial_angle = initial_angle
     options[:relative_object] = object
     @damage_increase = options[:damage_increase] || 1
@@ -27,7 +27,8 @@ class DumbProjectile < GeneralObject
     #   puts "NEW DUMB PROJECTILE: y- #{object.y}"
     # end
     # raise "WHAT IS GOING ON HERE: #{scale}, #{object.x}, #{object.y}, #{screen_width}, #{screen_height}, #{width_scale}, #{height_scale}, #{location_x}, #{location_y}, #{map_width}, #{map_height},"
-    super(scale, object.x, object.y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, location_x, location_y, map_pixel_width, map_pixel_height, options)
+   # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options = {})
+    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, nil, nil, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options)
     @current_speed = self.class.get_max_speed * @scale
   end
 

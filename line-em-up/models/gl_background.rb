@@ -46,7 +46,7 @@ class GLBackground
   # attr_accessor :player_position_x, :player_position_y
   attr_accessor :map_tile_width, :map_tile_height
   attr_accessor :map_pixel_width, :map_pixel_height
-  attr_accessor :screen_tile_width, :screen_tile_height
+  attr_accessor :tile_pixel_width, :tile_pixel_height
   attr_accessor :current_map_pixel_center_x, :current_map_pixel_center_y
 
   # tile size is 1 GPS (location_x, location_y)
@@ -104,7 +104,7 @@ class GLBackground
   end
 
 
-  def initialize player_x, player_y, screen_pixel_width, screen_pixel_height, width_scale, height_scale
+  def initialize player_x, player_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height
     @debug = true
     # @debug = false
 
@@ -160,8 +160,11 @@ class GLBackground
     @screen_pixel_height_half = @screen_pixel_height / 2
     @screen_pixel_width_half = @screen_pixel_width / 2
 
-    @screen_tile_width  = @screen_pixel_width  / VISIBLE_MAP_WIDTH.to_f
-    @screen_tile_height = @screen_pixel_height / VISIBLE_MAP_HEIGHT.to_f
+    @tile_pixel_width  = @screen_pixel_width  / VISIBLE_MAP_WIDTH.to_f
+    puts "WHAT IS GOING ON HERE:"
+    puts "@tile_pixel_width  = @screen_pixel_width  / VISIBLE_MAP_WIDTH.to_f"
+    puts "#{@tile_pixel_width}  = #{@screen_pixel_width}  / #{VISIBLE_MAP_WIDTH.to_f}"
+    @tile_pixel_height = @screen_pixel_height / VISIBLE_MAP_HEIGHT.to_f
 
     # @ratio = @screen_pixel_width.to_f / (@screen_pixel_height.to_f)
 
@@ -188,8 +191,8 @@ class GLBackground
     @current_map_pixel_center_x = nil# player_x || 0
     @current_map_pixel_center_y = nil#player_y || 0
     # Global units
-    @gps_map_center_x = nil # player_x ? (player_x / (@screen_tile_width)).round : 0
-    @gps_map_center_y = nil # player_y ? (player_y / (@screen_tile_height)).round : 0
+    @gps_map_center_x = nil # player_x ? (player_x / (@tile_pixel_width)).round : 0
+    @gps_map_center_y = nil # player_y ? (player_y / (@tile_pixel_height)).round : 0
     @map_name = "desert_v2_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
@@ -217,10 +220,10 @@ class GLBackground
     @map_tile_width =  @map["map_width"]
     @map_tile_height = @map["map_height"]
 
-    @map_pixel_width  = (@map_tile_width  * @screen_tile_width ).to_i
-    @map_pixel_height = (@map_tile_height * @screen_tile_height).to_i
-    puts "@map_pixel_height = (EXTERIOR_MAP_HEIGHT * @screen_tile_height)"
-    puts "#{@map_pixel_height} = (#{EXTERIOR_MAP_HEIGHT} * #{@screen_tile_height})"
+    @map_pixel_width  = (@map_tile_width  * @tile_pixel_width ).to_i
+    @map_pixel_height = (@map_tile_height * @tile_pixel_height).to_i
+    puts "@map_pixel_height = (EXTERIOR_MAP_HEIGHT * @tile_pixel_height)"
+    puts "#{@map_pixel_height} = (#{EXTERIOR_MAP_HEIGHT} * #{@tile_pixel_height})"
 
     # @map_tile_width = @map["map_width"]
     # @map_tile_height = @map["map_height"]
@@ -267,8 +270,8 @@ class GLBackground
     @gps_map_center_x =  player_tile_x
     @gps_map_center_y =  player_tile_y
 
-    # @gps_map_center_x =  (@current_map_pixel_center_x / (@screen_tile_width)).round
-    # @gps_map_center_y =  (@current_map_pixel_center_y / (@screen_tile_height)).round
+    # @gps_map_center_x =  (@current_map_pixel_center_x / (@tile_pixel_width)).round
+    # @gps_map_center_y =  (@current_map_pixel_center_y / (@tile_pixel_height)).round
 
     buildings = []
     enemies = []
@@ -304,7 +307,7 @@ class GLBackground
             # if results
             #   puts "GOT HERE: #{[@scale, results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width]}"
               # buildings << klass.new(results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width, {z: @visible_map[index_h][index_w]['height']})
-              # def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_tile_x, current_map_tile_y, options = {})
+              # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y, options = {})
               buildings << klass.new(@screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, {z: @visible_map[index_h][index_w]['height']})
             # else
             #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
@@ -373,8 +376,8 @@ class GLBackground
       # Not sure if the
       distance_from_top  = tile_y - (@gps_map_center_y - y_offset)
 
-      x = (distance_from_left * @screen_tile_width ) + @screen_tile_width  / 2.0
-      y = (distance_from_top  * @screen_tile_height) + @screen_tile_height / 2.0
+      x = (distance_from_left * @tile_pixel_width ) + @tile_pixel_width  / 2.0
+      y = (distance_from_top  * @tile_pixel_height) + @tile_pixel_height / 2.0
       return [x, y]
     end
   end
@@ -465,7 +468,7 @@ class GLBackground
     @current_map_pixel_center_x = player_x if @current_map_pixel_center_x.nil?
     @current_map_pixel_center_y = player_y if @current_map_pixel_center_y.nil?
 
-    puts "PLAYER: #{player_x} - #{player_y} against #{@current_map_pixel_center_x} - #{@current_map_pixel_center_y}"
+    # puts "PLAYER: #{player_x} - #{player_y} against #{@current_map_pixel_center_x} - #{@current_map_pixel_center_y}"
     @local_map_movement_y = player_y - @current_map_pixel_center_y
     # puts "@local_map_movement_y = player_y - @current_map_pixel_center_y"
     # puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_pixel_center_y}"
@@ -480,7 +483,7 @@ class GLBackground
     tile_movement_y = nil
 
     # 1 should be 1 GPS coord unit. No height scale should be on it.
-    if @local_map_movement_y >= @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f# * @height_scale * 1.1
+    if @local_map_movement_y >= @tile_pixel_height# / VISIBLE_MAP_HEIGHT.to_f# * @height_scale * 1.1
       puts "ADDING IN ARRAY 1"
       tile_movement = true
       if @current_map_pixel_center_y < (@map_pixel_height)
@@ -534,9 +537,9 @@ class GLBackground
           # value = "INSIDE MAP"
         end
         # puts "MAP ADDED at #{@current_map_pixel_center_y} w/ - top tracker: #{@y_top_tracker}"
-        tile_movement_y       = -@screen_tile_height
-        @current_map_pixel_center_y = @current_map_pixel_center_y + @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_y = @local_map_movement_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
+        tile_movement_y       = -@tile_pixel_height
+        @current_map_pixel_center_y = @current_map_pixel_center_y + @tile_pixel_height# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_y = @local_map_movement_y - @tile_pixel_height# / VISIBLE_MAP_HEIGHT.to_f
       else
         # Without this, you stick to the edge of the map?
         @local_map_movement_y = 0 if @local_map_movement_y > 0
@@ -550,7 +553,7 @@ class GLBackground
 
     # Adding to bottom of map
     # Convert on screen movement to map
-    if @local_map_movement_y <= -@screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
+    if @local_map_movement_y <= -@tile_pixel_height# / VISIBLE_MAP_HEIGHT.to_f
       puts "ADDING IN ARRAY 2"
       tile_movement = true
       if @current_map_pixel_center_y > 0
@@ -609,9 +612,9 @@ class GLBackground
           # value = "INSIDE MAP"
         end
         # puts "MAP ADDED at #{@current_map_pixel_center_y} w/ - top tracker: #{@y_top_tracker}"
-        tile_movement_y       = @screen_tile_height
-        @current_map_pixel_center_y = @current_map_pixel_center_y - @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_y = @local_map_movement_y + @screen_tile_height# / VISIBLE_MAP_HEIGHT.to_f
+        tile_movement_y       = @tile_pixel_height
+        @current_map_pixel_center_y = @current_map_pixel_center_y - @tile_pixel_height# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_y = @local_map_movement_y + @tile_pixel_height# / VISIBLE_MAP_HEIGHT.to_f
       else
         # Without this, you stick to the edge of the map?
         @local_map_movement_y = 0 if @local_map_movement_y > 0
@@ -620,7 +623,7 @@ class GLBackground
 
 
     # Moving to the RIGHT
-    if @local_map_movement_x >= @screen_tile_width
+    if @local_map_movement_x >= @tile_pixel_width
       puts "ADDING IN ARRAY 3 "
       tile_movement = true
       # print_visible_map
@@ -680,9 +683,9 @@ class GLBackground
           # verify_visible_map
         end
         # puts "MAP ADDED at #{@current_map_pixel_center_y} w/ - top tracker: #{@y_top_tracker}"
-        tile_movement_x       = @screen_tile_height
-        @current_map_pixel_center_x = @current_map_pixel_center_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_x = @local_map_movement_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+        tile_movement_x       = @tile_pixel_height
+        @current_map_pixel_center_x = @current_map_pixel_center_x + @tile_pixel_width# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_x = @local_map_movement_x - @tile_pixel_width# / VISIBLE_MAP_HEIGHT.to_f
       else
         # Without this, you stick to the edge of the map?
         @local_map_movement_x = 0 if @local_map_movement_x > 0
@@ -691,7 +694,7 @@ class GLBackground
   
 
     # MOVING TO THE LEFT
-    if @local_map_movement_x <= -@screen_tile_width# * @width_scale * 1.1
+    if @local_map_movement_x <= -@tile_pixel_width# * @width_scale * 1.1
       puts "ADDING IN ARRAY 4"
       # print_visible_map
       if @current_map_pixel_center_x < (@map_pixel_width)
@@ -748,9 +751,9 @@ class GLBackground
           end
           # verify_visible_map
         end
-        tile_movement_x       = -@screen_tile_height
-        @current_map_pixel_center_x = @current_map_pixel_center_x - @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
-        @local_map_movement_x = @local_map_movement_x + @screen_tile_width# / VISIBLE_MAP_HEIGHT.to_f
+        tile_movement_x       = -@tile_pixel_height
+        @current_map_pixel_center_x = @current_map_pixel_center_x - @tile_pixel_width# / VISIBLE_MAP_HEIGHT.to_f
+        @local_map_movement_x = @local_map_movement_x + @tile_pixel_width# / VISIBLE_MAP_HEIGHT.to_f
       else
         # Without this, you stick to the edge of the map?
         @local_map_movement_x = 0 if @local_map_movement_x > 0
@@ -889,21 +892,21 @@ class GLBackground
 
     # offs_y = 1.0 * @local_map_movement_y / (@screen_movement_increment_y)
     # offs_x = 1.0 * @local_map_movement_x / (@screen_movement_increment_x)
-    gps_offs_y = @local_map_movement_y / (@screen_tile_height )
-    gps_offs_x = @local_map_movement_x / (@screen_tile_width )
-    # puts "gps_offs_y = @local_map_movement_y / (@screen_tile_height )"
-    # puts "#{gps_offs_y} = #{@local_map_movement_y} / (#{@screen_tile_height} )"
-    screen_offset_x = @screen_tile_width  * gps_offs_x * -1
-    screen_offset_y = @screen_tile_height * gps_offs_y * -1
+    gps_offs_y = @local_map_movement_y / (@tile_pixel_height )
+    gps_offs_x = @local_map_movement_x / (@tile_pixel_width )
+    # puts "gps_offs_y = @local_map_movement_y / (@tile_pixel_height )"
+    # puts "#{gps_offs_y} = #{@local_map_movement_y} / (#{@tile_pixel_height} )"
+    screen_offset_x = @tile_pixel_width  * gps_offs_x * -1
+    screen_offset_y = @tile_pixel_height * gps_offs_y * -1
     offset_result = convert_screen_to_opengl(screen_offset_x, screen_offset_y)
-    opengl_offset_x = offset_result[:o_x]# >= @screen_tile_width ? 0 : offset_result[:o_x]
-    opengl_offset_y = offset_result[:o_y]# >= @screen_tile_height ? 0 : offset_result[:o_y]
+    opengl_offset_x = offset_result[:o_x]# >= @tile_pixel_width ? 0 : offset_result[:o_x]
+    opengl_offset_y = offset_result[:o_y]# >= @tile_pixel_height ? 0 : offset_result[:o_y]
 
     # puts "OLD OPENGL: #{opengl_offset_y}"
     # opengl_offset_y = opengl_offset_y * -1
     # puts "NEW OPENGL: #{opengl_offset_y}"
 
-    # puts "OFF_Y: #{@local_map_movement_y / (@screen_tile_height ) }= #{@local_map_movement_y} / (#{@screen_tile_height} )" 
+    # puts "OFF_Y: #{@local_map_movement_y / (@tile_pixel_height ) }= #{@local_map_movement_y} / (#{@tile_pixel_height} )" 
     # offs_x = offs_x + 0.1
 
     # Cool lighting
@@ -1026,14 +1029,14 @@ class GLBackground
           new_y_index = y_index - (tile_row_y_max / 2.0)
 
           # Screen coords width and height here.
-          screen_x = @screen_tile_width   * new_x_index
-          # puts "screen_x = @screen_tile_width   * new_x_index"
-          # puts "#{screen_x} = #{@screen_tile_width}   * #{new_x_index}"
-          screen_y = @screen_tile_height  * new_y_index
-          # puts "screen_y = @screen_tile_height  * new_y_index"
-          # puts "#{screen_y} = #{@screen_tile_height}  * #{new_y_index}"
+          screen_x = @tile_pixel_width   * new_x_index
+          # puts "screen_x = @tile_pixel_width   * new_x_index"
+          # puts "#{screen_x} = #{@tile_pixel_width}   * #{new_x_index}"
+          screen_y = @tile_pixel_height  * new_y_index
+          # puts "screen_y = @tile_pixel_height  * new_y_index"
+          # puts "#{screen_y} = #{@tile_pixel_height}  * #{new_y_index}"
 
-          result = convert_screen_to_opengl(screen_x, screen_y, @screen_tile_width, @screen_tile_height)
+          result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
           # puts "X and Y INDEX: #{x_index} - #{y_index}"
           # puts "RESULT HERE: #{result}"
           opengl_coord_x = result[:o_x]

@@ -18,7 +18,9 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(x, y, screen_pixel_width, screen_pixel_height, width_scale, height_scale, group_number, x_offset, y_offset, item, slot_type, map_pixel_width, map_pixel_height, options = {})
+  def initialize(
+    x, y, group_number, x_offset, y_offset, item, slot_type, options = {}
+  )
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
@@ -35,7 +37,8 @@ class Hardpoint < GeneralObject
 # initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
     @map_pixel_width = map_pixel_width
     @map_pixel_height = map_pixel_height
-    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
+  # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, options = {})
+    super(options)
     @main_weapon = nil
     @drawable_items_near_self = []
 

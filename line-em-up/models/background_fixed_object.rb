@@ -5,18 +5,18 @@
 # Used by buildings, pickups
 class BackgroundFixedObject < GeneralObject
 
-  def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_tile_x, current_map_tile_y, options = {})
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y, options = {})
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
     # validate_int([], self.class.name, __callee__)
     # validate_not_nil([], self.class.name, __callee__)
 
-    validate_int([screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
-    validate_float([width_scale, height_scale], self.class.name, __callee__)
-    validate_not_nil([screen_pixel_width, screen_pixel_height, width_scale, height_scale, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
+    # validate_int([screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
+    # validate_float([width_scale, height_scale], self.class.name, __callee__)
+    # validate_not_nil([width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
 
-    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
+    super(options)
 
     @current_map_tile_x  = current_map_tile_x
     @current_map_tile_y  = current_map_tile_y

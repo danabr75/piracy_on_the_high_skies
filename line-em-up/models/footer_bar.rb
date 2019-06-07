@@ -3,7 +3,7 @@ require_relative 'general_object.rb'
 class FooterBar < GeneralObject
   attr_reader :x, :y, :living_time, :height
 
-  def initialize(screen_pixel_width, screen_pixel_height, width_scale, height_scale, image = nil)
+  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, image = nil)
     @scale = (screen_pixel_height + width_scale) / 2
     @width_scale  = width_scale
     @height_scale = height_scale

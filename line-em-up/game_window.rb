@@ -75,6 +75,8 @@ class GameWindow < Gosu::Window
 
   attr_accessor :width, :height, :block_all_controls
 
+  include GlobalVariables
+
   def initialize width = nil, height = nil, fullscreen = false, options = {}
     @config_path = self.class::CONFIG_FILE
     @window = self
@@ -151,7 +153,14 @@ class GameWindow < Gosu::Window
     self.caption = "OpenGL Integration"
     
 
-    @gl_background = GLBackground.new(nil, nil, @width, @height, @width_scale, @height_scale)
+    @gl_background = GLBackground.new(nil, nil, @width_scale, @height_scale, @width, @height)
+
+
+    GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+      @gl_background.map_pixel_width, @gl_background.map_pixel_height,
+      @gl_background.map_tile_width, @gl_background.map_tile_height,
+      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height
+    )
     
     @grappling_hook = nil
     
@@ -200,23 +209,23 @@ class GameWindow < Gosu::Window
     #   {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
 
     @player = Player.new(
-      @width, @height,
       @width_scale, @height_scale,
+      @width, @height,
       #(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
       nil, nil,
       @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2,
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
+      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
       {
-        handicap: @handicap, max_movable_height: @height - @footer_bar.height,
-        tile_width: @gl_background.screen_tile_width, tile_height: @gl_background.screen_tile_height
+        handicap: @handicap, max_movable_height: @height - @footer_bar.height
       }
     )
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
 
     @scroll_factor = 1
-    @movement_x = 0.0
-    @movement_y = 0.0
+    @movement_x = 0
+    @movement_y = 0
     @can_toggle_scroll_factor = true
     @boss_active = false
     @boss = nil
@@ -492,7 +501,6 @@ class GameWindow < Gosu::Window
 
       if @player.is_alive && !@game_pause && !@menu_open
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
-        # puts "FIRST: #{@movement_x} and #{@movement_y}"
         @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
