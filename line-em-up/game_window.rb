@@ -159,7 +159,8 @@ class GameWindow < Gosu::Window
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
-      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height
+      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
+      true
     )
     
     @grappling_hook = nil

@@ -1,4 +1,4 @@
-require_relative 'screen_map_fixed_object.rb'
+require_relative 'screen_fixed_object.rb'
 # require_relative 'rocket_launcher_pickup.rb'
 require_relative '../lib/config_setting.rb'
 require 'gosu'
@@ -10,7 +10,7 @@ require 'glut'
 include OpenGL
 include GLUT
 
-class Player < ScreenMapFixedObject
+class Player < ScreenFixedObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   # SPEED = 7
@@ -39,11 +39,20 @@ class Player < ScreenMapFixedObject
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
-    super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+
+    @current_map_pixel_x = current_map_pixel_x
+    @current_map_pixel_y = current_map_pixel_y
+    @current_map_tile_x  = current_map_tile_x
+    @current_map_tile_y  = current_map_tile_y
     # puts "current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y"
     # puts "#{current_map_pixel_x}, #{current_map_pixel_y}, #{current_map_tile_x}, #{current_map_tile_y}"
-    @x = screen_pixel_width  / 2
-    @y = screen_pixel_height / 2
+    # @x = screen_pixel_width  / 2
+    # @y = screen_pixel_height / 2
+    # Can't get x and y until we know the screen size... hmmm
+    super()
+    update_x_and_y(@screen_pixel_width  / 2, @screen_pixel_height / 2)
+    puts "NEW2 X AND Y: #{@x} - #{@y}"
+    # super(@screen_pixel_width  / 2, @screen_pixel_height / 2)
 
     @score = 0
     @cooldown_wait = 0
@@ -75,6 +84,7 @@ class Player < ScreenMapFixedObject
     ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     if ship
       ship_class = eval(ship)
+      puts "SHIP HERE: #{@x} - #{@y}"
       @ship = ship_class.new(@x, @y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, nil, tile_pixel_width, tile_pixel_height, options)
     else
       @ship = BasicShip.new(@x, @y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, nil, tile_pixel_width, tile_pixel_height, options)

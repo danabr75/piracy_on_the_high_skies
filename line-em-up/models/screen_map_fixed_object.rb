@@ -37,23 +37,53 @@ class ScreenMapFixedObject < GeneralObject
     # within outer and inner bounds.
     # check x, starting from the left, going to the right
     # inner_x_bound: 14062.5 < 14175.0 (RuntimeError)
-    outer_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width
-                        # 14175.0 = (112.5 * (125)) + 112.5
-    inner_x_bound = (@tile_pixel_width * (@current_map_tile_x))
-    puts "inner_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width"
-    puts "#{inner_x_bound} = (#{@tile_pixel_width} * (#{@current_map_tile_x})) + #{@tile_pixel_width}"
-    # inner_x_bound: 14062.5 < 14175.0 (RuntimeError)
-    # inner_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x)) + @tile_pixel_width
-    # outer_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x))
-    raise "@current_map_pixel_x > outer_x_bound: #{@current_map_pixel_x} > #{outer_x_bound}" if @current_map_pixel_x > outer_x_bound
-    raise "@current_map_pixel_x < inner_x_bound: #{@current_map_pixel_x} < #{inner_x_bound}" if @current_map_pixel_x < inner_x_bound
+    # if @debug
+    #   outer_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width
+    #                       # 14175.0 = (112.5 * (125)) + 112.5
+    #   inner_x_bound = (@tile_pixel_width * (@current_map_tile_x))
+    #   puts "inner_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width"
+    #   puts "#{inner_x_bound} = (#{@tile_pixel_width} * (#{@current_map_tile_x})) + #{@tile_pixel_width}"
+    #   # inner_x_bound: 14062.5 < 14175.0 (RuntimeError)
+    #   # inner_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x)) + @tile_pixel_width
+    #   # outer_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x))
+    #   raise "@current_map_pixel_x > outer_x_bound: #{@current_map_pixel_x} > #{outer_x_bound}" if @current_map_pixel_x > outer_x_bound
+    #   raise "@current_map_pixel_x < inner_x_bound: #{@current_map_pixel_x} < #{inner_x_bound}" if @current_map_pixel_x < inner_x_bound
 
-    outer_y_bound = (@tile_pixel_height * @current_map_tile_y) + @tile_pixel_height
-    inner_y_bound = (@tile_pixel_height * @current_map_tile_y)
-    raise "@current_map_pixel_y > outer_y_bound: #{@current_map_pixel_y} > #{outer_y_bound}" if @current_map_pixel_x > outer_y_bound
-    raise "@current_map_pixel_y < inner_y_bound: #{@current_map_pixel_y} < #{inner_y_bound}" if @current_map_pixel_y < inner_y_bound
+    #   outer_y_bound = (@tile_pixel_height * @current_map_tile_y) + @tile_pixel_height
+    #   inner_y_bound = (@tile_pixel_height * @current_map_tile_y)
+    #   raise "@current_map_pixel_y > outer_y_bound: #{@current_map_pixel_y} > #{outer_y_bound}" if @current_map_pixel_x > outer_y_bound
+    #   raise "@current_map_pixel_y < inner_y_bound: #{@current_map_pixel_y} < #{inner_y_bound}" if @current_map_pixel_y < inner_y_bound
 
-    # For objects that don't take damage, they'll never get hit by anything due to having 0 health
+    #   # For objects that don't take damage, they'll never get hit by anything due to having 0 health
+    # end
     @health = 0
+    run_validations
+  end
+
+  def update
+    super
+    run_validations
+  end
+
+  def run_validations
+    if @debug
+      outer_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width
+                          # 14175.0 = (112.5 * (125)) + 112.5
+      inner_x_bound = (@tile_pixel_width * (@current_map_tile_x))
+      # puts "inner_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width"
+      # puts "#{inner_x_bound} = (#{@tile_pixel_width} * (#{@current_map_tile_x})) + #{@tile_pixel_width}"
+      # inner_x_bound: 14062.5 < 14175.0 (RuntimeError)
+      # inner_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x)) + @tile_pixel_width
+      # outer_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x))
+      raise "@current_map_pixel_x > outer_x_bound: #{@current_map_pixel_x} > #{outer_x_bound}" if @current_map_pixel_x > outer_x_bound
+      raise "@current_map_pixel_x < inner_x_bound: #{@current_map_pixel_x} < #{inner_x_bound}" if @current_map_pixel_x < inner_x_bound
+
+      outer_y_bound = (@tile_pixel_height * @current_map_tile_y) + @tile_pixel_height
+      inner_y_bound = (@tile_pixel_height * @current_map_tile_y)
+      raise "@current_map_pixel_y > outer_y_bound: #{@current_map_pixel_y} > #{outer_y_bound}" if @current_map_pixel_x > outer_y_bound
+      raise "@current_map_pixel_y < inner_y_bound: #{@current_map_pixel_y} < #{inner_y_bound}" if @current_map_pixel_y < inner_y_bound
+
+      # For objects that don't take damage, they'll never get hit by anything due to having 0 health
+    end
   end
 end

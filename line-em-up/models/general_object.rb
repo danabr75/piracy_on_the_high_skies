@@ -43,6 +43,7 @@ class GeneralObject
     @height_scale        = GlobalVariables.height_scale
     @screen_pixel_width  = GlobalVariables.screen_pixel_width
     @screen_pixel_height = GlobalVariables.screen_pixel_height
+    @debug               = GlobalVariables.debug
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
