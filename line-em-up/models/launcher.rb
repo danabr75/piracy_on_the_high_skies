@@ -15,11 +15,13 @@ class Launcher < GeneralObject
     raise "Override me"
   end
 
-  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
-    options[:relative_y_padding] = -(object.image_height_half)
+  def initialize(options = {})
+    # DID WE REALLY NEED THIS????????????????????????????????????????
+    # options[:relative_y_padding] = -(object.image_height_half)
+
          # (width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
     # initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, tile_pixel_width = nil, tile_pixel_height = nil, options = {})
-    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options)
+    super(options)
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")

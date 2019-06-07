@@ -96,24 +96,37 @@ class Hardpoint < GeneralObject
 
   end
 
-  def attack initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y, opts = {}
+  def convert_pointer_to_map_pixel pointer
+    return [1, 2]
+  end
+
+  def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, opts = {}
+    # pointer convert to map_pixel_x and y!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
+
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
+    can_attack = false
     if @main_weapon.nil?
       # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
       options = {}
-      options[:damage_increase] = opts[:damage_increase] if opts[:damage_increase]
       options[:image_angle] = @image_angle
       if @assigned_weapon_class
-        @main_weapon = @assigned_weapon_class.new(@scale, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, @screen_map_width, @screen_map_height, self, options)
-        @drawable_items_near_self << @main_weapon
-        attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y)
+        # @main_weapon = @assigned_weapon_class.new(self, options)
+        @main_weapon = @assigned_weapon_class.new(options)
+        can_attack = true
       end
     else
       @main_weapon.active = true if @main_weapon.active == false
-      @drawable_items_near_self << @main_weapon
-      attack_projectile = @main_weapon.attack(initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y)
+      can_attack = true
     end
+
+    if can_attack
+      # attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
+      attack_projectile = @main_weapon.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, nil, nil, options)
+      @drawable_items_near_self << @main_weapon
+    end
+
     if attack_projectile
       return {
         projectiles: [attack_projectile],

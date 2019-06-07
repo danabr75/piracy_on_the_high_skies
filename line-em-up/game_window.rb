@@ -208,17 +208,10 @@ class GameWindow < Gosu::Window
     #   @gl_background.player_position_x, @gl_background.player_position_y, @gl_background.global_map_width, @gl_background.global_map_height,
     #   {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
 
+    # In the future, can use the map to mark insertion point for player. for now, we will choose the center
     @player = Player.new(
-      @width_scale, @height_scale,
-      @width, @height,
-      #(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
-      nil, nil,
-      @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2,
-      @gl_background.map_pixel_width, @gl_background.map_pixel_height,
-      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      {
-        handicap: @handicap, max_movable_height: @height - @footer_bar.height
-      }
+      @gl_background.map_pixel_width / 2.0, @gl_background.map_pixel_height / 2.0,
+      @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2
     )
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
@@ -780,8 +773,8 @@ class GameWindow < Gosu::Window
       @font.draw("pickups count: #{@pickups.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Object count: #{@enemies.count + @enemy_projectiles.count + @projectiles.count + @enemy_destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Damage Reduction: #{@player.damage_reduction.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Damage Reduction: #{@player.damage_reduction.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end

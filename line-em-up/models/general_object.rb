@@ -72,13 +72,15 @@ class GeneralObject
 
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
-    @image_width  = @image.width  * (@width_scale || @scale)
-    @image_height = @image.height * (@height_scale || @scale)
-    @image_size   = @image_width  * @image_height / 2
-    @image_radius = (@image_width  + @image_height) / 4
+    if @image
+      @image_width  = @image.width  * (@width_scale || @scale)
+      @image_height = @image.height * (@height_scale || @scale)
+      @image_size   = @image_width  * @image_height / 2
+      @image_radius = (@image_width  + @image_height) / 4
 
-    @image_width_half  = @image_width  / 2
-    @image_height_half = @image_height / 2
+      @image_width_half  = @image_width  / 2
+      @image_height_half = @image_height / 2
+    end
 
     @inited = true
     # Don't need these values assigned.
@@ -496,7 +498,7 @@ class GeneralObject
     class_type = [class_type] unless class_type.class == Array
     parameters.each_with_index do |param, index|
       next if param.nil?
-      raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class}" if !class_type.include?(param.class)
+      raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class} w/ value: #{param}" if !class_type.include?(param.class)
     end
   end
 end

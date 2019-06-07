@@ -324,19 +324,20 @@ class PilotableShip < GeneralObject
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @left_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, relative_object_offset_x, relative_object_offset_y) if hp.group_number == group
+        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
       end
       # puts "Results :#{results}"
     elsif @right_broadside_mode
       results = @right_broadside_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, relative_object_offset_x, relative_object_offset_y) if hp.group_number == group
+        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
       end
     else
       # puts "@front_hard_points: #{@front_hard_points}"
       results = @front_hard_points.collect do |hp|
         # puts "HP #{hp}"
-        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, relative_object_offset_x, relative_object_offset_y) if hp.group_number == group
+        # def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, opts = {}
+        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
       end
     end
     results.reject!{|v| v.nil?}

@@ -5,7 +5,7 @@
 # Used by buildings, pickups
 class BackgroundFixedObject < GeneralObject
 
-  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y, options = {})
+  def initialize(current_map_tile_x, current_map_tile_y, options = {})
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)

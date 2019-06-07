@@ -5,9 +5,14 @@ class DumbMissileLauncher < Launcher
   MISSILE_LAUNCHER_INIT_ANGLE = 90.0
   # COOLDOWN_DELAY = 15
 
-  def init_projectile initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y, options
-    # Bullet.new(@scale, @screen_pixel_width, @screen_pixel_height, self, options)
-    Missile.new(@scale, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, self, pointer.x, pointer.y, MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle, location_x, location_y, @screen_map_width, @screen_map_height, relative_object_offset_x, relative_object_offset_y, {damage_increase: @damage_increase})
+  # convert pointer x and y to map pixel coordinates
+  def init_projectile initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
+    Missile.new(
+      current_map_pixel_x, current_map_pixel_y, 
+      destination_map_pixel_x, destination_map_pixel_y,
+      MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle,
+      current_map_tile_x, current_map_tile_y, options
+    )
   end
 
 
@@ -26,11 +31,11 @@ class DumbMissileLauncher < Launcher
   #   end
   # end
 
-  def attack initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y
+  # Calculate offset in the hardpoint, not on the launcher side (multiple projectiles).
+  def attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
     # puts "DUMB MISSILE LAUNCHER ATTACK"
     if @cooldown_wait <= 0
-      options = {damage_increase: @damage_increase}
-      projectile = init_projectile(initial_angle, location_x, location_y, pointer, relative_object_offset_x, relative_object_offset_y, options)
+      projectile = init_projectile(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
       # @projectiles << projectile
       @cooldown_wait = get_cooldown
       return projectile

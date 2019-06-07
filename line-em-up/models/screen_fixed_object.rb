@@ -3,7 +3,7 @@
 # Used by menu (maybe), player, HUD. NOT LASERS.
 class ScreenFixedObject < GeneralObject
  # def initialize(current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
- def initialize(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
+ def initialize(x, y, options = {})
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)

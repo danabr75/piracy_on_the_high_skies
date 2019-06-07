@@ -308,7 +308,7 @@ class GLBackground
             #   puts "GOT HERE: #{[@scale, results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width]}"
               # buildings << klass.new(results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width, {z: @visible_map[index_h][index_w]['height']})
               # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y, options = {})
-              buildings << klass.new(@screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, {z: @visible_map[index_h][index_w]['height']})
+              buildings << klass.new(x_index, y_index, {z: @visible_map[index_h][index_w]['height']})
             # else
             #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
             # end

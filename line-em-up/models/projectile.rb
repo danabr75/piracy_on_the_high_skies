@@ -1,6 +1,6 @@
 require_relative 'general_object.rb'
 
-class Projectile < GeneralObject
+class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   COOLDOWN_DELAY = 50
@@ -23,17 +23,20 @@ class Projectile < GeneralObject
   def draw_gl
   end
 
-  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, end_point_x, end_point_y, angle_min = nil, angle_max = nil, angle_init = nil, location_x = nil, location_y = nil, map_pixel_width = nil, map_pixel_height = nil, relative_object_offset_x = nil, relative_object_offset_y = nil, options = {})
-    if options[:x_homing_padding]
-      end_point_x = end_point_x + options[:x_homing_padding]
-    end
-    @damage_increase = options[:damage_increase] || 1
-    @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
-    options[:relative_object] = object
-    super(scale, nil, nil, width_scale, height_scale, screen_pixel_width, screen_pixel_height, location_x, location_y, map_pixel_width, map_pixel_height, relative_object_offset_x, relative_object_offset_y, options)
+  def initialize(current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, options = {})
+    # if options[:x_homing_padding]
+    #   end_point_x = end_point_x + options[:x_homing_padding]
+    # end
+    # @damage_increase = options[:damage_increase] || 1
+    # Set this in global vars
+    # @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
+    # options[:relative_object] = object
+    # super(current_map_pixel_x, current_map_pixel_y, relative_object_offset_x, relative_object_offset_y, options)
+    super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
-    start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
-    end_point   = OpenStruct.new(:x => end_point_x - screen_width / 2, :y => end_point_y - screen_height / 2)
+    # Might have to reorient x and y here.
+    start_point = OpenStruct.new(:x => current_map_pixel_x, :y => current_map_pixel_y)
+    end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
     @angle = calc_angle(start_point, end_point)
     @radian = calc_radian(start_point, end_point)
 

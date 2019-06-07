@@ -36,9 +36,12 @@ class Player < ScreenMapFixedObject
   # gps_location_x and gps_location_y is now global map
   # def initialize(scale, x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
  # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
-  def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options = {})
-    raise "error" if screen_pixel_width.class == Float
-    super(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options)
+  def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
+    validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
+    validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
+    super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+    # puts "current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y"
+    # puts "#{current_map_pixel_x}, #{current_map_pixel_y}, #{current_map_tile_x}, #{current_map_tile_y}"
     @x = screen_pixel_width  / 2
     @y = screen_pixel_height / 2
 
@@ -63,9 +66,9 @@ class Player < ScreenMapFixedObject
     @cannon_launchers = 0
     trigger_hard_point_load
     @damage_reduction = options[:handicap] ? options[:handicap] : 1
-    invert_handicap = 1 - options[:handicap]
-    @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
-    @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
+    # invert_handicap = 1 - options[:handicap]
+    # @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
+    # @damage_increase = invert_handicap > 0 ? 1 + (invert_handicap) : 1
     @kill_count = 0
     # @drawable_items_near_self = []
     @angle = 0
