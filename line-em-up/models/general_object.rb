@@ -31,7 +31,7 @@ class GeneralObject
   include GlobalVariables
 
   attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
-  attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height
+  attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height, :damage_increase, :average_scale
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
     @tile_pixel_height   = GlobalVariables.tile_pixel_height
@@ -44,6 +44,8 @@ class GeneralObject
     @screen_pixel_width  = GlobalVariables.screen_pixel_width
     @screen_pixel_height = GlobalVariables.screen_pixel_height
     @debug               = GlobalVariables.debug
+    @damage_increase     = GlobalVariables.damage_increase
+    @average_scale       = GlobalVariables.average_scale
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
@@ -92,13 +94,13 @@ class GeneralObject
     @y_offset = 0
   end   
 
-  def get_x_with_offset
-    @x + (@x_offset)
-  end
+  # def get_x_with_offset
+  #   @x + (@x_offset)
+  # end
 
-  def get_y_with_offset
-    @y + (@y_offset)
-  end
+  # def get_y_with_offset
+  #   @y + (@y_offset)
+  # end
 
   # For enemies and projectiles... maybe using this
   def update_offsets x_offset, y_offset
@@ -160,11 +162,13 @@ class GeneralObject
   end
 
 
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
+  def update mouse_x, mouse_y, player
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     @time_alive += 1
-    return is_on_screen?
+    recalculate_current_tiles
+    # return is_on_screen?
+    return true
   end
 
   def self.get_max_speed
@@ -312,6 +316,8 @@ class GeneralObject
 
 
   # This isn't exactly right, objects are drawn farther away from center than they should be.
+  # Are these still being used? X and Y should only be used to draw on the screen
+  # They are still being used... maybe it's ok
   def convert_x_and_y_to_opengl_coords
     middle_x = @screen_pixel_width / 2
     middle_y = @screen_pixel_height / 2
@@ -330,6 +336,8 @@ class GeneralObject
     return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
+  # Are these still being used? X and Y should only be used to draw on the screen
+  # They are still being used... maybe it's ok
   def self.convert_x_and_y_to_opengl_coords(x, y, screen_pixel_width, screen_pixel_height)
     middle_x = screen_pixel_width.to_f / 2.0
     middle_y = screen_pixel_height.to_f / 2.0
@@ -360,7 +368,38 @@ class GeneralObject
     ObjectSpace.each_object(Class).select { |klass| klass < self }
   end
 
-  def movement speed, angle
+
+  def is_on_map?
+    puts "@current_map_pixel: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+    # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
+    # puts "@current_map_pixel_x < @map_pixel_width && @current_map_pixel_x > 0"
+    # puts "#{@current_map_pixel_x} < #{@map_pixel_width} && #{@current_map_pixel_x} > 0"
+    # puts "#{@current_map_pixel_x < @map_pixel_width} && #{@current_map_pixel_x > 0}"
+    # 17402.549329529695 < 28125 && 17402.549329529695 > 0
+    # true && true
+    result = @current_map_pixel_x < @map_pixel_width && @current_map_pixel_x > 0 && @current_map_pixel_y < @map_pixel_height && @current_map_pixel_y > 0
+    puts "#{@current_map_pixel_x < @map_pixel_width} && #{@current_map_pixel_x > 0} && #{@current_map_pixel_y < @map_pixel_height} && #{@current_map_pixel_y > 0}"
+    puts "RESULT: #{result}"
+    # raise "STOP" if result == false
+    return result
+  end
+
+  # Launched, pointed north, at the top right corner of the map
+  # Current map_pixel_x: 197.02986467841077 = @X: 450.0
+  # ...
+  # Current map_pixel_x: 101.52206203019966 = @X: 354.4921973517889
+  # ...
+  # Current map_pixel_x: -32.18886167729589 = @X: 220.78127364429332
+
+  # Launched, pointed north, at the center of the map
+  # Current map_pixel_x: 14062.5 = @X: 450.0
+  # ...
+  # Current map_pixel_x: 1359.9622477878852 = @X: -12252.537752212114
+  # ...
+  # Current map_pixel_x: -72.6547919352809 = @X: -13685.154791935282
+
+  # Don't need allow_over_edge_of_map param, all objects are allowed past. Player has it's own logic to stop itself
+  def movement speed, angle, allow_over_edge_of_map = false
     # puts "MOVEMENT"
     # raise "ISSUE6" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     raise " NO SCALE PRESENT FOR MOVEMENT" if @width_scale.nil? || @height_scale.nil?
@@ -383,10 +422,19 @@ class GeneralObject
     new_y = Math.sin(step) * base + @current_map_pixel_y
     # puts "new_y = Math.sin(step) * base + @current_map_pixel_y"
     # puts "#{new_y} = Math.sin(#{step}) * #{base} + #{@current_map_pixel_y}"
+
+    # PRE MOVMENET: 7.885561234832409 - 71.5517865980955
+    # new_y = Math.sin(step) * base + @current_map_pixel_y
+    # 78.96594488335472 = Math.sin(0.22689280275926285) * 32.958984375 + 71.5517865980955
+    # POST MOVMENET: -24.2286865058919 - 78.96594488335472
+
+
     # puts "PRE MOVE: #{new_x} x #{new_y}"
     # new_x = new_x * @width_scale
     # new_y = new_y * @height_scale
     # puts "POST MOVE: #{new_x} x #{new_y}"
+    # Because X is swapped
+    # Not sure why we're reversing direction of x here.. maybe a miscalculation on the Math
     x_diff = (@current_map_pixel_x - new_x) * -1
     y_diff = @current_map_pixel_y - new_y
 
@@ -396,6 +444,7 @@ class GeneralObject
 
     # puts "(@current_map_pixel_y - y_diff)"
     # puts "(@#{current_map_pixel_y} - #{y_diff})"
+    if !allow_over_edge_of_map
       if (@current_map_pixel_y - y_diff) > @map_pixel_height
         # Block progress along top of map Y 
         # puts "Block progress along bottom of map Y "
@@ -419,6 +468,7 @@ class GeneralObject
         x_diff = x_diff + (@current_map_pixel_x + x_diff)
         @current_momentum = 0
       end
+    end
 
     # else
 
@@ -427,9 +477,8 @@ class GeneralObject
     # end
 
     # puts "MOVEMNET: #{x_diff.round(3)} - #{y_diff.round(3)}"
-
-    @current_map_pixel_y -= y_diff
-    @current_map_pixel_x -= x_diff
+    @current_map_pixel_y += y_diff
+    @current_map_pixel_x += x_diff
     # PLAYER MOVEMENT: 14118.0 - 28124.412499999864
     # puts "PLAYER MOVEMENT: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
 
@@ -448,6 +497,8 @@ class GeneralObject
     return [x_diff, y_diff]
   end
 
+  # Need to adjust this method. Should go from X,Y to map_pixel_x and map_pixel_y
+  # X and Y are no longer used to calculate collisions
   def update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
     # left-top, left-bottom, right-top, right-bottom
     ox = vert0[0] - (vert0[0] - vert2[0])
@@ -501,5 +552,18 @@ class GeneralObject
       next if param.nil?
       raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class} w/ value: #{param}" if !class_type.include?(param.class)
     end
+  end
+
+  def recalculate_current_tiles
+    # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
+    # If statement is due to the fact that some objects are created without these variables being initted.
+    # Indexed at 0. on a 250 x 250 tile map, values are 0..249
+    # It is possible to exceed the mapped areas, like projectiles flying off the edge of the map.
+    @current_map_tile_x = (@current_map_pixel_x / (@tile_pixel_width)).to_i  if @current_map_pixel_x && @tile_pixel_width
+    @current_map_tile_y = (@current_map_pixel_y / (@tile_pixel_height)).to_i if @current_map_pixel_y && @tile_pixel_height
+  end
+
+  def run_pixel_to_tile_validations
+    raise "STOP USING ME"
   end
 end

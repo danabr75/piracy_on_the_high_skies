@@ -72,24 +72,11 @@ class GLBackground
   # 225.0, 675.0, 450.0 , 450.0
   # RETURNING: {:o_x=>-0.5, :o_y=>0.5, :o_w=>0.0, :o_h=>0.0}
   def convert_screen_to_opengl x, y, w = nil, h = nil, include_adjustments_for_not_exact_opengl_dimensions = false
-    # puts "convert_screen_to_opengl"
-    # puts "#{x}, #{y}, #{w} , #{h}"
-    # puts "convert_screen_to_opengl"
-    # puts "#{x} - #{y} - #{w} - #{h}"
-    # convert 0..900 to 0..2 (-1..1) 
-    # 450 / 900.0
-    # screen_to_opengl_increment_x = (-2.0 / (@screen_pixel_width.to_f))
-    # screen_to_opengl_increment_y = (-2.0 / (@screen_pixel_height.to_f))
-    # opengl_x   = (x * screen_to_opengl_increment_x) + 1
-    # opengl_y   = (y * screen_to_opengl_increment_y) + 1
+    # puts "IT's SET RIUGHT HERE2!!: #{@screen_pixel_height} - #{y}"
     opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
-    opengl_x   = opengl_x * 1.2 if include_adjustments_for_not_exact_opengl_dimensions
+    # opengl_x   = opengl_x * 1.2 if include_adjustments_for_not_exact_opengl_dimensions
     opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
-    opengl_y   = opengl_y * 0.92 if include_adjustments_for_not_exact_opengl_dimensions
-    # opengl_x  = opengl_x / 2.0
-    # opengl_y  = opengl_y / 2.0
-    # opengl_x   = opengl_x * -1
-    # opengl_y   = opengl_y * -1
+    # opengl_y   = opengl_y * 0.92 if include_adjustments_for_not_exact_opengl_dimensions
     if w && h
       open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
       # open_gl_w = open_gl_w - opengl_x
@@ -104,7 +91,7 @@ class GLBackground
   end
 
 
-  def initialize player_x, player_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height
+  def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height
     @debug = true
     # @debug = false
 
@@ -156,14 +143,15 @@ class GLBackground
 
 
     @screen_pixel_width = screen_pixel_width
+    # puts "IT's SET RIUGHT HERE!!: #{@screen_pixel_width}"
     @screen_pixel_height = screen_pixel_height
     @screen_pixel_height_half = @screen_pixel_height / 2
     @screen_pixel_width_half = @screen_pixel_width / 2
 
     @tile_pixel_width  = @screen_pixel_width  / VISIBLE_MAP_WIDTH.to_f
-    puts "WHAT IS GOING ON HERE:"
-    puts "@tile_pixel_width  = @screen_pixel_width  / VISIBLE_MAP_WIDTH.to_f"
-    puts "#{@tile_pixel_width}  = #{@screen_pixel_width}  / #{VISIBLE_MAP_WIDTH.to_f}"
+    # puts "WHAT IS GOING ON HERE:"
+    # puts "@tile_pixel_width  = @screen_pixel_width  / VISIBLE_MAP_WIDTH.to_f"
+    # puts "#{@tile_pixel_width}  = #{@screen_pixel_width}  / #{VISIBLE_MAP_WIDTH.to_f}"
     @tile_pixel_height = @screen_pixel_height / VISIBLE_MAP_HEIGHT.to_f
 
     # @ratio = @screen_pixel_width.to_f / (@screen_pixel_height.to_f)
@@ -243,10 +231,10 @@ class GLBackground
     # @x_right_tracker  = nil
     # @x_left_tracker   = nil
 
-    if player_x && player_y
-      raise "This case is no longer supported. Can't return objects like buildings from initialize"
-      init_map
-    end
+    # if player_x && player_y
+    #   raise "This case is no longer supported. Can't return objects like buildings from initialize"
+    #   init_map
+    # end
 
 
     if @debug
@@ -455,7 +443,7 @@ class GLBackground
   end
 
 
-  def update player, player_x, player_y, buildings, pickups, projectiles, enemy_projectiles
+  def update player, player_map_pixel_movement_x, player_map_pixel_movement_y, buildings, pickups, projectiles, enemy_projectiles
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
 
@@ -465,14 +453,14 @@ class GLBackground
 
     @time_alive += 1
 
-    @current_map_pixel_center_x = player_x if @current_map_pixel_center_x.nil?
-    @current_map_pixel_center_y = player_y if @current_map_pixel_center_y.nil?
+    @current_map_pixel_center_x = player_map_pixel_movement_x if @current_map_pixel_center_x.nil?
+    @current_map_pixel_center_y = player_map_pixel_movement_y if @current_map_pixel_center_y.nil?
 
     # puts "PLAYER: #{player_x} - #{player_y} against #{@current_map_pixel_center_x} - #{@current_map_pixel_center_y}"
-    @local_map_movement_y = player_y - @current_map_pixel_center_y
+    @local_map_movement_y = player_map_pixel_movement_y - @current_map_pixel_center_y
     # puts "@local_map_movement_y = player_y - @current_map_pixel_center_y"
     # puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_pixel_center_y}"
-    @local_map_movement_x = player_x - @current_map_pixel_center_x
+    @local_map_movement_x = player_map_pixel_movement_x - @current_map_pixel_center_x
 
     # player.relative_object_offset_x = @local_map_movement_x
     # player.relative_object_offset_y = @local_map_movement_y
@@ -511,8 +499,8 @@ class GLBackground
             if x_index < @map_tile_width && x_index >= 0
               # Flipping Y Axis when retrieving from map data
               y_index = (@map_tile_height - ((@gps_map_center_y) + @gps_tile_offset_y))
-              puts "(@map_tile_height - ((@gps_map_center_y) + @gps_tile_offset_y)) - 1"
-              puts "(#{@map_tile_height} - ((#{@gps_map_center_y}) + #{@gps_tile_offset_y})) - 1"
+              # puts "(@map_tile_height - ((@gps_map_center_y) + @gps_tile_offset_y)) - 1"
+              # puts "(#{@map_tile_height} - ((#{@gps_map_center_y}) + #{@gps_tile_offset_y})) - 1"
               # (250 - ((126) + 9)) - 1
               # puts y_index
               new_array << @map_data[y_index][x_index]
@@ -1076,10 +1064,11 @@ class GLBackground
 
           lights = [{pos: [0,0], brightness: 0.4, radius: 0.5}]
           # Too slow.. FPS droppage
-          projectiles.each do |p|
-            results = convert_screen_to_opengl(p.x, p.y, nil, nil, true)
-            lights << {pos: [(results[:o_x]), (results[:o_y] * -1)], brightness: 0.3, radius: 0.5}
-          end
+          # projectiles.each do |p|
+            # Needs to be updated from x y to map x and map y
+            # results = convert_screen_to_opengl(p.x, p.y, nil, nil, true)
+            # lights << {pos: [(results[:o_x]), (results[:o_y] * -1)], brightness: 0.3, radius: 0.5}
+          # end
 
           if @enable_dark_mode
             default_colors = [0.3, 0.3, 0.3, 0.3]

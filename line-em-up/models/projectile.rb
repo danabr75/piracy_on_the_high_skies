@@ -35,105 +35,146 @@ class Projectile < ScreenMapFixedObject
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
     # Might have to reorient x and y here.
+    # start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
     start_point = OpenStruct.new(:x => current_map_pixel_x, :y => current_map_pixel_y)
     end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
     @angle = calc_angle(start_point, end_point)
+    angle_min = angle_min
+    angle_max = angle_max
+    angle_init = angle_init
+    puts "ANGLE #{@angle} from start: #{[current_map_pixel_x, current_map_pixel_y]} and end: #{[destination_map_pixel_x, destination_map_pixel_y]}"
+
+  # ANGLE 90.54463725738333
+  # start: [165.3689031842951, 175.50829614799085]
+  # end: [162.2712469342951, -150.35498510200915]
+
+
     @radian = calc_radian(start_point, end_point)
 
-    @image_angle = @angle
-    if @angle < 0.0
-      @angle = 360.0 - @angle.abs
-    end
+    @image_angle = @angle - 90
+    # TEMP stopping the image angle business, not worth it at this point
+    @current_image_angle = @angle - 90
+    @angle  = @angle - 90
 
-    if angle_min
-      if angle_min < 0.0
-        puts "1ANGLE WAS: #{angle_min}"
-        angle_min = 360 - angle_min.abs
-        puts "1NEW ANGLE: #{angle_min}"
-      elsif angle_min > 360.0
-        puts "2ANGLE WAS: #{angle_min}"
-        angle_min = angle_min - 360
-        puts "2NEW ANGLE: #{angle_min}"
-      end
-    end
+    # if @angle < 0.0
+    #   @angle = 360.0 - @angle.abs
+    # end
 
-    if angle_max
-      if angle_max < 0.0
-        puts "3ANGLE WAS: #{angle_max}"
-        angle_max = 360 - angle_max.abs
-        puts "3NEW ANGLE: #{angle_max}"
-      elsif angle_max > 360.0
-        puts "4ANGLE WAS: #{angle_max}"
-        angle_max = angle_max - 360
-        puts "4NEW ANGLE: #{angle_max}"
-      end
-    end
+    # if angle_min
+    #   if angle_min < 0.0
+    #     # puts "1ANGLE WAS: #{angle_min}"
+    #     angle_min = 360 - angle_min.abs
+    #     # puts "1NEW ANGLE: #{angle_min}"
+    #   elsif angle_min > 360.0
+    #     # puts "2ANGLE WAS: #{angle_min}"
+    #     angle_min = angle_min - 360
+    #     # puts "2NEW ANGLE: #{angle_min}"
+    #   end
+    # end
 
-    if angle_min.nil? && angle_max.nil?
-      # do nothing
-    else
-      if is_angle_between_two_angles?(@angle, angle_min, angle_max)
-        # Do nothing, we're good
-      else
-        @angle = nearest_angle(@angle, angle_min, angle_max)
-      end
-    end
+    # if angle_max
+    #   if angle_max < 0.0
+    #     # puts "3ANGLE WAS: #{angle_max}"
+    #     angle_max = 360 - angle_max.abs
+    #     # puts "3NEW ANGLE: #{angle_max}"
+    #   elsif angle_max > 360.0
+    #     # puts "4ANGLE WAS: #{angle_max}"
+    #     angle_max = angle_max - 360
+    #     # puts "4NEW ANGLE: #{angle_max}"
+    #   end
+    # end
 
-    if angle_init
-      @current_image_angle = (angle_init - 90) * -1
-      @end_image_angle = (@angle - 90) * -1
-    else
-      @current_image_angle = (@angle - 90) * -1
-    end
+    # if angle_min.nil? && angle_max.nil?
+    #   # do nothing
+    # else
+    #   if is_angle_between_two_angles?(@angle, angle_min, angle_max)
+    #     # Do nothing, we're good
+    #   else
+    #     @angle = nearest_angle(@angle, angle_min, angle_max)
+    #   end
+    # end
+
+    # if angle_init
+    #   @current_image_angle = (angle_init - 90) * -1
+    #   @end_image_angle = (@angle - 90) * -1
+    # else
+    #   @current_image_angle = (@angle - 90) * -1
+    # end
+
+    # # if it's min, incrementer is negative, else pos
+    # value = nearest_angle(@angle, angle_min, angle_max)
+    # if value == angle_min
+    #   @image_angle_incrementor = -2
+    # else
+    #   @image_angle_incrementor = 2
+    # end
+
   end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
+  def update mouse_x, mouse_y, player
     if @end_image_angle && @time_alive > 10
-      incrementing_amount = 0.5
-      angle_difference = (@current_image_angle - @end_image_angle)
-      if incrementing_amount > angle_difference.abs
-        # puts "ENDING IMAGE HERE!!!!!!"
-        @current_image_angle = @end_image_angle
-        @end_image_angle = nil
-      elsif angle_difference > 0
-        @current_image_angle -= incrementing_amount
-      elsif angle_difference < 0
-        @current_image_angle += incrementing_amount
-      else
-        @current_image_angle = @end_image_angle
-        @end_image_angle = nil
-      end
+
+      # if @current_image_angle != @end_image_angle
+      #   @current_image_angle = @current_image_angle + @image_angle_incrementor
+      #   # if it's negative
+      #   if @image_angle_incrementor < 0
+      #     @current_image_angle = @end_image_angle if @current_image_angle < @end_image_angle 
+      #   # it's positive
+      #   elsif @image_angle_incrementor > 0
+      #     @current_image_angle = @end_image_angle if @current_image_angle > @end_image_angle 
+      #   end
+      # end
+
+      # incrementing_amount = 2
+      # angle_difference = (@current_image_angle - @end_image_angle)
+
+
+      # if incrementing_amount > angle_difference.abs
+      #   # puts "ENDING IMAGE HERE!!!!!!"
+      #   @current_image_angle = @end_image_angle
+      #   @end_image_angle = nil
+      # elsif angle_difference > 0
+      #   @current_image_angle -= incrementing_amount
+      # elsif angle_difference < 0
+      #   @current_image_angle += incrementing_amount
+      # else
+      #   @current_image_angle = @end_image_angle
+      #   @end_image_angle = nil
+      # end
     end
-
-
 
     new_speed = 0
     if @time_alive > (@custom_initial_delay || self.class.get_initial_delay)
       new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)
       new_speed = self.class.get_max_speed if new_speed > self.class.get_max_speed
-      new_speed = new_speed * @scale
+      new_speed = new_speed * @average_scale
 
 
+    puts "PRE MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+      movement(new_speed, @angle) if new_speed != 0
+    puts "POST MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+      # vx = 0
+      # vy = 0
+      # if new_speed != 0
+      #   vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
 
-      vx = 0
-      vy = 0
-      if new_speed != 0
-        vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+      #   vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
+      #   vy = vy * -1
+      # end
 
-        vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-        vy = vy * -1
-      end
-
-      @x = @x + vx
-      @y = @y + vy
+      # @current_map_pixel_x = @current_map_pixel_x + vx
+      # @current_map_pixel_y = @current_map_pixel_y + vy
 
     end
-    super(mouse_x, mouse_y)
+
+    return super(mouse_x, mouse_y, player)
   end
 
   def draw
     # limiting angle extreme by 2
-    @image.draw_rot(get_x_with_offset,get_y_with_offset, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+    if is_on_screen?
+      @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+    end
   end
 
   def get_draw_ordering

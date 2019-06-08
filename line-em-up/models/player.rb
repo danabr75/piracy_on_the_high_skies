@@ -44,6 +44,7 @@ class Player < ScreenFixedObject
     @current_map_pixel_y = current_map_pixel_y
     @current_map_tile_x  = current_map_tile_x
     @current_map_tile_y  = current_map_tile_y
+    # run_pixel_to_tile_validations
     # puts "current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y"
     # puts "#{current_map_pixel_x}, #{current_map_pixel_y}, #{current_map_tile_x}, #{current_map_tile_y}"
     # @x = screen_pixel_width  / 2
@@ -324,14 +325,14 @@ class Player < ScreenFixedObject
   def move_left movement_x = 0, movement_y = 0
     # new_speed = (@speed  / (@mass.to_f)) * -1.5
     new_speed = (@speed  / (@mass.to_f)) * -100
-    x_diff, y_diff = self.movement(new_speed, @angle + 90)
+    x_diff, y_diff = self.movement(new_speed, @angle + 90, true)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def move_right movement_x = 0, movement_y = 0
     # new_speed = (@speed  / (@mass.to_f)) * -1.5
     new_speed = (@speed  / (@mass.to_f)) * -100
-    x_diff, y_diff = self.movement(new_speed, @angle - 90)
+    x_diff, y_diff = self.movement(new_speed, @angle - 90, true)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
@@ -343,8 +344,8 @@ class Player < ScreenFixedObject
     # @rotation_speed = 2
 
   # Figure out why these got switched later, accelerate and brake
-  def brake movement_x = 0, movement_y = 0
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle )
+  def accelerate movement_x = 0, movement_y = 0
+    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle, true)
 
     if @current_momentum <= @max_momentum
       @current_momentum += 1.2
@@ -355,10 +356,10 @@ class Player < ScreenFixedObject
     return [(movement_x - x_diff), (movement_y - y_diff)]
   end
   
-  def accelerate movement_x = 0, movement_y = 0
+  def brake movement_x = 0, movement_y = 0
     # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "ACCELERATE: #{movement_x} - #{movement_y}"
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180 )
+    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180, true)
 
     if @current_momentum >= -@max_momentum
       @current_momentum -= 2
@@ -368,7 +369,7 @@ class Player < ScreenFixedObject
   end
 
   def attack_group_1 pointer
-    @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, 0, 0, pointer)
+    @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
   end
  
   def deactivate_group_1
@@ -376,7 +377,7 @@ class Player < ScreenFixedObject
   end
 
   def attack_group_2 pointer
-    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, @map_pixel_width, @map_pixel_height, 0, 0, pointer)
+    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
   end
  
   def deactivate_group_2
@@ -404,13 +405,14 @@ class Player < ScreenFixedObject
     @ship.draw_gl
   end
   
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1, movement_x, movement_y
+  def update mouse_x, mouse_y, player, movement_x, movement_y
+    # run_pixel_to_tile_validations
     # raise "ISSUE" if movement_x.class != Integer || movement_y.class != Integer 
     # puts "HERE: #{@current_map_pixel_x.class} - #{@current_map_pixel_y.class}"
     # puts "HERE2: #{[@current_map_pixel_x , @current_map_pixel_y]}"
     # raise "ISSUE2" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER: #{@current_map_pixel_x} - #{@current_map_pixel_y}" if @time_alive % 10 == 0
-    @ship.update(mouse_x, mouse_y, player, scroll_factor)
+    @ship.update(mouse_x, mouse_y, player)
 
     if @current_momentum > 0.0
       speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
@@ -459,7 +461,7 @@ class Player < ScreenFixedObject
     end
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
-
+    super(mouse_x, mouse_y, player)
     return [(movement_x - x_diff), (movement_y - y_diff)]
   end
 

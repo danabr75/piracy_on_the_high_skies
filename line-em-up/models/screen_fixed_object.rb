@@ -3,7 +3,9 @@
 # Used by menu (maybe), player, HUD. NOT LASERS.
 class ScreenFixedObject < GeneralObject
  # def initialize(current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
- def initialize(options = {})
+  attr_reader :angle
+
+  def initialize(options = {})
     @x = nil
     @y = nil
 
@@ -40,12 +42,17 @@ class ScreenFixedObject < GeneralObject
 
     # @x_offset = 0
     # @y_offset = 0
-
   end
 
   def update_x_and_y x, y
-    puts "NEW X AND Y: #{x} - #{y}"
     @x = x
     @y = y
   end
+
+  def update mouse_x, mouse_y, player
+    # Inherit, add logic, then call this to calculate whether it's still visible.
+    # @time_alive ||= 0 # Temp solution
+    return super(mouse_x, mouse_y, player)
+  end
+
 end

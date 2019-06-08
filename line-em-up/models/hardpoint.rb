@@ -97,12 +97,16 @@ class Hardpoint < GeneralObject
   end
 
   def convert_pointer_to_map_pixel pointer
-    return [1, 2]
+    return [pointer.current_map_pixel_x, pointer.current_map_pixel_y]
   end
 
-  def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, opts = {}
+  def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
     # pointer convert to map_pixel_x and y!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    # puts "pointer"
+    # puts pointer
     destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
+    puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
+    puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
 
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil

@@ -1,6 +1,7 @@
 require_relative 'general_object.rb'
 class Cursor < GeneralObject
   attr_accessor :x, :y, :image_width_half, :image_height_half
+  attr_reader   :current_map_pixel_x, :current_map_pixel_y
 
 
   def get_image
@@ -8,7 +9,7 @@ class Cursor < GeneralObject
   end
 
   
-  def initialize screenx, screeny, width_scale, height_scale
+  def initialize screenx, screeny, width_scale, height_scale, player
     @width_scale  = width_scale
     @height_scale = height_scale
     @screen_pixel_width  = screenx
@@ -21,6 +22,9 @@ class Cursor < GeneralObject
     @image_height_half = @image_height / 2
     @x = 0
     @y = 0
+
+    @current_map_pixel_x = 0
+    @current_map_pixel_y = 0
 
     # TEST
     # @image2 = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
@@ -110,9 +114,12 @@ class Cursor < GeneralObject
     return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
-  def update mouse_x, mouse_y
+  def update mouse_x, mouse_y, player
     @x = mouse_x
     @y = mouse_y
+
+    @current_map_pixel_x = player.current_map_pixel_x + (mouse_x * -1) +  (@screen_pixel_width  / 2)
+    @current_map_pixel_y = player.current_map_pixel_y + (mouse_y     ) -  (@screen_pixel_height / 2)
     # puts "CURSOR X: #{@x}"
     # puts "CURSOR Y: #{@y}"
     new_pos_x, new_pos_y, increment_x, increment_y = convert_x_and_y_to_opengl_coords

@@ -319,7 +319,8 @@ class PilotableShip < GeneralObject
   #   return @y
   # end
 
-  def attack_group initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, group, relative_object_offset_x, relative_object_offset_y
+  def attack_group initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
+    puts "WHAT IS POINTER: #{pointer}"
     if @left_broadside_mode
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @left_broadside_hard_points.collect do |hp|
@@ -355,12 +356,12 @@ class PilotableShip < GeneralObject
     end
   end
 
-  def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, relative_object_offset_x, relative_object_offset_y
-    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, 1, relative_object_offset_x, relative_object_offset_y)
+  def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 1)
   end
 
-  def attack_group_2 initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, relative_object_offset_x, relative_object_offset_y
-    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, map_pixel_width, map_pixel_height, pointer, 2, relative_object_offset_x, relative_object_offset_y)
+  def attack_group_2 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 2)
   end
 
   def deactivate_group_1

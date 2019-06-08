@@ -7,7 +7,7 @@ require 'opengl'
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
   COOLDOWN_DELAY = 30
-  MAX_SPEED      = 30
+  MAX_SPEED      = 3
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 0.5
   SPEED_INCREASE_FACTOR = 2
@@ -69,7 +69,8 @@ class Missile < Projectile
 
   def drops
     [
-      SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+      # Add back in once SE has been updated to display on map, not on screen.
+      # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
     ]
   end
 

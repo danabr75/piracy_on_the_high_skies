@@ -4,7 +4,7 @@ class SmallExplosion < GeneralObject
   attr_reader :x, :y, :living_time
   TIME_TO_LIVE = 50
 
-  def initialize(scale, screen_pixel_width, screen_pixel_height, x = nil, y = nil, image = nil, options = {})
+  def initialize(x = nil, y = nil, image = nil, options = {})
     @scale = scale
     if options[:third_scale]
       @scale = @scale / 3

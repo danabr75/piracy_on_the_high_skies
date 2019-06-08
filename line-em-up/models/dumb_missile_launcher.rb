@@ -7,6 +7,7 @@ class DumbMissileLauncher < Launcher
 
   # convert pointer x and y to map pixel coordinates
   def init_projectile initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
+    validate_not_nil([options], self.class.name, __callee__) 
     Missile.new(
       current_map_pixel_x, current_map_pixel_y, 
       destination_map_pixel_x, destination_map_pixel_y,
@@ -33,6 +34,8 @@ class DumbMissileLauncher < Launcher
 
   # Calculate offset in the hardpoint, not on the launcher side (multiple projectiles).
   def attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
+    validate_not_nil([options], self.class.name, __callee__) 
+    # current_map_tile_x, current_map_tile_y CALCUATE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "DUMB MISSILE LAUNCHER ATTACK"
     if @cooldown_wait <= 0
       projectile = init_projectile(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options)

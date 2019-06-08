@@ -153,7 +153,7 @@ class GameWindow < Gosu::Window
     self.caption = "OpenGL Integration"
     
 
-    @gl_background = GLBackground.new(nil, nil, @width_scale, @height_scale, @width, @height)
+    @gl_background = GLBackground.new(@width_scale, @height_scale, @width, @height)
 
 
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
@@ -184,7 +184,6 @@ class GameWindow < Gosu::Window
     # @max_enemies = 4
     @max_enemies = 0
 
-    @pointer = Cursor.new(@width, @height, @width_scale, @height_scale)
     @ui_y = 0
     @footer_bar = FooterBar.new(@width, @height, @width_scale, @height_scale)
     reset_font_ui_y
@@ -214,10 +213,13 @@ class GameWindow < Gosu::Window
       @gl_background.map_pixel_width / 2.0, @gl_background.map_pixel_height / 2.0,
       @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2
     )
+    
+    @pointer = Cursor.new(@width, @height, @width_scale, @height_scale, @player)
+
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
 
-    @scroll_factor = 1
+    # @scroll_factor = 1
     @movement_x = 0
     @movement_y = 0
     @can_toggle_scroll_factor = true
@@ -377,7 +379,7 @@ class GameWindow < Gosu::Window
   end
 
   def update
-    @pointer.update(self.mouse_x, self.mouse_y) if @pointer
+    @pointer.update(self.mouse_x, self.mouse_y, @player) if @pointer
     if @start_fullscreen
       @start_fullscreen = false
       GameWindow.fullscreen(self)
@@ -484,13 +486,13 @@ class GameWindow < Gosu::Window
       end
 
       if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
-        @scroll_factor = @player.rotate_clockwise
+        @player.rotate_clockwise
         # @can_toggle_scroll_factor = false
       end
 
       if Gosu.button_down?(Gosu::KB_D) && @can_toggle_scroll_factor
         # @can_toggle_scroll_factor = false
-        @scroll_factor = @player.rotate_counterclockwise
+        @player.rotate_counterclockwise
       end
 
       if @player.is_alive && !@game_pause && !@menu_open
@@ -573,23 +575,23 @@ class GameWindow < Gosu::Window
 
         
         
-        @buildings.reject! { |building| !building.update(nil, nil, nil, @scroll_factor) }
+        @buildings.reject! { |building| !building.update(nil, nil, nil) }
 
         if @player.is_alive && @grappling_hook
           grap_result = @grappling_hook.update(@player)
           @grappling_hook = nil if !grap_result
         end
 
-        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
+        @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player) }
 
-        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
+        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
-        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
-        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player, @scroll_factor) }
-        @enemies.reject! { |enemy| !enemy.update(nil, nil, @player, @scroll_factor) }
+        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
 
         if @boss
-          result = @boss.update(nil, nil, @player, @scroll_factor)
+          result = @boss.update(nil, nil, @player)
           if !result
             @boss_killed = true
             @boss = nil
@@ -778,6 +780,18 @@ class GameWindow < Gosu::Window
       # @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("GPS: #{@player.current_map_tile_x} - #{@player.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("MAP PIXEL: #{@player.current_map_pixel_x.round(1)} - #{@player.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Angle: #{@player.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+
+      # @font.draw("Cursor MAP PIXEL: #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      if @projectiles.any?
+        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("P GPS: #{@projectiles.last.current_map_tile_x} - #{@projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("P MAP PIXEL: #{@projectiles.last.current_map_pixel_x.round(1)} - #{@projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("P Angle: #{@projectiles.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
     end
     # @gl_background.draw(ZOrder::Background)
     reset_font_ui_y

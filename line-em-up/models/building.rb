@@ -16,7 +16,10 @@ class Building < BackgroundFixedObject
   def drops
     # rand_num = rand(10)
     # if rand(10) == 9
-      [HealthPack.new(@scale, @x, @y, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, @location_x, @location_y, @map_height, @map_width, {z: @z})]
+      [ 
+        # Add back in after update
+        # HealthPack.new(@scale, @x, @y, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, @location_x, @location_y, @map_height, @map_width, {z: @z})
+      ]
       # raise "STOP"
     # elsif rand(10) == 8
     #   [BombPack.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y)]
