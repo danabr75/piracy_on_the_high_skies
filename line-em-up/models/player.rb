@@ -325,14 +325,14 @@ class Player < ScreenFixedObject
   def move_left movement_x = 0, movement_y = 0
     # new_speed = (@speed  / (@mass.to_f)) * -1.5
     new_speed = (@speed  / (@mass.to_f)) * -100
-    x_diff, y_diff = self.movement(new_speed, @angle + 90, true)
+    x_diff, y_diff = self.movement(new_speed, @angle + 90, false)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def move_right movement_x = 0, movement_y = 0
     # new_speed = (@speed  / (@mass.to_f)) * -1.5
     new_speed = (@speed  / (@mass.to_f)) * -100
-    x_diff, y_diff = self.movement(new_speed, @angle - 90, true)
+    x_diff, y_diff = self.movement(new_speed, @angle - 90, false)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
@@ -345,7 +345,7 @@ class Player < ScreenFixedObject
 
   # Figure out why these got switched later, accelerate and brake
   def accelerate movement_x = 0, movement_y = 0
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle, true)
+    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle, false)
 
     if @current_momentum <= @max_momentum
       @current_momentum += 1.2
@@ -359,7 +359,7 @@ class Player < ScreenFixedObject
   def brake movement_x = 0, movement_y = 0
     # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "ACCELERATE: #{movement_x} - #{movement_y}"
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180, true)
+    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180, false)
 
     if @current_momentum >= -@max_momentum
       @current_momentum -= 2
@@ -416,14 +416,22 @@ class Player < ScreenFixedObject
 
     if @current_momentum > 0.0
       speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
-      x_diff, y_diff = self.movement(speed, @angle)
-      @current_momentum -= 1
-      @current_momentum = 0 if @current_momentum < 0
+      x_diff, y_diff, halt = self.movement(speed, @angle)
+      if halt
+        @current_momentum = 0
+      else
+        @current_momentum -= 1
+        @current_momentum = 0 if @current_momentum < 0
+      end
     elsif @current_momentum < 0.0
       speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
-      x_diff, y_diff = self.movement(-speed, @angle + 180)
-      @current_momentum += 1
-      @current_momentum = 0 if @current_momentum > 0
+      x_diff, y_diff, halt = self.movement(-speed, @angle + 180)
+      if halt
+        @current_momentum = 0
+      else
+        @current_momentum += 1
+        @current_momentum = 0 if @current_momentum > 0
+      end
     else
       x_diff, y_diff = [0,0]
     end
@@ -440,20 +448,22 @@ class Player < ScreenFixedObject
     puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height} - #{@map_pixel_width}" if @time_alive % 100 == 0
 
     # puts "PLAYER: @current_map_pixel_y >= @map_pixel_height: #{@current_map_pixel_y} >= #{@map_pixel_height}"
-    if @current_map_pixel_y >= @map_pixel_height# * @tile_height
+    
+    # Keeps us from getting outside mapspace, and getting stuck on boundary
+    if !(@current_map_pixel_y < @map_pixel_height) # * @tile_height
       # puts "CASE 1"
       # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
       @current_momentum = 0
-      @current_map_pixel_y = @map_pixel_height
+      @current_map_pixel_y = @map_pixel_height - 1
     elsif @current_map_pixel_y < 0
       # puts "CASE 2"
       @current_momentum = 0
       @current_map_pixel_y = 0
     end
-    if @current_map_pixel_x >= @map_pixel_width# * @tile_width
+    if !(@current_map_pixel_x < @map_pixel_width) # * @tile_width
       # puts "CASE 3"
       @current_momentum = 0
-      @current_map_pixel_x = @map_pixel_width
+      @current_map_pixel_x = @map_pixel_width - 1
     elsif @current_map_pixel_x < 0
       # puts "CASE 4"
       @current_momentum = 0

@@ -444,6 +444,7 @@ class GeneralObject
 
     # puts "(@current_map_pixel_y - y_diff)"
     # puts "(@#{current_map_pixel_y} - #{y_diff})"
+    hit_map_boundary = false
     if !allow_over_edge_of_map
       if (@current_map_pixel_y - y_diff) > @map_pixel_height
         # Block progress along top of map Y 
@@ -452,21 +453,25 @@ class GeneralObject
         # puts "#{y_diff} = #{y_diff} - ((#{@current_map_pixel_y + y_diff}) - #{@current_map_pixel_y})"
         # -27.649999999997817 = -27.649999999997817 - ((28096.762499999866) - 28124.412499999864)
         y_diff = y_diff - ((@current_map_pixel_y + y_diff) - @current_map_pixel_y)
-        @current_momentum = 0
+        # @current_momentum = 0
+        hit_map_boundary = true
       elsif @current_map_pixel_y - y_diff < 0
         # Block progress along bottom of map Y 
         # puts "Block progress along top of map Y "
         y_diff = y_diff + (@current_map_pixel_y + y_diff)
-        @current_momentum = 0
+        # @current_momentum = 0
+        hit_map_boundary = true
       end
 
       if @current_map_pixel_x - x_diff > @map_pixel_width
         # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_pixel_width}"
         x_diff = x_diff - ((@current_map_pixel_x + x_diff) - @current_map_pixel_x)
-        @current_momentum = 0
+        # @current_momentum = 0
+        hit_map_boundary = true
       elsif @current_map_pixel_x - x_diff < 0
         x_diff = x_diff + (@current_map_pixel_x + x_diff)
-        @current_momentum = 0
+        # @current_momentum = 0
+        hit_map_boundary = true
       end
     end
 
@@ -494,7 +499,7 @@ class GeneralObject
     #   @location_x = 0
     # end
 
-    return [x_diff, y_diff]
+    return [x_diff, y_diff, hit_map_boundary]
   end
 
   # Need to adjust this method. Should go from X,Y to map_pixel_x and map_pixel_y

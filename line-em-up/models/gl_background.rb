@@ -48,6 +48,7 @@ class GLBackground
   attr_accessor :map_pixel_width, :map_pixel_height
   attr_accessor :tile_pixel_width, :tile_pixel_height
   attr_accessor :current_map_pixel_center_x, :current_map_pixel_center_y
+  attr_reader :gps_map_center_x, :gps_map_center_y
 
   # tile size is 1 GPS (location_x, location_y)
   # Screen size changes. At 900x900, it should be 900 (screen_pixel_width) / 15 (VISIBLE_MAP_WIDTH) = 60 pixels
@@ -344,6 +345,7 @@ class GLBackground
   # RESULTS HERE: [825.0, 525.0]
   # Don't factor in x or y offset here.
   def gps_tile_coords_to_center_screen_coords tile_x, tile_y
+    raise "STOP USING ME"
     # @gps_map_center_y
     # @gps_map_center_x
 
@@ -435,9 +437,9 @@ class GLBackground
           end
         end
       else
-        puts "START MAP NOT VERIFIABLE"
-        print_visible_map
-        puts "END   MAP NOT VERIFIABLE"
+        # puts "START MAP NOT VERIFIABLE"
+        # print_visible_map
+        # puts "END   MAP NOT VERIFIABLE"
       end
     end
   end
@@ -611,8 +613,14 @@ class GLBackground
 
 
     # Moving to the RIGHT
-    if @local_map_movement_x >= @tile_pixel_width
+    if @local_map_movement_x >= @tile_pixel_width 
+      puts "TEST HERE: #{@gps_map_center_x} - #{@map_tile_width}"
+    end
+    if @local_map_movement_x >= @tile_pixel_width && !(@gps_map_center_x >= @map_tile_width - 1)
       puts "ADDING IN ARRAY 3 "
+      puts "!(@gps_map_center_x >= @map_tile_width)"
+      puts "!(#{@gps_map_center_x} >= #{@map_tile_width})"
+      puts "#{!(@gps_map_center_x >= @map_tile_width)}"
       tile_movement = true
       # print_visible_map
       if @current_map_pixel_center_x < (@map_pixel_width)
