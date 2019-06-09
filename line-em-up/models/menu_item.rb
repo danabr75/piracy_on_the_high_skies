@@ -26,7 +26,7 @@ class MenuItem
       # elsif !@is_button
       #   @active_image.draw(@x, @y, @z)
       # elsif @is_button
-      @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
+      @button.draw(-(@button.w / 2), -(@button.h / 2))
         # @main_image.draw(0, 0)
       # end
     end
@@ -50,7 +50,7 @@ class MenuItem
         #   end
         # else
           # @main_image.update(-(@main_image.w / 2), -(@y_offset - @main_image.h / 2))
-        @button.update(0, 0)#(-(@button.w / 2), -(@button.h))
+        @button.update(-(@button.w / 2), -(@button.h / 2))
         # end
     end
 

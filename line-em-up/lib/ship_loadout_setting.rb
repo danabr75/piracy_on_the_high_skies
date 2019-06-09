@@ -18,6 +18,7 @@ class ShipLoadoutSetting < Setting
   # attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
   attr_accessor :value, :ship_value
   attr_accessor :mouse_x, :mouse_y
+  attr_reader :active
   def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
     @width_scale  = width_scale
     @height_scale = height_scale
@@ -81,6 +82,8 @@ class ShipLoadoutSetting < Setting
     @cursor_object = nil
     @ship_hardpoints = init_hardpoints(@ship)
     @active = false
+    # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
+    @button = LUIT::Button.new(@window, :back, max_width / 2, max_height - 50, "Return to Game", 30, 30)
   end
 
   def enable
@@ -95,9 +98,9 @@ class ShipLoadoutSetting < Setting
 
   def self.get_id_button_mapping
     values = {
-      next:     lambda { |window, id| window.next_clicked },
-      previous: lambda { |window, id| window.previous_clicked },
-      back:     lambda { |window, id| window.disable }
+      next:     lambda { |window, menu, id| menu.next_clicked },
+      previous: lambda { |window, menu, id| menu.previous_clicked },
+      back:     lambda { |window, menu, id| menu.disable }
     }
   end
 
@@ -423,6 +426,10 @@ class ShipLoadoutSetting < Setting
 
       matrix_update
 
+      # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
+      # @button.update
+      @button.update(-(@button.w / 2), -(@button.h / 2))
+
       # get ship value from player. used to come from update
       # if ship_value != @ship_value
       #   @ship_value = ship_value
@@ -491,6 +498,9 @@ class ShipLoadoutSetting < Setting
       hardpoint_draw
 
       matrix_draw
+
+      # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
+      @button.draw(-(@button.w / 2), -(@button.h / 2))
 
       @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 

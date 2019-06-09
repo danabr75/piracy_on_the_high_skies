@@ -220,7 +220,7 @@ class GameWindow < Gosu::Window
     # @scroll_factor = 1
     @movement_x = 0
     @movement_y = 0
-    @can_toggle_scroll_factor = true
+    # @can_toggle_scroll_factor = true
     @boss_active = false
     @boss = nil
     @boss_killed = false
@@ -266,8 +266,13 @@ class GameWindow < Gosu::Window
     # START SHIP LOADOUT INIT.
     @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @scale})
     # END  SHIP LOADOUT INIT.
-    LUIT.config({window: @window, z: 25})
-    @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
+    @menus = [@ship_loadout_menu, @menu]
+    # LUIT.config({window: @window, z: 25})
+    # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
+  end
+
+  def menus_active
+    @menus.collect{|menu| menu.active }.include?(true)
   end
 
 
@@ -450,7 +455,7 @@ class GameWindow < Gosu::Window
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
 
     if !@block_all_controls
-      if Gosu.button_down?(Gosu::KbEscape) && !@menu.active
+      if Gosu.button_down?(Gosu::KbEscape) && !menus_active
         @menu.enable
       end
 
@@ -485,22 +490,23 @@ class GameWindow < Gosu::Window
       end
 
 
-      if Gosu.button_down?(Gosu::KB_TAB) || Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)
-        @can_toggle_secondary = false
-        @player.toggle_secondary
-      end
 
-      if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
-        @player.rotate_clockwise
-        # @can_toggle_scroll_factor = false
-      end
+      if @player.is_alive && !@game_pause && !menus_active
+        if Gosu.button_down?(Gosu::KB_TAB) || Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)
+          @can_toggle_secondary = false
+          @player.toggle_secondary
+        end
 
-      if Gosu.button_down?(Gosu::KB_D) && @can_toggle_scroll_factor
-        # @can_toggle_scroll_factor = false
-        @player.rotate_counterclockwise
-      end
+        if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
+          @player.rotate_clockwise
+          # @can_toggle_scroll_factor = false
+        end
 
-      if @player.is_alive && !@game_pause && !@menu.active
+        if Gosu.button_down?(Gosu::KB_D)# && @can_toggle_scroll_factor
+          # @can_toggle_scroll_factor = false
+          @player.rotate_counterclockwise
+        end
+
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
         @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
@@ -566,7 +572,7 @@ class GameWindow < Gosu::Window
         @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
       end
 
-      if !@game_pause && !@menu.active
+      if !@game_pause && !menus_active
 
         @projectiles.each do |projectile|
           results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
@@ -732,7 +738,7 @@ class GameWindow < Gosu::Window
 
       end
     end # END if !@block_all_controls
-    @button.update
+    # @button.update
   end # END UPDATE FUNCTION
 
   def draw
@@ -741,14 +747,14 @@ class GameWindow < Gosu::Window
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw
     @ship_loadout_menu.draw
-    @button.draw
+    # @button.draw
     @footer_bar.draw(@player)
     @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 
     @player.draw() if @player.is_alive
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
-    if !@menu.active && !@player.is_alive
+    if !menus_active && !@player.is_alive
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

@@ -49,11 +49,11 @@ class Setting
   # required for LUIT objects, passes id of element
   def onClick element_id
     # puts "ONCLICK mappuing"
-    puts @button_id_mapping
+    # puts @button_id_mapping
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
       puts "BUTTON EXISTS: #{element_id}"
-      @button_id_mapping[element_id].call(self, element_id)
+      @button_id_mapping[element_id].call(self.window, self, element_id)
     else
       puts "Clicked button that is not mapped: #{element_id}"
     end
@@ -83,7 +83,7 @@ class Setting
     @value = value
   end
 
-  # Deprecating, using Liut
+  # Deprecating, using Liut. Still used for next, prev config settings
   def clicked mx, my
     if is_mouse_hovering_next(mx, my)
       previous_clicked

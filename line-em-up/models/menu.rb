@@ -14,7 +14,7 @@ class Menu
     # @offset_y = 0
     # @local_window = self
     @items = Array.new
-    @current_height = 0
+    @current_height = 50
     # Add to it while the buttons are being added, in add_item
     @button_id_mapping = {}
     @active = false
