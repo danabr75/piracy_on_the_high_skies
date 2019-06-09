@@ -344,7 +344,7 @@ class ShipLoadoutSetting < Setting
       ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
       hardpoint_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
-      @cursor_object = false
+      @cursor_object = nil
     end
   end
 
