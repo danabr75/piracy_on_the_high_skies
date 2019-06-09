@@ -21,6 +21,8 @@ class BackgroundFixedObject < GeneralObject
     @current_map_tile_x  = current_map_tile_x
     @current_map_tile_y  = current_map_tile_y
 
+    get_map_pixel_location_from_map_tile_location
+
     # if options[:relative_y_padding]
       # puts "options[:relative_y_padding]: #{options[:relative_y_padding]}"
     # end
@@ -30,5 +32,13 @@ class BackgroundFixedObject < GeneralObject
 
     # @x_offset_base = relative_object_offset_x || 0
     # @y_offset_base = relative_object_offset_y || 0
+  end
+
+  def update mouse_x, mouse_y, player
+    @time_alive += 1
+    updating_x_y_from_map_pixel_location(player)
+    # no need to update tile or pixel location
+    # super(mouse_x, mouse_y, player)
+    return is_alive
   end
 end

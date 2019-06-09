@@ -549,12 +549,12 @@ class GameWindow < Gosu::Window
         @player.collect_pickups(@pickups)
 
         @enemy_projectiles.each do |projectile|
-          results = projectile.hit_object(@player)
-          @pickups = @pickups + results[:drops]
+          results = projectile.hit_objects([@player])
+          # @pickups = @pickups + results[:drops]
         end
         @enemy_destructable_projectiles.each do |projectile|
-          results = projectile.hit_object(@player)
-          @pickups = @pickups + results[:drops]
+          results = projectile.hit_objects([@player])
+          # @pickups = @pickups + results[:drops]
         end
 
 
@@ -565,17 +565,18 @@ class GameWindow < Gosu::Window
 
         @projectiles.each do |projectile|
           results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
-
-          @pickups = @pickups + results[:drops]
-          @player.score += results[:point_value]
-          @enemies_killed += results[:killed]
-          @player.add_kill_count(results[:killed])
+          if results
+            @pickups = @pickups + results[:drops]
+            @player.score += results[:point_value]
+            @enemies_killed += results[:killed]
+            @player.add_kill_count(results[:killed])
+          end
         end
 
 
         
         
-        @buildings.reject! { |building| !building.update(nil, nil, nil) }
+        @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player) }
 
         if @player.is_alive && @grappling_hook
           grap_result = @grappling_hook.update(@player)
@@ -786,12 +787,17 @@ class GameWindow < Gosu::Window
       @font.draw("Angle: #{@player.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
-      # @font.draw("Cursor MAP PIXEL: #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Cursor MAP PIXEL: #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       if @projectiles.any?
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("P GPS: #{@projectiles.last.current_map_tile_x} - #{@projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("P MAP PIXEL: #{@projectiles.last.current_map_pixel_x.round(1)} - #{@projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("P Angle: #{@projectiles.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
+      if @buildings.any?
+        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("B GPS: #{@buildings.last.current_map_tile_x} - #{@buildings.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("B MAP PIXEL: #{@buildings.last.current_map_pixel_x.round(1)} - #{@buildings.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
     end
     # @gl_background.draw(ZOrder::Background)

@@ -3,6 +3,7 @@ class DumbMissileLauncher < Launcher
   MISSILE_LAUNCHER_MIN_ANGLE = 75.0
   MISSILE_LAUNCHER_MAX_ANGLE = 105.0
   MISSILE_LAUNCHER_INIT_ANGLE = 90.0
+  COOLDOWN_DELAY = 10
   # COOLDOWN_DELAY = 15
 
   # convert pointer x and y to map pixel coordinates

@@ -320,7 +320,7 @@ class PilotableShip < GeneralObject
   # end
 
   def attack_group initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
-    puts "WHAT IS POINTER: #{pointer}"
+    # puts "WHAT IS POINTER: #{pointer}"
     if @left_broadside_mode
       # puts "@broadside_hard_points: #{@broadside_hard_points}"
       results = @left_broadside_hard_points.collect do |hp|

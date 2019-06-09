@@ -6,7 +6,7 @@ require 'opengl'
 
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
-  COOLDOWN_DELAY = 30
+  COOLDOWN_DELAY = 3
   MAX_SPEED      = 3
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 0.5
@@ -92,7 +92,10 @@ class Missile < Projectile
   #   @mouse_start_y = mouse_y
   # end
   
-  # def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x, mouse_y, player
+    puts "MISSILE: #{@health}"
+    return super(mouse_x, mouse_y, player)
+  end
   #   new_speed = 0
   #   if @time_alive > self.class.get_initial_delay
   #     new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)

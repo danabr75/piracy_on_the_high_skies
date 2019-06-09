@@ -3,7 +3,7 @@ require_relative 'general_object.rb'
 class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
-  COOLDOWN_DELAY = 50
+  # COOLDOWN_DELAY = 50
   STARTING_SPEED = 3.0
   INITIAL_DELAY  = 0
   SPEED_INCREASE_FACTOR = 0.0
@@ -13,6 +13,8 @@ class Projectile < ScreenMapFixedObject
   ADVANCED_HIT_BOX_DETECTION = false
 
   MAX_TILE_TRAVEL = 20
+
+  HEALTH = 1
 
 
   def get_image
@@ -55,6 +57,9 @@ class Projectile < ScreenMapFixedObject
     # TEMP stopping the image angle business, not worth it at this point
     @current_image_angle = @angle - 90
     @angle  = @angle - 90
+
+    @health = self.class::HEALTH
+    puts "HEAHT HERE: #{@health}"
 
     # if @angle < 0.0
     #   @angle = 360.0 - @angle.abs
@@ -186,7 +191,8 @@ class Projectile < ScreenMapFixedObject
   end
 
   def hit_object(object)
-    return hit_objects([[object]])
+    raise "WHY? STOP USING ME"
+    # return hit_objects([[object]])
     # puts "PROJECTILE hit object: #{test}"
     # return test
   end
@@ -207,16 +213,25 @@ class Projectile < ScreenMapFixedObject
           next
         end
         # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
-        if self.class.get_advanced_hit_box_detection
+        if false && self.class.get_advanced_hit_box_detection
+          # Disabling advanced hit detection for now
           self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
           other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
           hit_object = rec_intersection(self_object, other_object)
         else
           # puts "HIT OBJECT DETECTION: proj-size: #{(self.get_size / 2)}"
           # puts "HIT OBJECT DETECTION:  obj-size: #{(self.get_size / 2)}"
-          hit_object = Gosu.distance(@x, @y, object.x, object.y) < self.get_radius + object.get_radius
+          raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
+          raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
+          raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
+          raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
+          hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
         end
         if hit_object
+          puts "COLLISION DETECTED!!!!! - #{self.class.name} - to #{object.class.name}"
+          puts "Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius"
+          puts "Gosu.distance(#{@current_map_pixel_x}, #{@current_map_pixel_y}, #{object.current_map_pixel_x}, #{object.current_map_pixel_y}) < #{self.get_radius} + #{object.get_radius}"
+          # raise "STOP HERE"
           # hit_object = true
           if self.class.get_aoe <= 0
             if object.respond_to?(:health) && object.respond_to?(:take_damage)
@@ -271,7 +286,7 @@ class Projectile < ScreenMapFixedObject
       end
     end
 
-    @y = @off_screen if hit_object
+    @health = 0 if hit_object
     return {drops: drops, point_value: points, killed: killed}
   end
 
@@ -282,9 +297,9 @@ class Projectile < ScreenMapFixedObject
   def self.get_aoe
     self::AOE
   end
-  def self.get_cooldown_delay
-    self::COOLDOWN_DELAY
-  end
+  # def self.get_cooldown_delay
+  #   self::COOLDOWN_DELAY
+  # end
   def self.get_starting_speed
     self::STARTING_SPEED
   end

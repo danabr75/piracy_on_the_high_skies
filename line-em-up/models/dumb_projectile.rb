@@ -49,45 +49,48 @@ class DumbProjectile < ScreenMapFixedObject
     false
   end
 
-  def hit_object(object)
-    return hit_objects([[object]])
-  end
+  # def hit_object(object)
+  #   return hit_objects([[object]])
+  # end
 
   def hit_objects(object_groups)
-    drops = []
-    points = 0
-    hit_object = false
-    killed = 0
-    object_groups.each do |group|
-      group.each do |object|
-        next if object.nil?
-        break if hit_object
-        if object.health <= 0
-          next
-        end
-        hit_object = Gosu.distance(@x, @y, object.x, object.y) < self.get_radius + object.get_radius
-        if hit_object
-          if object.respond_to?(:health) && object.respond_to?(:take_damage)
-            object.take_damage(self.class.get_damage * @damage_increase)
-          end
+    raise "MOVED TO PROJECTILE"
+    # drops = []
+    # points = 0
+    # hit_object = false
+    # killed = 0
+    # object_groups.each do |group|
+    #   group.each do |object|
+    #     next if object.nil?
+    #     break if hit_object
+    #     if object.health <= 0
+    #       next
+    #     end
+    #     hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
+    #     puts "HIT OBJECT " if hit_object
+    #     raise "test" if hit_object
+    #     if hit_object
+    #       if object.respond_to?(:health) && object.respond_to?(:take_damage)
+    #         object.take_damage(self.class.get_damage * @damage_increase)
+    #       end
 
-          if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+    #       if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
 
-            object.drops.each do |drop|
-              drops << drop
-            end
-          end
+    #         object.drops.each do |drop|
+    #           drops << drop
+    #         end
+    #       end
 
-          if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
-            killed += 1
-            points = points + object.get_points
-          end
-        end
-      end
-    end
-    @y = @off_screen if hit_object
-    collision_triggers if hit_object
-    return {drops: drops, point_value: points, killed: killed}
+    #       if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
+    #         killed += 1
+    #         points = points + object.get_points
+    #       end
+    #     end
+    #   end
+    # end
+    # @y = @off_screen if hit_object
+    # collision_triggers if hit_object
+    # return {drops: drops, point_value: points, killed: killed}
   end
 
   protected

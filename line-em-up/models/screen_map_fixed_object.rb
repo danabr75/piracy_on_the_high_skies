@@ -26,7 +26,7 @@ class ScreenMapFixedObject < GeneralObject
       @current_map_pixel_x = ((@current_map_tile_x * @tile_pixel_width)  + @tile_pixel_width  / 2).to_i
       @current_map_pixel_y = ((@current_map_tile_y * @tile_pixel_height) + @tile_pixel_height / 2).to_i
     elsif (@current_map_tile_x.nil? || @current_map_tile_y.nil?) && (@current_map_pixel_x && @current_map_pixel_y)
-      recalculate_current_tiles
+      get_map_tile_location_from_map_pixel_location
     else
       raise "You have to provide either map pixels or map tiles! #{[@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"
     end
@@ -63,23 +63,16 @@ class ScreenMapFixedObject < GeneralObject
 
     #   # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     # end
-    @health = 0
+    # @health = 0
     # run_pixel_to_tile_validations
   end
 
   def update mouse_x, mouse_y, player
     updating_x_y_from_map_pixel_location(player)
-    super(mouse_x, mouse_y, player)
-    return is_on_map?
+    # Is on map and is alive, essentially
+    puts "SMFO - UPDATE: #{is_on_map?} - #{is_alive} - #{@health}"
+    return(is_on_map? && super(mouse_x, mouse_y, player))
   end
 
-  def updating_x_y_from_map_pixel_location player
-    @x = (player.current_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
-    puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
-
-    # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
-    # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
-    @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height/ 2)
-  end
 
 end

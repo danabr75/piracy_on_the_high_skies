@@ -34,7 +34,7 @@ class Launcher < GeneralObject
   end
 
   def get_cooldown
-    COOLDOWN_DELAY
+    self.class::COOLDOWN_DELAY
   end
 
   # Used via hardpoint

@@ -265,8 +265,8 @@ class GLBackground
     buildings = []
     enemies = []
     pickups = []
-    puts "@map_objects"
-    puts @map_objects.inspect
+    # puts "@map_objects"
+    # puts @map_objects.inspect
 
     (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
       y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
@@ -279,32 +279,47 @@ class GLBackground
         x_index = @gps_map_center_x + x_offset
         @visible_map[index_h][index_w] = @map_data[y_index][x_index]
         @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
-        if @map_objects["buildings"] && @map_objects["buildings"][y_index.to_s] && @map_objects["buildings"][y_index.to_s][x_index.to_s]
-          building_datas = @map_objects["buildings"][y_index.to_s][x_index.to_s] || []
-          building_datas.each do |building_data|
-            # puts "building DATA - #{y_index} - #{x_index}"
-            # puts building_data
-            # puts building_data.class
-            # puts "TEST:"
-            # puts @visible_map[index_h][index_w]
-            # # raise "STOP HERE"
-            # puts building_data["klass_name"]
-            klass = eval(building_data["klass_name"])
-            # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
-            # # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
-            # puts "CREATED BUILDING HERE - #{results}"
-            # if results
-            #   puts "GOT HERE: #{[@scale, results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width]}"
-              # buildings << klass.new(results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width, {z: @visible_map[index_h][index_w]['height']})
-              # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y, options = {})
-              buildings << klass.new(x_index, y_index, {z: @visible_map[index_h][index_w]['height']})
-            # else
-            #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
-            # end
+        # if @map_objects["buildings"] && @map_objects["buildings"][y_index.to_s] && @map_objects["buildings"][y_index.to_s][x_index.to_s]
+        #   building_datas = @map_objects["buildings"][y_index.to_s][x_index.to_s] || []
+        #   building_datas.each do |building_data|
+        #     # puts "building DATA - #{y_index} - #{x_index}"
+        #     # puts building_data
+        #     # puts building_data.class
+        #     # puts "TEST:"
+        #     # puts @visible_map[index_h][index_w]
+        #     # # raise "STOP HERE"
+        #     # puts building_data["klass_name"]
+        #     klass = eval(building_data["klass_name"])
+        #     # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
+        #     # # results = gps_tile_coords_to_center_screen_coords(x_index, y_index)
+        #     # puts "CREATED BUILDING HERE - #{results}"
+        #     # if results
+        #     #   puts "GOT HERE: #{[@scale, results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width]}"
+        #       # buildings << klass.new(results[0], results[1], @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, x_index, y_index, @map_tile_height, @map_tile_width, {z: @visible_map[index_h][index_w]['height']})
+        #       # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_tile_x, current_map_tile_y, options = {})
+        #       buildings << klass.new(x_index, y_index, {z: @visible_map[index_h][index_w]['height']})
+        #     # else
+        #     #   raise "ISSUE WITH BUILDING. Should not be nil here. gps_tile_coords_to_center_screen_coords(#{x_index}, #{y_index}) -> #{results}"
+        #     # end
+        #   end
+        # end
+      end
+    end
+
+    if @map_objects["buildings"]
+      building_datas = @map_objects["buildings"]
+      building_datas.each do |y_value, data|
+        # puts "building DATA - #{y_index} - #{x_index}"
+        puts "y_value: #{y_value}, data: #{data}"
+        data.each do |x_value, elements|
+          elements.each do |element|
+            klass = eval(element["klass_name"])
+            buildings << klass.new(x_value.to_i, y_value.to_i) #Z really isn't necessary at this turn, {z: @map_data[y_value][x_value]['height']})
           end
         end
       end
     end
+
     @map_inited = true
     # @only return active objects?
     # Except enemies, cause they can have movement outside of the visible map?
@@ -1115,13 +1130,16 @@ class GLBackground
 
           buildings.each do |building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-            building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+
+            # NEED TO STOP USING THIS I SPOSE
+            # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+
             building.class.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
           end
 
           pickups.each do |pickup|
             next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
-            pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            # pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 
           error = glGetError

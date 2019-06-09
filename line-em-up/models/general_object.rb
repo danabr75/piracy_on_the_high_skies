@@ -11,6 +11,7 @@ class GeneralObject
   RIGHT = 'right'
   SCROLLING_SPEED = 4
   MAX_SPEED      = 5
+  HEALTH = 0
   
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
@@ -102,11 +103,11 @@ class GeneralObject
   #   @y + (@y_offset)
   # end
 
-  # For enemies and projectiles... maybe using this
-  def update_offsets x_offset, y_offset
-    @x_offset = x_offset
-    @y_offset = y_offset
-  end
+  # # For enemies and projectiles... maybe using this
+  # def update_offsets x_offset, y_offset
+  #   @x_offset = x_offset
+  #   @y_offset = y_offset
+  # end
 
   # If using a different class for ZOrder than it has for model name, or if using subclass (from subclass or parent)
   def get_draw_ordering
@@ -155,7 +156,6 @@ class GeneralObject
     @health -= damage
   end
 
-  HEALTH = 0
 
   def self.get_initial_health
     self::HEALTH
@@ -166,9 +166,9 @@ class GeneralObject
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     @time_alive += 1
-    recalculate_current_tiles
+    get_map_tile_location_from_map_pixel_location
     # return is_on_screen?
-    return true
+    return is_alive
   end
 
   def self.get_max_speed
@@ -504,6 +504,7 @@ class GeneralObject
 
   # Need to adjust this method. Should go from X,Y to map_pixel_x and map_pixel_y
   # X and Y are no longer used to calculate collisions
+  # Keeping this around, but not going to use for the future.
   def update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
     # left-top, left-bottom, right-top, right-bottom
     ox = vert0[0] - (vert0[0] - vert2[0])
@@ -559,7 +560,7 @@ class GeneralObject
     end
   end
 
-  def recalculate_current_tiles
+  def get_map_tile_location_from_map_pixel_location
     # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
     # If statement is due to the fact that some objects are created without these variables being initted.
     # Indexed at 0. on a 250 x 250 tile map, values are 0..249
@@ -568,7 +569,34 @@ class GeneralObject
     @current_map_tile_y = (@current_map_pixel_y / (@tile_pixel_height)).to_i if @current_map_pixel_y && @tile_pixel_height
   end
 
+  def get_map_pixel_location_from_map_tile_location
+    # puts "get_map_pixel_location_from_map_tile_location"
+    # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
+    # If statement is due to the fact that some objects are created without these variables being initted.
+    # Indexed at 0. on a 250 x 250 tile map, values are 0..249
+    # It is possible to exceed the mapped areas, like projectiles flying off the edge of the map.
+    @current_map_pixel_x = ((@current_map_tile_x) * @tile_pixel_width)  + (@tile_pixel_width  / 2.0) if @current_map_tile_x && @tile_pixel_width
+    @current_map_pixel_y = ((@current_map_tile_y) * @tile_pixel_height) + (@tile_pixel_height / 2.0) if @current_map_tile_y && @tile_pixel_height
+    # puts "TILE = #{[@current_map_tile_x, @current_map_tile_y]}"
+    # puts "GOT PIXEL: #{[@current_map_pixel_x, @current_map_pixel_y]}"
+    # TILE = [124, 128]
+    # GOT PIXEL: [14006.25, 14456.25]
+  end
+
+  def updating_x_y_from_map_pixel_location player
+    @x = (player.current_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
+    # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
+
+    # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
+    # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
+    @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height/ 2)
+  end
+
   def run_pixel_to_tile_validations
     raise "STOP USING ME"
+  end
+
+  def stop
+    raise "STOP HERE"
   end
 end

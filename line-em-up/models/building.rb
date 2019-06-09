@@ -34,22 +34,22 @@ class Building < BackgroundFixedObject
 
   def draw
     # Doesn't exactly match terrain
-    # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, @z, @width_scale, @height_scale)
+    @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @width_scale, @height_scale)
   end
 
-  def convert_screen_to_opengl x, y, w = nil, h = nil
-    opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
-    opengl_x   = opengl_x * 1.2 # Needs to be boosted for some odd reason - Screen is not entirely 1..-1
-    opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
-    opengl_y   = opengl_y * 0.92
-    if w && h
-      open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
-      open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
-      return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
-    else
-      return {o_x: opengl_x, o_y: opengl_y}
-    end
-  end
+  # def convert_screen_to_opengl x, y, w = nil, h = nil
+  #   opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
+  #   opengl_x   = opengl_x * 1.2 # Needs to be boosted for some odd reason - Screen is not entirely 1..-1
+  #   opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
+  #   opengl_y   = opengl_y * 0.92
+  #   if w && h
+  #     open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
+  #     open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
+  #     return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
+  #   else
+  #     return {o_x: opengl_x, o_y: opengl_y}
+  #   end
+  # end
 
   def self.alt_draw_gl v1, v2, v3, v4
     @image2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png", :tileable => true)
@@ -59,19 +59,23 @@ class Building < BackgroundFixedObject
     colors = [1, 1, 1, 1]
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
     glBegin(GL_TRIANGLE_STRIP)
-      glTexCoord2d(info.left, info.top)
+      # bottom left 
+      glTexCoord2d(info.left, info.bottom)
       glColor4d(colors[0], colors[1], colors[2], colors[3])
       glVertex3d(v1[0], v1[1], v1[2])
 
-      glTexCoord2d(info.left, info.bottom)
+      # Top Left
+      glTexCoord2d(info.left, info.top)
       glColor4d(colors[0], colors[1], colors[2], colors[3])
       glVertex3d(v2[0], v2[1], v2[2])
 
-      glTexCoord2d(info.right, info.top)
+      # bottom Right
+      glTexCoord2d(info.right, info.bottom)
       glColor4d(colors[0], colors[1], colors[2], colors[3])
       glVertex3d(v3[0], v3[1], v3[2])
 
-      glTexCoord2d(info.right, info.bottom)
+      # top right
+      glTexCoord2d(info.right, info.top)
       glColor4d(colors[0], colors[1], colors[2], colors[3])
       glVertex3d(v4[0], v4[1], v4[2])
     glEnd
@@ -94,11 +98,7 @@ class Building < BackgroundFixedObject
     # Draw nothing here
   end
 
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    if is_alive
-      return true
-    else
-      return false
-    end
+  def update mouse_x, mouse_y, player
+    return super(mouse_x, mouse_y, player)
   end
 end

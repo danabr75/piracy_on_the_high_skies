@@ -105,8 +105,8 @@ class Hardpoint < GeneralObject
     # puts "pointer"
     # puts pointer
     destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
-    puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
-    puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
+    # puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
+    # puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
 
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
