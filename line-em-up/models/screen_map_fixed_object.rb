@@ -68,7 +68,7 @@ class ScreenMapFixedObject < GeneralObject
   end
 
   def update mouse_x, mouse_y, player
-    updating_x_y_from_map_pixel_location(player)
+    convert_map_pixel_location_to_screen(player)
     # Is on map and is alive, essentially
     # puts "SMFO - UPDATE: #{is_on_map?} - #{is_alive} - #{@health}"
     return(is_on_map? && super(mouse_x, mouse_y, player))

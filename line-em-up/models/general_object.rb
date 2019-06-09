@@ -585,13 +585,20 @@ class GeneralObject
     # GOT PIXEL: [14006.25, 14456.25]
   end
 
-  def updating_x_y_from_map_pixel_location player
+  def convert_map_pixel_location_to_screen player
     @x = (player.current_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
     # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
 
     # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
     # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
     @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height/ 2)
+  end
+
+  # object can be player.. or an enemy. This is used to calculate projectiles emerging from hardpoints.
+  def convert_screen_to_map_pixel_location object_map_pixel_x, object_map_pixel_y
+    current_map_pixel_x = -(( @x    ) - (@screen_pixel_width  / 2) - object_map_pixel_x)
+    current_map_pixel_y = -((@screen_pixel_height  -    @y    ) - (@screen_pixel_height / 2) - object_map_pixel_y)
+    return [current_map_pixel_x, current_map_pixel_y]
   end
 
   def convert_map_tile_location_to_opengl x, y, w = nil, h = nil, include_adjustments_for_not_exact_opengl_dimensions = false

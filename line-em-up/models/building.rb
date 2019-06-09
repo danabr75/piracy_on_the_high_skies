@@ -103,7 +103,7 @@ class Building < BackgroundFixedObject
       # Update from gl_background
     else
       # lol don't need to update x and y if off screen.
-      # updating_x_y_from_map_pixel_location(player)
+      # convert_map_pixel_location_to_screen(player)
       get_map_pixel_location_from_map_tile_location
     end
     return super(mouse_x, mouse_y, player)

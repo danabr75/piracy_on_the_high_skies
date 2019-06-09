@@ -39,7 +39,8 @@ class DumbMissileLauncher < Launcher
     # current_map_tile_x, current_map_tile_y CALCUATE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "DUMB MISSILE LAUNCHER ATTACK"
     if @cooldown_wait <= 0
-      projectile = init_projectile(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+      new_map_pixel_x, new_map_pixel_y = convert_screen_to_map_pixel_location(current_map_pixel_x, current_map_pixel_y)
+      projectile = init_projectile(initial_angle, new_map_pixel_x, new_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
       # @projectiles << projectile
       @cooldown_wait = get_cooldown
       return projectile
