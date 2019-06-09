@@ -1,0 +1,6 @@
+
+Inventory: {"0":{"0":"DumbMissileLauncher","1":"LaserLauncher","2":null,"6":null,"5":null,"4":null,"3":null},"1":{"0":"DumbMissileLauncher","1":null,"2":"BulletLauncher","3":null,"6":null,"5":null,"4":null},"2":{"0":"DumbMissileLauncher","1":null,"2":"LaserLauncher","3":null,"4":null,"5":null,"6":null},"3":{"2":"LaserLauncher","1":null,"0":"DumbMissileLauncher","3":null,"4":null,"5":null}};
+MiteShip: {"right_hardpoint_locations":{"1":"DumbMissileLauncher","0":"DumbMissileLauncher"},"front_hardpoint_locations":{"0":"DumbMissileLauncher"}};
+ship: BasicShip;
+BasicShip: {"front_hardpoint_locations":{"1":"DumbMissileLauncher"},"right_hardpoint_locations":{"2":"LaserLauncher","1":"LaserLauncher","0":"LaserLauncher"},"left_hardpoint_locations":{"0":"BulletLauncher","1":"BulletLauncher","2":"BulletLauncher"}};
+resolution: 900x900;

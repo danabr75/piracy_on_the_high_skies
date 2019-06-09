@@ -86,9 +86,9 @@ class Player < ScreenFixedObject
     if ship
       ship_class = eval(ship)
       puts "SHIP HERE: #{@x} - #{@y}"
-      @ship = ship_class.new(@x, @y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, nil, tile_pixel_width, tile_pixel_height, options)
+      @ship = ship_class.new(@x, @y, nil, options)
     else
-      @ship = BasicShip.new(@x, @y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, nil, tile_pixel_width, tile_pixel_height, options)
+      @ship = BasicShip.new(@x, @y, nil, options)
     end
     @ship.x = @x
     @ship.y = @y

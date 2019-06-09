@@ -73,7 +73,7 @@ class GameWindow < Gosu::Window
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
-  attr_accessor :width, :height, :block_all_controls
+  attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu
 
   include GlobalVariables
 
@@ -139,10 +139,8 @@ class GameWindow < Gosu::Window
     # @width, @height = [@width.to_f, @height.to_f]
     
     @game_pause = false
-    @game_pause = false
-    @menu_open = false
-    @menu = nil
-    @can_open_menu = true
+    # @menu = nil
+    # @can_open_menu = true
     @can_pause = true
     @can_resize = !options[:block_resize].nil? && options[:block_resize] == true ? false : true
     @can_toggle_secondary = true
@@ -228,6 +226,48 @@ class GameWindow < Gosu::Window
     @boss_killed = false
 
     @debug = true #is_debug?
+
+    # START MENU INIT
+    # Can punt to different file
+    @window = self
+    @menu = Menu.new(@window, @width / 2, 10 * @scale, ZOrder::UI, @scale)
+    @menu.add_item(
+      :resume, "Resume",
+      0, 0,
+      lambda {|window, menu, id| menu.disable },
+      nil,
+      {is_button: true}
+    )
+    @menu.add_item(
+      :loadout, "Inventory",
+      0, 0,
+      # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
+      lambda {|window, menu, id| window.menu.disable; window.ship_loadout_menu.enable },
+      nil,
+      {is_button: true}
+    )
+    # This will close the window... which i guess is fine.
+    @menu.add_item(
+      :back_to_menu, "Back To Menu",
+      0, 0,
+      lambda {|window, menu, id| self.close; Main.new.show }, 
+      nil,
+      {is_button: true}
+    )
+    @menu.add_item(
+      :exit, "Exit",
+      0, 0,
+      lambda {|window, menu, id| window.close; }, 
+      nil,
+      {is_button: true}
+    )
+    # END  MENU INIT
+
+    # START SHIP LOADOUT INIT.
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @scale})
+    # END  SHIP LOADOUT INIT.
+    LUIT.config({window: @window, z: 25})
+    @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
   end
 
 
@@ -236,9 +276,14 @@ class GameWindow < Gosu::Window
   def button_down(id)
     # puts "HERE: #{id.inspect}"
     # super(id)
-    if id == Gosu::MsLeft && @menu_open && @menu
-      @menu.clicked
-    end
+    # Not necessary when using LUIT.. using `update` instead for trigger
+    # if id == Gosu::MsLeft
+    #   @menu.clicked
+    # end
+
+    # if id == Gosu::MsLeft
+    #   @ship_loadout_menu.clicked
+    # end
 
     if @player.is_alive && !@game_pause && !@menu_open
               # KB_LEFT_CONTROL    = 224,
@@ -251,20 +296,32 @@ class GameWindow < Gosu::Window
 
   end
 
+  # required for LUIT objects, passes id of element
+  def onClick element_id
+    # Block any clicks unless curser object is nil
+    # Don't navigate unless cursor is clear of tracked objects
+    # puts "1ONCLICK HERE!: #{element_id}"
+    # if !@cursor_object
+      @menu.onClick(element_id)
+      @ship_loadout_menu.onClick(element_id)
+
+      # Should not be handled at this level. 
+      # button_clicked_exists = @button_id_mapping.key?(element_id)
+      # if button_clicked_exists
+      #   @button_id_mapping[element_id].call(self, element_id)
+      # else
+      #   puts "Clicked button that is not mapped: #{element_id}"
+      # end
+    # end
+  end
+
+
   def self.reset(window, options = {})
     window = GameWindow.new(window.width, window.height, window.fullscreen?, options.merge({block_controls_until_button_up: true})).show
   end
 
   def self.start width = nil, height = nil, fullscreen = false, options = {}
-    # begin
-    # window = GameWindow.new.show
-      GameWindow.new(width, height, fullscreen, options).show
-    # rescue Exception => e
-    #   puts "Exception caught in GameWindow"
-    #   puts e.message
-    #   puts e.backtrace
-    #   raise e
-    # end
+    GameWindow.new(width, height, fullscreen, options).show
   end
 
 # When fullscreen, try to match window with screen resolution
@@ -379,76 +436,24 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
+
+
+
     @pointer.update(self.mouse_x, self.mouse_y, @player) if @pointer
     if @start_fullscreen
       @start_fullscreen = false
       GameWindow.fullscreen(self)
     end
     # reset_center_font_ui_y
-    @menu.update if @menu
+    @menu.update
+    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
+
     if !@block_all_controls
-      if Gosu.button_down?(Gosu::KbEscape) && @can_open_menu
-        @menu_open = true
-        @can_open_menu = false
-        # @menu = Menu.new(self)
-        @menu = Menu.new(self, @width / 2, 10 * @scale, ZOrder::UI, @scale)
-
-        button_key = :resume
-        @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Resume", 0, 1),
-          0,
-          0,
-          lambda {|window, id| @menu_open = false; @menu = nil; @can_open_menu = true; },
-          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
-          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
-          {is_button: true, key: button_key}
-        )
-        # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { @menu_open = false; @menu = nil; @can_open_menu = true; }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/resume.png", false))
-
-
-        # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
-        # (object, x, y, z, callback, hover_image = nil, options = {})
-        button_key = :loadout
-        @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Inventory", 0, 1),
-          0,
-          0,
-          lambda {|window, id|
-            self.close
-            LoadoutWindow.new(nil,nil,nil,{game_window: @window}).show
-          },
-          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
-          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
-          {is_button: true, key: button_key}
-        )
-        button_key = :back_to_menu
-        @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Back To Menu", 0, 1),
-          0,
-          0,
-          lambda {|window, id| self.close; Main.new.show }, 
-          # lambda {|window, id| self.close; LoadoutWindow.new.show },
-          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
-          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
-          {is_button: true, key: button_key}
-        )
-
-        button_key = :exit
-        @menu.add_item(
-          LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
-          0,
-          0,
-          lambda {|window, id| self.close; }, 
-          # lambda {|window, id| self.close; LoadoutWindow.new.show },
-          # { self.close; Main.new.show }, # lambda { self.close; Main.new.show },
-          nil, # Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false)
-          {is_button: true, key: button_key}
-        )
-
-        # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close; Main.new.show }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/back_to_menu.png", false))
-        # @menu.add_item(Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false), get_center_font_ui_x, get_center_font_ui_y, ZOrder::UI, lambda { self.close }, Gosu::Image.new(self, "#{MEDIA_DIRECTORY}/exit.png", false))
-        # close!
+      if Gosu.button_down?(Gosu::KbEscape) && !@menu.active
+        @menu.enable
       end
+
       if Gosu.button_down?(Gosu::KB_M)
         GameWindow.reset(self, {debug: @debug})
       end
@@ -495,7 +500,7 @@ class GameWindow < Gosu::Window
         @player.rotate_counterclockwise
       end
 
-      if @player.is_alive && !@game_pause && !@menu_open
+      if @player.is_alive && !@game_pause && !@menu.active
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
         @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
@@ -561,7 +566,7 @@ class GameWindow < Gosu::Window
         @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
       end
 
-      if !@game_pause && !@menu_open
+      if !@game_pause && !@menu.active
 
         @projectiles.each do |projectile|
           results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
@@ -727,20 +732,23 @@ class GameWindow < Gosu::Window
 
       end
     end # END if !@block_all_controls
+    @button.update
   end # END UPDATE FUNCTION
 
   def draw
     # Adding pointer as a opengl coord test
     @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
-    @menu.draw if @menu
+    @menu.draw
+    @ship_loadout_menu.draw
+    @button.draw
     @footer_bar.draw(@player)
     @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 
     @player.draw() if @player.is_alive
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
-    if !@menu && !@player.is_alive
+    if !@menu.active && !@player.is_alive
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

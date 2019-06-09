@@ -28,16 +28,16 @@ class PilotableShip < GeneralObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
-  def initialize(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle, tile_pixel_width, tile_pixel_height, options = {})
+  def initialize(x, y, angle, options = {})
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
     # validate_int([], self.class.name, __callee__)
     # validate_not_nil([], self.class.name, __callee__)
 
-    validate_int([x, y, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle], self.class.name, __callee__)
-    validate_float([width_scale, height_scale], self.class.name, __callee__)
-    validate_not_nil([x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height], self.class.name, __callee__)
+    # validate_int([x, y, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle], self.class.name, __callee__)
+    # validate_float([width_scale, height_scale], self.class.name, __callee__)
+    # validate_not_nil([x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height], self.class.name, __callee__)
 
 
     @x = x

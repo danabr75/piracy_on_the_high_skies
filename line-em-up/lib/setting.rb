@@ -52,6 +52,7 @@ class Setting
     puts @button_id_mapping
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
+      puts "BUTTON EXISTS: #{element_id}"
       @button_id_mapping[element_id].call(self, element_id)
     else
       puts "Clicked button that is not mapped: #{element_id}"

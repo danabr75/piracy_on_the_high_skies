@@ -8,7 +8,7 @@ require_relative '../models/launcher.rb'
 
 class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
-  SELECTION = ::Launcher.descendants
+  # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
 
   # def self.get_weapon_options
@@ -18,12 +18,15 @@ class ShipLoadoutSetting < Setting
   # attr_accessor :x, :y, :font, :max_width, :max_height, :selection, :value, :ship_value
   attr_accessor :value, :ship_value
   attr_accessor :mouse_x, :mouse_y
-  def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path, ship_value, options = {}
+  def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
+    @width_scale  = width_scale
+    @height_scale = height_scale
+    LUIT.config({window: window || self, z: 25})
     # @window = window # Want relative to self, not window. Can't do that from settting, not a window.
     @mouse_x, @mouse_y = [0,0]
-    @window = self # ignoring outer window here? Want actions relative to this window.
+    @window = window # ignoring outer window here? Want actions relative to this window.
     @scale = options[:scale] || 1
-    puts "SHIP LOADOUT SETTING SCALE: #{@scale}"
+    # puts "SHIP LOADOUT SETTING SCALE: #{@scale}"
     @font = Gosu::Font.new(20)
     # @x = width
     @y = current_height
@@ -31,33 +34,36 @@ class ShipLoadoutSetting < Setting
     @max_height = max_height
     @next_x = 5 * @scale
     @prev_x = @max_width - 5 * @scale - @font.text_width('>')
-    LUIT.config({window: @window, z: 25})
     @selection = []
-    @launchers = ::Launcher.descendants.collect{|d| d.name}
+    # @launchers = ::Launcher.descendants.collect{|d| d.name}
     @meta_launchers = {}
     @filler_items = []
-    @launchers.each_with_index do |klass_name, index|
-      klass = eval(klass_name)
-      image = klass.get_hardpoint_image
-      button_key = "clicked_launcher_#{index}".to_sym
-      @meta_launchers[button_key] = {follow_cursor: false, klass: klass, image: image}
-      @filler_items << {follow_cursor: false, klass: klass, image: image}
-      # @button_id_mapping[button_key] = lambda { |setting, id| setting.click_inventory(id) }
-    end
+    # @launchers.each_with_index do |klass_name, index|
+    #   klass = eval(klass_name)
+    #   image = klass.get_hardpoint_image
+    #   button_key = "clicked_launcher_#{index}".to_sym
+    #   @meta_launchers[button_key] = {follow_cursor: false, klass: klass, image: image}
+    #   @filler_items << {follow_cursor: false, klass: klass, image: image}
+    #   @button_id_mapping[button_key] = lambda { |setting, id| setting.click_inventory(id) }
+    # end
     @hardpoint_image_z = 50
     # puts "SELECTION: #{@selection}"
     # puts "INNITING #{config_file_path}"
     @config_file_path = config_file_path
     @name = self.class::NAME
-    @ship_value = ship_value
-    klass = eval(@ship_value)
+    # @ship_value = ship_value
     # implement hide_hardpoints on pilotable ship class
-    @ship = klass.new(1, @max_width / 2, max_height / 2, max_width, max_height, {use_large_image: true, hide_hardpoints: true})
+
+    # Used to come from loadout window
+    @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
+    klass = eval(@ship_value)
+
+    @ship = klass.new(@max_width / 2, max_height / 2, nil, {use_large_image: true, hide_hardpoints: true})
+
     # puts "RIGHT HERE!@!!!"
     # puts "@ship.right_broadside_hard_points"
     # puts @ship.right_broadside_hard_points
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
-    @fullscreen_height = fullscreen_height
     # @window = window
     # first array is rows at the top, 2nd goes down through the rows
     @inventory_matrix = []
@@ -70,19 +76,28 @@ class ShipLoadoutSetting < Setting
     @button_id_mapping = self.class.get_id_button_mapping
     init_matrix
     # puts "FILLER ITEMS: #{@filler_items}"
-    @inventory_items = retrieve_inventory_items
+    # @inventory_items = retrieve_inventory_items
     # fill_matrix(@filler_items)
     @cursor_object = nil
     @ship_hardpoints = init_hardpoints(@ship)
+    @active = false
   end
 
-  def retrieve_inventory_items
+  def enable
+    @active = true
   end
+  def disable
+    @active = false
+  end
+
+  # def retrieve_inventory_items
+  # end
 
   def self.get_id_button_mapping
     values = {
-      next: lambda { |setting, id| setting.next_clicked },
-      previous: lambda { |setting, id| setting.previous_clicked }
+      next:     lambda { |window, id| window.next_clicked },
+      previous: lambda { |window, id| window.previous_clicked },
+      back:     lambda { |window, id| window.disable }
     }
   end
 
@@ -126,33 +141,7 @@ class ShipLoadoutSetting < Setting
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "matrix_#{x}_#{y}"
         click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
-        # click_area = LUIT::Button.new(@window, click_key, current_x, current_y, '', @cell_width, @cell_height)
-        # Kludge here to populate inventory on first load, without committing the config file.
-        # puts "X AND Y START : #{x} - #{y}"
-        # if y == 0
-        #   klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'DumbMissileLauncher')
-        #   if klass_name == 'DumbMissileLauncher'
-        #     puts "SETTING X AND Y: #{x} - #{y} - with DumbMissileLauncher"
-        #     ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'DumbMissileLauncher')
-        #   end
-        # elsif y == 1
-        #   klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'LaserLauncher')
-        #   puts "Y HERE was 1: AND GOT ORIGINAL KLASS HERE #{klass_name}"
-        #   if klass_name == 'LaserLauncher'
-        #     puts "SETTING X AND Y: #{x} - #{y} - with LaserLauncher"
-        #     ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'LaserLauncher')
-        #   end
-        # elsif y == 2
-        #   klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'BulletLauncher')
-        #   if klass_name == 'BulletLauncher'
-        #     puts "SETTING X AND Y: #{x} - #{y} - with BulletLauncher"
-        #     ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], 'BulletLauncher')
-        #   end
-        # else
-          klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
-        # end
-        puts "X and Y WAS : #{x} - #{y}"
-        puts "CLASS WAS: #{klass_name}"
+        klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
         item = nil
         if klass_name
           klass = eval(klass_name)
@@ -197,7 +186,13 @@ class ShipLoadoutSetting < Setting
           if item
             image = item[:image]
             if image
-              image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z, @width_scale, @height_scale)
+              # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
+              image.draw(
+                value[:x] - (image.width / 2) + @cell_width / 2,
+                value[:y] - (image.height / 2)  + @cell_height / 2,
+                @hardpoint_image_z,
+                @width_scale, @height_scale
+              )
             end
           end
         end
@@ -420,22 +415,27 @@ class ShipLoadoutSetting < Setting
     end
   end
 
-  def update mouse_x, mouse_y, ship_value
-    @mouse_x, @mouse_y = [mouse_x, mouse_y]
+  def update mouse_x, mouse_y, player
+    if @active
+      @mouse_x, @mouse_y = [mouse_x, mouse_y]
 
-    hardpoint_update
+      hardpoint_update
 
-    matrix_update
+      matrix_update
 
-    if ship_value != @ship_value
-      @ship_value = ship_value
-      klass = eval(@ship_value)
-      @ship = klass.new(1, @max_width / 2, @max_height / 2, @max_width, @max_height, {use_large_image: true, hide_hardpoints: true})
-      @ship_hardpoints = init_hardpoints(@ship)
+      # get ship value from player. used to come from update
+      # if ship_value != @ship_value
+      #   @ship_value = ship_value
+      #   klass = eval(@ship_value)
+      #   @ship = klass.new(1, @max_width / 2, @max_height / 2, @max_width, @max_height, {use_large_image: true, hide_hardpoints: true})
+      #   @ship_hardpoints = init_hardpoints(@ship)
+      # else
+      #   # Do nothing
+      # end
+      return @cursor_object
     else
-      # Do nothing
+      return nil
     end
-    return @cursor_object
   end
 
   def get_hardpoints
@@ -459,6 +459,7 @@ class ShipLoadoutSetting < Setting
 
   # deprecated
   def clicked mx, my
+    raise "Deperected?"
     puts "SHIP LOADOUT CLICKED"
     if is_mouse_hovering_next(mx, my)
 
@@ -467,35 +468,36 @@ class ShipLoadoutSetting < Setting
     end
   end
 
-  def is_mouse_hovering_next mx, my
-    local_width  = @font.text_width('>')
-    local_height = @font.height
+  # def is_mouse_hovering_next mx, my
+  #   local_width  = @font.text_width('>')
+  #   local_height = @font.height
 
-    (mx >= @next_x and my >= @y) and (mx <= @next_x + local_width) and (my <= @y + local_height)
-  end
+  #   (mx >= @next_x and my >= @y) and (mx <= @next_x + local_width) and (my <= @y + local_height)
+  # end
 
-  def is_mouse_hovering_prev mx, my
-    local_width  = @font.text_width('<')
-    local_height = @font.height
+  # def is_mouse_hovering_prev mx, my
+  #   local_width  = @font.text_width('<')
+  #   local_height = @font.height
 
-    (mx >= @prev_x and my >= @y) and (mx <= @prev_x + local_width) and (my <= @y + local_height)
-  end
+  #   (mx >= @prev_x and my >= @y) and (mx <= @prev_x + local_width) and (my <= @y + local_height)
+  # end
 
   def draw
+    if @active
+      if @cursor_object
+        @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
+      end
 
-    if @cursor_object
-      @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
+      hardpoint_draw
+
+      matrix_draw
+
+      @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
+
+      @ship.draw
+      @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
+      @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
     end
-
-    hardpoint_draw
-
-    matrix_draw
-
-    @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
-
-    @ship.draw
-    @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
-    @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
   end
 
 end
