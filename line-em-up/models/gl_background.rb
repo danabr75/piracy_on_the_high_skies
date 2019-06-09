@@ -220,7 +220,7 @@ class GLBackground
     if @debug
       @map_data.each_with_index do |e, y|
         e.each_with_index do |v, x|
-          @map_data[y][x] = @map_data[y][x].merge({'gps_y' => @map_tile_height - y, 'gps_x' => @map_tile_width - x})
+          @map_data[y][x] = @map_data[y][x].merge({'gps_y' => (@map_tile_height - y) - 1, 'gps_x' => (@map_tile_width - x) - 1 })
         end
       end
     end
@@ -387,6 +387,8 @@ class GLBackground
     end
   end
 
+  # This is printing out in the wrong order. 249, 249 is reading as 0,0
+  # This is confusing.
   def print_visible_map
     if @debug
       puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
