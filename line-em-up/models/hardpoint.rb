@@ -22,21 +22,27 @@ class Hardpoint < GeneralObject
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
-    @x_offset = x_offset #* width_scale
-    @y_offset = y_offset #* height_scale
+
     @center_x = x
     @center_y = y
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
     # raise "HERE: #{width_scale} - #{height_scale}"
-    @x = x + x_offset #* width_scale
-    @y = y + y_offset #* height_scale
 #def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
 # initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
     @map_pixel_width = map_pixel_width
     @map_pixel_height = map_pixel_height
   # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, options = {})
     super(options)
+
+    # Scale is already built into offset, via the lambda call
+    @x_offset = x_offset #* width_scale
+    @y_offset = y_offset #* height_scale
+
+
+    @x = x + @x_offset
+    @y = y + @y_offset
+
     @main_weapon = nil
     @drawable_items_near_self = []
 
@@ -58,7 +64,7 @@ class Hardpoint < GeneralObject
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
-    @init_angle = @angle
+    @init_angle = @angle + (options[:init_angle] || 0)
     @radian = calc_radian(start_point, end_point)
     # @x = @x * width_scale
     # @y = @y * height_scale
@@ -171,12 +177,11 @@ class Hardpoint < GeneralObject
   end
 
 
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
-    @center_y = player.y
-    @center_x = player.x
-    # Update these after angle is working (for when player is on edge of the map.)
-    # @x = player.x + @x_offset# * @scale
-    # @y = player.y + @y_offset# * @scale
+  def update mouse_x, mouse_y, player
+    # Center should stay the same
+    # @center_y = player.y
+    # @center_x = player.x
+
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     @main_weapon.update(mouse_x, mouse_y, self, scroll_factor) if @main_weapon

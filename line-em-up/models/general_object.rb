@@ -88,11 +88,12 @@ class GeneralObject
 
     @inited = true
     # Don't need these values assigned.
-    @x = -50
-    @y = -50
+    @x = @x || -50
+    @y = @y || -50
     # Not sure if keeping these
-    @x_offset = 0
-    @y_offset = 0
+    # Used for hardpoints, objects relative to other objects
+    @x_offset = @x_offset || 0
+    @y_offset = @y_offset || 0
   end   
 
   # def get_x_with_offset

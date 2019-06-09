@@ -264,6 +264,7 @@ class GameWindow < Gosu::Window
     # END  MENU INIT
 
     # START SHIP LOADOUT INIT.
+    # @refresh_player_ship = false
     @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @scale})
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu]
@@ -441,6 +442,11 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    if @ship_loadout_menu.refresh_player_ship
+      @player.refresh_ship
+      @ship_loadout_menu.refresh_player_ship = false
+    end
+
     @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
 
 
@@ -752,7 +758,7 @@ class GameWindow < Gosu::Window
     @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 
-    @player.draw() if @player.is_alive
+    @player.draw() if @player.is_alive && !@ship_loadout_menu.active
     @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
     if !menus_active && !@player.is_alive
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

@@ -48,8 +48,8 @@ class ShipSetting < Setting
 
   def self.get_id_button_mapping
     {
-      next: lambda { |setting, id| setting.next_clicked },
-      previous: lambda { |setting, id| setting.previous_clicked }
+      next:     lambda { |window, menu, id| menu.next_clicked },
+      previous: lambda { |window, menu, id| menu.previous_clicked }
     }
   end
 

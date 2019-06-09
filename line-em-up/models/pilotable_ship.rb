@@ -111,13 +111,16 @@ class PilotableShip < GeneralObject
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-      # width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height,
-      # x, y, group_number, x_offset, y_offset, item, slot_type
-      @front_hard_points << Hardpoint.new(
+
+      hp = Hardpoint.new(
         x, y, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0),
         location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], options
       )
-      # @front_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), nil, options)
+      # .merge({init_angle: @angle}
+      # if @angle > 
+      puts "ANGLE HERE: #{@angle}"
+      # rotate_hardpoints_counterclockwise(@angle)
+      @front_hard_points << hp
     end
     # puts "Front hard points"
     self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
@@ -386,12 +389,16 @@ class PilotableShip < GeneralObject
       @front_hard_points.each { |item| item.draw }
     end
 
+
+    if @use_large_image
+      puts "GOT HERE!!!!!!!! - #{@x} and #{@y}"
+    end
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
     # test.update(5.0)
     # image = self.get_image
     # Why using self?
-    image = self.get_image
+    # image = self.get_image
     # if @broadside_mode
     #   image = @broadside_image
     # else
@@ -406,7 +413,7 @@ class PilotableShip < GeneralObject
     # super
     # puts "DRAWING PLAYER: #{[@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale]}"
     # DRAWING PLAYER: [450, 450, 8, {:handicap=>1, :max_movable_height=>-27960.0, :tile_width=>112.5, :tile_height=>112.5}, 0.5, 0.5, 1.875, 1.875]
-    image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
     @turn_right = false
     @turn_left = false
@@ -473,17 +480,17 @@ class PilotableShip < GeneralObject
     glEnd
   end
   
-  def update mouse_x = nil, mouse_y = nil, player = nil, scroll_factor = 1
+  def update mouse_x = nil, mouse_y = nil, player = nil
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
     @front_hard_points.each do |hardpoint|
-      hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
+      hardpoint.update(mouse_x, mouse_y, self)
     end
     @left_broadside_hard_points.each do |hardpoint|
-      hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
+      hardpoint.update(mouse_x, mouse_y, self)
     end
     @right_broadside_hard_points.each do |hardpoint|
-      hardpoint.update(mouse_x, mouse_y, self, scroll_factor)
+      hardpoint.update(mouse_x, mouse_y, self)
     end
 
     # @cooldown_wait -= 1              if @cooldown_wait > 0

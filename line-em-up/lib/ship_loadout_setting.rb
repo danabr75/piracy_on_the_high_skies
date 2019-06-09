@@ -19,9 +19,11 @@ class ShipLoadoutSetting < Setting
   attr_accessor :value, :ship_value
   attr_accessor :mouse_x, :mouse_y
   attr_reader :active
+  attr_accessor :refresh_player_ship
   def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
     @width_scale  = width_scale
     @height_scale = height_scale
+    @refresh_player_ship = false
     LUIT.config({window: window || self, z: 25})
     # @window = window # Want relative to self, not window. Can't do that from settting, not a window.
     @mouse_x, @mouse_y = [0,0]
@@ -59,7 +61,9 @@ class ShipLoadoutSetting < Setting
     @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
     klass = eval(@ship_value)
 
-    @ship = klass.new(@max_width / 2, max_height / 2, nil, {use_large_image: true, hide_hardpoints: true})
+    @ship = klass.new(@max_width / 2, @max_height / 2, nil, {use_large_image: true, hide_hardpoints: true})
+
+    puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
     # puts "RIGHT HERE!@!!!"
     # puts "@ship.right_broadside_hard_points"
@@ -100,7 +104,7 @@ class ShipLoadoutSetting < Setting
     values = {
       next:     lambda { |window, menu, id| menu.next_clicked },
       previous: lambda { |window, menu, id| menu.previous_clicked },
-      back:     lambda { |window, menu, id| menu.disable }
+      back:     lambda { |window, menu, id| menu.refresh_player_ship = true; menu.disable }
     }
   end
 
@@ -250,7 +254,7 @@ class ShipLoadoutSetting < Setting
         #   puts "hp.x_offset and hp.y_offset: #{hp.x_offset} and #{hp.y_offset}"
         # end
         click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset - (@cell_width / 2), hp.y + hp.y_offset - @cell_height / 2, @cell_width, @cell_height)
-        @button_id_mapping[button_key] = lambda { |setting, id| setting.click_ship_hardpoint(id) }
+        @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
         if hp.assigned_weapon_class
           image = hp.assigned_weapon_class.get_hardpoint_image
           item = {

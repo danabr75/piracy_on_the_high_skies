@@ -102,6 +102,10 @@ class Player < ScreenFixedObject
     @rotation_speed = 2
   end
 
+  def refresh_ship options = {}
+    @ship = @ship.class.new(@ship.x, @ship.y, @angle, options)
+  end
+
   def get_kill_count_max
     self.class::SPECIAL_POWER_KILL_MAX
   end
