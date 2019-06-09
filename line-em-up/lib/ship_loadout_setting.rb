@@ -61,7 +61,7 @@ class ShipLoadoutSetting < Setting
     @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
     klass = eval(@ship_value)
 
-    @ship = klass.new(@max_width / 2, @max_height / 2, nil, {use_large_image: true, hide_hardpoints: true})
+    @ship = klass.new(@max_width / 2, @max_height / 2, 0, {use_large_image: true, hide_hardpoints: true})
 
     puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 

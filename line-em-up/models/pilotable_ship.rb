@@ -29,11 +29,12 @@ class PilotableShip < GeneralObject
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
   def initialize(x, y, angle, options = {})
+
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
     # validate_int([], self.class.name, __callee__)
-    # validate_not_nil([], self.class.name, __callee__)
+    validate_not_nil([x, y, angle], self.class.name, __callee__)
 
     # validate_int([x, y, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle], self.class.name, __callee__)
     # validate_float([width_scale, height_scale], self.class.name, __callee__)
@@ -43,7 +44,7 @@ class PilotableShip < GeneralObject
     @x = x
     @y = y
     puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
-    @angle = angle || 0
+    @angle = angle
     media_path = self.class::SHIP_MEDIA_DIRECTORY
     path = media_path
     # @right_image = self.class.get_right_image(path)
@@ -111,11 +112,13 @@ class PilotableShip < GeneralObject
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-
+      puts "ANGLE HERE: #{@angle}"
       hp = Hardpoint.new(
         x, y, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0),
-        location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], options
+        location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], @angle, options
       )
+      # Init HP location
+      # hp.rotate_hardpoints_counterclockwise(0)
       # .merge({init_angle: @angle}
       # if @angle > 
       puts "ANGLE HERE: #{@angle}"
@@ -148,14 +151,7 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_counterclockwise angle_increment
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
-        # step = step.round(5)
-        hp.x = Math.cos(step) * hp.radius + hp.center_x
-        hp.y = Math.sin(step) * hp.radius + hp.center_y
-
         hp.increment_angle(angle_increment)
-        # puts "POST - CC ANGLE: #{hp.angle}"
-
       end
     end
   end
@@ -165,12 +161,6 @@ class PilotableShip < GeneralObject
   def rotate_hardpoints_clockwise angle_increment
     [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
       group.each do |hp|
-        # 90 and 45 should probably from from hp.. image angle?
-        step = (Math::PI/180 * (hp.angle)) + 90.0 + 45.0# - 180
-        # step = step.round(5)
-        hp.x = Math.cos(step) * hp.radius + hp.center_x
-        hp.y = Math.sin(step) * hp.radius + hp.center_y
-
         hp.decrement_angle(angle_increment)
       end
     end
@@ -390,9 +380,6 @@ class PilotableShip < GeneralObject
     end
 
 
-    if @use_large_image
-      puts "GOT HERE!!!!!!!! - #{@x} and #{@y}"
-    end
     # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
     # test.draw
     # test.update(5.0)

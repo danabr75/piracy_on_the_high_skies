@@ -86,9 +86,10 @@ class Player < ScreenFixedObject
     if ship
       ship_class = eval(ship)
       puts "SHIP HERE: #{@x} - #{@y}"
-      @ship = ship_class.new(@x, @y, nil, options)
+      # from_player is for debugging only
+      @ship = ship_class.new(@x, @y, @angle, options.merge({from_player: true}))
     else
-      @ship = BasicShip.new(@x, @y, nil, options)
+      @ship = BasicShip.new(@x, @y, @angle, options.merge({from_player: true}))
     end
     @ship.x = @x
     @ship.y = @y

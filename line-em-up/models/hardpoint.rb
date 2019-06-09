@@ -18,7 +18,7 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, options = {})
+  def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number
@@ -54,7 +54,7 @@ class Hardpoint < GeneralObject
     end
     @image_hardpoint_width_half = @image_hardpoint.width  / 2
     @image_hardpoint_height_half = @image_hardpoint.height  / 2
-    @image_angle = options[:image_angle] || 0# 180
+    @image_angle = options[:image_angle] || 0
     # Maybe these are reversed?
     start_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # Not sure why the offset is getting switched somewhere...
@@ -64,7 +64,9 @@ class Hardpoint < GeneralObject
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
-    @init_angle = @angle + (options[:init_angle] || 0)
+    @init_angle = @angle# + current_ship_angle
+     "INIT ANGLE HERE" if options[:from_player]
+    puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
     @radian = calc_radian(start_point, end_point)
     # @x = @x * width_scale
     # @y = @y * height_scale
@@ -74,6 +76,15 @@ class Hardpoint < GeneralObject
     # puts "End POINT : #{@x} - #{@y}"
     # puts "Angle #{@angle} and radius: #{@radius}"
     # puts ""
+    # if current_ship_angle == 0
+    #   # Do nothing
+    # else
+    #   increment_angle(current_ship_angle)
+    # end
+    # init location. Don't need to set X or Y
+    puts "init_angle: #{@init_angle} and ship angle: #{current_ship_angle}" if options[:from_player]
+    self.increment_angle(current_ship_angle)
+    puts "POST ANGLE: #{@angle}" if options[:from_player]
   end
 
 
@@ -83,6 +94,10 @@ class Hardpoint < GeneralObject
     else
       @angle += angle_increment
     end
+    step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
+    # step = step.round(5)
+    @x = Math.cos(step) * @radius + @center_x
+    @y = Math.sin(step) * @radius + @center_y
   end
 
   def decrement_angle angle_increment
@@ -91,6 +106,10 @@ class Hardpoint < GeneralObject
     else
       @angle -= angle_increment
     end
+    step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
+    # step = step.round(5)
+    @x = Math.cos(step) * @radius + @center_x
+    @y = Math.sin(step) * @radius + @center_y
   end
 
 
@@ -184,7 +203,7 @@ class Hardpoint < GeneralObject
 
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
-    @main_weapon.update(mouse_x, mouse_y, self, scroll_factor) if @main_weapon
+    @main_weapon.update(mouse_x, mouse_y, self) if @main_weapon
     # @cooldown_wait -= 1              if @cooldown_wait > 0
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
