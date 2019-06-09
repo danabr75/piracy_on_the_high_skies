@@ -74,10 +74,10 @@ class ShipLoadoutSetting < Setting
     @inventory_matrix = []
     @inventory_matrix_max_width = 4
     @inventory_matrix_max_height = 7
-    @cell_width  = 25 * @scale
-    @cell_height = 25 * @scale
-    @cell_width_padding = 5 * @scale
-    @cell_height_padding = 5 * @scale
+    @cell_width  = 25 * @width_scale
+    @cell_height = 25 * @height_scale
+    @cell_width_padding = 5 * @width_scale
+    @cell_height_padding = 5 * @height_scale
     @button_id_mapping = self.class.get_id_button_mapping
     init_matrix
     # puts "FILLER ITEMS: #{@filler_items}"
@@ -104,7 +104,7 @@ class ShipLoadoutSetting < Setting
     values = {
       next:     lambda { |window, menu, id| menu.next_clicked },
       previous: lambda { |window, menu, id| menu.previous_clicked },
-      back:     lambda { |window, menu, id| menu.refresh_player_ship = true; menu.disable }
+      back:     lambda { |window, menu, id| window.cursor_object.nil? ? (menu.refresh_player_ship = true;  menu.disable;) : nil }
     }
   end
 
@@ -397,7 +397,7 @@ class ShipLoadoutSetting < Setting
       ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
       matrix_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
-      @cursor_object = false
+      @cursor_object = nil
     end
   end
 

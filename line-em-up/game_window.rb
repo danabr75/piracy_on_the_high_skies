@@ -73,7 +73,7 @@ class GameWindow < Gosu::Window
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
-  attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu
+  attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
 
   include GlobalVariables
 
@@ -447,6 +447,8 @@ class GameWindow < Gosu::Window
       @ship_loadout_menu.refresh_player_ship = false
     end
 
+    # Reset cursor object. # Need to move this inside of ship loadout... or can't, cause of scope?
+    # @cursor_object = nil
     @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
 
 
