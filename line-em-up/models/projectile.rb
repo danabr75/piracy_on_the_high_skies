@@ -38,13 +38,22 @@ class Projectile < ScreenMapFixedObject
 
     # Might have to reorient x and y here.
     # start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
-    start_point = OpenStruct.new(:x => current_map_pixel_x, :y => current_map_pixel_y)
+    start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
     end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
-    @angle = calc_angle(start_point, end_point)
-    angle_min = angle_min
-    angle_max = angle_max
-    angle_init = angle_init
-    puts "ANGLE #{@angle} from start: #{[current_map_pixel_x, current_map_pixel_y]} and end: #{[destination_map_pixel_x, destination_map_pixel_y]}"
+    # Reorienting angle to make 0 north
+    @angle = calc_angle(start_point, end_point) - 90
+    # angle_min = angle_min
+    # angle_max = angle_max
+    # angle_init = angle_init
+    puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
+    # CALC ANGLE: -66.31613067749021 INIT ANGLE: -284.0
+    # NEAREST ANGLE 293.6838693225098 - 61 - 91
+
+    
+    # NEAREST ANGLE 88.68157948154932 - 75.0 - 105.0
+
+    # CORRECT
+    # CALC ANGLE: 88.68157948154932 INIT ANGLE: 90.0
 
   # ANGLE 90.54463725738333
   # start: [165.3689031842951, 175.50829614799085]
@@ -53,82 +62,85 @@ class Projectile < ScreenMapFixedObject
 
     @radian = calc_radian(start_point, end_point)
 
-    @image_angle = @angle - 90
+    # @image_angle = @angle
     # TEMP stopping the image angle business, not worth it at this point
-    @current_image_angle = @angle - 90
-    @angle  = @angle - 90
+    
+    # @angle  = @angle
 
     @health = self.class::HEALTH
-    puts "HEAHT HERE: #{@health}"
 
-    # if @angle < 0.0
-    #   @angle = 360.0 - @angle.abs
-    # end
+    if @angle < 0.0
+      @angle = 360.0 - @angle.abs
+    end
 
-    # if angle_min
-    #   if angle_min < 0.0
-    #     # puts "1ANGLE WAS: #{angle_min}"
-    #     angle_min = 360 - angle_min.abs
-    #     # puts "1NEW ANGLE: #{angle_min}"
-    #   elsif angle_min > 360.0
-    #     # puts "2ANGLE WAS: #{angle_min}"
-    #     angle_min = angle_min - 360
-    #     # puts "2NEW ANGLE: #{angle_min}"
-    #   end
-    # end
+    if angle_min
+      if angle_min < 0.0
+        # puts "1ANGLE WAS: #{angle_min}"
+        angle_min = 360 - angle_min.abs
+        # puts "1NEW ANGLE: #{angle_min}"
+      elsif angle_min > 360.0
+        # puts "2ANGLE WAS: #{angle_min}"
+        angle_min = angle_min - 360
+        # puts "2NEW ANGLE: #{angle_min}"
+      end
+    end
 
-    # if angle_max
-    #   if angle_max < 0.0
-    #     # puts "3ANGLE WAS: #{angle_max}"
-    #     angle_max = 360 - angle_max.abs
-    #     # puts "3NEW ANGLE: #{angle_max}"
-    #   elsif angle_max > 360.0
-    #     # puts "4ANGLE WAS: #{angle_max}"
-    #     angle_max = angle_max - 360
-    #     # puts "4NEW ANGLE: #{angle_max}"
-    #   end
-    # end
+    if angle_max
+      if angle_max < 0.0
+        # puts "3ANGLE WAS: #{angle_max}"
+        angle_max = 360 - angle_max.abs
+        # puts "3NEW ANGLE: #{angle_max}"
+      elsif angle_max > 360.0
+        # puts "4ANGLE WAS: #{angle_max}"
+        angle_max = angle_max - 360
+        # puts "4NEW ANGLE: #{angle_max}"
+      end
+    end
 
-    # if angle_min.nil? && angle_max.nil?
-    #   # do nothing
-    # else
-    #   if is_angle_between_two_angles?(@angle, angle_min, angle_max)
-    #     # Do nothing, we're good
-    #   else
-    #     @angle = nearest_angle(@angle, angle_min, angle_max)
-    #   end
-    # end
+    if angle_min.nil? && angle_max.nil?
+      # do nothing
+    else
+      if is_angle_between_two_angles?(@angle, angle_min, angle_max)
+        # Do nothing, we're good
+      else
+        @angle = nearest_angle(@angle, angle_min, angle_max)
+      end
+    end
 
-    # if angle_init
-    #   @current_image_angle = (angle_init - 90) * -1
-    #   @end_image_angle = (@angle - 90) * -1
-    # else
-    #   @current_image_angle = (@angle - 90) * -1
-    # end
+    if angle_init
+      @end_image_angle = @angle + 90
+      @current_image_angle = angle_init + 90
+    else
+      @current_image_angle = @angle + 90
+    end
 
-    # # if it's min, incrementer is negative, else pos
-    # value = nearest_angle(@angle, angle_min, angle_max)
-    # if value == angle_min
-    #   @image_angle_incrementor = -2
-    # else
-    #   @image_angle_incrementor = 2
-    # end
+    # if it's min, incrementer is negative, else pos
+    value = nearest_angle(@angle, angle_min, angle_max)
+    puts "value = nearest_angle(@angle, angle_min, angle_max)"
+    puts "#{value} = nearest_angle(#{@angle}, #{angle_min}, #{angle_max})"
+    if value == angle_min
+      @image_angle_incrementor = -0.2
+    else
+      @image_angle_incrementor = 0.2
+    end
+
+    puts "ANGLE END #{@angle}"
 
   end
 
   def update mouse_x, mouse_y, player
     if @end_image_angle && @time_alive > 10
 
-      # if @current_image_angle != @end_image_angle
-      #   @current_image_angle = @current_image_angle + @image_angle_incrementor
-      #   # if it's negative
-      #   if @image_angle_incrementor < 0
-      #     @current_image_angle = @end_image_angle if @current_image_angle < @end_image_angle 
-      #   # it's positive
-      #   elsif @image_angle_incrementor > 0
-      #     @current_image_angle = @end_image_angle if @current_image_angle > @end_image_angle 
-      #   end
-      # end
+      if @current_image_angle != @end_image_angle
+        @current_image_angle = @current_image_angle + @image_angle_incrementor
+        # if it's negative
+        if @image_angle_incrementor < 0
+          @current_image_angle = @end_image_angle if @current_image_angle < @end_image_angle 
+        # it's positive
+        elsif @image_angle_incrementor > 0
+          @current_image_angle = @end_image_angle if @current_image_angle > @end_image_angle 
+        end
+      end
 
       # incrementing_amount = 2
       # angle_difference = (@current_image_angle - @end_image_angle)
@@ -178,7 +190,7 @@ class Projectile < ScreenMapFixedObject
   def draw
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+      @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle - 90, 0.5, 0.5, @width_scale, @height_scale)
     end
   end
 

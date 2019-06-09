@@ -400,6 +400,7 @@ class GeneralObject
   # Current map_pixel_x: -72.6547919352809 = @X: -13685.154791935282
 
   # Don't need allow_over_edge_of_map param, all objects are allowed past. Player has it's own logic to stop itself
+  # ANGLE HERE = 0 is NORTH, 180 is SOUTH
   def movement speed, angle, allow_over_edge_of_map = false
     # puts "MOVEMENT"
     # raise "ISSUE6" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
@@ -597,6 +598,7 @@ class GeneralObject
   # object can be player.. or an enemy. This is used to calculate projectiles emerging from hardpoints.
   def convert_screen_to_map_pixel_location object_map_pixel_x, object_map_pixel_y
     current_map_pixel_x = -(( @x    ) - (@screen_pixel_width  / 2) - object_map_pixel_x)
+    # Y is reversed
     current_map_pixel_y = -((@screen_pixel_height  -    @y    ) - (@screen_pixel_height / 2) - object_map_pixel_y)
     return [current_map_pixel_x, current_map_pixel_y]
   end

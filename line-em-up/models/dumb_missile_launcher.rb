@@ -1,8 +1,9 @@
 require_relative 'launcher.rb'
 class DumbMissileLauncher < Launcher
-  MISSILE_LAUNCHER_MIN_ANGLE = 75.0
-  MISSILE_LAUNCHER_MAX_ANGLE = 105.0
-  MISSILE_LAUNCHER_INIT_ANGLE = 90.0
+  # 0 is NORTH, 180 is SOUTH
+  MISSILE_LAUNCHER_MIN_ANGLE = -15
+  MISSILE_LAUNCHER_MAX_ANGLE = 15
+  # MISSILE_LAUNCHER_INIT_ANGLE = 0.0
   COOLDOWN_DELAY = 10
   # COOLDOWN_DELAY = 15
 
@@ -12,7 +13,7 @@ class DumbMissileLauncher < Launcher
     Missile.new(
       current_map_pixel_x, current_map_pixel_y, 
       destination_map_pixel_x, destination_map_pixel_y,
-      MISSILE_LAUNCHER_MIN_ANGLE - initial_angle, MISSILE_LAUNCHER_MAX_ANGLE - initial_angle, MISSILE_LAUNCHER_INIT_ANGLE - initial_angle,
+      MISSILE_LAUNCHER_MIN_ANGLE + initial_angle, MISSILE_LAUNCHER_MAX_ANGLE + initial_angle, initial_angle,
       current_map_tile_x, current_map_tile_y, options
     )
   end
