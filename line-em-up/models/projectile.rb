@@ -155,9 +155,9 @@ class Projectile < ScreenMapFixedObject
       new_speed = new_speed * @average_scale
 
 
-    puts "PRE MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+    # puts "PRE MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
       movement(new_speed, @angle) if new_speed != 0
-    puts "POST MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+    # puts "POST MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
       # vx = 0
       # vy = 0
       # if new_speed != 0

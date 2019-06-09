@@ -99,6 +99,18 @@ class Building < BackgroundFixedObject
   end
 
   def update mouse_x, mouse_y, player
+    if is_on_screen?
+      # Update from gl_background
+    else
+      # lol don't need to update x and y if off screen.
+      # updating_x_y_from_map_pixel_location(player)
+      get_map_pixel_location_from_map_tile_location
+    end
     return super(mouse_x, mouse_y, player)
   end
+
+  # maybe use this in the future...
+  # def opengl_update o_x, oy, oz, viewMatrix, projectionMatrix, viewport, player
+  #   get_map_pixel_location_from_opengl(o_x, oy, oz, viewMatrix, projectionMatrix, viewport, player)
+  # end
 end

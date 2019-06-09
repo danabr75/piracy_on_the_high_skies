@@ -36,6 +36,7 @@ class BackgroundFixedObject < GeneralObject
 
   def update mouse_x, mouse_y, player
     @time_alive += 1
+    # Might not be necessary for buildings....
     updating_x_y_from_map_pixel_location(player)
     # no need to update tile or pixel location
     # super(mouse_x, mouse_y, player)

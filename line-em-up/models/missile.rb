@@ -93,7 +93,7 @@ class Missile < Projectile
   # end
   
   def update mouse_x, mouse_y, player
-    puts "MISSILE: #{@health}"
+    # puts "MISSILE: #{@health}"
     return super(mouse_x, mouse_y, player)
   end
   #   new_speed = 0

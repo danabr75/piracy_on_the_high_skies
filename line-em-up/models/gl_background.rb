@@ -314,7 +314,7 @@ class GLBackground
         data.each do |x_value, elements|
           elements.each do |element|
             klass = eval(element["klass_name"])
-            buildings << klass.new(x_value.to_i, y_value.to_i) #Z really isn't necessary at this turn, {z: @map_data[y_value][x_value]['height']})
+            buildings << klass.new(x_value.to_i, y_value.to_i, {z: @map_data[y_value.to_i][x_value.to_i]['height']})
           end
         end
       end

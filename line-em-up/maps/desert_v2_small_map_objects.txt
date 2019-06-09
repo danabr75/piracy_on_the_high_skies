@@ -1,6 +1,21 @@
 {
   "buildings":{
-    "128":{
+    "125":{
+      "124":[
+        {"klass_name":"Store","data":null}
+      ]
+    },
+    "127":{
+      "128":[
+        {"klass_name":"Store","data":null}
+      ]
+    },
+    "123":{
+      "124":[
+        {"klass_name":"Store","data":null}
+      ]
+    },
+    "120":{
       "124":[
         {"klass_name":"Store","data":null}
       ]

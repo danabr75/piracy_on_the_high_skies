@@ -18,9 +18,7 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(
-    x, y, group_number, x_offset, y_offset, item, slot_type, options = {}
-  )
+  def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # puts "GHARDPOINT INIT: #{y_offset}"
     @group_number = group_number

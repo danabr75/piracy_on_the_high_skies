@@ -370,7 +370,7 @@ class GeneralObject
 
 
   def is_on_map?
-    puts "@current_map_pixel: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+    # puts "@current_map_pixel: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
     # puts "@current_map_pixel_x < @map_pixel_width && @current_map_pixel_x > 0"
     # puts "#{@current_map_pixel_x} < #{@map_pixel_width} && #{@current_map_pixel_x} > 0"
@@ -378,8 +378,8 @@ class GeneralObject
     # 17402.549329529695 < 28125 && 17402.549329529695 > 0
     # true && true
     result = @current_map_pixel_x < @map_pixel_width && @current_map_pixel_x > 0 && @current_map_pixel_y < @map_pixel_height && @current_map_pixel_y > 0
-    puts "#{@current_map_pixel_x < @map_pixel_width} && #{@current_map_pixel_x > 0} && #{@current_map_pixel_y < @map_pixel_height} && #{@current_map_pixel_y > 0}"
-    puts "RESULT: #{result}"
+    # puts "#{@current_map_pixel_x < @map_pixel_width} && #{@current_map_pixel_x > 0} && #{@current_map_pixel_y < @map_pixel_height} && #{@current_map_pixel_y > 0}"
+    # puts "RESULT: #{result}"
     # raise "STOP" if result == false
     return result
   end
@@ -569,7 +569,8 @@ class GeneralObject
     @current_map_tile_y = (@current_map_pixel_y / (@tile_pixel_height)).to_i if @current_map_pixel_y && @tile_pixel_height
   end
 
-  def get_map_pixel_location_from_map_tile_location
+  # Used a lot by buildings
+  def get_map_pixel_location_from_map_tile_location depth_factor_x = nil, depth_factor_y = nil
     # puts "get_map_pixel_location_from_map_tile_location"
     # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
     # If statement is due to the fact that some objects are created without these variables being initted.
@@ -591,6 +592,43 @@ class GeneralObject
     # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
     @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height/ 2)
   end
+
+  def convert_map_tile_location_to_opengl x, y, w = nil, h = nil, include_adjustments_for_not_exact_opengl_dimensions = false
+    # puts "IT's SET RIUGHT HERE2!!: #{@screen_pixel_height} - #{y}"
+    opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
+    # opengl_x   = opengl_x * 1.2 if include_adjustments_for_not_exact_opengl_dimensions
+    opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
+    # opengl_y   = opengl_y * 0.92 if include_adjustments_for_not_exact_opengl_dimensions
+    if w && h
+      open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
+      # open_gl_w = open_gl_w - opengl_x
+      open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
+      # open_gl_h = open_gl_h - opengl_y
+      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}}"
+      return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
+    else
+      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y}}"
+      return {o_x: opengl_x, o_y: opengl_y}
+    end
+  end
+  
+  def get_map_pixel_location_from_opengl(o_x, oy, oz, viewMatrix, projectionMatrix, viewport, player)
+    x, y, z = convert3DTo2D(o_x, oy, oz, viewMatrix, projectionMatrix, viewport)
+    # y = @screen_pixel_height - y
+    # @x = x
+    # @y = y
+    @current_map_pixel_x = -(x  - (@screen_pixel_width / 2)  - player.current_map_pixel_x)
+    @current_map_pixel_y = -(y  - (@screen_pixel_height / 2) - player.current_map_pixel_y)
+    # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
+
+    # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
+    # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
+    # @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height/ 2)
+
+
+    return [x, y, z]
+  end
+
 
   def run_pixel_to_tile_validations
     raise "STOP USING ME"

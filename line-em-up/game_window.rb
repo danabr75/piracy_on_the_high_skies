@@ -655,7 +655,7 @@ class GameWindow < Gosu::Window
         if @boss_active && @boss.nil? && @enemies.count == 0 && @boss_killed == false
           @boss_active = false
           # Activate Boss
-          @boss = Mothership.new(@scale, @width, @height, @width_scale, @height_scale)
+          # @boss = Mothership.new(@scale, @width, @height, @width_scale, @height_scale)
           # @enemies.push(@boss)
         end
 
