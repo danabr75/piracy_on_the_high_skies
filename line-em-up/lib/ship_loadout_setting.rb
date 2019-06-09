@@ -154,7 +154,7 @@ class ShipLoadoutSetting < Setting
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
         current_x = current_x + @cell_width + @cell_width_padding
-        @button_id_mapping[key] = lambda { |setting, id| setting.click_inventory(id) }
+        @button_id_mapping[key] = lambda { |window, menu, id| menu.click_inventory(id) }
       end
       current_x = @next_x
       current_y = current_y + @cell_height + @cell_height_padding
