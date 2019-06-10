@@ -18,9 +18,9 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, options = {})
+  def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
-    # puts "GHARDPOINT INIT: #{y_offset}"
+    puts "GHARDPOINT INIT: #{y_offset} - SLOT TPYE: #{slot_type}"
     @group_number = group_number
 
     @center_x = x
@@ -36,12 +36,27 @@ class Hardpoint < GeneralObject
     super(options)
 
     # Scale is already built into offset, via the lambda call
-    @x_offset = x_offset #* width_scale
+    @x_offset = x_offset * -1#* width_scale
     @y_offset = y_offset #* height_scale
-
+    # Storing the angle offset here.. oddly enough, don't need it here. Could replace options[:image_angle]
+    @angle_offset = angle_offset
 
     @x = x + @x_offset
     @y = y + @y_offset
+    puts "#{@x} = #{x} + #{@x_offset} - SLOT TPYE: #{slot_type}"
+    puts "#{@y} = #{y} + #{@y_offset} - SLOT TPYE: #{slot_type}"
+
+    # GHARDPOINT INIT: 97.55859375 - SLOT TPYE: generictest
+    # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
+    # 547.55859375 = 450 + 97.55859375 - SLOT TPYE: generictest
+
+    # GHARDPOINT INIT: 0 - SLOT TPYE: generictest
+    # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
+    # 450 = 450 + 0 - SLOT TPYE: generictest
+
+    # GHARDPOINT INIT: -97.55859375 - SLOT TPYE: generictest
+    # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
+    # 352.44140625 = 450 + -97.55859375 - SLOT TPYE: generictest
 
     @main_weapon = nil
     @drawable_items_near_self = []
@@ -60,31 +75,20 @@ class Hardpoint < GeneralObject
     # Not sure why the offset is getting switched somewhere...
     # Maybe the calc Angle function is off somewhere
     # Without the offset being modified, the hardpoints are flipped across the center x axis
-    end_point   = OpenStruct.new(:x => (x + (@x_offset * -1)) * 1.0, :y => @y * 1.0)
+    end_point   = OpenStruct.new(:x => @x, :y => @y)
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
     @init_angle = @angle# + current_ship_angle
-     "INIT ANGLE HERE" if options[:from_player]
-    puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
+     # "INIT ANGLE HERE" if options[:from_player]
+    # puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
     @radian = calc_radian(start_point, end_point)
     # @x = @x * width_scale
     # @y = @y * height_scale
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
-    # puts "ID: #{@id}"
-    # puts "START POINT : #{@center_x} - #{@center_y}"
-    # puts "End POINT : #{@x} - #{@y}"
-    # puts "Angle #{@angle} and radius: #{@radius}"
-    # puts ""
-    # if current_ship_angle == 0
-    #   # Do nothing
-    # else
-    #   increment_angle(current_ship_angle)
-    # end
-    # init location. Don't need to set X or Y
-    puts "init_angle: #{@init_angle} and ship angle: #{current_ship_angle}" if options[:from_player]
+
+    puts "CURERNT SHIP ANGLE: #{current_ship_angle}- SLOT TPYE: #{slot_type}"
     self.increment_angle(current_ship_angle)
-    puts "POST ANGLE: #{@angle}" if options[:from_player]
   end
 
 
@@ -98,6 +102,8 @@ class Hardpoint < GeneralObject
     # step = step.round(5)
     @x = Math.cos(step) * @radius + @center_x
     @y = Math.sin(step) * @radius + @center_y
+    # @x = @x + @x_offset
+    # @y = @y + @y_offset
   end
 
   def decrement_angle angle_increment

@@ -112,16 +112,16 @@ class PilotableShip < GeneralObject
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-      puts "ANGLE HERE: #{@angle}"
+      # puts "ANGLE HERE: #{@angle}"
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0),
-        location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], @angle, options
+        x, y, 1, location[:x_offset].call(get_image, @average_scale),
+        location[:y_offset].call(get_image, @average_scale), item_klass, location[:slot_type], @angle, 0, options
       )
       # Init HP location
       # hp.rotate_hardpoints_counterclockwise(0)
       # .merge({init_angle: @angle}
       # if @angle > 
-      puts "ANGLE HERE: #{@angle}"
+      # puts "ANGLE HERE: #{@angle}"
       # rotate_hardpoints_counterclockwise(@angle)
       @front_hard_points << hp
     end
@@ -137,8 +137,8 @@ class PilotableShip < GeneralObject
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0),
-        location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], @angle + 90, options
+        x, y, 1, location[:x_offset].call(get_image, @average_scale),
+        location[:y_offset].call(get_image, @average_scale), item_klass, location[:slot_type].to_s + 'test', @angle, 90, options
       )
       @right_broadside_hard_points << hp
     end

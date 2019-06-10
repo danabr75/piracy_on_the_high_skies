@@ -64,7 +64,7 @@ class GeneralObject
     # validate_float([], self.class.name, __callee__)
     # validate_int([], self.class.name, __callee__)
     # validate_not_nil([], self.class.name, __callee__)
-    puts "@tile_pixel_width: #{@tile_pixel_width}"
+    # puts "@tile_pixel_width: #{@tile_pixel_width}"
     validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
 
     validate_float([@width_scale, @height_scale],  self.class.name, __callee__)
