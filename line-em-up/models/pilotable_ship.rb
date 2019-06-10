@@ -130,12 +130,17 @@ class PilotableShip < GeneralObject
       # if index < 2
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'right_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
-        options[:image_angle] = 90
+      options[:image_angle] = 90
         # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-        @right_broadside_hard_points << Hardpoint.new(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options)
+        # @right_broadside_hard_points << Hardpoint.new(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options)
       # else
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
+      hp = Hardpoint.new(
+        x, y, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0),
+        location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], @angle + 90, options
+      )
+      @right_broadside_hard_points << hp
     end
     self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
       # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
@@ -313,29 +318,18 @@ class PilotableShip < GeneralObject
   # end
 
   def attack_group initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
-    # puts "WHAT IS POINTER: #{pointer}"
-    if @left_broadside_mode
-      # puts "@broadside_hard_points: #{@broadside_hard_points}"
-      results = @left_broadside_hard_points.collect do |hp|
-        # puts "HP #{hp}"
-        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
-      end
-      # puts "Results :#{results}"
-    elsif @right_broadside_mode
-      results = @right_broadside_hard_points.collect do |hp|
-        # puts "HP #{hp}"
-        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
-      end
-    else
-      # puts "@front_hard_points: #{@front_hard_points}"
-      results = @front_hard_points.collect do |hp|
-        # puts "HP #{hp}"
-        # def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, opts = {}
-        hp.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
+    results = []
+    [
+      {objects: @right_broadside_hard_points,  angle_offset: 90},
+      {objects: @left_broadside_hard_points,   angle_offset: -90},
+      {objects: @front_hard_points,            angle_offset: 0}
+    ].each do |section|
+      results << section[:objects].collect do |hp|
+        hp.attack(initial_angle + section[:angle_offset], current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
       end
     end
+    results = results.flatten
     results.reject!{|v| v.nil?}
-    # puts "Results: #{results}"
     return results
   end
 
@@ -348,6 +342,97 @@ class PilotableShip < GeneralObject
       end
     end
   end
+
+# RESULT HERE?
+# [{:projectiles=>[#<Missile:0x00007f97cd75c6c0 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="40347bd5-cc14-4ab0-95a5-13ecb7619954", @image=##############
+# #      o     #
+# #     .@.    #
+# #     i@.    #
+# #     i@i    #
+# #     i@i    #
+# #     o@i    #
+# #     V@V    #
+# #     @@V    #
+# #     @@V    #
+# #     @@V    #
+# #     @@V    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #            #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@:  #
+# #   i@@@@@@M.#
+# # .M@@@@@@@@@#
+# #.@@@@@@@@@@@#
+# #i@@@@@@@@@@:#
+# #.@@@@@@@@V: #
+# #  :M@@@@M   #
+# #    :M@M.   #
+# #     V@V    #
+# ##############
+# , @time_alive=0, @image_width=22.5, @image_height=78.75, @image_size=885.9375, @image_radius=25.3125, @image_width_half=11.25, @image_height_half=39.375, @inited=true, @x=-50, @y=-50, @x_offset=0, @y_offset=0, @current_map_pixel_x=14054.801557577564, @current_map_pixel_y=14012.875559766864, @current_map_tile_x=124, @current_map_tile_y=124, @angle=359.2119350338511, @radian=1.5570419984159805, @health=1, @end_image_angle=449.2119350338511, @current_image_angle=90, @image_angle_incrementor=0.2>], :cooldown=>45}, {:projectiles=>[#<Missile:0x00007f97ce2af040 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="f2cc89b4-28ef-4e3f-9abc-23f6566abdad", @image=##############
+# #      o     #
+# #     .@.    #
+# #     i@.    #
+# #     i@i    #
+# #     i@i    #
+# #     o@i    #
+# #     V@V    #
+# #     @@V    #
+# #     @@V    #
+# #     @@V    #
+# #     @@V    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #     @@@    #
+# #            #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@   #
+# #    @@@@@:  #
+# #   i@@@@@@M.#
+# # .M@@@@@@@@@#
+# #.@@@@@@@@@@@#
+# #i@@@@@@@@@@:#
+# #.@@@@@@@@V: #
+# #  :M@@@@M   #
+# #    :M@M.   #
+# #     V@V    #
+# ##############
+# , @time_alive=0, @image_width=22.5, @image_height=78.75, @image_size=885.9375, @image_radius=25.3125, @image_width_half=11.25, @image_height_half=39.375, @inited=true, @x=-50, @y=-50, @x_offset=0, @y_offset=0, @current_map_pixel_x=14078.814389317577, @current_map_pixel_y=14015.00587630687, @current_map_tile_x=125, @current_map_tile_y=124, @angle=359.2119350338511, @radian=1.5570419984159805, @health=1, @end_image_angle=449.2119350338511, @current_image_angle=90, @image_angle_incrementor=0.2>], :cooldown=>45}]
 
   def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
     return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 1)

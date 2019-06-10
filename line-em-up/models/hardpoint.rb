@@ -149,8 +149,20 @@ class Hardpoint < GeneralObject
     end
 
     if can_attack
+      start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
+      # Reorienting angle to make 0 north
+      destination_angle = calc_angle(start_point, end_point) - 90
+      if destination_angle < 0.0
+        destination_angle = 360.0 - destination_angle.abs
+      elsif destination_angle > 360.0
+        destination_angle = destination_angle - 360.0
+      end
+
+      raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
+
       # attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
-      attack_projectile = @main_weapon.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, nil, nil, options)
+      attack_projectile = @main_weapon.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, nil, nil, options)
       @drawable_items_near_self << @main_weapon
     end
 

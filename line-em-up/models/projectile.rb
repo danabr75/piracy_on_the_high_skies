@@ -4,7 +4,8 @@ class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   # COOLDOWN_DELAY = 50
-  STARTING_SPEED = 3.0
+  STARTING_SPEED = 0.1
+  MAX_SPEED      = 1
   INITIAL_DELAY  = 0
   SPEED_INCREASE_FACTOR = 0.0
   DAMAGE = 5
@@ -16,6 +17,9 @@ class Projectile < ScreenMapFixedObject
 
   HEALTH = 1
 
+  # IMPLEMENT THIS
+  MAX_TILE_TRAVEL = 12
+
 
   def get_image
     puts "override get_image!"
@@ -25,7 +29,8 @@ class Projectile < ScreenMapFixedObject
   def draw_gl
   end
 
-  def initialize(current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, options = {})
+  # destination_map_pixel_x, destination_map_pixel_y params will become destination_angle
+  def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, options = {})
     # if options[:x_homing_padding]
     #   end_point_x = end_point_x + options[:x_homing_padding]
     # end
@@ -38,26 +43,21 @@ class Projectile < ScreenMapFixedObject
 
     # Might have to reorient x and y here.
     # start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
-    start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
-    end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
-    # Reorienting angle to make 0 north
-    @angle = calc_angle(start_point, end_point) - 90
+    # start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+    # end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
+    # # Reorienting angle to make 0 north
+    # @angle = calc_angle(start_point, end_point) - 90
+    @angle = destination_angle
     # angle_min = angle_min
     # angle_max = angle_max
     # angle_init = angle_init
     puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
-    # CALC ANGLE: -66.31613067749021 INIT ANGLE: -284.0
-    # NEAREST ANGLE 293.6838693225098 - 61 - 91
 
-    
-    # NEAREST ANGLE 88.68157948154932 - 75.0 - 105.0
+  # PLAYER ATTACKING w/ ANGLE: 306
+  # CALC ANGLE: 74.12453384013747 INIT ANGLE: 306
+  # 291 = nearest_angle(74.12453384013747, 291, 321)
 
-    # CORRECT
-    # CALC ANGLE: 88.68157948154932 INIT ANGLE: 90.0
 
-  # ANGLE 90.54463725738333
-  # start: [165.3689031842951, 175.50829614799085]
-  # end: [162.2712469342951, -150.35498510200915]
 
 
     @radian = calc_radian(start_point, end_point)
@@ -71,6 +71,9 @@ class Projectile < ScreenMapFixedObject
 
     if @angle < 0.0
       @angle = 360.0 - @angle.abs
+    end
+    if @angle > 360.0
+      @angle = @angle - 360.0
     end
 
     if angle_min
@@ -102,8 +105,13 @@ class Projectile < ScreenMapFixedObject
     else
       if is_angle_between_two_angles?(@angle, angle_min, angle_max)
         # Do nothing, we're good
+        puts "ANGLE IS BETWEEN TWO ANGLES"
       else
-        @angle = nearest_angle(@angle, angle_min, angle_max)
+        value = nearest_angle(@angle, angle_min, angle_max)
+        puts "value = nearest_angle(@angle, angle_min, angle_max)"
+        puts "NEW ANGLE HERE"
+        puts "#{value} = nearest_angle(#{@angle}, #{angle_min}, #{angle_max})"
+        @angle = value
       end
     end
 
@@ -115,10 +123,11 @@ class Projectile < ScreenMapFixedObject
     end
 
     # if it's min, incrementer is negative, else pos
-    value = nearest_angle(@angle, angle_min, angle_max)
-    puts "value = nearest_angle(@angle, angle_min, angle_max)"
-    puts "#{value} = nearest_angle(#{@angle}, #{angle_min}, #{angle_max})"
-    if value == angle_min
+    puts "DID ANGLE CHANGE? #{@angle}"
+    # value = nearest_angle(@angle, angle_min, angle_max)
+    # if value == angle_min
+    # THIS NEEDS TP BE UPDATED... wrong rotation
+    if @angle == angle_min
       @image_angle_incrementor = -0.2
     else
       @image_angle_incrementor = 0.2

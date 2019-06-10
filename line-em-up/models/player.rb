@@ -94,12 +94,12 @@ class Player < ScreenFixedObject
     @ship.x = @x
     @ship.y = @y
     # Get details from ship
-    # @mass = 50 # Get from ship
-    @mass = 300 # Get from ship
+    @mass = 100 # Get from ship
+    # @mass = 300 # Get from ship
     @current_momentum = 0
     @max_momentum = @mass * 3 # speed here?
-    # @speed = 3 #/ (@mass / 2)
-    @speed = 100 #/ (@mass / 2)
+    @speed = 50 #/ (@mass / 2)
+    # @speed = 100 #/ (@mass / 2)
     @rotation_speed = 2
   end
 
@@ -374,6 +374,7 @@ class Player < ScreenFixedObject
   end
 
   def attack_group_1 pointer
+    puts "PLAYER ATTACKING w/ ANGLE: #{@angle}"
     @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
   end
  
@@ -421,6 +422,7 @@ class Player < ScreenFixedObject
 
     if @current_momentum > 0.0
       speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
       x_diff, y_diff, halt = self.movement(speed, @angle)
       if halt
         @current_momentum = 0

@@ -7,7 +7,8 @@ require 'opengl'
 class Missile < Projectile
   attr_reader :x, :y, :time_alive, :mouse_start_x, :mouse_start_y
   COOLDOWN_DELAY = 3
-  MAX_SPEED      = 3
+  MAX_SPEED      = 1
+
   STARTING_SPEED = 0.0
   INITIAL_DELAY  = 0.5
   SPEED_INCREASE_FACTOR = 2
