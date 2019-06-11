@@ -1,4 +1,4 @@
-require_relative 'general_object.rb'
+require_relative 'screen_map_fixed_object.rb'
 
 class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian

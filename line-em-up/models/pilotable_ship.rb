@@ -138,7 +138,7 @@ class PilotableShip < GeneralObject
       # end
       hp = Hardpoint.new(
         x, y, 1, location[:x_offset].call(get_image, @average_scale),
-        location[:y_offset].call(get_image, @average_scale), item_klass, location[:slot_type].to_s + 'test', @angle, 90, options
+        location[:y_offset].call(get_image, @average_scale), item_klass, location[:slot_type], @angle, 90, options
       )
       @right_broadside_hard_points << hp
     end

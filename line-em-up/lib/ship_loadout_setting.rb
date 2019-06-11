@@ -1,4 +1,8 @@
-require 'luit'
+# require 'luit' # overridding
+
+# require_relative '../../vendors/lib/luit'
+# require "#{vendor_directory}/lib/luit.rb"
+
 
 require_relative 'setting.rb'
 require_relative '../models/basic_ship.rb'
@@ -24,7 +28,8 @@ class ShipLoadoutSetting < Setting
     @width_scale  = width_scale
     @height_scale = height_scale
     @refresh_player_ship = false
-    LUIT.config({window: window || self, z: 25})
+    # @z = ZOrder::HardPointClickableLocation
+    LUIT.config({window: window || self})
     # @window = window # Want relative to self, not window. Can't do that from settting, not a window.
     @mouse_x, @mouse_y = [0,0]
     @window = window # ignoring outer window here? Want actions relative to this window.
@@ -87,7 +92,7 @@ class ShipLoadoutSetting < Setting
     @ship_hardpoints = init_hardpoints(@ship)
     @active = false
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
-    @button = LUIT::Button.new(@window, :back, max_width / 2, max_height - 50, "Return to Game", 30, 30)
+    @button = LUIT::Button.new(@window, :back, max_width / 2, max_height - 50, ZOrder::UI, "Return to Game", 30, 30)
   end
 
   def enable
@@ -147,7 +152,8 @@ class ShipLoadoutSetting < Setting
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "matrix_#{x}_#{y}"
-        click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
+        puts "CELL HEIGHT HERE: #{@cell_height}"
+        click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
         klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
         item = nil
         if klass_name
@@ -265,8 +271,28 @@ class ShipLoadoutSetting < Setting
         # CLICK AREA: [474.7267846530563, 291.09953170050284] - group: front
         # CLICK AREA: [397.6856161538535, 297.93429726635867] - group: front
 
-        puts "CLICK AREA: #{[hp.x, hp.y]} - group: #{group[:location]}"
-        click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, @cell_width, @cell_height)
+        # puts "CLICK AREA: #{[hp.x, hp.y]} - group: #{group[:location]}"
+        if group[:location]    == :front
+          # directional_area = 
+        elsif group[:location] == :right
+        elsif group[:location] == :left
+        end
+
+        color, hover_color = [nil,nil]
+        if hp.slot_type    == :generic
+          puts "GOT HERE - GENERIC"
+          # color, hover_color = [Gosu::Color.argb(0x8aff82), Gosu::Color.argb(0xc3ffba)]
+          color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
+        elsif hp.slot_type == :offensive
+          color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
+        end
+        # raise "HP TPYE: #{hp.slot_type}"
+        # uiColor: 0xff_555555, uiColorLight: 0xff_888888
+        # puts "HOVLER COLOR HERE: #{hover_color}"
+                                            # holder, id, x, y, w = 0, h = 0, color = nil, hover_color = nil
+        # puts "HARDPOINT NEW CLICK AREA - #{@cell_height}"
+                                          # holder, id, x, y, z, w = 0, h = 0, color = nil, hover_color = nil)
+        click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
         @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
         if hp.assigned_weapon_class
           image = hp.assigned_weapon_class.get_hardpoint_image
@@ -277,6 +303,7 @@ class ShipLoadoutSetting < Setting
 
         else
         end
+
         value[group[:location]] << {item: item, x: hp.x, y: hp.y, click_area: click_area, key: button_key}
       end
     end

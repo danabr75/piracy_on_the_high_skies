@@ -1,5 +1,5 @@
 require 'gosu'
-require 'luit'
+# require 'luit'
 
 
 VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors"
@@ -11,7 +11,7 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 require 'opengl'
 
 class LoadoutWindow < Gosu::Window
-  require 'luit'
+  # require 'luit'
 
   # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
@@ -45,10 +45,10 @@ class LoadoutWindow < Gosu::Window
     # @mouse_x = 0
     @window = self
     @game_window = options[:game_window]
-    puts "NEW GAME WINDOW UIN LOADOUT"
-    puts @game_window
+    # puts "NEW GAME WINDOW UIN LOADOUT"
+    # puts @game_window
     # @scale = 1
-    LUIT.config({window: @window, z: 25})
+    LUIT.config({window: @window})
     config_path = options[:config_path] || CONFIG_FILE
  
 
@@ -144,7 +144,7 @@ class LoadoutWindow < Gosu::Window
     # @menu.add_item(debug_start_image, (@width / 2) - (debug_start_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; GameWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true, debug: true, difficulty: @difficulty}) }, debug_start_image)
     @button_id_mapping = self.class.get_id_button_mapping(self)
     # @loadout_button = LUIT::Button.new(self, :loadout, (@width / 2), get_center_font_ui_y, "Back To Menu", 0, 1)
-    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, "Back", 0, 1)
+    @back_button = LUIT::Button.new(self, :back, (@width / 2), @height, ZOrder::UI, "Back", 0, 1)
     @movement_x, @movement_y = [0.0, 0.0]
   end
 

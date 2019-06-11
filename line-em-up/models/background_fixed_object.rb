@@ -3,6 +3,8 @@
 # Only uses X and Y for pixel placement. X and Y depend on where they are in relation to the player.
 # Doesn't use X and Y for pixel placement, the background object will insert them.
 # Used by buildings, pickups
+require_relative "general_object.rb"
+
 class BackgroundFixedObject < GeneralObject
 
   def initialize(current_map_tile_x, current_map_tile_y, options = {})

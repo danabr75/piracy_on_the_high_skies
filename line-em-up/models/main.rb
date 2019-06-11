@@ -77,7 +77,7 @@ class Main < Gosu::Window
 
     button_key = :start_game
     @menu.add_item(
-      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Start", 0, 1),
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, ZOrder::UI, "Start", 0, 1),
       0,
       0,
       lambda {|window, id|
@@ -97,7 +97,7 @@ class Main < Gosu::Window
     # @menu.add_item(loadout_image, (@width / 2) - (loadout_image.width / 2), get_center_font_ui_y, 1, lambda {self.close; LoadoutWindow.start(@game_window_width, @game_window_height, dynamic_get_resolution_fs, {block_controls_until_button_up: true}) }, loadout_image)
     button_key = :loadout
     @menu.add_item(
-      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Loadout", 0, 1),
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, ZOrder::UI, "Loadout", 0, 1),
       0,
       0,
       lambda {|window, id|
@@ -127,7 +127,7 @@ class Main < Gosu::Window
     # )
     button_key = :debug_start # too lazy to rename
     @menu.add_item(
-      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Populate Inventory", 0, 1),
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, ZOrder::UI, "Populate Inventory", 0, 1),
       0,
       0,
       lambda {|window, id|
@@ -149,7 +149,7 @@ class Main < Gosu::Window
 
     button_key = :exit
     @menu.add_item(
-      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, "Exit", 0, 1),
+      LUIT::Button.new(@menu.local_window, button_key, @menu.x, @menu.y + @menu.current_height, ZOrder::UI, "Exit", 0, 1),
       0,
       0,
       lambda {|window, id|

@@ -2,6 +2,7 @@
 # Uses current_map_pixel_x and current_map_pixel_y for tracking.
 # Only uses X and Y for pixel placement, not for location tracking. X and Y depend on where they are in relation to the player.
 # Used by projectiles, enemies, tumbleweeds, etc.
+require_relative "general_object.rb"
 class ScreenMapFixedObject < GeneralObject
  # def initialize(current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
  # Use tile tracking so we know when to load them into the visible map

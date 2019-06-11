@@ -10,7 +10,7 @@ gem 'gosu'
 
 # gosu >= 0.11.3.1, ~> 0.11
 # Had syntax error, using local version now
-gem 'luit'
+# gem 'luit'
 # gem 'gosu-examples'
 # FORKED from opengl (0.10.0)
 # gem 'danabr75-opengl'

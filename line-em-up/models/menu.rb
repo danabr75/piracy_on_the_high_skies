@@ -4,7 +4,7 @@ class Menu
   attr_reader :active, :window
   def initialize(window, x, y, z = ZOrder::UI, scale = 1)
     # LUIT.config({window: self, z: 25})
-    LUIT.config({window: window || self, z: z})
+    LUIT.config({window: window || self})
     @scale = scale
     @window = window
     @x = x
@@ -36,7 +36,7 @@ class Menu
   def add_item(key, text, x, y, callback, hover_image = nil, options = {})
       @button_id_mapping[key] = callback
 
-      button = LUIT::Button.new(self, key, self.x, self.y + self.current_height, text, 0, 1)
+      button = LUIT::Button.new(self, key, self.x, self.y + self.current_height, @z, text, 0, 1)
 
       if options[:is_button]
         @current_height = @current_height + button.h + @cell_padding
