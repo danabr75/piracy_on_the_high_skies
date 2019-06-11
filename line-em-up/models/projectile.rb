@@ -8,6 +8,7 @@ class Projectile < ScreenMapFixedObject
   MAX_SPEED      = 1
   INITIAL_DELAY  = 0
   SPEED_INCREASE_FACTOR = 0.0
+  SPEED_INCREASE_INCREMENT = 0.0
   DAMAGE = 5
   AOE = 0
   MAX_CURSOR_FOLLOW = 5 # Do we need this if we have a max speed?
@@ -31,43 +32,17 @@ class Projectile < ScreenMapFixedObject
 
   # destination_map_pixel_x, destination_map_pixel_y params will become destination_angle
   def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, options = {})
-    # if options[:x_homing_padding]
-    #   end_point_x = end_point_x + options[:x_homing_padding]
-    # end
-    # @damage_increase = options[:damage_increase] || 1
-    # Set this in global vars
-    # @custom_initial_delay = options[:custom_initial_delay] if options[:custom_initial_delay]
-    # options[:relative_object] = object
-    # super(current_map_pixel_x, current_map_pixel_y, relative_object_offset_x, relative_object_offset_y, options)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
-
-    # Might have to reorient x and y here.
-    # start_point = OpenStruct.new(:x => @x - screen_width / 2, :y => @y - screen_height / 2)
-    # start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
-    # end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
-    # # Reorienting angle to make 0 north
-    # @angle = calc_angle(start_point, end_point) - 90
     @angle = destination_angle
-    # angle_min = angle_min
-    # angle_max = angle_max
-    # angle_init = angle_init
     puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
-
-  # PLAYER ATTACKING w/ ANGLE: 306
-  # CALC ANGLE: 74.12453384013747 INIT ANGLE: 306
-  # 291 = nearest_angle(74.12453384013747, 291, 321)
-
-
-
 
     @radian = calc_radian(start_point, end_point)
 
-    # @image_angle = @angle
-    # TEMP stopping the image angle business, not worth it at this point
-    
-    # @angle  = @angle
-
     @health = self.class::HEALTH
+
+    @refresh_angle_on_updates = options[:refresh_angle_on_updates] || false
+
+    @speed = self.class.get_starting_speed
 
     if @angle < 0.0
       @angle = 360.0 - @angle.abs
@@ -105,40 +80,40 @@ class Projectile < ScreenMapFixedObject
     else
       if is_angle_between_two_angles?(@angle, angle_min, angle_max)
         # Do nothing, we're good
-        puts "ANGLE IS BETWEEN TWO ANGLES"
       else
         value = nearest_angle(@angle, angle_min, angle_max)
-        puts "value = nearest_angle(@angle, angle_min, angle_max)"
-        puts "NEW ANGLE HERE"
-        puts "#{value} = nearest_angle(#{@angle}, #{angle_min}, #{angle_max})"
         @angle = value
       end
     end
 
-    if angle_init
-      @end_image_angle = @angle + 90
-      @current_image_angle = angle_init + 90
+    # Angle init is always mandatory, why have 'else'?
+    if @refresh_angle_on_updates
+      if angle_init
+        @end_image_angle = @angle + 90
+        @current_image_angle = angle_init + 90
+      else
+        @current_image_angle = @angle + 90
+      end
     else
-      @current_image_angle = @angle + 90
+      @current_image_angle = @end_image_angle = @angle + 90
     end
 
     # if it's min, incrementer is negative, else pos
-    puts "DID ANGLE CHANGE? #{@angle}"
     # value = nearest_angle(@angle, angle_min, angle_max)
     # if value == angle_min
     # THIS NEEDS TP BE UPDATED... wrong rotation
-    if @angle == angle_min
-      @image_angle_incrementor = -0.2
-    else
-      @image_angle_incrementor = 0.2
+    if @refresh_angle_on_updates
+      if @angle == angle_min
+        @image_angle_incrementor = -0.2
+      else
+        @image_angle_incrementor = 0.2
+      end
     end
-
-    puts "ANGLE END #{@angle}"
 
   end
 
   def update mouse_x, mouse_y, player
-    if @end_image_angle && @time_alive > 10
+    if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
 
       if @current_image_angle != @end_image_angle
         @current_image_angle = @current_image_angle + @image_angle_incrementor
@@ -150,47 +125,26 @@ class Projectile < ScreenMapFixedObject
           @current_image_angle = @end_image_angle if @current_image_angle > @end_image_angle 
         end
       end
-
-      # incrementing_amount = 2
-      # angle_difference = (@current_image_angle - @end_image_angle)
-
-
-      # if incrementing_amount > angle_difference.abs
-      #   # puts "ENDING IMAGE HERE!!!!!!"
-      #   @current_image_angle = @end_image_angle
-      #   @end_image_angle = nil
-      # elsif angle_difference > 0
-      #   @current_image_angle -= incrementing_amount
-      # elsif angle_difference < 0
-      #   @current_image_angle += incrementing_amount
-      # else
-      #   @current_image_angle = @end_image_angle
-      #   @end_image_angle = nil
-      # end
     end
 
-    new_speed = 0
+    # new_speed = 0
     if @time_alive > (@custom_initial_delay || self.class.get_initial_delay)
-      new_speed = self.class.get_starting_speed + (self.class.get_speed_increase_factor > 0 ? @time_alive * self.class.get_speed_increase_factor : 0)
-      new_speed = self.class.get_max_speed if new_speed > self.class.get_max_speed
-      new_speed = new_speed * @average_scale
+      speed_factor = self.class.get_speed_increase_factor
+      if @speed < self.class.get_max_speed
+        if speed_factor && speed_factor > 0.0
+          @speed = @speed + (@time_alive * speed_factor)
+        end
+        speed_increment = self.class.get_speed_increase_increment
+        if speed_increment && speed_increment > 0.0
+          @speed = @speed + speed_increment
+        end
 
+        @speed = self.class.get_max_speed if @speed > self.class.get_max_speed
+      end
 
-    # puts "PRE MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
-      movement(new_speed, @angle) if new_speed != 0
-    # puts "POST MOVMENET: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
-      # vx = 0
-      # vy = 0
-      # if new_speed != 0
-      #   vx = ((new_speed / 3) * 1) * Math.cos(@angle * Math::PI / 180)
+      factor_in_scale_speed = @speed * @average_scale
 
-      #   vy = ((new_speed / 3) * 1) * Math.sin(@angle * Math::PI / 180)
-      #   vy = vy * -1
-      # end
-
-      # @current_map_pixel_x = @current_map_pixel_x + vx
-      # @current_map_pixel_y = @current_map_pixel_y + vy
-
+      movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
     end
 
     return super(mouse_x, mouse_y, player)
@@ -330,6 +284,10 @@ class Projectile < ScreenMapFixedObject
   def self.get_speed_increase_factor
     self::SPEED_INCREASE_FACTOR
   end
+  def self.get_speed_increase_increment
+    self::SPEED_INCREASE_INCREMENT
+  end
+  # need to re-implement this
   def self.get_max_cursor_follow
     self::MAX_CURSOR_FOLLOW
   end

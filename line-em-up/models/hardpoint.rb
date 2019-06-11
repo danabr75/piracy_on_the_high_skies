@@ -14,8 +14,8 @@ class Hardpoint < GeneralObject
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half, :image_angle
 
 
-  # MISSILE_LAUNCHER_MIN_ANGLE = 75
-  # MISSILE_LAUNCHER_MAX_ANGLE = 105
+  # LAUNCHER_MIN_ANGLE = 75
+  # LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
 # Assuming from player
@@ -83,6 +83,8 @@ class Hardpoint < GeneralObject
 
     if item
       @assigned_weapon_class = item
+      # puts "@assigned_weapon_class: #{@assigned_weapon_class.inspect}"
+      # puts "@assigned_weapon_class2: #{@assigned_weapon_class::HARDPOINT_NAME}"
       @image_hardpoint = item.get_hardpoint_image
     else
       @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")

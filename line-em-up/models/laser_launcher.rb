@@ -13,9 +13,15 @@ class LaserLauncher < Launcher
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
+  HARDPOINT_NAME = "laser_launcher"
+
   # def init_projectile init_angle, options
   #   LaserParticle.new(@scale, @screen_pixel_width, @screen_pixel_height, self, init_angle, options)
   # end
+  
+  def self.get_hardpoint_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
+  end
 
   def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, object, options = {})
     raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)

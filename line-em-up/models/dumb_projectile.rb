@@ -1,3 +1,5 @@
+# I don't this this is used anymore
+
 require_relative 'screen_map_fixed_object.rb'
 
 class DumbProjectile < ScreenMapFixedObject

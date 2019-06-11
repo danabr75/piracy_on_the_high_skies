@@ -10,7 +10,7 @@ class Mite < GeneralObject
   # MAX_ATTACK_SPEED = 0.8
   # POINT_VALUE_BASE = 5
   # # MISSILE_LAUNCHER_MIN_ANGLE = 255
-  # # MISSILE_LAUNCHER_MAX_ANGLE = 285
+  # # LAUNCHER_MAX_ANGLE = 285
   # # MISSILE_LAUNCHER_INIT_ANGLE = 270
   # attr_accessor :cooldown_wait, :attack_speed, :health, :armor, :x, :y
 

@@ -30,3 +30,17 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
 Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
 
+
+def populate_inventory
+  @config_file_path = CONFIG_FILE
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '0'.to_s], 'DumbMissileLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '0'.to_s], 'DumbMissileLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '0'.to_s], 'DumbMissileLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '1'.to_s], 'LaserLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '1'.to_s], 'LaserLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '1'.to_s], 'LaserLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '2'.to_s], 'BulletLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '2'.to_s], 'BulletLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '2'.to_s], 'BulletLauncher')
+  return true
+end

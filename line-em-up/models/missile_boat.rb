@@ -8,8 +8,8 @@ class MissileBoat < GeneralObject
   SPEED = 5
   MAX_ATTACK_SPEED = 3.0
   POINT_VALUE_BASE = 50
-  MISSILE_LAUNCHER_MIN_ANGLE = 255
-  MISSILE_LAUNCHER_MAX_ANGLE = 285
+  LAUNCHER_MIN_ANGLE = 255
+  LAUNCHER_MAX_ANGLE = 285
   MISSILE_LAUNCHER_INIT_ANGLE = 270
   attr_accessor :cooldown_wait, :attack_speed, :health, :armor, :x, :y
 
@@ -45,9 +45,9 @@ class MissileBoat < GeneralObject
     x_padding_2 = -(5 * @scale)
     return {
       projectiles: [
-        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2, damage_increase: @damage_factor}),
-        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1, damage_increase: @damage_factor}),
-        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2, damage_increase: @damage_factor})
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, LAUNCHER_MIN_ANGLE, LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 2, damage_increase: @damage_factor}),
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, LAUNCHER_MIN_ANGLE, LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 12, x_homing_padding: x_padding_1, damage_increase: @damage_factor}),
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, LAUNCHER_MIN_ANGLE, LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {custom_initial_delay: 18, x_homing_padding: x_padding_2, damage_increase: @damage_factor})
       ],
       cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }

@@ -10,8 +10,8 @@ class Mothership < GeneralObject
   MAX_ATTACK_SPEED = 3.0
   POINT_VALUE_BASE = 1000
 
-  MISSILE_LAUNCHER_MIN_ANGLE = nil
-  MISSILE_LAUNCHER_MAX_ANGLE = nil
+  LAUNCHER_MIN_ANGLE = nil
+  LAUNCHER_MAX_ANGLE = nil
   MISSILE_LAUNCHER_INIT_ANGLE = nil
 
   attr_accessor :cooldown_wait, :attack_speed, :health, :armor, :x, :y, :secondary_cooldown_wait, :tertiary_cooldown_wait
@@ -67,8 +67,8 @@ class Mothership < GeneralObject
     return {
       projectiles: [
         # relative_object not required yet for these
-        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self }),
-        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, MISSILE_LAUNCHER_MIN_ANGLE, MISSILE_LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self })
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, LAUNCHER_MIN_ANGLE, LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'left',  relative_object: self }),
+        SemiGuidedMissile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, player, LAUNCHER_MIN_ANGLE, LAUNCHER_MAX_ANGLE, MISSILE_LAUNCHER_INIT_ANGLE, {side: 'right', relative_object: self })
       ],
       cooldown: SemiGuidedMissile::COOLDOWN_DELAY
     }

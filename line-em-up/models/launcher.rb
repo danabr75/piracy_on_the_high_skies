@@ -11,6 +11,22 @@ class Launcher < GeneralObject
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
+  HARDPOINT_NAME = "replace_me"  
+  HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
+
+  def self.get_hardpoint_media_location
+    MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
+  end
+
+  # Hate to have to use a parameter for this, seems so simple
+  def self.get_hardpoint_image
+    # # puts "RIGHT HERE: #{HARDPOINT_NAME}"
+    # using_name = hardpoint_name || HARDPOINT_NAME
+    raise "You forgot to override the launcher's 'HARDPOINT_NAME' here - for this class: #{self.name}"
+    # # puts "HERE IT IS: #{self.class.name} with #{get_hardpoint_media_location}"
+    # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{using_name}/hardpoint.png")
+  end
+
   def init_projectile
     raise "Override me"
   end
@@ -37,12 +53,12 @@ class Launcher < GeneralObject
     self.class::COOLDOWN_DELAY
   end
 
-  # Used via hardpoint
-  def self.get_hardpoint_image
-    # raise "Override me"
-    # default
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
-  end
+  # # Used via hardpoint
+  # def self.get_hardpoint_image
+  #   # raise "Override me"
+  #   # default
+  #   Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
+  # end
 
   def attack initial_angle, location_x, location_y, pointer
     if @cooldown_wait <= 0
@@ -66,7 +82,8 @@ class Launcher < GeneralObject
 
   def get_hardpoint_image
     # default
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
+    self.class.get_hardpoint_image
+    # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
   end
 
   def deactivate

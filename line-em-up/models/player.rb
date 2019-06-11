@@ -23,8 +23,8 @@ class Player < ScreenFixedObject
 
   SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle
-  MISSILE_LAUNCHER_MIN_ANGLE = 75
-  MISSILE_LAUNCHER_MAX_ANGLE = 105
+  LAUNCHER_MIN_ANGLE = 75
+  LAUNCHER_MAX_ANGLE = 105
   MISSILE_LAUNCHER_INIT_ANGLE = 90
 
   SPECIAL_POWER = 'laser'
