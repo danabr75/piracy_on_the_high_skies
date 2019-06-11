@@ -173,7 +173,7 @@ class ShipLoadoutSetting < Setting
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z, @width_scale, @height_scale)
+          image.draw(element[:x] - (image.width / 2), element[:y] - (image.height / 2) , @hardpoint_image_z, @width_scale, @height_scale)
         end
       end
     end
@@ -195,8 +195,10 @@ class ShipLoadoutSetting < Setting
             if image
               # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
               image.draw(
-                value[:x] - (image.width  / 2)  + @cell_width  / 2,
-                value[:y] - (image.height / 2)  + @cell_height / 2,
+                value[:x] - (image.width  / 2),
+                value[:y] - (image.height / 2),
+                # value[:x] - (image.width  / 2)  + @cell_width  / 2,
+                # value[:y] - (image.height / 2)  + @cell_height / 2,
                 @hardpoint_image_z,
                 @width_scale, @height_scale
               )
@@ -264,7 +266,7 @@ class ShipLoadoutSetting < Setting
         # CLICK AREA: [397.6856161538535, 297.93429726635867] - group: front
 
         puts "CLICK AREA: #{[hp.x, hp.y]} - group: #{group[:location]}"
-        click_area = LUIT::ClickArea.new(@window, button_key, hp.x, hp.y, @cell_width, @cell_height)
+        click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, @cell_width, @cell_height)
         @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
         if hp.assigned_weapon_class
           image = hp.assigned_weapon_class.get_hardpoint_image
