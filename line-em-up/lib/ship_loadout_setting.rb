@@ -173,7 +173,7 @@ class ShipLoadoutSetting < Setting
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2), element[:y] - (image.height / 2) , @hardpoint_image_z, @width_scale, @height_scale)
+          image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z, @width_scale, @height_scale)
         end
       end
     end
