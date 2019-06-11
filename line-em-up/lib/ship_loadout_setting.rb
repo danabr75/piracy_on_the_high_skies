@@ -61,7 +61,7 @@ class ShipLoadoutSetting < Setting
     @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
     klass = eval(@ship_value)
 
-    @ship = klass.new(@max_width / 2, @max_height / 2, 0, {use_large_image: true, hide_hardpoints: true})
+    @ship = klass.new(@max_width / 2, @max_height / 2, 0, {use_large_image: true, hide_hardpoints: true, block_initial_angle: true})
 
     puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
@@ -195,7 +195,7 @@ class ShipLoadoutSetting < Setting
             if image
               # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
               image.draw(
-                value[:x] - (image.width / 2) + @cell_width / 2,
+                value[:x] - (image.width  / 2)  + @cell_width  / 2,
                 value[:y] - (image.height / 2)  + @cell_height / 2,
                 @hardpoint_image_z,
                 @width_scale, @height_scale
@@ -233,14 +233,17 @@ class ShipLoadoutSetting < Setting
     end
   end
 
+# front-SHIP LOADOUT: 412 => 474 + -38.671875 - (46.875/ 2) ; 111.56828170050284 => 291.09953170050284 + -156.09375 - 46.875 / 2
+# front-SHIP LOADOUT: 412 => 397 + 38.671875 - (46.875/ 2) ; 118.40304726635867 => 297.93429726635867 + -156.09375 - 46.875 / 2
+
   def init_hardpoints ship
     # Populate ship hardpoints from save file here.
     # will be populated from the ship, don't need to here.
     value = {}
     groups = [
       {hardpoints: ship.right_broadside_hard_points, location: :right},
-      {hardpoints: ship.left_broadside_hard_points, location: :left},
-      {hardpoints: ship.front_hard_points, location: :front}
+      {hardpoints: ship.left_broadside_hard_points,  location: :left},
+      {hardpoints: ship.front_hard_points,           location: :front}
     ]
     groups.each do |group|
       value[group[:location]] = []
@@ -253,7 +256,15 @@ class ShipLoadoutSetting < Setting
         #   puts "HP X and Y: #{hp.x} and #{hp.y}"
         #   puts "hp.x_offset and hp.y_offset: #{hp.x_offset} and #{hp.y_offset}"
         # end
-        click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset - (@cell_width / 2), hp.y + hp.y_offset - @cell_height / 2, @cell_width, @cell_height)
+        # puts "#{group[:location]}-SHIP LOADOUT: #{hp.x + hp.x_offset - (@cell_width / 2)} => #{hp.x} + #{hp.x_offset} - (#{@cell_width }/ 2) ; #{hp.y + hp.y_offset - @cell_height / 2} => #{hp.y} + #{hp.y_offset} - #{@cell_height} / 2"
+        # click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset - (@cell_width / 2), hp.y + hp.y_offset - @cell_height / 2, @cell_width, @cell_height)
+        # OFFSET is already built into the HP X and Y, taking it out
+
+        # CLICK AREA: [474.7267846530563, 291.09953170050284] - group: front
+        # CLICK AREA: [397.6856161538535, 297.93429726635867] - group: front
+
+        puts "CLICK AREA: #{[hp.x, hp.y]} - group: #{group[:location]}"
+        click_area = LUIT::ClickArea.new(@window, button_key, hp.x, hp.y, @cell_width, @cell_height)
         @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
         if hp.assigned_weapon_class
           image = hp.assigned_weapon_class.get_hardpoint_image
@@ -264,7 +275,7 @@ class ShipLoadoutSetting < Setting
 
         else
         end
-        value[group[:location]] << {item: item, x: hp.x + hp.x_offset - (@cell_width / 2), y: hp.y + hp.y_offset - @cell_height / 2, click_area: click_area, key: button_key}
+        value[group[:location]] << {item: item, x: hp.x, y: hp.y, click_area: click_area, key: button_key}
       end
     end
     # puts "VALUES HERE FRONT:"
@@ -414,6 +425,7 @@ class ShipLoadoutSetting < Setting
       if list.any?
         list.each do |value|
           click_area = value[:click_area]
+          # puts "CLICK AREA: #{click_area.y}"
           if click_area
             click_area.update(0, 0)
           end
@@ -449,14 +461,15 @@ class ShipLoadoutSetting < Setting
     end
   end
 
-  def get_hardpoints
-    klass = eval(@ship_value)
-    return {
-      front: klass::FRONT_HARDPOINT_LOCATIONS,
-      right: klass::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS,
-      left:  klass::LEFT_BROADSIDE_HARDPOINT_LOCATIONS
-    }
-  end
+  # Not used
+  # def get_hardpoints
+  #   klass = eval(@ship_value)
+  #   return {
+  #     front: klass::FRONT_HARDPOINT_LOCATIONS,
+  #     right: klass::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS,
+  #     left:  klass::LEFT_BROADSIDE_HARDPOINT_LOCATIONS
+  #   }
+  # end
 
   def get_image
     klass = eval(@ship_value)

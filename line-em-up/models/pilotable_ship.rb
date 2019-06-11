@@ -79,7 +79,7 @@ class PilotableShip < GeneralObject
     @turn_right = false
     @turn_left = false
 
-    @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
+    # @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
     @rocket_launchers = 0
     @bomb_launchers   = 0
     @cannon_launchers = 0

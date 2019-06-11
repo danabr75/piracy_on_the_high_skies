@@ -18,6 +18,25 @@ class Hardpoint < GeneralObject
   # MISSILE_LAUNCHER_MAX_ANGLE = 105
   # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
+# Assuming from player
+# X INIT HARdPOINT: 438.6997767857143 = 450 + -11.300223214285714 - SLOT TPYE: generic
+# Y INIT HARdPOINT: 404.296875 = 450 + -45.703125 - SLOT TPYE: generic
+# CURERNT SHIP ANGLE: 0- SLOT TPYE: generic
+# GHARDPOINT INIT: -45.703125 - SLOT TPYE: generic
+# X INIT HARdPOINT: 461.3002232142857 = 450 + 11.300223214285714 - SLOT TPYE: generic
+# Y INIT HARdPOINT: 404.296875 = 450 + -45.703125 - SLOT TPYE: generic
+
+
+
+
+# #assuming from ship loadout.
+# X INIT HARdPOINT: 411.328125 = 450 + -38.671875 - SLOT TPYE: generic
+# Y INIT HARdPOINT: 293.90625 = 450 + -156.09375 - SLOT TPYE: generic
+# CURERNT SHIP ANGLE: 0- SLOT TPYE: generic
+# GHARDPOINT INIT: -156.09375 - SLOT TPYE: generic
+# X INIT HARdPOINT: 488.671875 = 450 + 38.671875 - SLOT TPYE: generic
+# Y INIT HARdPOINT: 293.90625 = 450 + -156.09375 - SLOT TPYE: generic
+
   def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     puts "GHARDPOINT INIT: #{y_offset} - SLOT TPYE: #{slot_type}"
@@ -43,8 +62,9 @@ class Hardpoint < GeneralObject
 
     @x = x + @x_offset
     @y = y + @y_offset
-    puts "#{@x} = #{x} + #{@x_offset} - SLOT TPYE: #{slot_type}"
-    puts "#{@y} = #{y} + #{@y_offset} - SLOT TPYE: #{slot_type}"
+    # old_y = @y
+    puts "X INIT HARdPOINT: #{@x} = #{x} + #{@x_offset} - SLOT TPYE: #{slot_type}"
+    puts "Y INIT HARdPOINT: #{@y} = #{y} + #{@y_offset} - SLOT TPYE: #{slot_type}"
 
     # GHARDPOINT INIT: 97.55859375 - SLOT TPYE: generictest
     # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
@@ -88,7 +108,20 @@ class Hardpoint < GeneralObject
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
 
     puts "CURERNT SHIP ANGLE: #{current_ship_angle}- SLOT TPYE: #{slot_type}"
-    self.increment_angle(current_ship_angle)
+    # Increlementing at 0 will adjust the x and y, to make them slightly off.
+    if options[:block_initial_angle]
+      # The graphical Gosu image drawing system needs the offset minused.
+      # The angle determining system requires it positive
+      # This is a mystery
+      # Can't run these commands after the angling, causes a pixel shift
+      @x = x - @x_offset
+      @y = y + @y_offset
+    else
+      self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
+    end
+    # puts "NEW Y: #{@y}"
+    # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
+
   end
 
 
