@@ -806,9 +806,9 @@ class GLBackground
   
   # include Gl
   NEAR_VALUE = 1
-  FAR_VALUE  = 100
+  FAR_VALUE  = 10
   NDC_X_LENGTH  = 0.1
-  NDC_Y_LENGTH  = 0.075
+  NDC_Y_LENGTH  = 0.1
   
   def exec_gl player_x, player_y, projectiles, buildings, pickups
     player_x, player_y = [player_x.to_i, player_y.to_i]
@@ -1130,18 +1130,19 @@ class GLBackground
             glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
           glEnd
 
+
+          # Both these buildings and pickups drawing methods work. Building is more attached to the terrain.
+          # Building draw the tile here
+          # Pickups update the x and y coords, and then the pickup draws itself.
           buildings.each do |building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-
-            # NEED TO STOP USING THIS I SPOSE
+            building.class.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
-
-            building.class.alt_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
           end
 
           pickups.each do |pickup|
             next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
-            # pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 
           error = glGetError

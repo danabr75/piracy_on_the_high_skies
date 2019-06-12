@@ -11,14 +11,16 @@ class Building < BackgroundFixedObject
   POINT_VALUE_BASE = 1
   HEALTH = 100
 
-
+  # For radius size calculations
+  def self.get_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png")
+  end
 
   def drops
     # rand_num = rand(10)
     # if rand(10) == 9
       [ 
-        # Add back in after update
-        # HealthPack.new(@scale, @x, @y, @screen_pixel_width, @screen_pixel_height, @width_scale, @height_scale, @location_x, @location_y, @map_height, @map_width, {z: @z})
+        HealthPack.new(@current_map_tile_x, @current_map_tile_y)
       ]
       # raise "STOP"
     # elsif rand(10) == 8
@@ -33,8 +35,8 @@ class Building < BackgroundFixedObject
   end
 
   def draw
-    # Doesn't exactly match terrain
-    @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @width_scale, @height_scale)
+    # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
+    # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @width_scale, @height_scale)
   end
 
   # def convert_screen_to_opengl x, y, w = nil, h = nil
@@ -51,7 +53,7 @@ class Building < BackgroundFixedObject
   #   end
   # end
 
-  def self.alt_draw_gl v1, v2, v3, v4
+  def self.tile_draw_gl v1, v2, v3, v4
     @image2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png", :tileable => true)
     @info = @image2.gl_tex_info
 

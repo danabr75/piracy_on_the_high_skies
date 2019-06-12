@@ -262,6 +262,7 @@ class Projectile < ScreenMapFixedObject
     end
 
     @health = 0 if hit_object
+    puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
     return {drops: drops, point_value: points, killed: killed}
   end
 
