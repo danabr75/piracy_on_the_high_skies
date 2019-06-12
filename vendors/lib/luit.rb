@@ -105,17 +105,24 @@ module LUIT
     end
 
     def draw(x = 0, y = 0)
-      puts "DRAWING HOVER: #{@hover_color}" if @hover
-      puts "WHAT IS H?: #{@h}" if @hover
+      # puts "DRAWING HOVER: #{@hover_color}" if @hover
+      # puts "WHAT IS H?: #{@h}" if @hover
           # .draw_rect(x, y, z, width, height, c, z = 0, mode = :default) ⇒ void
       Gosu::draw_rect(@x + x, @y + y, @w, @h, @hover ? @hover_color : @color, @z)
     end
-
+    # def update(x = 0, y = 0)
+    #   if Gosu::distance($mx, $my, x, y) <= @r
+    #     @hover = true
+    #   else
+    #     @hover = false
+    #   end
+    # end
     def update(x = 0, y = 0)
       x += @x
       y += @y
-      updateHover(x, y)
+      is_hover = updateHover(x, y)
       super(x, y)
+      return is_hover
     end
   end
 

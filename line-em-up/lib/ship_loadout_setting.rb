@@ -7,6 +7,8 @@
 require_relative 'setting.rb'
 require_relative '../models/basic_ship.rb'
 require_relative '../models/launcher.rb'
+
+require 'gosu'
 # require "#{MODEL_DIRECTORY}/basic_ship.rb"
 # require_relative "config_settings.rb"
 
@@ -27,6 +29,8 @@ class ShipLoadoutSetting < Setting
   def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
     @width_scale  = width_scale
     @height_scale = height_scale
+    @average_scale = (@width_scale + @height_scale) / 2.0
+
     @refresh_player_ship = false
     # @z = ZOrder::HardPointClickableLocation
     LUIT.config({window: window || self})
@@ -68,7 +72,7 @@ class ShipLoadoutSetting < Setting
 
     @ship = klass.new(@max_width / 2, @max_height / 2, 0, {use_large_image: true, hide_hardpoints: true, block_initial_angle: true})
 
-    puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
+    # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
     # puts "RIGHT HERE!@!!!"
     # puts "@ship.right_broadside_hard_points"
@@ -92,7 +96,11 @@ class ShipLoadoutSetting < Setting
     @ship_hardpoints = init_hardpoints(@ship)
     @active = false
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
-    @button = LUIT::Button.new(@window, :back, max_width / 2, max_height - 50, ZOrder::UI, "Return to Game", 30, 30)
+    @button = LUIT::Button.new(@window, :back, max_width / 2, 50, ZOrder::UI, "Return to Game", 30, 30)
+    @font_height  = (20 * @average_scale).to_i
+    @font_padding = (4 * @average_scale).to_i
+    @font = Gosu::Font.new(@font_height)
+    @hover_object = nil
   end
 
   def enable
@@ -147,8 +155,11 @@ class ShipLoadoutSetting < Setting
     (0..@inventory_matrix_max_width - 1).each do |i|
       @inventory_matrix[i] = Array.new(@inventory_matrix_max_height)
     end
-    current_y = @y + @cell_height_padding
-    current_x = @next_x
+    # puts "@inventory_matrix_max_height: #{@inventory_matrix_max_height}"
+    max_y_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
+    # raise "GOT THIS for height: #{max_y_height} - Y was: #{@y}"
+    current_y = (@max_height / 2) - (max_y_height / 2)
+    current_x = @next_x + @cell_width_padding
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "matrix_#{x}_#{y}"
@@ -166,7 +177,7 @@ class ShipLoadoutSetting < Setting
         current_x = current_x + @cell_width + @cell_width_padding
         @button_id_mapping[key] = lambda { |window, menu, id| menu.click_inventory(id) }
       end
-      current_x = @next_x
+      current_x = @next_x + @cell_width_padding
       current_y = current_y + @cell_height + @cell_height_padding
     end
   end
@@ -218,11 +229,14 @@ class ShipLoadoutSetting < Setting
   end
 
   def matrix_update
+    hover_object = nil
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
-        @inventory_matrix[x][y][:click_area].update(0,0)
+        is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
+        hover_object = {item: @inventory_matrix[x][y][:item], holding_type: :inventory} if is_hover
       end
     end
+    return hover_object
   end
 
   def print_out_matrix
@@ -249,34 +263,23 @@ class ShipLoadoutSetting < Setting
     # will be populated from the ship, don't need to here.
     value = {}
     groups = [
-      {hardpoints: ship.right_broadside_hard_points, location: :right},
-      {hardpoints: ship.left_broadside_hard_points,  location: :left},
-      {hardpoints: ship.front_hard_points,           location: :front}
+      # Angle not used yet.
+      {hardpoints: ship.right_broadside_hard_points, location: :right, angle: 90},
+      {hardpoints: ship.left_broadside_hard_points,  location: :left,  angle: 270},
+      {hardpoints: ship.front_hard_points,           location: :front, angle: 0}
     ]
     groups.each do |group|
       value[group[:location]] = []
       group[:hardpoints].each_with_index do |hp, index|
         button_key = "#{group[:location].to_s}_hardpoint_#{index}"
-        # click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, @cell_width, @cell_height)
-# image.draw(value[:x] - (image.width / 2) + @cell_width / 2, value[:y] - (image.height / 2)  + @cell_height / 2, @hardpoint_image_z)
-        # if group[:location] == :front
-        #   puts "FRONT HERE!!!!!"
-        #   puts "HP X and Y: #{hp.x} and #{hp.y}"
-        #   puts "hp.x_offset and hp.y_offset: #{hp.x_offset} and #{hp.y_offset}"
+
+        # # Show direction on hover
+        # directional_area = nil
+        # if group[:location]    == :front
+        #   directional_area = 
+        # elsif group[:location] == :right
+        # elsif group[:location] == :left
         # end
-        # puts "#{group[:location]}-SHIP LOADOUT: #{hp.x + hp.x_offset - (@cell_width / 2)} => #{hp.x} + #{hp.x_offset} - (#{@cell_width }/ 2) ; #{hp.y + hp.y_offset - @cell_height / 2} => #{hp.y} + #{hp.y_offset} - #{@cell_height} / 2"
-        # click_area = LUIT::ClickArea.new(@window, button_key, hp.x + hp.x_offset - (@cell_width / 2), hp.y + hp.y_offset - @cell_height / 2, @cell_width, @cell_height)
-        # OFFSET is already built into the HP X and Y, taking it out
-
-        # CLICK AREA: [474.7267846530563, 291.09953170050284] - group: front
-        # CLICK AREA: [397.6856161538535, 297.93429726635867] - group: front
-
-        # puts "CLICK AREA: #{[hp.x, hp.y]} - group: #{group[:location]}"
-        if group[:location]    == :front
-          # directional_area = 
-        elsif group[:location] == :right
-        elsif group[:location] == :left
-        end
 
         color, hover_color = [nil,nil]
         if hp.slot_type    == :generic
@@ -286,12 +289,6 @@ class ShipLoadoutSetting < Setting
         elsif hp.slot_type == :offensive
           color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
         end
-        # raise "HP TPYE: #{hp.slot_type}"
-        # uiColor: 0xff_555555, uiColorLight: 0xff_888888
-        # puts "HOVLER COLOR HERE: #{hover_color}"
-                                            # holder, id, x, y, w = 0, h = 0, color = nil, hover_color = nil
-        # puts "HARDPOINT NEW CLICK AREA - #{@cell_height}"
-                                          # holder, id, x, y, z, w = 0, h = 0, color = nil, hover_color = nil)
         click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
         @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
         if hp.assigned_weapon_class
@@ -304,7 +301,7 @@ class ShipLoadoutSetting < Setting
         else
         end
 
-        value[group[:location]] << {item: item, x: hp.x, y: hp.y, click_area: click_area, key: button_key}
+        value[group[:location]] << {item: item, x: hp.x, y: hp.y, click_area: click_area, key: button_key, hp: hp}
       end
     end
     # puts "VALUES HERE FRONT:"
@@ -450,26 +447,39 @@ class ShipLoadoutSetting < Setting
   end
 
   def hardpoint_update
+    hover_object = nil
     @ship_hardpoints.each do |key, list|
       if list.any?
         list.each do |value|
           click_area = value[:click_area]
           # puts "CLICK AREA: #{click_area.y}"
           if click_area
-            click_area.update(0, 0)
+            is_hover = click_area.update(0, 0)
+            # puts "WAS HARDPOINT HOVER? #{is_hover}"
+            # puts "Value item"
+            # puts value[:item]
+            hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp]} if is_hover
+            # raise "GOT HERE" if is_hover
           end
         end
       end
     end
+    return hover_object
   end
 
   def update mouse_x, mouse_y, player
     if @active
       @mouse_x, @mouse_y = [mouse_x, mouse_y]
 
-      hardpoint_update
+      @hover_object = hardpoint_update
 
-      matrix_update
+
+      hover_object = matrix_update
+
+      @hover_object = hover_object if @hover_object.nil?
+      # puts "UPDATE HERE: #{@hover_object}"
+
+      # display data on cover object
 
       # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
       # @button.update
@@ -535,8 +545,35 @@ class ShipLoadoutSetting < Setting
   #   (mx >= @prev_x and my >= @y) and (mx <= @prev_x + local_width) and (my <= @y + local_height)
   # end
 
+  def detail_box_draw
+    if @hover_object
+      puts "HOVEROBJECT"
+      puts @hover_object.keys
+      # @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+       # 68:   #   local_width  = @font.text_width('>')
+       # 69:   #   local_height = @font.height
+
+       puts "HERER1: #{@hover_object[:holding_type]}"
+      if @hover_object[:holding_type] == :inventory
+        # holding_slot
+        # puts "HERE: "
+        text = "This is an inventory slot."
+        # max_width, max_height,
+        @font.draw(text, @max_width / 2, (@max_height / 2.0) - @font.text_width(text), ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
+      if @hover_object[:holding_type] == :hardpoint
+        text = "This is an hardpoint slot."
+        # raise "MAX IWDTH HERE: #{ @max_width} - #{@max_height}"
+        @font.draw(text, (@max_width / 2) - (@font.text_width(text) / 2.0), (@max_height) - @font_height - @font_padding, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
+    end
+  end
+
   def draw
     if @active
+
+      detail_box_draw
+
       if @cursor_object
         @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
       end
