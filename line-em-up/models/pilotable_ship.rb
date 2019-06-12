@@ -114,8 +114,8 @@ class PilotableShip < GeneralObject
       item_klass = eval(item_klass) if item_klass
       # puts "ANGLE HERE: #{@angle}"
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, @average_scale),
-        location[:y_offset].call(get_image, @average_scale), item_klass, location[:slot_type], @angle, 0, options
+        x, y, 1, location[:x_offset].call(get_image, @width_scale),
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
       )
       # Init HP location
       # hp.rotate_hardpoints_counterclockwise(0)
@@ -137,8 +137,8 @@ class PilotableShip < GeneralObject
       #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
       # end
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, @average_scale),
-        location[:y_offset].call(get_image, @average_scale), item_klass, location[:slot_type], @angle, 90, options
+        x, y, 1, location[:x_offset].call(get_image, @width_scale),
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 90, options
       )
       @right_broadside_hard_points << hp
     end
@@ -147,7 +147,11 @@ class PilotableShip < GeneralObject
       item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'left_hardpoint_locations', index.to_s])
       item_klass = eval(item_klass) if item_klass
       options[:image_angle] = 270
-      @left_broadside_hard_points << Hardpoint.new(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options)
+      hp = Hardpoint.new(
+        x, y, 1, location[:x_offset].call(get_image, @width_scale),
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 270, options
+      )
+      @left_broadside_hard_points << hp
     end
     @theta = nil
   end

@@ -34,38 +34,38 @@ class BasicShip < PilotableShip
     # Bottom One
     {
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 7)}, y_offset: lambda { |image, scale| (image.height * scale) / 4 }   
+      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| (image.height * scale) / 4 }   
     },
     # Middle One
     {
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 7)}, y_offset: lambda { |image, scale| 0 } 
+      x_offset: lambda { |image, scale| ((image.width * scale) / 4)}, y_offset: lambda { |image, scale| 0 } 
     },
     # Top One
     {
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 7)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4) }
     }
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]
 
   LEFT_BROADSIDE_HARDPOINT_LOCATIONS = [
-    # # Bottom One
-    # {
-    #   slot_type: :generic, 
-    #   x_offset: lambda { |image, scale| -((image.width * scale) / 7)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4 }   
-    # },
-    # # Middle One
-    # {
-    #   slot_type: :generic, 
-    #   x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| 0 } 
-    # },
-    # # Top One
-    # {
-    #   slot_type: :generic, 
-    #   x_offset: lambda { |image, scale| -((image.width * scale) / 6)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4) }
-    # }
-    # # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
+    # Bottom One
+    {
+      slot_type: :offensive, 
+      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4 }   
+    },
+    # Middle One
+    {
+      slot_type: :offensive, 
+      x_offset: lambda { |image, scale| -((image.width * scale) / 4)}, y_offset: lambda { |image, scale| 0 } 
+    },
+    # Top One
+    {
+      slot_type: :offensive, 
+      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4) }
+    }
+    # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]
 
 
