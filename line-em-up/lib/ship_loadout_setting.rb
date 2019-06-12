@@ -88,11 +88,16 @@ class ShipLoadoutSetting < Setting
     @cell_width_padding = 5 * @width_scale
     @cell_height_padding = 5 * @height_scale
     @button_id_mapping = self.class.get_id_button_mapping
+
+    @inventory_height = nil
+    @inventory_width  = nil
     init_matrix
     # puts "FILLER ITEMS: #{@filler_items}"
     # @inventory_items = retrieve_inventory_items
     # fill_matrix(@filler_items)
     @cursor_object = nil
+    @hardpoints_height = nil
+    @hardpoints_width  = nil
     @ship_hardpoints = init_hardpoints(@ship)
     @active = false
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
@@ -156,9 +161,10 @@ class ShipLoadoutSetting < Setting
       @inventory_matrix[i] = Array.new(@inventory_matrix_max_height)
     end
     # puts "@inventory_matrix_max_height: #{@inventory_matrix_max_height}"
-    max_y_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
+    @inventory_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
+    @inventory_width  = (@inventory_matrix_max_width  * @cell_width)  + (@inventory_matrix_max_width  * @cell_width_padding)
     # raise "GOT THIS for height: #{max_y_height} - Y was: #{@y}"
-    current_y = (@max_height / 2) - (max_y_height / 2)
+    current_y = (@max_height / 2) - (@inventory_height / 2)
     current_x = @next_x + @cell_width_padding
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
@@ -194,6 +200,9 @@ class ShipLoadoutSetting < Setting
         end
       end
     end
+    text = "Inventory"
+    @font.draw(text, (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@max_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    Gosu::draw_rect(@cell_width_padding / 2.0, (@max_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height, @inventory_width + @cell_width_padding, @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
   end
 
   def hardpoint_draw
@@ -261,6 +270,11 @@ class ShipLoadoutSetting < Setting
   def init_hardpoints ship
     # Populate ship hardpoints from save file here.
     # will be populated from the ship, don't need to here.
+
+    # HARD TO APPLY HERE
+    # @hardpoints_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
+    # @hardpoints_width  = (@inventory_matrix_max_width  * @cell_width)  + (@inventory_matrix_max_width  * @cell_width_padding)
+
     value = {}
     groups = [
       # Angle not used yet.
@@ -547,25 +561,21 @@ class ShipLoadoutSetting < Setting
 
   def detail_box_draw
     if @hover_object
-      puts "HOVEROBJECT"
-      puts @hover_object.keys
+      # puts "HOVEROBJECT"
+      # puts @hover_object.keys
       # @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-       # 68:   #   local_width  = @font.text_width('>')
-       # 69:   #   local_height = @font.height
+      # @font.text_width('>')
+      # @font.height
 
-       puts "HERER1: #{@hover_object[:holding_type]}"
+       # puts "HERER1: #{@hover_object[:holding_type]}"
+      text = nil
       if @hover_object[:holding_type] == :inventory
-        # holding_slot
-        # puts "HERE: "
         text = "This is an inventory slot."
-        # max_width, max_height,
-        @font.draw(text, @max_width / 2, (@max_height / 2.0) - @font.text_width(text), ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
       if @hover_object[:holding_type] == :hardpoint
         text = "This is an hardpoint slot."
-        # raise "MAX IWDTH HERE: #{ @max_width} - #{@max_height}"
-        @font.draw(text, (@max_width / 2) - (@font.text_width(text) / 2.0), (@max_height) - @font_height - @font_padding, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
+      @font.draw(text, (@max_width / 2) - (@font.text_width(text) / 2.0), (@max_height) - @font_height - @font_padding, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
   end
 

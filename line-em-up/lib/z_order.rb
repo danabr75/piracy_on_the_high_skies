@@ -1,5 +1,8 @@
 module ZOrder
-  Background, Building, LaserParticle, Projectile, BigExplosions, Pickups, Enemy, Player, Ship, Hardpoint, HardPointClickableLocation, Launcher, SmallExplosions, UI, CurserUIBuffer, Cursor = *0..50
+  # MenuBackground appears underneath HardPointClickableLocation
+  # Hardpoint appears on top of HardPointClickableLocation
+  # I don't understand this
+  Background, Building, LaserParticle, Projectile, BigExplosions, Pickups, Enemy, Player, Ship, Hardpoint, MenuBackground, HardPointClickableLocation, Launcher, SmallExplosions, UI, CurserUIBuffer, Cursor = *0..50
 end
 
 # [2] pry(main)> ZOrder::Ship
