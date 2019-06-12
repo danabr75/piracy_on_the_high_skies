@@ -48,4 +48,13 @@ class BulletLauncher < Launcher
       end
     end
   end
+
+  def self.name
+    "Bullet Launcher"
+  end
+
+  def self.description
+    "This is a standard bullet launcher. Fires bullets."
+  end
+
 end

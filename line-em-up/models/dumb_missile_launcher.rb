@@ -52,4 +52,12 @@ class DumbMissileLauncher < Launcher
       end
     end
   end
+
+  def self.name
+    "Missile Launcher"
+  end
+
+  def self.description
+    "This is a standard missile launcher. Fires missiles."
+  end
 end

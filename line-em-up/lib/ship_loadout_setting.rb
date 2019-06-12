@@ -102,7 +102,7 @@ class ShipLoadoutSetting < Setting
     @active = false
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
     @button = LUIT::Button.new(@window, :back, max_width / 2, 50, ZOrder::UI, "Return to Game", 30, 30)
-    @font_height  = (20 * @average_scale).to_i
+    @font_height  = (12 * @average_scale).to_i
     @font_padding = (4 * @average_scale).to_i
     @font = Gosu::Font.new(@font_height)
     @hover_object = nil
@@ -472,7 +472,7 @@ class ShipLoadoutSetting < Setting
             # puts "WAS HARDPOINT HOVER? #{is_hover}"
             # puts "Value item"
             # puts value[:item]
-            hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp]} if is_hover
+            hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp] } if is_hover
             # raise "GOT HERE" if is_hover
           end
         end
@@ -568,14 +568,31 @@ class ShipLoadoutSetting < Setting
       # @font.height
 
        # puts "HERER1: #{@hover_object[:holding_type]}"
+      texts = []
       text = nil
+
+      # Are these necessary here? Is there a difference? Maybe if it's a store, we can show a price.
       if @hover_object[:holding_type] == :inventory
-        text = "This is an inventory slot."
       end
       if @hover_object[:holding_type] == :hardpoint
-        text = "This is an hardpoint slot."
       end
-      @font.draw(text, (@max_width / 2) - (@font.text_width(text) / 2.0), (@max_height) - @font_height - @font_padding, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+
+      if @hover_object[:item]
+        object = @hover_object[:item]
+        if object[:klass].name
+          texts << object[:klass].name
+        end
+        if object[:klass].description
+          texts << object[:klass].description
+        end
+      end
+
+      texts.each_with_index do |text, index|
+        height_padding = index * @font_height
+        # puts "HEIGHT PADDING: #{index} - #{height_padding}"
+        @font.draw(text, (@max_width / 4), (@max_height) + height_padding - (@font_height * 8), ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        # @font.draw(text, (@max_width / 2) - (@font.text_width(text) / 2.0), (@max_height) - @font_height - (@font_padding * 4), ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
     end
   end
 

@@ -197,4 +197,13 @@ class LaserLauncher < Launcher
 
     end
   end
+
+  def self.name
+    "Laser Launcher"
+  end
+
+  def self.description
+    "This does not work yet. Do not fire"
+  end
+
 end
