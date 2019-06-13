@@ -202,7 +202,15 @@ class GeneralObject
     return bearing
   end
 
+  # https://www.mathsisfun.com/geometry/radians.html
   def calc_radian(point1, point2)
+    return self.class.calc_radian(point1, point2)
+    # rdn = Math.atan2(point1.y-point2.y, point2.x-point1.x)
+    # return rdn
+  end
+
+  def self.calc_radian(point1, point2)
+    # Should be 1° × π/180 = 0.01745rad
     rdn = Math.atan2(point1.y-point2.y, point2.x-point1.x)
     return rdn
   end

@@ -13,33 +13,8 @@ class Hardpoint < GeneralObject
   attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle, :center_x, :center_y
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half, :image_angle
 
-
-  # LAUNCHER_MIN_ANGLE = 75
-  # LAUNCHER_MAX_ANGLE = 105
-  # MISSILE_LAUNCHER_INIT_ANGLE = 90
-
-# Assuming from player
-# X INIT HARdPOINT: 438.6997767857143 = 450 + -11.300223214285714 - SLOT TPYE: generic
-# Y INIT HARdPOINT: 404.296875 = 450 + -45.703125 - SLOT TPYE: generic
-# CURERNT SHIP ANGLE: 0- SLOT TPYE: generic
-# GHARDPOINT INIT: -45.703125 - SLOT TPYE: generic
-# X INIT HARdPOINT: 461.3002232142857 = 450 + 11.300223214285714 - SLOT TPYE: generic
-# Y INIT HARdPOINT: 404.296875 = 450 + -45.703125 - SLOT TPYE: generic
-
-
-
-
-# #assuming from ship loadout.
-# X INIT HARdPOINT: 411.328125 = 450 + -38.671875 - SLOT TPYE: generic
-# Y INIT HARdPOINT: 293.90625 = 450 + -156.09375 - SLOT TPYE: generic
-# CURERNT SHIP ANGLE: 0- SLOT TPYE: generic
-# GHARDPOINT INIT: -156.09375 - SLOT TPYE: generic
-# X INIT HARdPOINT: 488.671875 = 450 + 38.671875 - SLOT TPYE: generic
-# Y INIT HARdPOINT: 293.90625 = 450 + -156.09375 - SLOT TPYE: generic
-
   def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
-    puts "GHARDPOINT INIT: #{y_offset} - SLOT TPYE: #{slot_type}"
     @group_number = group_number
 
     @center_x = x
@@ -53,6 +28,7 @@ class Hardpoint < GeneralObject
     @map_pixel_height = map_pixel_height
   # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, options = {})
     super(options)
+    puts "GHARDPOINT ID: #{@id}"
 
     # Scale is already built into offset, via the lambda call
     @x_offset = x_offset * -1#* width_scale
@@ -61,22 +37,10 @@ class Hardpoint < GeneralObject
     @angle_offset = angle_offset
 
     @x = x + @x_offset
+    puts "HARDPOINT HERE X: #{@x } = #{x} + #{@x_offset}"
     @y = y + @y_offset
-    # old_y = @y
-    puts "X INIT HARdPOINT: #{@x} = #{x} + #{@x_offset} - SLOT TPYE: #{slot_type}"
-    puts "Y INIT HARdPOINT: #{@y} = #{y} + #{@y_offset} - SLOT TPYE: #{slot_type}"
-
-    # GHARDPOINT INIT: 97.55859375 - SLOT TPYE: generictest
-    # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
-    # 547.55859375 = 450 + 97.55859375 - SLOT TPYE: generictest
-
-    # GHARDPOINT INIT: 0 - SLOT TPYE: generictest
-    # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
-    # 450 = 450 + 0 - SLOT TPYE: generictest
-
-    # GHARDPOINT INIT: -97.55859375 - SLOT TPYE: generictest
-    # 488.671875 = 450 + 38.671875 - SLOT TPYE: generictest
-    # 352.44140625 = 450 + -97.55859375 - SLOT TPYE: generictest
+    puts "HARDPOINT HERE Y: #{@y} = #{y} + #{@y_offset}"
+    puts "center location: #{@center_x} -  #{@center_y} "
 
     @main_weapon = nil
     @drawable_items_near_self = []
@@ -105,13 +69,16 @@ class Hardpoint < GeneralObject
      # "INIT ANGLE HERE" if options[:from_player]
     # puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
     @radian = calc_radian(start_point, end_point)
+    puts "RADIAN HERE: #{@radian} and angle #{@angle}"
     # @x = @x * width_scale
     # @y = @y * height_scale
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
+    puts "@radius = Gosu.distance(@center_x, @center_y, @x, @y)"
+    puts "#{@radius} = Gosu.distance(#{@center_x}, #{@center_y}, #{@x}, #{@y})"
 
-    puts "CURERNT SHIP ANGLE: #{current_ship_angle}- SLOT TPYE: #{slot_type}"
     # Increlementing at 0 will adjust the x and y, to make them slightly off.
     if options[:block_initial_angle]
+      puts "block_initial_angle"
       # The graphical Gosu image drawing system needs the offset minused.
       # The angle determining system requires it positive
       # This is a mystery
@@ -119,11 +86,17 @@ class Hardpoint < GeneralObject
       @x = x - @x_offset
       @y = y + @y_offset
     else
+      puts "OLD ANGLE: #{@angle} w/ current ship angle: #{current_ship_angle}"
+      # Radian, Angle, and distance all check out. Not sure why the angle increment swaps the x offset, or why the angle looks slightly off.
+      # This is a stop-gap measure
+      @angle = @angle + 3.5
       self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
+      puts "NEW ANGLE: #{@angle}"
+      puts "NEW X AND Y: #{@x} - #{@y}"
     end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
-
+    puts "END HARDPOINT #{@id}"
   end
 
 
