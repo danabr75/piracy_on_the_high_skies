@@ -25,5 +25,14 @@
         {"klass_name":"Store","data":null}
       ]
     }
+  },
+
+
+  "enemies":{
+    "125":{
+      "125":[
+        {"klass_name":"AIShip","data":null}
+      ]
+    }
   }
 }

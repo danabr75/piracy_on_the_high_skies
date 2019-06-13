@@ -76,8 +76,6 @@ class PilotableShip < GeneralObject
     # @rockets = 250
     @bombs = 3
     @secondary_weapon = RocketLauncherPickup::NAME
-    @turn_right = false
-    @turn_left = false
 
     # @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
     @rocket_launchers = 0
@@ -154,6 +152,8 @@ class PilotableShip < GeneralObject
       @left_broadside_hard_points << hp
     end
     @theta = nil
+    @speed = self.class::SPEED
+    @mass = self.class::MASS
   end
 
   # right broadside
@@ -197,6 +197,20 @@ class PilotableShip < GeneralObject
 
   def self.get_large_image path
     Gosu::Image.new("#{path}/large.png")
+  end
+
+  def self.get_mass
+    self.class::MASS
+  end
+  def self.get_speed
+    self.class::SPEED
+  end
+
+  def get_armor
+    self.class::ARMOR
+  end
+  def get_health
+    self.class::HEALTH
   end
 
   # def self.get_right_image path
@@ -347,97 +361,6 @@ class PilotableShip < GeneralObject
     end
   end
 
-# RESULT HERE?
-# [{:projectiles=>[#<Missile:0x00007f97cd75c6c0 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="40347bd5-cc14-4ab0-95a5-13ecb7619954", @image=##############
-# #      o     #
-# #     .@.    #
-# #     i@.    #
-# #     i@i    #
-# #     i@i    #
-# #     o@i    #
-# #     V@V    #
-# #     @@V    #
-# #     @@V    #
-# #     @@V    #
-# #     @@V    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #            #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@:  #
-# #   i@@@@@@M.#
-# # .M@@@@@@@@@#
-# #.@@@@@@@@@@@#
-# #i@@@@@@@@@@:#
-# #.@@@@@@@@V: #
-# #  :M@@@@M   #
-# #    :M@M.   #
-# #     V@V    #
-# ##############
-# , @time_alive=0, @image_width=22.5, @image_height=78.75, @image_size=885.9375, @image_radius=25.3125, @image_width_half=11.25, @image_height_half=39.375, @inited=true, @x=-50, @y=-50, @x_offset=0, @y_offset=0, @current_map_pixel_x=14054.801557577564, @current_map_pixel_y=14012.875559766864, @current_map_tile_x=124, @current_map_tile_y=124, @angle=359.2119350338511, @radian=1.5570419984159805, @health=1, @end_image_angle=449.2119350338511, @current_image_angle=90, @image_angle_incrementor=0.2>], :cooldown=>45}, {:projectiles=>[#<Missile:0x00007f97ce2af040 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="f2cc89b4-28ef-4e3f-9abc-23f6566abdad", @image=##############
-# #      o     #
-# #     .@.    #
-# #     i@.    #
-# #     i@i    #
-# #     i@i    #
-# #     o@i    #
-# #     V@V    #
-# #     @@V    #
-# #     @@V    #
-# #     @@V    #
-# #     @@V    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #     @@@    #
-# #            #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@   #
-# #    @@@@@:  #
-# #   i@@@@@@M.#
-# # .M@@@@@@@@@#
-# #.@@@@@@@@@@@#
-# #i@@@@@@@@@@:#
-# #.@@@@@@@@V: #
-# #  :M@@@@M   #
-# #    :M@M.   #
-# #     V@V    #
-# ##############
-# , @time_alive=0, @image_width=22.5, @image_height=78.75, @image_size=885.9375, @image_radius=25.3125, @image_width_half=11.25, @image_height_half=39.375, @inited=true, @x=-50, @y=-50, @x_offset=0, @y_offset=0, @current_map_pixel_x=14078.814389317577, @current_map_pixel_y=14015.00587630687, @current_map_tile_x=125, @current_map_tile_y=124, @angle=359.2119350338511, @radian=1.5570419984159805, @health=1, @end_image_angle=449.2119350338511, @current_image_angle=90, @image_angle_incrementor=0.2>], :cooldown=>45}]
-
   def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
     return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 1)
   end
@@ -467,32 +390,8 @@ class PilotableShip < GeneralObject
       @left_broadside_hard_points.each { |item| item.draw }
       @front_hard_points.each { |item| item.draw }
     end
-
-
-    # test = Ashton::ParticleEmitter.new(@x, @y, get_draw_ordering)
-    # test.draw
-    # test.update(5.0)
-    # image = self.get_image
-    # Why using self?
-    # image = self.get_image
-    # if @broadside_mode
-    #   image = @broadside_image
-    # else
-    #   if @turn_right
-    #     image = @right_image
-    #   elsif @turn_left
-    #     image = @left_image
-    #   else
-    #     image = @image
-    #   end
-    # end
-    # super
-    # puts "DRAWING PLAYER: #{[@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale]}"
-    # DRAWING PLAYER: [450, 450, 8, {:handicap=>1, :max_movable_height=>-27960.0, :tile_width=>112.5, :tile_height=>112.5}, 0.5, 0.5, 1.875, 1.875]
     @image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
-    @turn_right = false
-    @turn_left = false
   end
 
   POINTS_X = 7

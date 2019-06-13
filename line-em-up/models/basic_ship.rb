@@ -14,11 +14,19 @@ class BasicShip < PilotableShip
   SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0
-  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
+  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :rockets, :score, :time_alive
 
-  attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
-  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode, :front_hard_points, :broadside_hard_points
+  attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :kill_count
+  attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :front_hard_points, :broadside_hard_points
   MAX_HEALTH = 200
+
+
+  # New stuff, older stuff above
+  attr_reader :mass, :speed
+  MASS  = 100
+  SPEED = 50
+  HEALTH = 100
+  ARMOR = 5
 
   FRONT_HARDPOINT_LOCATIONS = [
     {

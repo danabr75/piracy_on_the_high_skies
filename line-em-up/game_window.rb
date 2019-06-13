@@ -216,6 +216,8 @@ class GameWindow < Gosu::Window
 
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
+    @enemies = values[:enemies]
+    @pickups = values[:pickups]
 
     # @scroll_factor = 1
     @movement_x = 0
@@ -608,7 +610,10 @@ class GameWindow < Gosu::Window
 
         @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
         @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+
+        puts "PREUPDATE-ENEMIES: #{@enemies.count}"
         @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
+        puts "POSTUPDATE-ENEMIES: #{@enemies.count}"
 
         if @boss
           result = @boss.update(nil, nil, @player)
@@ -667,81 +672,81 @@ class GameWindow < Gosu::Window
             @player.score += 100
           end
         end
-        if @boss_active_at_enemies_killed <= @enemies_killed || @boss_active_at_level <= @enemies_spawner_counter
-          @boss_active = true
-        end
+        # if @boss_active_at_enemies_killed <= @enemies_killed || @boss_active_at_level <= @enemies_spawner_counter
+        #   @boss_active = true
+        # end
 
-        if @boss_active && @boss.nil? && @enemies.count == 0 && @boss_killed == false
-          @boss_active = false
-          # Activate Boss
-          # @boss = Mothership.new(@scale, @width, @height, @width_scale, @height_scale)
-          # @enemies.push(@boss)
-        end
+        # if @boss_active && @boss.nil? && @enemies.count == 0 && @boss_killed == false
+        #   @boss_active = false
+        #   # Activate Boss
+        #   # @boss = Mothership.new(@scale, @width, @height, @width_scale, @height_scale)
+        #   # @enemies.push(@boss)
+        # end
 
         # Move to enemy mehtods
-        @enemies.each do |enemy|
-          if enemy.cooldown_wait <= 0
-            results = enemy.attack(@player)
+        # @enemies.each do |enemy|
+        #   if enemy.cooldown_wait <= 0
+        #     results = enemy.attack(@player)
 
-            projectiles = results[:projectiles]
-            cooldown = results[:cooldown]
-            enemy.cooldown_wait = cooldown.to_f.fdiv(enemy.attack_speed)
+        #     projectiles = results[:projectiles]
+        #     cooldown = results[:cooldown]
+        #     enemy.cooldown_wait = cooldown.to_f.fdiv(enemy.attack_speed)
 
-            projectiles.each do |projectile|
-              if projectile.destructable?
-                @enemy_destructable_projectiles.push(projectile)
-              else
-                @enemy_projectiles.push(projectile)
-              end
-            end
-          end
-        end
+        #     projectiles.each do |projectile|
+        #       if projectile.destructable?
+        #         @enemy_destructable_projectiles.push(projectile)
+        #       else
+        #         @enemy_projectiles.push(projectile)
+        #       end
+        #     end
+        #   end
+        # end
 
-        if @boss
-          if @boss.cooldown_wait <= 0
-            results = @boss.attack(@player)
-            projectiles = results[:projectiles]
-            cooldown = results[:cooldown]
-            @boss.cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
-            projectiles.each do |projectile|
-              if projectile.destructable?
-                @enemy_destructable_projectiles.push(projectile)
-              else
-                @enemy_projectiles.push(projectile)
-              end
-            end
-          end
-          if @boss.secondary_cooldown_wait <= 0
-            results = @boss.secondary_attack(@player)
+        # if @boss
+        #   if @boss.cooldown_wait <= 0
+        #     results = @boss.attack(@player)
+        #     projectiles = results[:projectiles]
+        #     cooldown = results[:cooldown]
+        #     @boss.cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
+        #     projectiles.each do |projectile|
+        #       if projectile.destructable?
+        #         @enemy_destructable_projectiles.push(projectile)
+        #       else
+        #         @enemy_projectiles.push(projectile)
+        #       end
+        #     end
+        #   end
+        #   if @boss.secondary_cooldown_wait <= 0
+        #     results = @boss.secondary_attack(@player)
 
-            projectiles = results[:projectiles]
-            cooldown = results[:cooldown]
-            @boss.secondary_cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
-            projectiles.each do |projectile|
-              if projectile.destructable?
-                @enemy_destructable_projectiles.push(projectile)
-              else
-                @enemy_projectiles.push(projectile)
-              end
-            end
-          end
+        #     projectiles = results[:projectiles]
+        #     cooldown = results[:cooldown]
+        #     @boss.secondary_cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
+        #     projectiles.each do |projectile|
+        #       if projectile.destructable?
+        #         @enemy_destructable_projectiles.push(projectile)
+        #       else
+        #         @enemy_projectiles.push(projectile)
+        #       end
+        #     end
+        #   end
 
-          if @boss.tertiary_cooldown_wait <= 0
-            results = @boss.tertiary_attack(@player)
+        #   if @boss.tertiary_cooldown_wait <= 0
+        #     results = @boss.tertiary_attack(@player)
 
-            projectiles = results[:projectiles]
-            cooldown = results[:cooldown]
-            @boss.tertiary_cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
-            projectiles.each do |projectile|
-              if projectile.destructable?
-                @enemy_destructable_projectiles.push(projectile)
-              else
-                @enemy_projectiles.push(projectile)
-              end
-            end
-          end
+        #     projectiles = results[:projectiles]
+        #     cooldown = results[:cooldown]
+        #     @boss.tertiary_cooldown_wait = cooldown.to_f.fdiv(@boss.attack_speed)
+        #     projectiles.each do |projectile|
+        #       if projectile.destructable?
+        #         @enemy_destructable_projectiles.push(projectile)
+        #       else
+        #         @enemy_projectiles.push(projectile)
+        #       end
+        #     end
+        #   end
 
-        end
+        # end
 
 
       end
@@ -778,19 +783,16 @@ class GameWindow < Gosu::Window
     # @stars.each { |star| star.draw }
     @pickups.each { |pickup| pickup.draw() }
     @buildings.each { |building| building.draw() }
-    @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    @font.draw("Boss Health: #{@boss.health.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @boss
+    # @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw("Boss Health: #{@boss.health.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @boss
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Armor: #{@player.armor}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Rockets: #{@player.rockets}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'missile'
       # @font.draw("Bombs: #{@player.bombs}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'bomb'
-      @font.draw("Weapon: #{@player.get_secondary_name}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Rockets: #{@player.rockets}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Bombs: #{@player.bombs}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.bombs > 0
       @font.draw("Time Alive: #{@player.time_alive}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Enemy count: #{@enemies.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("enemy_projectiles: #{@enemy_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

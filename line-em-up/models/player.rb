@@ -14,21 +14,22 @@ class Player < ScreenFixedObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   # SPEED = 7
-  MAX_ATTACK_SPEED = 3.0
-  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :rockets, :score, :time_alive
+  # MAX_ATTACK_SPEED = 3.0
+  attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :rockets, :score, :time_alive
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
+  attr_reader :health, :armor
   MAX_HEALTH = 200
 
-  SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
+  # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle
-  LAUNCHER_MIN_ANGLE = 75
-  LAUNCHER_MAX_ANGLE = 105
-  MISSILE_LAUNCHER_INIT_ANGLE = 90
+  # LAUNCHER_MIN_ANGLE = 75
+  # LAUNCHER_MAX_ANGLE = 105
+  # MISSILE_LAUNCHER_INIT_ANGLE = 90
 
-  SPECIAL_POWER = 'laser'
-  SPECIAL_POWER_KILL_MAX = 50
+  # SPECIAL_POWER = 'laser'
+  # SPECIAL_POWER_KILL_MAX = 50
 
   # x and y is graphical representation of object
   # location x and y where it exists on the global map.
@@ -61,20 +62,11 @@ class Player < ScreenFixedObject
     @grapple_hook_cooldown_wait = 0
     @attack_speed = 3
     # @attack_speed = 3
-    @health = 100.0
-    @armor = 0
-    @rockets = 50
-    # @rockets = 250
-    @bombs = 3
-    @secondary_weapon = RocketLauncherPickup::NAME
-    @turn_right = false
-    @turn_left = false
-
-    @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
-    @rocket_launchers = 0
-    @bomb_launchers   = 0
-    @cannon_launchers = 0
-    trigger_hard_point_load
+    # @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
+    # @rocket_launchers = 0
+    # @bomb_launchers   = 0
+    # @cannon_launchers = 0
+    # trigger_hard_point_load
     @damage_reduction = options[:handicap] ? options[:handicap] : 1
     # invert_handicap = 1 - options[:handicap]
     # @boost_increase = invert_handicap > 0 ? 1 + (invert_handicap * 1.25) : 1
@@ -94,39 +86,46 @@ class Player < ScreenFixedObject
     @ship.x = @x
     @ship.y = @y
     # Get details from ship
-    @mass = 100 # Get from ship
-    # @mass = 300 # Get from ship
+    # @ship.mass = 100 # Get from ship
+    # @ship.mass = 300 # Get from ship
     @current_momentum = 0
-    @max_momentum = @mass * 3 # speed here?
-    @speed = 50 #/ (@mass / 2)
-    # @speed = 100 #/ (@mass / 2)
+    @max_momentum = @ship.mass * 3 # speed here?
+    # @ship.speed = 50 #/ (@ship.mass / 2)
+    # @ship.speed = 100 #/ (@ship.mass / 2)
     @rotation_speed = 2
+
+    @health = @ship.get_health
+    @armor = @ship.get_armor
   end
+
+  # def get_armor
+  #   @ship.armor    
+  # end
 
   def refresh_ship options = {}
     @ship = @ship.class.new(@ship.x, @ship.y, @angle, options)
   end
 
-  def get_kill_count_max
-    self.class::SPECIAL_POWER_KILL_MAX
-  end
+  # def get_kill_count_max
+  #   self.class::SPECIAL_POWER_KILL_MAX
+  # end
 
-  def ready_for_special?
-    @kill_count >= get_kill_count_max
-  end
+  # def ready_for_special?
+  #   @kill_count >= get_kill_count_max
+  # end
 
-  def special_attack object_groups
-    # Fire special attack.
-    @kill_count = 0
-    projectiles = []
-    object_groups.each do |group|
-      group.each do |object|
-        next if object.nil?
-          projectiles << Missile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
-      end
-    end
-    return projectiles
-  end
+  # def special_attack object_groups
+  #   # Fire special attack.
+  #   @kill_count = 0
+  #   projectiles = []
+  #   object_groups.each do |group|
+  #     group.each do |object|
+  #       next if object.nil?
+  #         projectiles << Missile.new(@scale, @screen_pixel_width, @screen_pixel_height, self, object.x, object.y, nil, nil, nil, {damage_increase: @damage_increase})
+  #     end
+  #   end
+  #   return projectiles
+  # end
 
 
   def special_attack_2
@@ -167,38 +166,38 @@ class Player < ScreenFixedObject
   HARD_POINTS = 12
 
   def add_kill_count kill_count
-    if @kill_count + kill_count > get_kill_count_max
-      @kill_count = get_kill_count_max
-    else
-      @kill_count += kill_count
-    end
+  #   if @kill_count + kill_count > get_kill_count_max
+  #     @kill_count = get_kill_count_max
+  #   else
+  #     @kill_count += kill_count
+  #   end
   end
 
-  def add_hard_point hard_point
-    @hard_point_items << hard_point
-    trigger_hard_point_load
-  end
+  # def add_hard_point hard_point
+  #   @hard_point_items << hard_point
+  #   trigger_hard_point_load
+  # end
 
-  def trigger_hard_point_load
-    @rocket_launchers, @bomb_launchers, @cannon_launchers = [0, 0, 0]
-    count = 0
-    # puts "RUNNING ON: #{@hard_point_items}"
-    @hard_point_items.each do |hard_point|
-      break if count == HARD_POINTS
-      case hard_point
-      when 'bomb_launcher'
-        @bomb_launchers += 1
-      when RocketLauncherPickup::NAME
-        # puts "INCREASTING ROCKET LAUNCHER: #{RocketLauncherPickup::NAME}"
-        @rocket_launchers += 1
-      when 'cannon_launcher'
-        @cannon_launchers += 1
-      else
-        "Raise should never get here. hard_point: #{hard_point}"
-      end
-      count += 1
-    end
-  end
+  # def trigger_hard_point_load
+  #   @rocket_launchers, @bomb_launchers, @cannon_launchers = [0, 0, 0]
+  #   count = 0
+  #   # puts "RUNNING ON: #{@hard_point_items}"
+  #   @hard_point_items.each do |hard_point|
+  #     break if count == HARD_POINTS
+  #     case hard_point
+  #     when 'bomb_launcher'
+  #       @bomb_launchers += 1
+  #     when RocketLauncherPickup::NAME
+  #       # puts "INCREASTING ROCKET LAUNCHER: #{RocketLauncherPickup::NAME}"
+  #       @rocket_launchers += 1
+  #     when 'cannon_launcher'
+  #       @cannon_launchers += 1
+  #     else
+  #       "Raise should never get here. hard_point: #{hard_point}"
+  #     end
+  #     count += 1
+  #   end
+  # end
 
   # Issue with image.. probably shouldn't be using images to define sizes
   # def get_image
@@ -328,29 +327,29 @@ class Player < ScreenFixedObject
   # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
 
   def move_left movement_x = 0, movement_y = 0
-    # new_speed = (@speed  / (@mass.to_f)) * -1.5
-    new_speed = (@speed  / (@mass.to_f)) * -100
+    # new_speed = (@ship.speed  / (@ship.mass.to_f)) * -1.5
+    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -100
     x_diff, y_diff = self.movement(new_speed, @angle + 90, false)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def move_right movement_x = 0, movement_y = 0
-    # new_speed = (@speed  / (@mass.to_f)) * -1.5
-    new_speed = (@speed  / (@mass.to_f)) * -100
+    # new_speed = (@ship.speed  / (@ship.mass.to_f)) * -1.5
+    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -100
     x_diff, y_diff = self.movement(new_speed, @angle - 90, false)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   # Calculate W movement
-    # @mass = 50 # Get from ship
+    # @ship.mass = 50 # Get from ship
     # @current_momentum = 0
-    # @max_momentum = @mass
-    # @speed = 10 / (@mass / 2)
+    # @max_momentum = @ship.mass
+    # @ship.speed = 10 / (@ship.mass / 2)
     # @rotation_speed = 2
 
   # Figure out why these got switched later, accelerate and brake
   def accelerate movement_x = 0, movement_y = 0
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle, false)
+    x_diff, y_diff = self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
 
     if @current_momentum <= @max_momentum
       @current_momentum += 1.2
@@ -364,7 +363,7 @@ class Player < ScreenFixedObject
   def brake movement_x = 0, movement_y = 0
     # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "ACCELERATE: #{movement_x} - #{movement_y}"
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180, false)
+    x_diff, y_diff = self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
 
     if @current_momentum >= -@max_momentum
       @current_momentum -= 2
@@ -421,7 +420,7 @@ class Player < ScreenFixedObject
     @ship.update(mouse_x, mouse_y, player)
 
     if @current_momentum > 0.0
-      speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
       # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
       x_diff, y_diff, halt = self.movement(speed, @angle)
       if halt
@@ -431,7 +430,7 @@ class Player < ScreenFixedObject
         @current_momentum = 0 if @current_momentum < 0
       end
     elsif @current_momentum < 0.0
-      speed = (@mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
       x_diff, y_diff, halt = self.movement(-speed, @angle + 180)
       if halt
         @current_momentum = 0
@@ -478,6 +477,7 @@ class Player < ScreenFixedObject
     end
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
+    puts "PLAYER UPDATE: #{@x} - #{@y}"
     super(mouse_x, mouse_y, player)
     return [(movement_x - x_diff), (movement_y - y_diff)]
   end
