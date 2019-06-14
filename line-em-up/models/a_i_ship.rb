@@ -28,7 +28,7 @@ class AIShip < ScreenMapFixedObject
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
     @angle = 0
-    @ship = BasicShip.new(@x, @y, @angle)
+    @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle)
     @ship.x = @x
     @ship.y = @y
     @current_momentum = 0

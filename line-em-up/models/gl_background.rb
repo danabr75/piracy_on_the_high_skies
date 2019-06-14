@@ -799,7 +799,7 @@ class GLBackground
   
   # include Gl
   NEAR_VALUE = 1
-  FAR_VALUE  = 10
+  FAR_VALUE  = 12
   NDC_X_LENGTH  = 0.1
   NDC_Y_LENGTH  = 0.1
   
@@ -844,7 +844,7 @@ class GLBackground
     # // Move the scene back so we can see everything
     # glTranslatef( 0.0f, 0.0f, -100.0f );
     # -10 is as far back as we can go.
-    glTranslated(0, 0, -10)
+    glTranslated(0, 0, -FAR_VALUE)
 
 
 #     # TEST

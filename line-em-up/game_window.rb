@@ -611,9 +611,7 @@ class GameWindow < Gosu::Window
         @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
         @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
-        puts "PREUPDATE-ENEMIES: #{@enemies.count}"
         @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
-        puts "POSTUPDATE-ENEMIES: #{@enemies.count}"
 
         if @boss
           result = @boss.update(nil, nil, @player)
@@ -823,6 +821,13 @@ class GameWindow < Gosu::Window
         @font.draw("B GPS: #{@buildings.last.current_map_tile_x} - #{@buildings.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("B MAP PIXEL: #{@buildings.last.current_map_pixel_x.round(1)} - #{@buildings.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
+      if @enemies.any?
+        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E GPS: #{@enemies.last.current_map_tile_x} - #{@enemies.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E MAP PIXEL: #{@enemies.last.current_map_pixel_x.round(1)} - #{@enemies.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E Angle: #{@enemies.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
+
     end
     # @gl_background.draw(ZOrder::Background)
     reset_font_ui_y

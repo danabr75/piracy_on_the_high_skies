@@ -79,9 +79,9 @@ class Player < ScreenFixedObject
       ship_class = eval(ship)
       puts "SHIP HERE: #{@x} - #{@y}"
       # from_player is for debugging only
-      @ship = ship_class.new(@x, @y, @angle, options.merge({from_player: true}))
+      @ship = ship_class.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true}))
     else
-      @ship = BasicShip.new(@x, @y, @angle, options.merge({from_player: true}))
+      @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true}))
     end
     @ship.x = @x
     @ship.y = @y
@@ -103,7 +103,7 @@ class Player < ScreenFixedObject
   # end
 
   def refresh_ship options = {}
-    @ship = @ship.class.new(@ship.x, @ship.y, @angle, options)
+    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, @angle, options)
   end
 
   # def get_kill_count_max
@@ -328,14 +328,14 @@ class Player < ScreenFixedObject
 
   def move_left movement_x = 0, movement_y = 0
     # new_speed = (@ship.speed  / (@ship.mass.to_f)) * -1.5
-    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -100
+    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
     x_diff, y_diff = self.movement(new_speed, @angle + 90, false)
     return [movement_x - x_diff, movement_y - y_diff]
   end
   
   def move_right movement_x = 0, movement_y = 0
     # new_speed = (@ship.speed  / (@ship.mass.to_f)) * -1.5
-    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -100
+    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
     x_diff, y_diff = self.movement(new_speed, @angle - 90, false)
     return [movement_x - x_diff, movement_y - y_diff]
   end
@@ -451,7 +451,7 @@ class Player < ScreenFixedObject
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     @time_alive += 1 if self.is_alive
 
-    puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height} - #{@map_pixel_width}" if @time_alive % 100 == 0
+    # puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height} - #{@map_pixel_width}" if @time_alive % 100 == 0
 
     # puts "PLAYER: @current_map_pixel_y >= @map_pixel_height: #{@current_map_pixel_y} >= #{@map_pixel_height}"
     
@@ -477,7 +477,7 @@ class Player < ScreenFixedObject
     end
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
-    puts "PLAYER UPDATE: #{@x} - #{@y}"
+    # puts "PLAYER UPDATE: #{@x} - #{@y}"
     super(mouse_x, mouse_y, player)
     return [(movement_x - x_diff), (movement_y - y_diff)]
   end

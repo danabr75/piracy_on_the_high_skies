@@ -28,7 +28,7 @@ class PilotableShip < GeneralObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
-  def initialize(x, y, angle, options = {})
+  def initialize(x, y, z, angle, options = {})
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -43,6 +43,7 @@ class PilotableShip < GeneralObject
 
     @x = x
     @y = y
+    @z = z
     puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     @angle = angle
     media_path = self.class::SHIP_MEDIA_DIRECTORY
@@ -377,9 +378,6 @@ class PilotableShip < GeneralObject
     deactivate_group(2)
   end
 
-  def get_draw_ordering
-    ZOrder::Ship
-  end
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
@@ -390,7 +388,7 @@ class PilotableShip < GeneralObject
       @left_broadside_hard_points.each { |item| item.draw }
       @front_hard_points.each { |item| item.draw }
     end
-    @image.draw_rot(@x, @y, get_draw_ordering, @angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x, @y, @z, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 
@@ -424,7 +422,7 @@ class PilotableShip < GeneralObject
     # glLoadIdentity
     # glTranslated(0, 0, -4)
   
-    z = get_draw_ordering
+    z = @z
     
     # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
     # offs_y = 1
