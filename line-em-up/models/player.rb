@@ -74,14 +74,21 @@ class Player < ScreenFixedObject
     @kill_count = 0
     # @drawable_items_near_self = []
     @angle = 0
-    ship = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
-    if ship
-      ship_class = eval(ship)
-      puts "SHIP HERE: #{@x} - #{@y}"
+
+
+    # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"right_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"left_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
+    ship_klass_name = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
+    raise "Did not get Ship Class from config" if ship_klass_name.nil?
+    ship_klass = eval(ship_klass_name)
+
+    hardpoint_data = init_hardpoints(ship_klass_name)
+
+    if ship_klass
       # from_player is for debugging only
-      @ship = ship_class.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true}))
+      @ship = ship_klass.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true}).merge(hardpoint_data))
     else
-      @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true}))
+      raise "Not supported. Init your player data!"
+      # @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true, front_hard_points: front_hard_points, right_broadside_hard_points: right_broadside_hard_points, left_broadside_hard_points: left_broadside_hard_points}))
     end
     @ship.x = @x
     @ship.y = @y
@@ -103,7 +110,15 @@ class Player < ScreenFixedObject
   # end
 
   def refresh_ship options = {}
-    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, @angle, options)
+    hardpoint_data = init_hardpoints(@ship.class.name)
+    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, @angle, options.merge(hardpoint_data))
+  end
+
+  def init_hardpoints ship_klass_name
+    front_hardpoint_data = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [ship_klass_name, 'front_hardpoint_locations'])
+    right_hardpoint_data = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [ship_klass_name, 'right_hardpoint_locations'])
+    left_hardpoint_data  = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [ship_klass_name, 'left_hardpoint_locations'])
+    return {front_hardpoint_data: front_hardpoint_data, right_hardpoint_data: right_hardpoint_data, left_hardpoint_data: left_hardpoint_data}
   end
 
   # def get_kill_count_max

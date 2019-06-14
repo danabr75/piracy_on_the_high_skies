@@ -297,7 +297,6 @@ class ShipLoadoutSetting < Setting
 
         color, hover_color = [nil,nil]
         if hp.slot_type    == :generic
-          puts "GOT HERE - GENERIC"
           # color, hover_color = [Gosu::Color.argb(0x8aff82), Gosu::Color.argb(0xc3ffba)]
           color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
         elsif hp.slot_type == :offensive

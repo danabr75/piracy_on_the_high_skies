@@ -92,9 +92,6 @@ class PilotableShip < GeneralObject
     @drawable_items_near_self = []
     @right_broadside_mode = false
     @left_broadside_mode = false
-    @front_hard_points = []
-    @left_broadside_hard_points = []
-    @right_broadside_hard_points = []
     @hide_hardpoints = options[:hide_hardpoints] || false
 
     # Load hardpoints from CONFIG FILE HERE, plug in launcher class !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -108,50 +105,54 @@ class PilotableShip < GeneralObject
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
     # Update hardpoints location
+    @front_hard_points = Array.new(self.class::FRONT_HARDPOINT_LOCATIONS.length) {nil}
     self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
-      item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'front_hardpoint_locations', index.to_s])
-      item_klass = eval(item_klass) if item_klass
-      # puts "ANGLE HERE: #{@angle}"
+      item_klass_string = options[:front_hardpoint_data] ? options[:front_hardpoint_data][index.to_s] : nil
+      item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
+      raise "bad slot type" if location[:slot_type].nil?
       hp = Hardpoint.new(
         x, y, 1, location[:x_offset].call(get_image, @width_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
       )
-      # Init HP location
-      # hp.rotate_hardpoints_counterclockwise(0)
-      # .merge({init_angle: @angle}
-      # if @angle > 
-      # puts "ANGLE HERE: #{@angle}"
-      # rotate_hardpoints_counterclockwise(@angle)
-      @front_hard_points << hp
+      @front_hard_points[index] = hp
     end
-    # puts "Front hard points"
-    self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
-      # if index < 2
-      item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'right_hardpoint_locations', index.to_s])
-      item_klass = eval(item_klass) if item_klass
+    options.delete(:front_hardpoint_data)
+
+    @right_broadside_hard_points = Array.new(self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.length) {nil}
+    self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location, index|
+      item_klass_string = options[:right_hardpoint_data] ? options[:right_hardpoint_data][index.to_s] : nil
+      item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       options[:image_angle] = 90
-        # @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-        # @right_broadside_hard_points << Hardpoint.new(x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, (width_scale + height_scale) / 2.0), location[:y_offset].call(get_image, (width_scale + height_scale) / 2.0), item_klass, location[:slot_type], map_pixel_width, map_pixel_height, options)
-      # else
-      #   @right_broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-      # end
+      raise "bad slot type" if location[:slot_type].nil?
       hp = Hardpoint.new(
         x, y, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 90, options
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
       )
-      @right_broadside_hard_points << hp
+      @right_broadside_hard_points[index] = hp
     end
-    self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location,index|
-      # @broadside_hard_points << Hardpoint.new(scale, x, y, screen_pixel_width, screen_pixel_height, 1, location[:x_offset].call(get_image, @scale), location[:y_offset].call(get_image, @scale), LaserLauncher, options)
-      item_klass = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [self.class.name, 'left_hardpoint_locations', index.to_s])
-      item_klass = eval(item_klass) if item_klass
+    options.delete(:right_hardpoint_data)
+
+    @left_broadside_hard_points = Array.new(self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.length) {nil}
+    self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location, index|
+      item_klass_string = options[:left_hardpoint_data] ? options[:left_hardpoint_data][index.to_s] : nil
+      item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       options[:image_angle] = 270
+      raise "bad slot type" if location[:slot_type].nil?
       hp = Hardpoint.new(
         x, y, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 270, options
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
       )
-      @left_broadside_hard_points << hp
+      @left_broadside_hard_points[index] = hp
     end
+    options.delete(:left_hardpoint_data)
+
+
+    [@front_hard_points, @right_broadside_hard_points, @left_broadside_hard_points].each_with_index do |group, group_index|
+      group.each_with_index do |hp, hp_index|
+        raise "HP WAS NIL HERE: #{hp_index} for group: #{group_index}" if hp.nil?
+      end
+    end
+
     @theta = nil
     @speed = self.class::SPEED
     @mass = self.class::MASS
@@ -453,10 +454,13 @@ class PilotableShip < GeneralObject
     glEnd
   end
   
-  def update mouse_x = nil, mouse_y = nil, player = nil
+  def update mouse_x, mouse_y, player
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+    puts "@front_hard_points: #{@front_hard_points.count}"
     @front_hard_points.each do |hardpoint|
+      puts "HARDPOINT HERE:"
+      puts hardpoint
       hardpoint.update(mouse_x, mouse_y, self)
     end
     @left_broadside_hard_points.each do |hardpoint|
