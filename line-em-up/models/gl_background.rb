@@ -28,7 +28,7 @@ class GLBackground
   # outside of view padding
 
   # HAVE TO BE EVEN NUMBERS
-  EXTRA_MAP_WIDTH   = 2
+  EXTRA_MAP_WIDTH   = 4
   # POINTS_Y = 7
 
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
@@ -37,7 +37,7 @@ class GLBackground
   VISIBLE_MAP_HEIGHT = 8
   # outside of view padding
   # HAVE TO BE EVEN NUMBERS
-  EXTRA_MAP_HEIGHT   = 2
+  EXTRA_MAP_HEIGHT   = 4
   # Scrolling speed - higher it is, the slower the map moves
   SCROLLS_PER_STEP = 50
   # TEMP USING THIS, CANNOT FIND SCROLLING SPEED
@@ -803,7 +803,8 @@ class GLBackground
   NDC_X_LENGTH  = 0.1
   NDC_Y_LENGTH  = 0.1
   
-  def exec_gl player_x, player_y, projectiles, buildings, pickups
+  # player param is soley used for debugging
+  def exec_gl player, player_x, player_y, projectiles, buildings, pickups
     player_x, player_y = [player_x.to_i, player_y.to_i]
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)
@@ -1136,6 +1137,16 @@ class GLBackground
           pickups.each do |pickup|
             next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
             pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+          end
+
+          
+          if player.current_map_tile_x == x_element['gps_x'] && player.current_map_tile_y == x_element['gps_y']
+            puts "XELEMENT of Current Player: #{x_element}"
+
+# XELEMENT of Current Player: {"height"=>0.23451606664978608, "terrain_index"=>0,
+#   "corner_heights"=>{"top_left"=>0.0, "top_right"=>0.0, "bottom_left"=>0.0, "bottom_right"=>0.25},
+#   "gps_y"=>122, "gps_x"=>115}
+
           end
 
           error = glGetError

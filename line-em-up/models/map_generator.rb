@@ -26,6 +26,8 @@ class MapGenerator
     #   f << "\n#{setting_name}: #{root_values.to_json};"
     # end
 
+    # IMPORTANT!!!!!! WHEN generating heights, must not be zero!!!!!!!!!!!!!!
+
     height_rows = []
     (0..@map_tile_height - 1).each do |y|
       width_rows = []
