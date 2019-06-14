@@ -81,7 +81,7 @@ class Player < ScreenFixedObject
     raise "Did not get Ship Class from config" if ship_klass_name.nil?
     ship_klass = eval(ship_klass_name)
 
-    hardpoint_data = init_hardpoints(ship_klass_name)
+    hardpoint_data = self.class.get_hardpoint_data(ship_klass_name)
 
     if ship_klass
       # from_player is for debugging only
@@ -110,14 +110,14 @@ class Player < ScreenFixedObject
   # end
 
   def refresh_ship options = {}
-    hardpoint_data = init_hardpoints(@ship.class.name)
+    hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
     @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, @angle, options.merge(hardpoint_data))
   end
 
-  def init_hardpoints ship_klass_name
-    front_hardpoint_data = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [ship_klass_name, 'front_hardpoint_locations'])
-    right_hardpoint_data = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [ship_klass_name, 'right_hardpoint_locations'])
-    left_hardpoint_data  = ConfigSetting.get_mapped_setting(self.class::CONFIG_FILE, [ship_klass_name, 'left_hardpoint_locations'])
+  def self.get_hardpoint_data ship_klass_name
+    front_hardpoint_data = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'front_hardpoint_locations'])
+    right_hardpoint_data = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'right_hardpoint_locations'])
+    left_hardpoint_data  = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'left_hardpoint_locations'])
     return {front_hardpoint_data: front_hardpoint_data, right_hardpoint_data: right_hardpoint_data, left_hardpoint_data: left_hardpoint_data}
   end
 

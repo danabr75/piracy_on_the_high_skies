@@ -70,7 +70,9 @@ class ShipLoadoutSetting < Setting
     @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
     klass = eval(@ship_value)
 
-    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, 0, {use_large_image: true, hide_hardpoints: true, block_initial_angle: true})
+
+    hardpoint_data = Player.get_hardpoint_data(@ship_value)
+    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, 0, {use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
 
     # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
@@ -98,7 +100,7 @@ class ShipLoadoutSetting < Setting
     @cursor_object = nil
     @hardpoints_height = nil
     @hardpoints_width  = nil
-    @ship_hardpoints = init_hardpoints(@ship)
+    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     @active = false
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
     @button = LUIT::Button.new(@window, :back, max_width / 2, 50, ZOrder::UI, "Return to Game", 30, 30)
@@ -267,7 +269,7 @@ class ShipLoadoutSetting < Setting
 # front-SHIP LOADOUT: 412 => 474 + -38.671875 - (46.875/ 2) ; 111.56828170050284 => 291.09953170050284 + -156.09375 - 46.875 / 2
 # front-SHIP LOADOUT: 412 => 397 + 38.671875 - (46.875/ 2) ; 118.40304726635867 => 297.93429726635867 + -156.09375 - 46.875 / 2
 
-  def init_hardpoints ship
+  def init_hardpoints_clickable_areas ship
     # Populate ship hardpoints from save file here.
     # will be populated from the ship, don't need to here.
 
@@ -286,14 +288,6 @@ class ShipLoadoutSetting < Setting
       value[group[:location]] = []
       group[:hardpoints].each_with_index do |hp, index|
         button_key = "#{group[:location].to_s}_hardpoint_#{index}"
-
-        # # Show direction on hover
-        # directional_area = nil
-        # if group[:location]    == :front
-        #   directional_area = 
-        # elsif group[:location] == :right
-        # elsif group[:location] == :left
-        # end
 
         color, hover_color = [nil,nil]
         if hp.slot_type    == :generic
