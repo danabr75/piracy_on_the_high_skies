@@ -10,7 +10,7 @@ include GLUT
 
 # Not intended to be overridden
 class Hardpoint < GeneralObject
-  attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle, :center_x, :center_y
+  attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle_from_center, :center_x, :center_y
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
 
   def initialize(x, y, z, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
@@ -33,6 +33,8 @@ class Hardpoint < GeneralObject
     # Storing the angle offset here.. oddly enough, don't need it here. Could replace options[:image_angle]
     # The actual angle is calculated via the start and end point
     @angle_offset = angle_offset
+    # @angle_offset = 90 if item
+    puts "ANGE OFFSET: #{@angle_offset}" if item
 
     if options[:block_initial_angle]
       puts "block_initial_angle"
@@ -54,7 +56,7 @@ class Hardpoint < GeneralObject
     else
       @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     end
-    @image_angle = options[:image_angle] || 0
+    # @image_angle = options[:image_angle] || 0
     # Maybe these are reversed?
     start_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # Not sure why the offset is getting switched somewhere...
@@ -63,12 +65,14 @@ class Hardpoint < GeneralObject
     end_point   = OpenStruct.new(:x => @x, :y => @y)
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
-    @angle = calc_angle(start_point, end_point)
+    @angle_from_center = calc_angle(start_point, end_point)
+    puts "ANGLE INIT HERE: #{@angle_from_center}" if item
+    # ANGLE INIT HERE: 60.97169847574529
     # ANGLE IS OFF, NOT SURE WHY
-    @angle = @angle + 5
-    # @init_angle = @angle + current_ship_angle
+    @angle_from_center = @angle_from_center + 5
+    # @init_angle = @angle_from_center + current_ship_angle
      # "INIT ANGLE HERE" if options[:from_player]
-    # puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
+    # puts "#{@init_angle} = #{@angle_from_center} + #{current_ship_angle}"
     @radian = calc_radian(start_point, end_point)
     # @x = @x * width_scale
     # @y = @y * height_scale
@@ -86,12 +90,12 @@ class Hardpoint < GeneralObject
     #   # @x = x + @x_offset
     #   # @y = y + @y_offset
     # else
-    #   # puts "OLD ANGLE: #{@angle} w/ current ship angle: #{current_ship_angle}"
+    #   # puts "OLD ANGLE: #{@angle_from_center} w/ current ship angle: #{current_ship_angle}"
     #   # # Radian, Angle, and distance all check out. Not sure why the angle increment swaps the x offset, or why the angle looks slightly off.
     #   # # This is a stop-gap measure
-    #   # @angle = @angle + 5
+    #   # @angle_from_center = @angle_from_center + 5
     #   # self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
-    #   # puts "NEW ANGLE: #{@angle}"
+    #   # puts "NEW ANGLE: #{@angle_from_center}"
     #   # puts "NEW X AND Y: #{@x} - #{@y}"
     # end
     # puts "NEW Y: #{@y}"
@@ -102,12 +106,12 @@ class Hardpoint < GeneralObject
 
   # def increment_angle angle_increment
   #   # puts "HUH?  #{angle_increment}"
-  #   if @angle + angle_increment >= 360.0
-  #     @angle = (@angle + angle_increment) - 360.0
+  #   if @angle_from_center + angle_increment >= 360.0
+  #     @angle_from_center = (@angle_from_center + angle_increment) - 360.0
   #   else
-  #     @angle += angle_increment
+  #     @angle_from_center += angle_increment
   #   end
-  #   step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
+  #   step = (Math::PI/180 * (@angle_from_center)) + 90.0 + 45.0# - 180
   #   # step = step.round(5)
   #   @x = Math.cos(step) * @radius + @center_x
   #   @y = Math.sin(step) * @radius + @center_y
@@ -116,12 +120,12 @@ class Hardpoint < GeneralObject
   # end
 
   # def decrement_angle angle_increment
-  #   if @angle - angle_increment <= 0.0
-  #     @angle = (@angle - angle_increment) + 360.0
+  #   if @angle_from_center - angle_increment <= 0.0
+  #     @angle_from_center = (@angle_from_center - angle_increment) + 360.0
   #   else
-  #     @angle -= angle_increment
+  #     @angle_from_center -= angle_increment
   #   end
-  #   step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
+  #   step = (Math::PI/180 * (@angle_from_center)) + 90.0 + 45.0# - 180
   #   # step = step.round(5)
   #   @x = Math.cos(step) * @radius + @center_x
   #   @y = Math.sin(step) * @radius + @center_y
@@ -139,13 +143,13 @@ class Hardpoint < GeneralObject
   end
 
   # Pointer can be cursor.. or player..
-  def attack initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
-    puts "HARDPOINT ATTACK: #{[initial_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
+  def attack current_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
+    puts "HARDPOINT ATTACK: #{[current_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
     # pointer convert to map_pixel_x and y!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "pointer"
     # puts pointer
     destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
-    puts "DESTINATION ATTACK: #{[initial_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
+    puts "DESTINATION ATTACK: #{[current_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
 
     # puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
     # puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
@@ -156,7 +160,7 @@ class Hardpoint < GeneralObject
     if @main_weapon.nil?
       # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
       options = {}
-      options[:image_angle] = @image_angle
+      options[:image_angle] = @angle_from_center
       if @assigned_weapon_class
         # @main_weapon = @assigned_weapon_class.new(self, options)
         @main_weapon = @assigned_weapon_class.new(options)
@@ -186,12 +190,12 @@ class Hardpoint < GeneralObject
     # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
     # Pointed West
     # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
-      puts "ATTACking ANGLE HERE:  #{@angle + initial_ship_angle + @angle_offset} = #{@angle} + #{initial_ship_angle}  + #{@angle_offset}"
       # ATTACHKING NORTH
       # ATTACking ANGLE HERE:  76.11199883909319 = 76.11199883909319 + 0
       # ATTCKING WEST
       # 
-      step = (Math::PI/180 * (@angle + initial_ship_angle + @angle_offset)) + 90.0 + 45.0# - 180
+      # puts "ATTACking ANGLE HERE:  #{@angle_from_center + current_ship_angle + @angle_offset} = #{@angle_from_center} + #{current_ship_angle}  + #{@angle_offset}"
+      step = (Math::PI/180 * (@angle_from_center + current_ship_angle)) + 90.0 + 45.0# - 180
       # step = step.round(5)
       puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
       projectile_x = Math.cos(step) * @radius + current_map_pixel_x
@@ -203,11 +207,14 @@ class Hardpoint < GeneralObject
       puts "WHATISB : #{(current_map_pixel_x + @x_offset).round(2)} - #{(current_map_pixel_y + @y_offset).round(2)}"
 
       # attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
-      puts "BULLET LAUNCH ANGLE: #{@angle + initial_ship_angle + @angle_offset} = #{@angle} + #{initial_ship_angle} + #{@angle_offset}"
       # 426.0202923020712 = 66.02029230207123 + 90 + 270
       #   should be correct: initial_angle
       #   should be correct: initial_angle
-      attack_projectile = @main_weapon.attack(initial_ship_angle, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, options)
+      puts "BULLET LAUNCHER ANGLE ALLOWANCE:"
+      puts "current_ship_angle + @angle_offset"
+      puts "#{current_ship_angle + @angle_offset} = #{current_ship_angle} + #{@angle_offset}"
+      # The attack angle should be opposite of the angle offset.
+      attack_projectile = @main_weapon.attack(current_ship_angle - @angle_offset, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, options)
       @drawable_items_near_self << @main_weapon
     end
 
@@ -233,13 +240,13 @@ class Hardpoint < GeneralObject
   #   ZOrder::Hardpoint
   # end
 
-  def draw center_x, center_y, angle
-    # puts "DRAWING HARDPOINT ANGLE: #{angle + @angle} = #{angle} + #{@angle}" if @item
+  def draw center_x, center_y, ship_current_angle
+    # puts "DRAWING HARDPOINT ANGLE: #{angle + @angle_from_center} = #{angle} + #{@angle_from_center}" if @item
     # Pointed North
     # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
     # Pointed West
     # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
-    step = (Math::PI/180 * (angle + @angle)) + 90.0 + 45.0# - 180
+    step = (Math::PI/180 * (ship_current_angle + @angle_from_center)) + 90.0 + 45.0# - 180
     # step = step.round(5)
     @x = Math.cos(step) * @radius + center_x
     @y = Math.sin(step) * @radius + center_y
@@ -248,9 +255,9 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.reject! { |item| item.draw }
 
     # if @image_angle != nil
-    # angle = @angle + @image_angle
+    # angle = @angle_from_center + @image_angle
     # puts "ANGLE HERE: #{angle}"
-    @image_hardpoint.draw_rot(@x, @y, @z, @image_angle + angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image_hardpoint.draw_rot(@x, @y, @z, ship_current_angle - @angle_offset, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def draw_gl
