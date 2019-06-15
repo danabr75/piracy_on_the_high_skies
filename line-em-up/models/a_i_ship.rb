@@ -1,4 +1,4 @@
-require_relative 'screen_fixed_object.rb'
+require_relative 'screen_map_fixed_object.rb'
 # require_relative 'rocket_launcher_pickup.rb'
 require_relative '../lib/config_setting.rb'
 require 'gosu'
@@ -46,12 +46,21 @@ class AIShip < ScreenMapFixedObject
     @health = @ship.get_health
     @armor = @ship.get_armor
 
+    # 0 is north
+    # Angle the broadsides at the target
+    @firing_angle_preferences = [[240.0,300.0], [60.0,120.0]]
     # Find angle preference range here..
+    # override default
+    # Maybe implement calculations in the future here, to get most of hardpoint damage
     @ship.hardpoints.each do |hp|
-      hp.inspect
+      # hp.inspect
     end
 
-    @agro_map_pixel_distance = AGRO_TILE_DISTANCE * ((@tile_pixel_width + @tile_pixel_height) / 2.0)
+    @distance_preference_max = 3 * @average_tile_size
+    # Don't want to get boarded also
+    @distance_preference_min = 1 * @average_tile_size
+
+    @agro_map_pixel_distance = AGRO_TILE_DISTANCE * @average_tile_size
     @argo_target_map = {}
     # stop
   end
@@ -146,6 +155,7 @@ class AIShip < ScreenMapFixedObject
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player, air_targets = [], ground_targets = []
+    # START AGRO SECTION
     # @current_agro = current_agro - 0.1 if @current_agro > 0.0
     # need to remove from map when ship is destroyed.. maybe, would save memory space if that's important
     # just remove ship when argo reaches zero.
@@ -153,11 +163,6 @@ class AIShip < ScreenMapFixedObject
       @argo_target_map[target_id] = argo_level - AGRO_DECREMENT
       @argo_target_map.delete(target_id) if argo_level <= 0
     end
-
-
-    # @argo_target_map = {}
-    # puts "AI: front_hard_points.count #{@ship.front_hard_points.count}"
-    # puts "AI2: front_hard_points #{@ship.front_hard_points.first}"
 
     projectiles = []
     local_max_agro = 0
@@ -172,6 +177,7 @@ class AIShip < ScreenMapFixedObject
       # check distance if not allied
       # if tile distance is less than agro distance, then you increase agro against that target
       # update max_agro
+      # NEED TO ALSO INCREASE AGRO when taking damage from target.. and more so than just being within distance...
       within_range = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y) < @agro_map_pixel_distance
       if within_range
         @argo_target_map[target.id] = AGRO_MAX
@@ -181,7 +187,9 @@ class AIShip < ScreenMapFixedObject
         agro_target = target
       end
     end
+    # END AGRO SECTION
 
+    # START FIRING SECTION
     if agro_target
       @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
@@ -189,11 +197,45 @@ class AIShip < ScreenMapFixedObject
         end
       end
     end
+    # END FIRING SECTION
 
 
 
+    # START MOVING SECTION
+    need_to_move = false
+    # Is target within distance ? move closer, move further
+    # END MOVING SECTION
 
-    # increase aggro at target here, if enemy faction is within x tiles... agro distance needs to be a constant.
+    # START ANGLING PREFERENCE SECTION
+    if !need_to_move && agro_target
+      # if don't need to move, check firing angle preference.
+        start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+        end_point   = OpenStruct.new(:x => agro_target.current_map_pixel_x, :y => agro_target.current_map_pixel_y)
+        # Reorienting angle to make 0 north
+        destination_angle = calc_angle(start_point, end_point) - 90
+        if destination_angle < 0.0
+          destination_angle = 360.0 - destination_angle.abs
+        elsif destination_angle > 360.0
+          destination_angle = destination_angle - 360.0
+        end
+        # if destination_angle is within one of the preferred angles?
+        puts "AI: destination_angle: #{destination_angle}"
+        is_within_preferred_angle = false
+        # @firing_angle_preferences = [(240..300), (60..120)]
+        @firing_angle_preferences.each do |ap|
+          # NOTE: is_angle_between_two_angles is currently not working.. issues with the 0.. FIX IT HERE AND HOW
+          is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle, ap[0], ap[1])
+          break if is_within_preferred_angle
+        end
+
+
+    end
+    # END ANGLING PREFERENCE SECTION
+
+
+    # START NORMAL PASSIVE BEHAVIOUR
+    # IDK, patrol an area, guard a town, move randomly around the map, visit structures, pick up pickups.
+    # START NORMAL PASSIVE BEHAVIOUR
 
 
     @ship.update(mouse_x, mouse_y, player)

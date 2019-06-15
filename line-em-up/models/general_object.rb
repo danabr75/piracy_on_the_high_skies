@@ -39,9 +39,11 @@ class GeneralObject
 
   attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
   attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height, :damage_increase, :average_scale
+  attr_reader  :average_tile_size
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
     @tile_pixel_height   = GlobalVariables.tile_pixel_height
+    @average_tile_size   = GlobalVariables.average_tile_size
     @map_pixel_width     = GlobalVariables.map_pixel_width
     @map_pixel_height    = GlobalVariables.map_pixel_height
     @map_tile_width      = GlobalVariables.map_tile_width
@@ -237,30 +239,38 @@ class GeneralObject
     end
   end
 
+  # CONFIRMED WORKING IN ALL CASES
   def self.is_angle_between_two_angles?(angle, min_angle, max_angle)
-    return angle if min_angle.nil? || max_angle.nil?
-    value = false
-    if angle == min_angle
-      value = true
-    elsif angle == max_angle
-      value = true
-    elsif max_angle < min_angle
-      # if max angle is less than min, then it crossed the angle 0/360 barrier
-      if angle == 0
-        value =  true
-      elsif angle > 0 && angle < max_angle
-        value =  true
-      elsif angle > min_angle
-        value =  true
-      else
-        # return false
-      end
+    raise "BAD MIN OR MAX ANGLE: #{min_angle} or #{max_angle}" if min_angle.nil? || max_angle.nil?
+    angle     = angle_1to360(angle); 
+    angle_min = angle_1to360(min_angle);
+    angle_max = angle_1to360(max_angle);
+
+    if (angle_min < angle_max)
+      return angle_min <= angle && angle <= angle_max
     else
-      # max angle is greater than min, easy case.
-      value = angle < max_angle && angle > min_angle
+      return angle_min <= angle || angle <= angle_max
+    end
+  end
+  if false # run_validations_for_is_angle_between_two_angles
+    GeneralObject.is_angle_between_two_angles?(0.0, 20, 340)        == false
+    GeneralObject.is_angle_between_two_angles?(135.0, 90.0, 180.0)  == true
+    GeneralObject.is_angle_between_two_angles?(275.0, 180.0, 270.0) == false
+    GeneralObject.is_angle_between_two_angles?(0.0, 340, 20)        == true
+  end
+
+  def self.angle_1to360 angle
+    value = angle
+    if angle == -0.0
+      value = 0.0
+    elsif angle > 360.0
+      value = angle % 360.0
+    elsif angle < 0.0
+      value = angle % 360.0
     end
     return value
   end
+
 
   def is_angle_between_two_angles?(angle, min_angle, max_angle)
     GeneralObject.is_angle_between_two_angles?(angle, min_angle, max_angle)

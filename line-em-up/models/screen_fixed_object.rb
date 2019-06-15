@@ -1,6 +1,8 @@
 # A 2D object, fixed to the screen permanently. Probably does not move around.
 # Only uses X and Y for pixel placement.
 # Used by menu (maybe), player, HUD. NOT LASERS.
+require_relative 'general_object.rb'
+
 class ScreenFixedObject < GeneralObject
  # def initialize(current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, options = {})
   attr_reader :angle
