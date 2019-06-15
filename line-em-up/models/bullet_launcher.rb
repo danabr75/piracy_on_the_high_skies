@@ -38,6 +38,15 @@ class BulletLauncher < Launcher
     elsif angle_max > 360.0
       angle_max = angle_max - 360.0
     end
+    puts "angle_min = LAUNCHER_MIN_ANGLE + initial_angle"
+    puts "#{angle_min} = #{LAUNCHER_MIN_ANGLE} + #{initial_angle}"
+    puts "angle_max = LAUNCHER_MAX_ANGLE + initial_angle"
+    puts "#{angle_max} = #{LAUNCHER_MAX_ANGLE} + #{initial_angle}"
+    # if initial_angle < 0.0
+    #   initial_angle = 360.0 - initial_angle.abs
+    # elsif initial_angle > 360.0
+    #   initial_angle = initial_angle - 360.0
+    # end
     if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
       if @cooldown_wait <= 0
         # new_map_pixel_x, new_map_pixel_y = convert_screen_to_map_pixel_location(current_map_pixel_x, current_map_pixel_y)
@@ -47,6 +56,8 @@ class BulletLauncher < Launcher
         @cooldown_wait = get_cooldown
         return projectile
       end
+    else
+      puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
     end
   end
 

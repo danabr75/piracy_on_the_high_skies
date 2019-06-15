@@ -34,11 +34,15 @@ class Hardpoint < GeneralObject
     # The actual angle is calculated via the start and end point
     @angle_offset = angle_offset
 
-    @x = x + @x_offset
-    puts "HARDPOINT HERE X: #{@x } = #{x} + #{@x_offset}"
-    @y = y + @y_offset
-    puts "HARDPOINT HERE Y: #{@y} = #{y} + #{@y_offset}"
-    puts "center location: #{@center_x} -  #{@center_y} "
+    if options[:block_initial_angle]
+      puts "block_initial_angle"
+      # X IS flipped when non-angling, to be compatible to be displayed without using the angle system.
+      @x = x - @x_offset
+      @y = y + @y_offset
+    else
+      @x = x + @x_offset
+      @y = y + @y_offset
+    end
 
     @main_weapon = nil
     @drawable_items_near_self = []
@@ -60,6 +64,8 @@ class Hardpoint < GeneralObject
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
+    # ANGLE IS OFF, NOT SURE WHY
+    @angle = @angle + 5
     # @init_angle = @angle + current_ship_angle
      # "INIT ANGLE HERE" if options[:from_player]
     # puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
@@ -71,23 +77,23 @@ class Hardpoint < GeneralObject
     # puts "#{@radius} = Gosu.distance(#{@center_x}, #{@center_y}, #{@x}, #{@y})"
 
     # Increlementing at 0 will adjust the x and y, to make them slightly off.
-    if options[:block_initial_angle]
-      puts "block_initial_angle"
-      # The graphical Gosu image drawing system needs the offset minused.
-      # The angle determining system requires it positive
-      # This is a mystery
-      # Can't run these commands after the angling, causes a pixel shift
-      # @x = x + @x_offset
-      # @y = y + @y_offset
-    else
-      # puts "OLD ANGLE: #{@angle} w/ current ship angle: #{current_ship_angle}"
-      # # Radian, Angle, and distance all check out. Not sure why the angle increment swaps the x offset, or why the angle looks slightly off.
-      # # This is a stop-gap measure
-      # @angle = @angle + 5
-      # self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
-      # puts "NEW ANGLE: #{@angle}"
-      # puts "NEW X AND Y: #{@x} - #{@y}"
-    end
+    # if options[:block_initial_angle]
+    #   puts "block_initial_angle"
+    #   # The graphical Gosu image drawing system needs the offset minused.
+    #   # The angle determining system requires it positive
+    #   # This is a mystery
+    #   # Can't run these commands after the angling, causes a pixel shift
+    #   # @x = x + @x_offset
+    #   # @y = y + @y_offset
+    # else
+    #   # puts "OLD ANGLE: #{@angle} w/ current ship angle: #{current_ship_angle}"
+    #   # # Radian, Angle, and distance all check out. Not sure why the angle increment swaps the x offset, or why the angle looks slightly off.
+    #   # # This is a stop-gap measure
+    #   # @angle = @angle + 5
+    #   # self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
+    #   # puts "NEW ANGLE: #{@angle}"
+    #   # puts "NEW X AND Y: #{@x} - #{@y}"
+    # end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
     puts "END HARDPOINT #{@id}"
@@ -133,13 +139,13 @@ class Hardpoint < GeneralObject
   end
 
   # Pointer can be cursor.. or player..
-  def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
-    puts "HARDPOINT ATTACK: #{[initial_angle, current_map_pixel_x, current_map_pixel_y]}"
+  def attack initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
+    puts "HARDPOINT ATTACK: #{[initial_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
     # pointer convert to map_pixel_x and y!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "pointer"
     # puts pointer
     destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
-    puts "DESTINATION ATTACK: #{[initial_angle, current_map_pixel_x, current_map_pixel_y]}"
+    puts "DESTINATION ATTACK: #{[initial_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
 
     # puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
     # puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
@@ -180,12 +186,12 @@ class Hardpoint < GeneralObject
     # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
     # Pointed West
     # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
-      puts "ATTACking ANGLE HERE:  #{@angle + initial_angle} = #{@angle} + #{initial_angle}"
+      puts "ATTACking ANGLE HERE:  #{@angle + initial_ship_angle + @angle_offset} = #{@angle} + #{initial_ship_angle}  + #{@angle_offset}"
       # ATTACHKING NORTH
       # ATTACking ANGLE HERE:  76.11199883909319 = 76.11199883909319 + 0
       # ATTCKING WEST
       # 
-      step = (Math::PI/180 * (@angle + initial_angle)) + 90.0 + 45.0# - 180
+      step = (Math::PI/180 * (@angle + initial_ship_angle + @angle_offset)) + 90.0 + 45.0# - 180
       # step = step.round(5)
       puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
       projectile_x = Math.cos(step) * @radius + current_map_pixel_x
@@ -197,7 +203,11 @@ class Hardpoint < GeneralObject
       puts "WHATISB : #{(current_map_pixel_x + @x_offset).round(2)} - #{(current_map_pixel_y + @y_offset).round(2)}"
 
       # attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
-      attack_projectile = @main_weapon.attack(initial_angle, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, options)
+      puts "BULLET LAUNCH ANGLE: #{@angle + initial_ship_angle + @angle_offset} = #{@angle} + #{initial_ship_angle} + #{@angle_offset}"
+      # 426.0202923020712 = 66.02029230207123 + 90 + 270
+      #   should be correct: initial_angle
+      #   should be correct: initial_angle
+      attack_projectile = @main_weapon.attack(initial_ship_angle, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, options)
       @drawable_items_near_self << @main_weapon
     end
 

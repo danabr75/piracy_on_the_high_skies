@@ -76,7 +76,7 @@ class Player < ScreenFixedObject
     @angle = 0
 
 
-    # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"right_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"left_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
+    # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"starboard_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"port_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
     ship_klass_name = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
     raise "Did not get Ship Class from config" if ship_klass_name.nil?
     ship_klass = eval(ship_klass_name)
@@ -88,7 +88,7 @@ class Player < ScreenFixedObject
       @ship = ship_klass.new(@x, @y, get_draw_ordering, ZOrder::Hardpoint, @angle, options.merge({from_player: true}).merge(hardpoint_data))
     else
       raise "Not supported. Init your player data!"
-      # @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true, front_hard_points: front_hard_points, right_broadside_hard_points: right_broadside_hard_points, left_broadside_hard_points: left_broadside_hard_points}))
+      # @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true, front_hard_points: front_hard_points, starboard_hard_points: starboard_hard_points, port_hard_points: port_hard_points}))
     end
     @ship.x = @x
     @ship.y = @y
@@ -115,10 +115,8 @@ class Player < ScreenFixedObject
   end
 
   def self.get_hardpoint_data ship_klass_name
-    front_hardpoint_data = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'front_hardpoint_locations'])
-    right_hardpoint_data = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'right_hardpoint_locations'])
-    left_hardpoint_data  = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'left_hardpoint_locations'])
-    return {front_hardpoint_data: front_hardpoint_data, right_hardpoint_data: right_hardpoint_data, left_hardpoint_data: left_hardpoint_data}
+    hardpoint_data = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'hardpoint_locations'])
+    return {hardpoint_data: hardpoint_data}
   end
 
   # def get_kill_count_max
@@ -397,7 +395,7 @@ class Player < ScreenFixedObject
     # attack_results
     # Array
     # {:projectiles=>[#<Bullet:0x00007fe3509a3928 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="883f14b8-1559-48f4-8035-539903bb4fd5", @image=#######
-    
+
     return attack_results
   end
  

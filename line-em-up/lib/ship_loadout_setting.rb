@@ -77,8 +77,8 @@ class ShipLoadoutSetting < Setting
     # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
     # puts "RIGHT HERE!@!!!"
-    # puts "@ship.right_broadside_hard_points"
-    # puts @ship.right_broadside_hard_points
+    # puts "@ship.starboard_hard_points"
+    # puts @ship.starboard_hard_points
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     # @window = window
     # first array is rows at the top, 2nd goes down through the rows
@@ -208,7 +208,7 @@ class ShipLoadoutSetting < Setting
   end
 
   def hardpoint_draw
-    @ship_hardpoints.each do |key, list|
+    @ship_hardpoints.each do |list|
       if list.any?
         list.each do |value|
           click_area = value[:click_area]
@@ -277,39 +277,31 @@ class ShipLoadoutSetting < Setting
     # @hardpoints_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
     # @hardpoints_width  = (@inventory_matrix_max_width  * @cell_width)  + (@inventory_matrix_max_width  * @cell_width_padding)
 
-    value = {}
-    groups = [
-      # Angle not used yet.
-      {hardpoints: ship.right_broadside_hard_points, location: :right, angle: 90},
-      {hardpoints: ship.left_broadside_hard_points,  location: :left,  angle: 270},
-      {hardpoints: ship.front_hard_points,           location: :front, angle: 0}
-    ]
-    groups.each do |group|
-      value[group[:location]] = []
-      group[:hardpoints].each_with_index do |hp, index|
-        button_key = "#{group[:location].to_s}_hardpoint_#{index}"
+    value = []
+    ship.hardpoints.each_with_index do |hp, index|
+      button_key = "hardpoint_#{index}"
 
-        color, hover_color = [nil,nil]
-        if hp.slot_type    == :generic
-          # color, hover_color = [Gosu::Color.argb(0x8aff82), Gosu::Color.argb(0xc3ffba)]
-          color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
-        elsif hp.slot_type == :offensive
-          color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
-        end
-        click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
-        @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
-        if hp.assigned_weapon_class
-          image = hp.assigned_weapon_class.get_hardpoint_image
-          item = {
-            image: image, key: button_key, 
-            klass: hp.assigned_weapon_class
-          }
-
-        else
-        end
-
-        value[group[:location]] << {item: item, x: hp.x, y: hp.y, click_area: click_area, key: button_key, hp: hp}
+      color, hover_color = [nil,nil]
+      if hp.slot_type    == :generic
+        # color, hover_color = [Gosu::Color.argb(0x8aff82), Gosu::Color.argb(0xc3ffba)]
+        color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
+      elsif hp.slot_type == :offensive
+        color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
       end
+      click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
+      @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
+      if hp.assigned_weapon_class
+        image = hp.assigned_weapon_class.get_hardpoint_image
+        item = {
+          image: image, key: button_key, 
+          klass: hp.assigned_weapon_class
+        }
+
+      else
+        item = nil
+      end
+
+      value << {item: item, x: hp.x, y: hp.y, click_area: click_area, key: button_key, hp: hp}
     end
     # puts "VALUES HERE FRONT:"
     # puts value[:front]
@@ -318,7 +310,7 @@ class ShipLoadoutSetting < Setting
     # puts "VALUES HERE LEFT:"
     # puts value[:left].count
 
-    # ship.left_broadside_hard_points.each do |hp|
+    # ship.port_hard_points.each do |hp|
     #   value[:left] << {weapon_klass: hp.assigned_weapon_class, x: hp.x + hp.x_offset, y: hp.y + hp.y_offset}
     # end
 
@@ -334,11 +326,11 @@ class ShipLoadoutSetting < Setting
     # left_hardpoint_0
 
 
-    port, i = id.scan(/(\w+)_hardpoint_(\d+)/).first
-    port, i = [port.to_sym, i.to_i]
-    puts "PORT AND I: #{port} and #{i}"
+    i = id.scan(/hardpoint_(\d+)/).first
+    i = i.to_i
+    # puts "PORT AND I: #{port} and #{i}"
 
-    hardpoint_element = @ship_hardpoints[port][i]
+    hardpoint_element = @ship_hardpoints[i]
     element = hardpoint_element ? hardpoint_element[:item] : nil
 
     if @cursor_object && element
@@ -455,20 +447,16 @@ class ShipLoadoutSetting < Setting
 
   def hardpoint_update
     hover_object = nil
-    @ship_hardpoints.each do |key, list|
-      if list.any?
-        list.each do |value|
-          click_area = value[:click_area]
-          # puts "CLICK AREA: #{click_area.y}"
-          if click_area
-            is_hover = click_area.update(0, 0)
-            # puts "WAS HARDPOINT HOVER? #{is_hover}"
-            # puts "Value item"
-            # puts value[:item]
-            hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp] } if is_hover
-            # raise "GOT HERE" if is_hover
-          end
-        end
+    @ship_hardpoints.each do |value|
+      click_area = value[:click_area]
+      # puts "CLICK AREA: #{click_area.y}"
+      if click_area
+        is_hover = click_area.update(0, 0)
+        # puts "WAS HARDPOINT HOVER? #{is_hover}"
+        # puts "Value item"
+        # puts value[:item]
+        hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp] } if is_hover
+        # raise "GOT HERE" if is_hover
       end
     end
     return hover_object
@@ -512,8 +500,8 @@ class ShipLoadoutSetting < Setting
   #   klass = eval(@ship_value)
   #   return {
   #     front: klass::FRONT_HARDPOINT_LOCATIONS,
-  #     right: klass::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS,
-  #     left:  klass::LEFT_BROADSIDE_HARDPOINT_LOCATIONS
+  #     right: klass::PORT_HARDPOINT_LOCATIONS,
+  #     left:  klass::STARBOARD_HARDPOINT_LOCATIONS
   #   }
   # end
 

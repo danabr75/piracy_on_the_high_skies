@@ -17,12 +17,12 @@ class PilotableShip < GeneralObject
 
   attr_accessor :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
-  attr_accessor :right_broadside_mode, :left_broadside_mode, :right_broadside_hard_points, :left_broadside_hard_points, :front_hard_points
+  attr_accessor :hardpoints
   MAX_HEALTH = 200
 
   # FRONT_HARDPOINT_LOCATIONS = []
-  # RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = []
-  # LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
+  # PORT_HARDPOINT_LOCATIONS = []
+  # STARBOARD_HARDPOINT_LOCATIONS = []
 
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
@@ -90,8 +90,7 @@ class PilotableShip < GeneralObject
     @kill_count = 0
     @main_weapon = nil
     @drawable_items_near_self = []
-    @right_broadside_mode = false
-    @left_broadside_mode = false
+
     @hide_hardpoints = options[:hide_hardpoints] || false
 
     # Load hardpoints from CONFIG FILE HERE, plug in launcher class !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -105,52 +104,24 @@ class PilotableShip < GeneralObject
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
     # Update hardpoints location
-    @front_hard_points = Array.new(self.class::FRONT_HARDPOINT_LOCATIONS.length) {nil}
-    self.class::FRONT_HARDPOINT_LOCATIONS.each_with_index do |location, index|
-      item_klass_string = options[:front_hardpoint_data] ? options[:front_hardpoint_data][index.to_s] : nil
+    @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
+    self.class::HARDPOINT_LOCATIONS.each_with_index do |location, index|
+      item_klass_string = options[:hardpoint_data] ? options[:hardpoint_data][index.to_s] : nil
       item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       raise "bad slot type" if location[:slot_type].nil?
+      raise "bad anlge"     if location[:angle_offset].nil?
       hp = Hardpoint.new(
         x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], options
       )
-      @front_hard_points[index] = hp
+      @hardpoints[index] = hp
     end
-    options.delete(:front_hardpoint_data)
-
-    @right_broadside_hard_points = Array.new(self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.length) {nil}
-    self.class::RIGHT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location, index|
-      item_klass_string = options[:right_hardpoint_data] ? options[:right_hardpoint_data][index.to_s] : nil
-      item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
-      options[:image_angle] = 90
-      raise "bad slot type" if location[:slot_type].nil?
-      hp = Hardpoint.new(
-        x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 90, options
-      )
-      @right_broadside_hard_points[index] = hp
-    end
-    options.delete(:right_hardpoint_data)
-
-    @left_broadside_hard_points = Array.new(self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.length) {nil}
-    self.class::LEFT_BROADSIDE_HARDPOINT_LOCATIONS.each_with_index do |location, index|
-      item_klass_string = options[:left_hardpoint_data] ? options[:left_hardpoint_data][index.to_s] : nil
-      item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
-      options[:image_angle] = 270
-      raise "bad slot type" if location[:slot_type].nil?
-      hp = Hardpoint.new(
-        x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 270, options
-      )
-      @left_broadside_hard_points[index] = hp
-    end
-    options.delete(:left_hardpoint_data)
+    options.delete(:hardpoint_data)
 
 
-    [@front_hard_points, @right_broadside_hard_points, @left_broadside_hard_points].each_with_index do |group, group_index|
-      group.each_with_index do |hp, hp_index|
-        raise "HP WAS NIL HERE: #{hp_index} for group: #{group_index}" if hp.nil?
-      end
+
+    @hardpoints.each_with_index do |hp, hp_index|
+      raise "HP WAS NIL HERE: #{hp_index} for group: #{group_index}" if hp.nil?
     end
 
     @theta = nil
@@ -160,7 +131,7 @@ class PilotableShip < GeneralObject
 
   # right broadside
   # def rotate_hardpoints_counterclockwise angle_increment
-  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
   #     group.each do |hp|
   #       hp.increment_angle(angle_increment)
   #     end
@@ -170,7 +141,7 @@ class PilotableShip < GeneralObject
   # # left broadside
   # # Key: E
   # def rotate_hardpoints_clockwise angle_increment
-  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
   #     group.each do |hp|
   #       hp.decrement_angle(angle_increment)
   #     end
@@ -290,7 +261,7 @@ class PilotableShip < GeneralObject
   #   @turn_left = true
   #   @x = [@x - get_speed, (get_width/3)].max
 
-  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
   #     group.each do |hp|
   #       hp.x = @x + hp.x_offset
   #     end
@@ -302,7 +273,7 @@ class PilotableShip < GeneralObject
   #   @turn_right = true
   #   @x = [@x + get_speed, (@screen_pixel_width - (get_width/3))].min
 
-  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
   #     group.each do |hp|
   #       hp.x = @x + hp.x_offset
   #     end
@@ -318,7 +289,7 @@ class PilotableShip < GeneralObject
 
   #   @y = [@y - get_speed, @min_moveable_height + (get_height/2)].max
 
-  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
   #     group.each do |hp|
   #       hp.y = @y + hp.y_offset
   #     end
@@ -329,7 +300,7 @@ class PilotableShip < GeneralObject
   # def brake
   #   @y = [@y + get_speed, @max_movable_height - (get_height/2)].min
 
-  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
   #     group.each do |hp|
   #       hp.y = @y + hp.y_offset
   #     end
@@ -337,29 +308,20 @@ class PilotableShip < GeneralObject
   #   return @y
   # end
 
-  def attack_group initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
+  def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
     results = []
-    [
-      {objects: @right_broadside_hard_points,  angle_offset: 90},
-      {objects: @left_broadside_hard_points,   angle_offset: -90},
-      {objects: @front_hard_points,            angle_offset: 0}
-    ].each do |section|
-      results << section[:objects].collect do |hp|
-        hp.attack(initial_angle + section[:angle_offset], current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
-      end
+    @hardpoints.each do |hp|
+      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
     end
-    results = results.flatten
+    # results = results.flatten
     results.reject!{|v| v.nil?}
     return results
   end
 
   def deactivate_group group_number
     # puts "deactivate_group: #{group_number}"
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        # puts "STOPPING ATTACK #{hp.group_number} == #{group_number}: #{hp.group_number == group_number}"
-        hp.stop_attack if hp.group_number == group_number
-      end
+    @hardpoints.each do |hp|
+      hp.stop_attack if hp.group_number == group_number
     end
   end
 
@@ -383,13 +345,11 @@ class PilotableShip < GeneralObject
   def draw options = {}
     @drawable_items_near_self.reject! { |item| item.draw }
     # puts "DRAWING HARDPOINTS"
-    # puts "@right_broadside_hard_points: #{@right_broadside_hard_points.count}"
+    # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
     if !@hide_hardpoints
       # puts "AI DRAWING HARDPOINT HERE" if options[:test]
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
-      @right_broadside_hard_points.each { |item| item.draw(@x, @y, @angle) }
-      @left_broadside_hard_points.each { |item| item.draw(@x, @y, @angle) }
-      @front_hard_points.each { |item| item.draw(@x, @y, @angle) }
+      @hardpoints.each { |item| item.draw(@x, @y, @angle) }
     end
     @image.draw_rot(@x, @y, @z, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
@@ -406,9 +366,7 @@ class PilotableShip < GeneralObject
     # draw gl stuff
     @drawable_items_near_self.each {|item| item.draw_gl }
 
-    @left_broadside_hard_points.each { |item| item.draw_gl }
-    @right_broadside_hard_points.each { |item| item.draw_gl }
-    @front_hard_points.each { |item| item.draw_gl }
+    @hardpoints.each { |item| item.draw_gl }
 
     info = @image.gl_tex_info
 
@@ -459,13 +417,7 @@ class PilotableShip < GeneralObject
   def update mouse_x, mouse_y, player
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
-    @front_hard_points.each do |hardpoint|
-      hardpoint.update(mouse_x, mouse_y, self)
-    end
-    @left_broadside_hard_points.each do |hardpoint|
-      hardpoint.update(mouse_x, mouse_y, self)
-    end
-    @right_broadside_hard_points.each do |hardpoint|
+    @hardpoints.each do |hardpoint|
       hardpoint.update(mouse_x, mouse_y, self)
     end
 
