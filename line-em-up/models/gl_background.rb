@@ -455,7 +455,7 @@ class GLBackground
   end
 
 
-  def update player, player_map_pixel_movement_x, player_map_pixel_movement_y, buildings, pickups, projectiles, enemy_projectiles
+  def update player, player_map_pixel_movement_x, player_map_pixel_movement_y, buildings, pickups, projectiles
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
 
@@ -781,7 +781,7 @@ class GLBackground
     # raise "OFFSET IS OFF @y_bottom_tracker + offset_y != @gps_map_center_y: #{@y_bottom_tracker} + #{offset_y} != #{@gps_map_center_y}" if @y_bottom_tracker  + offset_y != @gps_map_center_y
     # raise "OFFSET IS OFF @x_right_tracker - offset_x != @gps_map_center_x: #{@x_right_tracker} - #{offset_x} != #{@gps_map_center_x}"   if @x_right_tracker   - offset_x != @gps_map_center_x
     # raise "OFFSET IS OFF @x_left_tracker + offset_x != @gps_map_center_x: #{@x_left_tracker} + #{offset_x} != #{@gps_map_center_x}"     if @x_left_tracker    + offset_x != @gps_map_center_x
-    return {pickups: pickups, buildings: buildings, projectiles: projectiles, enemy_projectiles: enemy_projectiles}
+    return {pickups: pickups, buildings: buildings, projectiles: projectiles}
   end
 
   

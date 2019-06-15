@@ -13,7 +13,7 @@ class Hardpoint < GeneralObject
   attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle_from_center, :center_x, :center_y
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
 
-  def initialize(x, y, z, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
+  def initialize(x, y, z, group_number, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner_id, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     @group_number = group_number
 
@@ -34,7 +34,6 @@ class Hardpoint < GeneralObject
     # The actual angle is calculated via the start and end point
     @angle_offset = angle_offset
     # @angle_offset = 90 if item
-    puts "ANGE OFFSET: #{@angle_offset}" if item
 
     if options[:block_initial_angle]
       puts "block_initial_angle"
@@ -49,13 +48,15 @@ class Hardpoint < GeneralObject
     @main_weapon = nil
     @drawable_items_near_self = []
 
-    @item = item
-    if item
-      @assigned_weapon_class = item
-      @image_hardpoint = item.get_hardpoint_image
+    @item_klass = item_klass
+    if @item_klass
+      @assigned_weapon_class = @item_klass
+      @image_hardpoint = @item_klass.get_hardpoint_image
     else
       @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     end
+
+
     # @image_angle = options[:image_angle] || 0
     # Maybe these are reversed?
     start_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
@@ -66,7 +67,6 @@ class Hardpoint < GeneralObject
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle_from_center = calc_angle(start_point, end_point)
-    puts "ANGLE INIT HERE: #{@angle_from_center}" if item
     # ANGLE INIT HERE: 60.97169847574529
     # ANGLE IS OFF, NOT SURE WHY
     @angle_from_center = @angle_from_center + 5
@@ -100,7 +100,9 @@ class Hardpoint < GeneralObject
     # end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
+    @item = @item_klass.new({image_angle: @angle_from_center}) if @item_klass
     puts "END HARDPOINT #{@id}"
+    @owner_id = owner_id
   end
 
 
@@ -134,13 +136,18 @@ class Hardpoint < GeneralObject
 
   def stop_attack
     # puts "HARDPOINT STOP ATTACK"
-    @main_weapon.deactivate if @main_weapon
+    @item.deactivate if @item
 
   end
 
   def convert_pointer_to_map_pixel pointer
     return [pointer.current_map_pixel_x, pointer.current_map_pixel_y]
   end
+
+  # def get_max_launcher_angle
+  #   if @item
+  #   end
+  # end
 
   # Pointer can be cursor.. or player..
   def attack current_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
@@ -157,17 +164,18 @@ class Hardpoint < GeneralObject
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
     can_attack = false
-    if @main_weapon.nil?
+    if @item.nil?
       # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
       options = {}
       options[:image_angle] = @angle_from_center
-      if @assigned_weapon_class
+      if @item_klass
         # @main_weapon = @assigned_weapon_class.new(self, options)
-        @main_weapon = @assigned_weapon_class.new(options)
+        # should be in init
+        @item = @item_klass.new(options)
         can_attack = true
       end
     else
-      @main_weapon.active = true if @main_weapon.active == false
+      @item.active = true if @item.active == false
       can_attack = true
     end
 
@@ -183,7 +191,6 @@ class Hardpoint < GeneralObject
       end
 
       raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
-      puts "HARDPOINT CACLINGV"
 
       # DRAWING
     # Pointed North
@@ -214,8 +221,8 @@ class Hardpoint < GeneralObject
       puts "current_ship_angle + @angle_offset"
       puts "#{current_ship_angle + @angle_offset} = #{current_ship_angle} + #{@angle_offset}"
       # The attack angle should be opposite of the angle offset.
-      attack_projectile = @main_weapon.attack(current_ship_angle - @angle_offset, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, options)
-      @drawable_items_near_self << @main_weapon
+      attack_projectile = @item.attack(current_ship_angle - @angle_offset, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, @owner_id, options)
+      @drawable_items_near_self << @item
     end
 
     if attack_projectile
@@ -272,7 +279,7 @@ class Hardpoint < GeneralObject
 
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
-    @main_weapon.update(mouse_x, mouse_y, self) if @main_weapon
+    @item.update(mouse_x, mouse_y, self) if @item
     # @cooldown_wait -= 1              if @cooldown_wait > 0
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0

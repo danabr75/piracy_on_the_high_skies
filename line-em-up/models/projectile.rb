@@ -31,8 +31,11 @@ class Projectile < ScreenMapFixedObject
   end
 
   # destination_map_pixel_x, destination_map_pixel_y params will become destination_angle
-  def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, options = {})
+  def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, launched_from_id, options = {})
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+
+    @launched_from_id = launched_from_id
+
     @angle = destination_angle
     puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
 
@@ -182,6 +185,10 @@ class Projectile < ScreenMapFixedObject
     object_groups.each do |group|
       group.each do |object|
         next if object.nil?
+        # Don't hit yourself
+        next if object.id == @id
+        # Don't hit the ship that launched it
+        next if object.id == @launched_from_id
         break if hit_object
         # don't hit a dead object
         if object.health <= 0

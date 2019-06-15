@@ -28,7 +28,7 @@ class PilotableShip < GeneralObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
-  def initialize(x, y, z, hardpoint_z, angle, options = {})
+  def initialize(x, y, z, hardpoint_z, angle, owner_id, options = {})
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -112,7 +112,7 @@ class PilotableShip < GeneralObject
       raise "bad anlge"     if location[:angle_offset].nil?
       hp = Hardpoint.new(
         x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], options
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner_id, options
       )
       @hardpoints[index] = hp
     end

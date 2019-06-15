@@ -15,6 +15,11 @@ class AIShip < ScreenMapFixedObject
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
   MAX_HEALTH = 200
+  AGRO_TILE_DISTANCE = 2
+  # in seconds
+  # ANGRO MAX is 10 seconds
+  AGRO_MAX = 10 * 60
+  AGRO_DECREMENT = 1
 
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
@@ -31,7 +36,7 @@ class AIShip < ScreenMapFixedObject
     @angle = 0
 
     hardpoint_data = Player.get_hardpoint_data('BasicShip')
-    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, hardpoint_data)
+    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, @id, hardpoint_data)
     @ship.x = @x
     @ship.y = @y
     @current_momentum = 0
@@ -40,6 +45,15 @@ class AIShip < ScreenMapFixedObject
 
     @health = @ship.get_health
     @armor = @ship.get_armor
+
+    # Find angle preference range here..
+    @ship.hardpoints.each do |hp|
+      hp.inspect
+    end
+
+    @agro_map_pixel_distance = AGRO_TILE_DISTANCE * ((@tile_pixel_width + @tile_pixel_height) / 2.0)
+    @argo_target_map = {}
+    # stop
   end
 
   def rotate_counterclockwise
@@ -129,20 +143,57 @@ class AIShip < ScreenMapFixedObject
     @ship.draw({test: true})
   end
 
-  def update mouse_x, mouse_y, player
+  # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
+  # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
+  def update mouse_x, mouse_y, player, air_targets = [], ground_targets = []
+    # @current_agro = current_agro - 0.1 if @current_agro > 0.0
+    # need to remove from map when ship is destroyed.. maybe, would save memory space if that's important
+    # just remove ship when argo reaches zero.
+    @argo_target_map.each do |target_id, argo_level|
+      @argo_target_map[target_id] = argo_level - AGRO_DECREMENT
+      @argo_target_map.delete(target_id) if argo_level <= 0
+    end
+
+
+    # @argo_target_map = {}
     # puts "AI: front_hard_points.count #{@ship.front_hard_points.count}"
     # puts "AI2: front_hard_points #{@ship.front_hard_points.first}"
-    projectiles = []
-    # if @time_alive % 300 == 0
-      puts "AI ATTACKING FROM: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
-      # Have access to player momentum.. can try to predict player path for advanced enemies
-      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, player).each do |results|
 
+    projectiles = []
+    local_max_agro = 0
+    agro_target = nil
+
+    air_targets.each do |target|
+      # Don't fire at self. don't fire at allies. Figure out ally logic
+      next if target.id == self.id
+      # Implement relationships.
+      # next if target.allied
+
+      # check distance if not allied
+      # if tile distance is less than agro distance, then you increase agro against that target
+      # update max_agro
+      within_range = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y) < @agro_map_pixel_distance
+      if within_range
+        @argo_target_map[target.id] = AGRO_MAX
+      end
+      if @argo_target_map[target.id] && @argo_target_map[target.id] > local_max_agro
+        local_max_agro = @argo_target_map[target.id] 
+        agro_target = target
+      end
+    end
+
+    if agro_target
+      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
       end
-    # end
+    end
+
+
+
+
+    # increase aggro at target here, if enemy faction is within x tiles... agro distance needs to be a constant.
 
 
     @ship.update(mouse_x, mouse_y, player)

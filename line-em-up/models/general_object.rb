@@ -673,6 +673,9 @@ class GeneralObject
   end
 
   def stop
-    raise "STOP HERE"
+    if @debug
+      raise "STOP HERE"
+    end
   end
+
 end

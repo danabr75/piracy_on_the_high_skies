@@ -165,22 +165,22 @@ class GameWindow < Gosu::Window
     
     @buildings = Array.new
     @projectiles = Array.new
-    @enemy_projectiles = Array.new
-    @enemy_destructable_projectiles = Array.new
+    # @enemy_projectiles = Array.new
+    @destructable_projectiles = Array.new
     @pickups = Array.new
 
-    @enemies = Array.new
-    @enemies_random_spawn_timer = 100
+    @ships = Array.new
+    # @enemies_random_spawn_timer = 100
     # @enemies_random_spawn_timer = 5
-    @enemies_spawner_counter = 0
+    # @enemies_spawner_counter = 0
     # @enemies_spawner_counter = 5
 
-    @max_enemy_count = 30
-    @enemies_killed = 0
+    # @max_enemy_count = 30
+    # @enemies_killed = 0
     
-    @font = Gosu::Font.new(20)
+    @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
     # @max_enemies = 4
-    @max_enemies = 0
+    # @max_enemies = 0
 
     @ui_y = 0
     @footer_bar = FooterBar.new(@width, @height, @width_scale, @height_scale)
@@ -216,7 +216,7 @@ class GameWindow < Gosu::Window
 
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
-    @enemies = values[:enemies]
+    @ships = values[:enemies]
     @pickups = values[:pickups]
 
     # @scroll_factor = 1
@@ -524,11 +524,12 @@ class GameWindow < Gosu::Window
         @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
-        results = @gl_background.update(@player, @player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @projectiles, @enemy_projectiles)
+        results = @gl_background.update(@player, @player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @projectiles)
         @buildings = results[:buildings]
         @pickups = results[:pickups]
-        @enemy_projectiles = results[:enemy_projectiles]
-        @projectiles = results[:projectiles]
+        # NEED to update background's projectiles
+        @projectiles = results[:enemy_projectiles] || []
+        @projectiles = @projectiles + (results[:projectiles] || [])
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
           if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
@@ -575,11 +576,11 @@ class GameWindow < Gosu::Window
 
         @player.collect_pickups(@pickups)
 
-        @enemy_projectiles.each do |projectile|
-          results = projectile.hit_objects([[@player]])
-          # @pickups = @pickups + results[:drops]
-        end
-        @enemy_destructable_projectiles.each do |projectile|
+        # @enemy_projectiles.each do |projectile|
+        #   results = projectile.hit_objects([[@player]])
+        #   # @pickups = @pickups + results[:drops]
+        # end
+        @destructable_projectiles.each do |projectile|
           results = projectile.hit_objects([[@player]])
           # @pickups = @pickups + results[:drops]
         end
@@ -592,12 +593,10 @@ class GameWindow < Gosu::Window
 
         @projectiles.each do |projectile|
           # Excluding buildings.. add back in when can aim bullets at ground.@buildings
-          results = projectile.hit_objects([@enemies, @enemy_destructable_projectiles])
+          results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
+          # Should be explosions n such here
           if results
             @pickups = @pickups + results[:drops]
-            @player.score += results[:point_value]
-            @enemies_killed += results[:killed]
-            @player.add_kill_count(results[:killed])
           end
         end
 
@@ -618,20 +617,20 @@ class GameWindow < Gosu::Window
         # The projectiles and enemy projectiles... only allows for two factions.. we need to support multiple...
         # attacks need to be able to handle.. lists of enemies and lists of allies maybe??
         @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
-        @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
-        @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        # @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
 
 
-        @enemies.reject! do |enemy|
-          results = enemy.update(nil, nil, @player)
+        @ships.reject! do |ship|
+          results = ship.update(nil, nil, @player, @ships + [@player], @buildings)
           # puts "RESULTS HERE: #{results}" if results[:projectiles]
           #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
 
           # puts "@enemy_projectiles:"
           # puts @enemy_projectiles
           results[:projectiles].each do |projectile|
-            @enemy_projectiles.push(projectile)
+            @projectiles.push(projectile)
           end
 
           # @enemy_projectiles = @enemy_projectiles + results[:projectiles]
@@ -652,49 +651,49 @@ class GameWindow < Gosu::Window
         # @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y, @player.location_x, @player.location_y)
         
 
-        if !@boss_killed && !@boss_active
-          # @buildings.push(Building.new(@scale, @width, @height)) if rand(100) == 0
-        end
+        # if !@boss_killed && !@boss_active
+        #   # @buildings.push(Building.new(@scale, @width, @height)) if rand(100) == 0
+        # end
 
         # Temp
         # @enemies.push(MissileBoat.new(@scale, @width, @height)) if rand(10) == 0
-        if !@boss_active && !@boss && !@boss_killed
+        # if !@boss_active && !@boss && !@boss_killed
 
-          # if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
-          #     # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-          #     @pickups << RocketLauncherPickup.new(@scale, @width, @height, @width_scale, @height_scale)
-          # end
-          if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
-              # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-              # swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
-              # @enemies = @enemies + swarm
-          end
+        #   # if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
+        #   #     # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+        #   #     @pickups << RocketLauncherPickup.new(@scale, @width, @height, @width_scale, @height_scale)
+        #   # end
+        #   if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
+        #       # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+        #       # swarm = HorizontalSwarm.trigger_swarm(@scale, @width, @height)
+        #       # @enemies = @enemies + swarm
+        #   end
 
-          if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @enemies.count <= @max_enemies
-            (0..(@enemies_spawner_counter / 2).round).each do |count|
-              # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-            end
-          end
-          if @player.time_alive % 500 == 0
-            @max_enemies += 1
-          end
-          if @player.time_alive % 1000 == 0 && @enemies_random_spawn_timer > 5
-            @enemies_random_spawn_timer -= 5
-          end
-          # temp
-          if @player.time_alive % 200 == 0
-            (0..(@enemies_spawner_counter / 4).round).each do |count|
-              # @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-            end
-          end
-          if @player.time_alive % 5000 == 0
-            @enemies_spawner_counter += 1
-          end
+        #   # if @player.is_alive && rand(@enemies_random_spawn_timer) == 0 && @ships.count <= @max_enemies
+        #   #   (0..(@enemies_spawner_counter / 2).round).each do |count|
+        #   #     # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+        #   #   end
+        #   # end
+        #   # if @player.time_alive % 500 == 0
+        #   #   @max_enemies += 1
+        #   # end
+        #   # if @player.time_alive % 1000 == 0 && @enemies_random_spawn_timer > 5
+        #   #   @enemies_random_spawn_timer -= 5
+        #   # end
+        #   # temp
+        #   # if @player.time_alive % 200 == 0
+        #   #   (0..(@enemies_spawner_counter / 4).round).each do |count|
+        #   #     # @enemies.push(MissileBoat.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
+        #   #   end
+        #   # end
+        # #   if @player.time_alive % 5000 == 0
+        # #     @enemies_spawner_counter += 1
+        # #   end
 
-          if @player.time_alive % 1000 == 0 && @player.time_alive > 0
-            @player.score += 100
-          end
-        end
+        # #   if @player.time_alive % 1000 == 0 && @player.time_alive > 0
+        # #     @player.score += 100
+        # #   end
+        # end
         # if @boss_active_at_enemies_killed <= @enemies_killed || @boss_active_at_level <= @enemies_spawner_counter
         #   @boss_active = true
         # end
@@ -782,7 +781,7 @@ class GameWindow < Gosu::Window
     # puts "@enemy_projectiles:"
     # puts @enemy_projectiles.class
     # puts @enemy_projectiles
-    @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles, @player, @pointer, @buildings, @pickups)
+    @open_gl_executer.draw(@gl_background, @projectiles + @destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw
     @ship_loadout_menu.draw
@@ -802,10 +801,10 @@ class GameWindow < Gosu::Window
       @font.draw("You won! Your score: #{@player.score}", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
-    @enemies.each { |enemy| enemy.draw() }
+    @ships.each { |ship| ship.draw() }
     @projectiles.each { |projectile| projectile.draw() }
-    @enemy_projectiles.each { |projectile| projectile.draw() }
-    @enemy_destructable_projectiles.each { |projectile| projectile.draw() }
+    # @enemy_projectiles.each { |projectile| projectile.draw() }
+    @destructable_projectiles.each { |projectile| projectile.draw() }
     # @stars.each { |star| star.draw }
     @pickups.each { |pickup| pickup.draw() }
     @buildings.each { |building| building.draw() }
@@ -820,13 +819,13 @@ class GameWindow < Gosu::Window
       # @font.draw("Rockets: #{@player.rockets}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'missile'
       # @font.draw("Bombs: #{@player.bombs}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'bomb'
       @font.draw("Time Alive: #{@player.time_alive}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Enemy count: #{@enemies.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("enemy_projectiles: #{@enemy_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Ship count: #{@ships.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("enemy_projectiles: #{@enemy_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("destructable_proj: #{@enemy_destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("destructable_proj: #{@destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("pickups count: #{@pickups.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Object count: #{@enemies.count + @enemy_projectiles.count + @projectiles.count + @enemy_destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Object count: #{@ships.count + @projectiles.count + @destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Damage Reduction: #{@player.damage_reduction.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -849,18 +848,18 @@ class GameWindow < Gosu::Window
         @font.draw("B GPS: #{@buildings.last.current_map_tile_x} - #{@buildings.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("B MAP PIXEL: #{@buildings.last.current_map_pixel_x.round(1)} - #{@buildings.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
-      if @enemies.any?
+      if @ships.any?
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("E GPS: #{@enemies.last.current_map_tile_x} - #{@enemies.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("E MAP PIXEL: #{@enemies.last.current_map_pixel_x.round(1)} - #{@enemies.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("E Angle: #{@enemies.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E GPS: #{@ships.last.current_map_tile_x} - #{@ships.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E MAP PIXEL: #{@ships.last.current_map_pixel_x.round(1)} - #{@ships.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E Angle: #{@ships.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
-      if @enemy_projectiles.any?
-        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("EP GPS: #{@enemy_projectiles.last.current_map_tile_x} - #{@enemy_projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("EP MAP PIXEL: #{@enemy_projectiles.last.current_map_pixel_x.round(1)} - #{@enemy_projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("EP Angle: #{@enemy_projectiles.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      end
+      # if @enemy_projectiles.any?
+      #   @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      #   @font.draw("EP GPS: #{@enemy_projectiles.last.current_map_tile_x} - #{@enemy_projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      #   @font.draw("EP MAP PIXEL: #{@enemy_projectiles.last.current_map_pixel_x.round(1)} - #{@enemy_projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      #   @font.draw("EP Angle: #{@enemy_projectiles.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # end
 
     end
     # @gl_background.draw(ZOrder::Background)
