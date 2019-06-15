@@ -29,7 +29,7 @@ class DumbMissileLauncher < Launcher
     validate_not_nil([options], self.class.name, __callee__) 
     # current_map_tile_x, current_map_tile_y CALCUATE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "DUMB MISSILE LAUNCHER ATTACK"
-    puts "IS ANGLE BETWEEN? #{is_angle_between_two_angles?(destination_angle, LAUNCHER_MIN_ANGLE + initial_angle, LAUNCHER_MAX_ANGLE + initial_angle)} = is_angle_between_two_angles?(#{destination_angle}, #{LAUNCHER_MIN_ANGLE + initial_angle}, #{LAUNCHER_MAX_ANGLE + initial_angle})"
+    # puts "IS ANGLE BETWEEN? #{is_angle_between_two_angles?(destination_angle, LAUNCHER_MIN_ANGLE + initial_angle, LAUNCHER_MAX_ANGLE + initial_angle)} = is_angle_between_two_angles?(#{destination_angle}, #{LAUNCHER_MIN_ANGLE + initial_angle}, #{LAUNCHER_MAX_ANGLE + initial_angle})"
     angle_min = LAUNCHER_MIN_ANGLE + initial_angle
     angle_max = LAUNCHER_MAX_ANGLE + initial_angle
     if angle_min < 0.0

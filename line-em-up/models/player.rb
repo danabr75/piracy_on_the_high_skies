@@ -85,7 +85,7 @@ class Player < ScreenFixedObject
 
     if ship_klass
       # from_player is for debugging only
-      @ship = ship_klass.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true}).merge(hardpoint_data))
+      @ship = ship_klass.new(@x, @y, get_draw_ordering, ZOrder::Hardpoint, @angle, options.merge({from_player: true}).merge(hardpoint_data))
     else
       raise "Not supported. Init your player data!"
       # @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true, front_hard_points: front_hard_points, right_broadside_hard_points: right_broadside_hard_points, left_broadside_hard_points: left_broadside_hard_points}))
@@ -111,7 +111,7 @@ class Player < ScreenFixedObject
 
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
-    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, @angle, options.merge(hardpoint_data))
+    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, @angle, options.merge(hardpoint_data))
   end
 
   def self.get_hardpoint_data ship_klass_name
@@ -255,7 +255,7 @@ class Player < ScreenFixedObject
       @angle += increment
     end
     @ship.angle = @angle
-    @ship.rotate_hardpoints_counterclockwise(increment.to_f)
+    # @ship.rotate_hardpoints_counterclockwise(increment.to_f)
     return 1
   end
 
@@ -267,7 +267,7 @@ class Player < ScreenFixedObject
       @angle -= increment
     end
     @ship.angle = @angle
-    @ship.rotate_hardpoints_clockwise(increment.to_f)
+    # @ship.rotate_hardpoints_clockwise(increment.to_f)
     return 1
   end
 
@@ -388,8 +388,17 @@ class Player < ScreenFixedObject
   end
 
   def attack_group_1 pointer
-    puts "PLAYER ATTACKING w/ ANGLE: #{@angle}"
-    @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    # puts "PLAYER ATTACKING w/ ANGLE: #{@angle}"
+    attack_results = @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    # puts "attack_results"
+    # puts attack_results.class
+    # puts attack_results
+
+    # attack_results
+    # Array
+    # {:projectiles=>[#<Bullet:0x00007fe3509a3928 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="883f14b8-1559-48f4-8035-539903bb4fd5", @image=#######
+    
+    return attack_results
   end
  
   def deactivate_group_1

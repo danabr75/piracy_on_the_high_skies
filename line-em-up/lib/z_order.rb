@@ -2,7 +2,9 @@ module ZOrder
   # MenuBackground appears underneath HardPointClickableLocation
   # Hardpoint appears on top of HardPointClickableLocation
   # I don't understand this
-  Background, Building, LaserParticle, Projectile, BigExplosions, Pickups, AIShip, Player, Hardpoint, MenuBackground, HardPointClickableLocation, Launcher, SmallExplosions, UI, CurserUIBuffer, Cursor = *0..50
+  # The more right, the more on top you are.
+  # Left should be under everything
+  Background, Building, LaserParticle, Projectile, BigExplosions, Pickups, AIShip, AIHardpoint, Player, Hardpoint, MenuBackground, HardPointClickableLocation, Launcher, SmallExplosions, UI, CurserUIBuffer, Cursor = *0..50
 end
 
 # [2] pry(main)> ZOrder::Ship

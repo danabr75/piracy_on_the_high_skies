@@ -15,20 +15,20 @@ class PilotableShip < GeneralObject
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
-  attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
+  attr_accessor :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   attr_accessor :right_broadside_mode, :left_broadside_mode, :right_broadside_hard_points, :left_broadside_hard_points, :front_hard_points
   MAX_HEALTH = 200
 
-  FRONT_HARDPOINT_LOCATIONS = []
-  RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = []
-  LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
+  # FRONT_HARDPOINT_LOCATIONS = []
+  # RIGHT_BROADSIDE_HARDPOINT_LOCATIONS = []
+  # LEFT_BROADSIDE_HARDPOINT_LOCATIONS = []
 
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
-  def initialize(x, y, z, angle, options = {})
+  def initialize(x, y, z, hardpoint_z, angle, options = {})
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -50,8 +50,8 @@ class PilotableShip < GeneralObject
     path = media_path
     # @right_image = self.class.get_right_image(path)
     # @left_image = self.class.get_left_image(path)
-    @right_broadside_image = self.class.get_right_broadside_image(path)
-    @left_broadside_image = self.class.get_left_broadside_image(path)
+    # @right_broadside_image = self.class.get_right_broadside_image(path)
+    # @left_broadside_image = self.class.get_left_broadside_image(path)
     if options[:use_large_image]
       @use_large_image = true
       @image = self.class.get_large_image(path)
@@ -111,7 +111,7 @@ class PilotableShip < GeneralObject
       item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       raise "bad slot type" if location[:slot_type].nil?
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, @width_scale),
+        x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
       )
       @front_hard_points[index] = hp
@@ -125,8 +125,8 @@ class PilotableShip < GeneralObject
       options[:image_angle] = 90
       raise "bad slot type" if location[:slot_type].nil?
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
+        x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 90, options
       )
       @right_broadside_hard_points[index] = hp
     end
@@ -139,8 +139,8 @@ class PilotableShip < GeneralObject
       options[:image_angle] = 270
       raise "bad slot type" if location[:slot_type].nil?
       hp = Hardpoint.new(
-        x, y, 1, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 0, options
+        x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, 270, options
       )
       @left_broadside_hard_points[index] = hp
     end
@@ -159,23 +159,23 @@ class PilotableShip < GeneralObject
   end
 
   # right broadside
-  def rotate_hardpoints_counterclockwise angle_increment
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        hp.increment_angle(angle_increment)
-      end
-    end
-  end
+  # def rotate_hardpoints_counterclockwise angle_increment
+  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #     group.each do |hp|
+  #       hp.increment_angle(angle_increment)
+  #     end
+  #   end
+  # end
 
-  # left broadside
-  # Key: E
-  def rotate_hardpoints_clockwise angle_increment
-    [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
-      group.each do |hp|
-        hp.decrement_angle(angle_increment)
-      end
-    end
-  end
+  # # left broadside
+  # # Key: E
+  # def rotate_hardpoints_clockwise angle_increment
+  #   [@right_broadside_hard_points, @left_broadside_hard_points, @front_hard_points].each do |group|
+  #     group.each do |hp|
+  #       hp.decrement_angle(angle_increment)
+  #     end
+  #   end
+  # end
 
 
   def add_hard_point hard_point
@@ -187,12 +187,12 @@ class PilotableShip < GeneralObject
     SHIP_MEDIA_DIRECTORY
   end
 
-  def self.get_right_broadside_image path
-    Gosu::Image.new("#{path}/right_broadside.png")
-  end
-  def self.get_left_broadside_image path
-    Gosu::Image.new("#{path}/left_broadside.png")
-  end
+  # def self.get_right_broadside_image path
+  #   Gosu::Image.new("#{path}/right_broadside.png")
+  # end
+  # def self.get_left_broadside_image path
+  #   Gosu::Image.new("#{path}/left_broadside.png")
+  # end
   def self.get_image path
     Gosu::Image.new("#{path}/default.png")
   end
@@ -228,15 +228,15 @@ class PilotableShip < GeneralObject
 
   def get_image
     # puts "GET IMAGE"
-    if @right_broadside_mode
-      return @right_broadside_image
-    elsif @left_broadside_mode
-      return @left_broadside_image
-    else
+    # if @right_broadside_mode
+    #   return @right_broadside_image
+    # elsif @left_broadside_mode
+    #   return @left_broadside_image
+    # else
       # puts "DEFAULT"
       # puts @image
       return @image
-    end
+    # end
   end
   
   def get_image_path path
@@ -249,21 +249,21 @@ class PilotableShip < GeneralObject
 
 
   def decrement_secondary_ammo_count count = 1
-    return case @secondary_weapon
-    when 'bomb'
-      self.bombs -= count
-    else
-      self.rockets -= count
-    end
+    # return case @secondary_weapon
+    # when 'bomb'
+    #   self.bombs -= count
+    # else
+    #   self.rockets -= count
+    # end
   end
 
   def get_secondary_name
-    return case @secondary_weapon
-    when 'bomb'
-      'Bomb'
-    else
-      'Rocket'
-    end
+    # return case @secondary_weapon
+    # when 'bomb'
+    #   'Bomb'
+    # else
+    #   'Rocket'
+    # end
   end
 
   def get_x
@@ -380,14 +380,16 @@ class PilotableShip < GeneralObject
   end
 
 
-  def draw
+  def draw options = {}
     @drawable_items_near_self.reject! { |item| item.draw }
     # puts "DRAWING HARDPOINTS"
     # puts "@right_broadside_hard_points: #{@right_broadside_hard_points.count}"
     if !@hide_hardpoints
-      @right_broadside_hard_points.each { |item| item.draw }
-      @left_broadside_hard_points.each { |item| item.draw }
-      @front_hard_points.each { |item| item.draw }
+      # puts "AI DRAWING HARDPOINT HERE" if options[:test]
+      # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
+      @right_broadside_hard_points.each { |item| item.draw(@x, @y, @angle) }
+      @left_broadside_hard_points.each { |item| item.draw(@x, @y, @angle) }
+      @front_hard_points.each { |item| item.draw(@x, @y, @angle) }
     end
     @image.draw_rot(@x, @y, @z, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)

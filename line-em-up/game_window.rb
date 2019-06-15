@@ -549,18 +549,24 @@ class GameWindow < Gosu::Window
         end
 
         if Gosu.button_down?(Gosu::KB_SPACE)
-          if @player.cooldown_wait <= 0
+          # Player cooldown no longer used.
+          # if @player.cooldown_wait <= 0
             @player.attack_group_1(@pointer).each do |results|
             # puts "NEW PROJECTILESv2: #{results}" if @debug
               projectiles = results[:projectiles]
               # cooldown = results[:cooldown]
               # @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
 
+              # puts "GOOD PROJECTILE:"
+              # puts projectiles
+              #PROJECTILE:
+              # <Bullet:0x00007f8fc833b3c8>
+
               projectiles.each do |projectile|
                 @projectiles.push(projectile)
               end
             end
-          end
+          # end
         else
           # MOVE ELSEWHERE... KEY UP
           # @player.deactivate_group_1
@@ -570,11 +576,11 @@ class GameWindow < Gosu::Window
         @player.collect_pickups(@pickups)
 
         @enemy_projectiles.each do |projectile|
-          results = projectile.hit_objects([@player])
+          results = projectile.hit_objects([[@player]])
           # @pickups = @pickups + results[:drops]
         end
         @enemy_destructable_projectiles.each do |projectile|
-          results = projectile.hit_objects([@player])
+          results = projectile.hit_objects([[@player]])
           # @pickups = @pickups + results[:drops]
         end
 
@@ -606,22 +612,40 @@ class GameWindow < Gosu::Window
 
         @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player) }
 
-        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
+
+        # The projectiles and enemy projectiles... only allows for two factions.. we need to support multiple...
+        # attacks need to be able to handle.. lists of enemies and lists of allies maybe??
+        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
         @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
         @enemy_destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
-        @enemies.reject! { |enemy| !enemy.update(nil, nil, @player) }
 
-        if @boss
-          result = @boss.update(nil, nil, @player)
-          if !result
-            @boss_killed = true
-            @boss = nil
-            @enemy_projectiles              = []
-            @enemy_destructable_projectiles = []
+
+        @enemies.reject! do |enemy|
+          results = enemy.update(nil, nil, @player)
+          # puts "RESULTS HERE: #{results}" if results[:projectiles]
+          #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
+
+          # puts "@enemy_projectiles:"
+          # puts @enemy_projectiles
+          results[:projectiles].each do |projectile|
+            @enemy_projectiles.push(projectile)
           end
+
+          # @enemy_projectiles = @enemy_projectiles + results[:projectiles]
+          return results[:is_alive]
         end
+
+        # if @boss
+        #   result = @boss.update(nil, nil, @player)
+        #   if !result
+        #     @boss_killed = true
+        #     @boss = nil
+        #     @enemy_projectiles              = []
+        #     @enemy_destructable_projectiles = []
+        #   end
+        # end
 
         # puts "GET: @player.location_x, @player.location_y = #{@player.location_x}, #{@player.location_y}"
         # @movement_x, @movement_y = @gl_background.scroll(@scroll_factor, @movement_x, @movement_y, @player.location_x, @player.location_y)
@@ -754,6 +778,9 @@ class GameWindow < Gosu::Window
 
   def draw
     # Adding pointer as a opengl coord test
+    # puts "@enemy_projectiles:"
+    # puts @enemy_projectiles.class
+    # puts @enemy_projectiles
     @open_gl_executer.draw(@gl_background, @projectiles + @enemy_projectiles + @enemy_destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw
@@ -826,6 +853,12 @@ class GameWindow < Gosu::Window
         @font.draw("E GPS: #{@enemies.last.current_map_tile_x} - #{@enemies.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("E MAP PIXEL: #{@enemies.last.current_map_pixel_x.round(1)} - #{@enemies.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("E Angle: #{@enemies.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
+      if @enemy_projectiles.any?
+        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("EP GPS: #{@enemy_projectiles.last.current_map_tile_x} - #{@enemy_projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("EP MAP PIXEL: #{@enemy_projectiles.last.current_map_pixel_x.round(1)} - #{@enemy_projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("EP Angle: #{@enemy_projectiles.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
 
     end

@@ -11,29 +11,27 @@ include GLUT
 # Not intended to be overridden
 class Hardpoint < GeneralObject
   attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle, :center_x, :center_y
-  attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_hardpoint_width_half, :image_hardpoint_height_half, :image_angle
+  attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
 
-  def initialize(x, y, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
+  def initialize(x, y, z, group_number, x_offset, y_offset, item, slot_type, current_ship_angle, angle_offset, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     @group_number = group_number
 
     @center_x = x
     @center_y = y
+    @z = z
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
-    # raise "HERE: #{width_scale} - #{height_scale}"
-#def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
-# initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {})
-    @map_pixel_width = map_pixel_width
-    @map_pixel_height = map_pixel_height
-  # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, options = {})
+
     super(options)
     puts "GHARDPOINT ID: #{@id}"
 
     # Scale is already built into offset, via the lambda call
-    @x_offset = x_offset * -1#* width_scale
+    @x_offset = x_offset #* -1#* width_scale
     @y_offset = y_offset #* height_scale
+
     # Storing the angle offset here.. oddly enough, don't need it here. Could replace options[:image_angle]
+    # The actual angle is calculated via the start and end point
     @angle_offset = angle_offset
 
     @x = x + @x_offset
@@ -45,16 +43,13 @@ class Hardpoint < GeneralObject
     @main_weapon = nil
     @drawable_items_near_self = []
 
+    @item = item
     if item
       @assigned_weapon_class = item
-      # puts "@assigned_weapon_class: #{@assigned_weapon_class.inspect}"
-      # puts "@assigned_weapon_class2: #{@assigned_weapon_class::HARDPOINT_NAME}"
       @image_hardpoint = item.get_hardpoint_image
     else
       @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     end
-    @image_hardpoint_width_half = @image_hardpoint.width  / 2
-    @image_hardpoint_height_half = @image_hardpoint.height  / 2
     @image_angle = options[:image_angle] || 0
     # Maybe these are reversed?
     start_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
@@ -65,16 +60,15 @@ class Hardpoint < GeneralObject
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
     @angle = calc_angle(start_point, end_point)
-    @init_angle = @angle# + current_ship_angle
+    # @init_angle = @angle + current_ship_angle
      # "INIT ANGLE HERE" if options[:from_player]
     # puts "#{@init_angle} = #{@angle} + #{current_ship_angle}"
     @radian = calc_radian(start_point, end_point)
-    puts "RADIAN HERE: #{@radian} and angle #{@angle}"
     # @x = @x * width_scale
     # @y = @y * height_scale
     @radius = Gosu.distance(@center_x, @center_y, @x, @y)
-    puts "@radius = Gosu.distance(@center_x, @center_y, @x, @y)"
-    puts "#{@radius} = Gosu.distance(#{@center_x}, #{@center_y}, #{@x}, #{@y})"
+    # puts "@radius = Gosu.distance(@center_x, @center_y, @x, @y)"
+    # puts "#{@radius} = Gosu.distance(#{@center_x}, #{@center_y}, #{@x}, #{@y})"
 
     # Increlementing at 0 will adjust the x and y, to make them slightly off.
     if options[:block_initial_angle]
@@ -83,16 +77,16 @@ class Hardpoint < GeneralObject
       # The angle determining system requires it positive
       # This is a mystery
       # Can't run these commands after the angling, causes a pixel shift
-      @x = x - @x_offset
-      @y = y + @y_offset
+      # @x = x + @x_offset
+      # @y = y + @y_offset
     else
-      puts "OLD ANGLE: #{@angle} w/ current ship angle: #{current_ship_angle}"
-      # Radian, Angle, and distance all check out. Not sure why the angle increment swaps the x offset, or why the angle looks slightly off.
-      # This is a stop-gap measure
-      @angle = @angle + 3.5
-      self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
-      puts "NEW ANGLE: #{@angle}"
-      puts "NEW X AND Y: #{@x} - #{@y}"
+      # puts "OLD ANGLE: #{@angle} w/ current ship angle: #{current_ship_angle}"
+      # # Radian, Angle, and distance all check out. Not sure why the angle increment swaps the x offset, or why the angle looks slightly off.
+      # # This is a stop-gap measure
+      # @angle = @angle + 5
+      # self.increment_angle(current_ship_angle) # if current_ship_angle != 0.0
+      # puts "NEW ANGLE: #{@angle}"
+      # puts "NEW X AND Y: #{@x} - #{@y}"
     end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
@@ -100,31 +94,32 @@ class Hardpoint < GeneralObject
   end
 
 
-  def increment_angle angle_increment
-    if @angle + angle_increment >= 360.0
-      @angle = (@angle + angle_increment) - 360.0
-    else
-      @angle += angle_increment
-    end
-    step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
-    # step = step.round(5)
-    @x = Math.cos(step) * @radius + @center_x
-    @y = Math.sin(step) * @radius + @center_y
-    # @x = @x + @x_offset
-    # @y = @y + @y_offset
-  end
+  # def increment_angle angle_increment
+  #   # puts "HUH?  #{angle_increment}"
+  #   if @angle + angle_increment >= 360.0
+  #     @angle = (@angle + angle_increment) - 360.0
+  #   else
+  #     @angle += angle_increment
+  #   end
+  #   step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
+  #   # step = step.round(5)
+  #   @x = Math.cos(step) * @radius + @center_x
+  #   @y = Math.sin(step) * @radius + @center_y
+  #   # @x = @x + @x_offset
+  #   # @y = @y + @y_offset
+  # end
 
-  def decrement_angle angle_increment
-    if @angle - angle_increment <= 0.0
-      @angle = (@angle - angle_increment) + 360.0
-    else
-      @angle -= angle_increment
-    end
-    step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
-    # step = step.round(5)
-    @x = Math.cos(step) * @radius + @center_x
-    @y = Math.sin(step) * @radius + @center_y
-  end
+  # def decrement_angle angle_increment
+  #   if @angle - angle_increment <= 0.0
+  #     @angle = (@angle - angle_increment) + 360.0
+  #   else
+  #     @angle -= angle_increment
+  #   end
+  #   step = (Math::PI/180 * (@angle)) + 90.0 + 45.0# - 180
+  #   # step = step.round(5)
+  #   @x = Math.cos(step) * @radius + @center_x
+  #   @y = Math.sin(step) * @radius + @center_y
+  # end
 
 
   def stop_attack
@@ -137,11 +132,15 @@ class Hardpoint < GeneralObject
     return [pointer.current_map_pixel_x, pointer.current_map_pixel_y]
   end
 
+  # Pointer can be cursor.. or player..
   def attack initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
+    puts "HARDPOINT ATTACK: #{[initial_angle, current_map_pixel_x, current_map_pixel_y]}"
     # pointer convert to map_pixel_x and y!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "pointer"
     # puts pointer
     destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
+    puts "DESTINATION ATTACK: #{[initial_angle, current_map_pixel_x, current_map_pixel_y]}"
+
     # puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
     # puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
 
@@ -174,9 +173,31 @@ class Hardpoint < GeneralObject
       end
 
       raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
+      puts "HARDPOINT CACLINGV"
+
+      # DRAWING
+    # Pointed North
+    # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
+    # Pointed West
+    # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
+      puts "ATTACking ANGLE HERE:  #{@angle + initial_angle} = #{@angle} + #{initial_angle}"
+      # ATTACHKING NORTH
+      # ATTACking ANGLE HERE:  76.11199883909319 = 76.11199883909319 + 0
+      # ATTCKING WEST
+      # 
+      step = (Math::PI/180 * (@angle + initial_angle)) + 90.0 + 45.0# - 180
+      # step = step.round(5)
+      puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
+      projectile_x = Math.cos(step) * @radius + current_map_pixel_x
+      # Adjustment - due to X offset issue
+      projectile_x = current_map_pixel_x + (current_map_pixel_x - projectile_x)
+      projectile_y = Math.sin(step) * @radius + current_map_pixel_y
+      # projectile_y = current_map_pixel_y + (current_map_pixel_y - projectile_y)
+      puts "OUTGOING: #{projectile_x.round(2)} - #{projectile_y.round(2)}"
+      puts "WHATISB : #{(current_map_pixel_x + @x_offset).round(2)} - #{(current_map_pixel_y + @y_offset).round(2)}"
 
       # attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
-      attack_projectile = @main_weapon.attack(initial_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, nil, nil, options)
+      attack_projectile = @main_weapon.attack(initial_angle, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, options)
       @drawable_items_near_self << @main_weapon
     end
 
@@ -198,23 +219,28 @@ class Hardpoint < GeneralObject
     @y
   end
 
-  def get_draw_ordering
-    ZOrder::Hardpoint
-  end
+  # def get_draw_ordering
+  #   ZOrder::Hardpoint
+  # end
 
-  def draw
+  def draw center_x, center_y, angle
+    # puts "DRAWING HARDPOINT ANGLE: #{angle + @angle} = #{angle} + #{@angle}" if @item
+    # Pointed North
+    # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
+    # Pointed West
+    # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
+    step = (Math::PI/180 * (angle + @angle)) + 90.0 + 45.0# - 180
+    # step = step.round(5)
+    @x = Math.cos(step) * @radius + center_x
+    @y = Math.sin(step) * @radius + center_y
+
     # puts "DRAWING HARDPOINT: #{@x} and #{@y}"
     @drawable_items_near_self.reject! { |item| item.draw }
 
     # if @image_angle != nil
     # angle = @angle + @image_angle
-    angle = @image_angle + @angle - @init_angle
     # puts "ANGLE HERE: #{angle}"
-    @image_hardpoint.draw_rot(@x, @y, get_draw_ordering, angle, 0.5, 0.5, @width_scale, @height_scale)
-    # else
-    #   @image_hardpoint.draw(@x - @image_hardpoint_width_half, @y - @image_hardpoint_height_half, get_draw_ordering, @width_scale, @height_scale)
-    # end
-
+    @image_hardpoint.draw_rot(@x, @y, @z, @image_angle + angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def draw_gl

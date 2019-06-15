@@ -594,13 +594,24 @@ class GeneralObject
     # GOT PIXEL: [14006.25, 14456.25]
   end
 
+  def self.convert_map_pixel_location_to_screen player, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
+    puts "HERE: (#{player.current_map_pixel_x} - #{current_map_pixel_x}) + (#{screen_pixel_width} / 2)"
+    x = (player.current_map_pixel_x - current_map_pixel_x) + (screen_pixel_width / 2)
+    # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
+
+    # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
+    # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
+    y = (current_map_pixel_y - player.current_map_pixel_y) + (screen_pixel_height / 2)
+    return [x, y]
+  end
+
   def convert_map_pixel_location_to_screen player
     @x = (player.current_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
     # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
 
     # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
     # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
-    @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height/ 2)
+    @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height / 2)
   end
 
   # object can be player.. or an enemy. This is used to calculate projectiles emerging from hardpoints.

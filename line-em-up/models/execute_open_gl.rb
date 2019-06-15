@@ -67,6 +67,8 @@ class ExecuteOpenGl
         # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
         glTranslatef(0, 0, -10)   #see lesson 01
         # glTranslatef(0, 0, -14)   #see lesson 01
+        # puts "PROJECTILE:"
+        # puts projectile
         projectile.draw_gl
       end
 

@@ -1141,12 +1141,10 @@ class GLBackground
 
           
           if player.current_map_tile_x == x_element['gps_x'] && player.current_map_tile_y == x_element['gps_y']
-            puts "XELEMENT of Current Player: #{x_element}"
-
-# XELEMENT of Current Player: {"height"=>0.23451606664978608, "terrain_index"=>0,
-#   "corner_heights"=>{"top_left"=>0.0, "top_right"=>0.0, "bottom_left"=>0.0, "bottom_right"=>0.25},
-#   "gps_y"=>122, "gps_x"=>115}
-
+            # puts "XELEMENT of Current Player: #{x_element}"
+            # XELEMENT of Current Player: {"height"=>0.23451606664978608, "terrain_index"=>0,
+            #   "corner_heights"=>{"top_left"=>0.0, "top_right"=>0.0, "bottom_left"=>0.0, "bottom_right"=>0.25},
+            #   "gps_y"=>122, "gps_x"=>115}
           end
 
           error = glGetError
