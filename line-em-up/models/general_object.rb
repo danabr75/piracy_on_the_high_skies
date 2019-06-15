@@ -239,6 +239,17 @@ class GeneralObject
     end
   end
 
+  def self.angle_1to360 angle
+    value = angle
+    if angle == -0.0
+      value = 0.0
+    elsif angle > 360.0
+      value = angle % 360.0
+    elsif angle < 0.0
+      value = angle % 360.0
+    end
+    return value
+  end
   # CONFIRMED WORKING IN ALL CASES
   def self.is_angle_between_two_angles?(angle, min_angle, max_angle)
     raise "BAD MIN OR MAX ANGLE: #{min_angle} or #{max_angle}" if min_angle.nil? || max_angle.nil?
@@ -252,24 +263,10 @@ class GeneralObject
       return angle_min <= angle || angle <= angle_max
     end
   end
-  if false # run_validations_for_is_angle_between_two_angles
-    GeneralObject.is_angle_between_two_angles?(0.0, 20, 340)        == false
-    GeneralObject.is_angle_between_two_angles?(135.0, 90.0, 180.0)  == true
-    GeneralObject.is_angle_between_two_angles?(275.0, 180.0, 270.0) == false
-    GeneralObject.is_angle_between_two_angles?(0.0, 340, 20)        == true
-  end
-
-  def self.angle_1to360 angle
-    value = angle
-    if angle == -0.0
-      value = 0.0
-    elsif angle > 360.0
-      value = angle % 360.0
-    elsif angle < 0.0
-      value = angle % 360.0
-    end
-    return value
-  end
+  raise "Validation failed" unless GeneralObject.is_angle_between_two_angles?(0.0, 20, 340)        == false
+  raise "Validation failed" unless GeneralObject.is_angle_between_two_angles?(135.0, 90.0, 180.0)  == true
+  raise "Validation failed" unless GeneralObject.is_angle_between_two_angles?(275.0, 180.0, 270.0) == false
+  raise "Validation failed" unless GeneralObject.is_angle_between_two_angles?(0.0, 340, 20)        == true
 
 
   def is_angle_between_two_angles?(angle, min_angle, max_angle)
@@ -277,19 +274,17 @@ class GeneralObject
   end
 
   # Which angle is nearest
-  def self.nearest_angle angle, min_angle, max_angle
-    puts "NEAREST ANGLE #{angle} - #{min_angle} - #{max_angle}"
+  # NOT SURE IF THIS IS FULLY WORKING
+  def self.nearest_angle angle, min_angle, max_angle, options = {}
+    # puts "NEAREST ANGLE #{angle} - #{min_angle} - #{max_angle}"
     value = nil
-    min_angle_diff = angle - min_angle
-    max_angle_diff = angle - max_angle
+    min_angle_diff = angle_1to360(angle - min_angle)
+    max_angle_diff = angle_1to360(angle - max_angle)
     first_diff = nil
-    puts "WAS NOT: #{min_angle_diff.abs} > #{max_angle_diff.abs}"
     if min_angle_diff.abs > max_angle_diff.abs
-      puts "CASE 1"
       first_diff = max_angle_diff.abs
       value = max_angle
     else
-      puts "CASE 2"
       first_diff = min_angle_diff.abs
       value = min_angle
     end
@@ -300,28 +295,35 @@ class GeneralObject
     min_angle_diff = alt_angle - min_angle
     max_angle_diff = alt_angle - max_angle
     second_diff = nil
-    puts "WAS #{min_angle_diff.abs} > #{max_angle_diff.abs}"
     if min_angle_diff.abs > max_angle_diff.abs
-      puts "CASE 3"
       second_diff = max_angle_diff.abs
       alt_value = max_angle
     else
-      puts "CASE 4"
       second_diff = min_angle_diff.abs
       alt_value = min_angle
     end
     # puts "VALUE: #{value}"
-    puts "FIRST DIFF #{first_diff} and SECOND: #{second_diff}" 
     if first_diff > second_diff
-      puts "CASE 5"
       value = alt_value
     end
-    puts "VALUE: #{value}"
-    return value
+    # puts "VALUE: #{value}"
+    if options[:with_diff]
+      return [value, [first_diff, second_diff].min]
+    else
+      return value
+    end
   end
 
   def nearest_angle angle, min_angle, max_angle
-    GeneralObject.nearest_angle(angle, min_angle, max_angle)
+    return GeneralObject.nearest_angle(angle, min_angle, max_angle)
+  end
+
+  def self.nearest_angle_with_diff angle, min_angle, max_angle
+    return GeneralObject.nearest_angle(angle, min_angle, max_angle, {with_diff: true})
+  end
+
+  def nearest_angle_with_diff angle, min_angle, max_angle
+    return GeneralObject.nearest_angle(angle, min_angle, max_angle, {with_diff: true})
   end
 
 # # new_pos_x = @x / @screen_pixel_width.to_f * (AXIS_X_MAX - AXIS_X_MIN) + AXIS_X_MIN;
