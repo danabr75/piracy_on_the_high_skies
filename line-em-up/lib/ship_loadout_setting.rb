@@ -208,33 +208,27 @@ class ShipLoadoutSetting < Setting
   end
 
   def hardpoint_draw
-    @ship_hardpoints.each do |list|
-      if list.any?
-        list.each do |value|
-          click_area = value[:click_area]
-          if click_area
-            click_area.draw(0, 0)
-          else
-            # puts " NO CLICK AREA FOUND"
-          end
-          item = value[:item]
-          if item
-            image = item[:image]
-            if image
-              # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
-              image.draw(
-                value[:x] - (image.width  / 2),
-                value[:y] - (image.height / 2),
-                # value[:x] - (image.width  / 2)  + @cell_width  / 2,
-                # value[:y] - (image.height / 2)  + @cell_height / 2,
-                @hardpoint_image_z,
-                @width_scale, @height_scale
-              )
-            end
-          end
-        end
+    @ship_hardpoints.each do |value|
+      click_area = value[:click_area]
+      if click_area
+        click_area.draw(0, 0)
       else
-        # puts " KEY DID NOT HAVE Value"
+        # puts " NO CLICK AREA FOUND"
+      end
+      item = value[:item]
+      if item
+        image = item[:image]
+        if image
+          # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
+          image.draw(
+            value[:x] - (image.width  / 2),
+            value[:y] - (image.height / 2),
+            # value[:x] - (image.width  / 2)  + @cell_width  / 2,
+            # value[:y] - (image.height / 2)  + @cell_height / 2,
+            @hardpoint_image_z,
+            @width_scale, @height_scale
+          )
+        end
       end
     end
   end
@@ -326,8 +320,9 @@ class ShipLoadoutSetting < Setting
     # left_hardpoint_0
 
 
-    i = id.scan(/hardpoint_(\d+)/).first
-    i = i.to_i
+    result = id.scan(/hardpoint_(\d+)/).first
+    raise "Could not find hardpoint ID" if result.nil?
+    i = result.first.to_i
     # puts "PORT AND I: #{port} and #{i}"
 
     hardpoint_element = @ship_hardpoints[i]
@@ -343,7 +338,7 @@ class ShipLoadoutSetting < Setting
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         hardpoint_element[:item] = @cursor_object
         puts "CONFIG SETTING 1"
-        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         hardpoint_element[:item][:key] = id
         @cursor_object = nil
       else
@@ -354,7 +349,7 @@ class ShipLoadoutSetting < Setting
         hardpoint_element[:item] = @cursor_object
         hardpoint_element[:item][:key] = id
         puts "CONFIG SETTING 2 "
-        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         @cursor_object = temp_element
         @cursor_object[:key] = nil # Original home lost, no last home of key present
         # @cursor_object[:follow_cursor] = true
@@ -368,16 +363,16 @@ class ShipLoadoutSetting < Setting
       hardpoint_element[:item] = nil
         puts "CONFIG SETTING 3 "
         # Not working.. 
-      puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
-      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], nil)
+      # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
+      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], nil)
     elsif @cursor_object
       # Placeing something new in inventory
       hardpoint_element[:item] = @cursor_object
-      puts "PUTTING ELEMENT IN: #{hardpoint_element[:item]}"
-        puts "CONFIG SETTING 4 "
-      puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
-      puts hardpoint_element[:item][:klass]
-      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "#{port}_hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
+      # puts "PUTTING ELEMENT IN: #{hardpoint_element[:item]}"
+        # puts "CONFIG SETTING 4 "
+      # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
+      # puts hardpoint_element[:item][:klass]
+      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
       hardpoint_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
       @cursor_object = nil
