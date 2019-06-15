@@ -164,6 +164,9 @@ class PilotableShip < GeneralObject
   # def self.get_left_broadside_image path
   #   Gosu::Image.new("#{path}/left_broadside.png")
   # end
+  def get_image
+    @image
+  end
   def self.get_image path
     Gosu::Image.new("#{path}/default.png")
   end

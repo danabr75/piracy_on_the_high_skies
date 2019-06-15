@@ -21,6 +21,7 @@ class AIShip < ScreenMapFixedObject
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
 
+    options[:image] = BasicShip.get_image(BasicShip::SHIP_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
     @score = 0
@@ -132,15 +133,16 @@ class AIShip < ScreenMapFixedObject
     # puts "AI: front_hard_points.count #{@ship.front_hard_points.count}"
     # puts "AI2: front_hard_points #{@ship.front_hard_points.first}"
     projectiles = []
-    if @time_alive % 300 == 0
+    # if @time_alive % 300 == 0
       puts "AI ATTACKING FROM: #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+      # Have access to player momentum.. can try to predict player path for advanced enemies
       @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, player).each do |results|
 
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
       end
-    end
+    # end
 
 
     @ship.update(mouse_x, mouse_y, player)

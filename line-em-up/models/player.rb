@@ -51,7 +51,14 @@ class Player < ScreenFixedObject
     # @x = screen_pixel_width  / 2
     # @y = screen_pixel_height / 2
     # Can't get x and y until we know the screen size... hmmm
-    super()
+
+    # Have to get ship image before super, to get image size..
+    ship_klass_name = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
+    raise "Did not get Ship Class from config" if ship_klass_name.nil?
+    ship_klass = eval(ship_klass_name)
+  
+    # I HATE this image retrieval system!!!!
+    super({image: ship_klass.get_image(ship_klass::SHIP_MEDIA_DIRECTORY) })
     update_x_and_y(@screen_pixel_width  / 2, @screen_pixel_height / 2)
     puts "NEW2 X AND Y: #{@x} - #{@y}"
     # super(@screen_pixel_width  / 2, @screen_pixel_height / 2)
@@ -77,9 +84,6 @@ class Player < ScreenFixedObject
 
 
     # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"starboard_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"port_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
-    ship_klass_name = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
-    raise "Did not get Ship Class from config" if ship_klass_name.nil?
-    ship_klass = eval(ship_klass_name)
 
     hardpoint_data = self.class.get_hardpoint_data(ship_klass_name)
 
@@ -111,6 +115,7 @@ class Player < ScreenFixedObject
 
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
+    # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
     @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, @angle, options.merge(hardpoint_data))
   end
 
@@ -213,16 +218,16 @@ class Player < ScreenFixedObject
   # end
 
   # Issue with image.. probably shouldn't be using images to define sizes
-  # def get_image
-  #   # if @inited
-  #   #   @ship.get_image
-  #   # end
-  #   if @broadside_mode
-  #     Gosu::Image.new("#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship/spaceship_broadside.png")
-  #   else
-  #     Gosu::Image.new("#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship/spaceship.png")
-  #   end
-  # end
+  def get_image
+    if @inited
+      @ship.get_image
+    end
+    # if @broadside_mode
+    #   Gosu::Image.new("#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship/spaceship_broadside.png")
+    # else
+    #   Gosu::Image.new("#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship/spaceship.png")
+    # end
+  end
   
   # def get_image_path
   #   "#{MEDIA_DIRECTORY}/spaceship.png"

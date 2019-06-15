@@ -6,6 +6,8 @@ class GeneralObject
   attr_reader :current_map_pixel_x, :current_map_pixel_y
   attr_reader :current_map_tile_x,  :current_map_tile_y
   attr_reader :x_offset, :y_offset
+  attr_reader :image
+
   # attr_accessor :x_offset_base, :y_offset_base
   LEFT  = 'left'
   RIGHT = 'right'
@@ -18,7 +20,11 @@ class GeneralObject
   end
 
   def get_image
-    self.class.get_image
+    if @image
+      return image
+    else
+      self.class.get_image
+    end
   end
 
   def self.get_image_path
@@ -73,6 +79,9 @@ class GeneralObject
 
     @id    = SecureRandom.uuid
     @image = options[:image] || get_image
+    if self.class.name == "Player"
+      raise "DIDN't GET IMAGE from player" if @image.nil?
+    end
 
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health

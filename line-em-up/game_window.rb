@@ -591,7 +591,8 @@ class GameWindow < Gosu::Window
       if !@game_pause && !menus_active
 
         @projectiles.each do |projectile|
-          results = projectile.hit_objects([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
+          # Excluding buildings.. add back in when can aim bullets at ground.@buildings
+          results = projectile.hit_objects([@enemies, @enemy_destructable_projectiles])
           if results
             @pickups = @pickups + results[:drops]
             @player.score += results[:point_value]

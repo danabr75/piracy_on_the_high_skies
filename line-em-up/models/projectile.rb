@@ -188,6 +188,7 @@ class Projectile < ScreenMapFixedObject
           next
         end
         # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
+        # maybe add advanced collision in when support multi-threads
         if false && self.class.get_advanced_hit_box_detection
           # Disabling advanced hit detection for now
           self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
@@ -200,6 +201,14 @@ class Projectile < ScreenMapFixedObject
           raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
           raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
           raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
+          if @debug
+            if self.get_radius.nil?
+              raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
+            end
+            if object.get_radius.nil?
+              raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
+            end
+          end
           hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
         end
         if hit_object
