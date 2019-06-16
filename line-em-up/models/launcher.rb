@@ -13,6 +13,34 @@ class Launcher < GeneralObject
 
   HARDPOINT_NAME = "replace_me"  
   HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
+  PROJECTILE_CLASS = nil
+
+  def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options = {}
+    validate_not_nil([options], self.class.name, __callee__)
+    self.class::PROJECTILE_CLASS.new(
+      current_map_pixel_x, current_map_pixel_y, 
+      destination_angle, start_point, end_point,
+      self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle, self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle, hardpoint_firing_angle,
+      current_map_tile_x, current_map_tile_y,
+      owner_id, options
+    )
+  end
+
+  def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options = {}
+    validate_not_nil([options], self.class.name, __callee__) 
+    angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
+    angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
+
+    if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
+      if @cooldown_wait <= 0
+        projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options)
+        @cooldown_wait = get_cooldown
+        return projectile
+      end
+    else
+      # puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
+    end
+  end
 
   def self.get_hardpoint_media_location
     MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
@@ -27,16 +55,7 @@ class Launcher < GeneralObject
     # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{using_name}/hardpoint.png")
   end
 
-  def init_projectile
-    raise "Override me"
-  end
-
   def initialize(options = {})
-    # DID WE REALLY NEED THIS????????????????????????????????????????
-    # options[:relative_y_padding] = -(object.image_height_half)
-
-         # (width_scale, height_scale, screen_pixel_width, screen_pixel_height, object, initial_angle, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
-    # initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, tile_pixel_width = nil, tile_pixel_height = nil, options = {})
     super(options)
     @active = true
     @projectiles = []
@@ -44,9 +63,6 @@ class Launcher < GeneralObject
 
     @inited = true
     @cooldown_wait = 0
-    # @image_angle = options[:image_angle] || 0
-    # puts "IMAGE ANGLE: #{@image_angle}"
-    # raise "STOP "
   end
 
   def get_cooldown
@@ -59,16 +75,6 @@ class Launcher < GeneralObject
   #   # default
   #   Gosu::Image.new("#{MEDIA_DIRECTORY}/laser_beam_hardpoint.png")
   # end
-
-  def attack initial_angle, location_x, location_y, pointer
-    if @cooldown_wait <= 0
-      options = {damage_increase: @damage_increase}
-      projectile = init_projectile(options)
-      @projectiles << projectile
-      @cooldown_wait = get_cooldown
-      return projectile
-    end
-  end
 
   # Get image is called before the initialization is complete
   def self.get_image

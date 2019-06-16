@@ -14,6 +14,7 @@ class AIShip < ScreenMapFixedObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
+  attr_reader :current_momentum
   MAX_HEALTH = 200
   AGRO_TILE_DISTANCE = 3
   PREFERRED_MIN_TILE_DISTANCE = 1
@@ -178,7 +179,7 @@ class AIShip < ScreenMapFixedObject
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player, air_targets = [], ground_targets = []
-    puts "AI SHIP STARTING UPDATE: #{@id}"
+    # puts "AI SHIP STARTING UPDATE: #{@id}"
     # START AGRO SECTION
     # @current_agro = current_agro - 0.1 if @current_agro > 0.0
     # need to remove from map when ship is destroyed.. maybe, would save memory space if that's important
@@ -221,6 +222,11 @@ class AIShip < ScreenMapFixedObject
     # START FIRING SECTION
     if agro_target
       @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+        results[:projectiles].each do |projectile|
+          projectiles.push(projectile)
+        end
+      end
+      @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
@@ -276,6 +282,7 @@ class AIShip < ScreenMapFixedObject
 
         if is_within_preferred_angle 
           # Do not rotate
+          # CHECK TO SEE IF ALLY SHIP IS WHITHIN ANGLE, MAY NEED TO MOVE TO GET CLEAR FIRING
         else
           # find_nearest_angle_group ..maybe? nearest preferred angle would suffice.
           desired_angle, lowest_angle_diff = get_preferred_angle_and_rotational_diff(@firing_angle_preferences, destination_angle)
@@ -292,7 +299,7 @@ class AIShip < ScreenMapFixedObject
 
 
     @ship.update(mouse_x, mouse_y, player)
-    puts "AI SHIP UPDATE: #{@id}"
+    # puts "AI SHIP UPDATE: #{@id}"
     result = super(mouse_x, mouse_y, player)
 
     @ship.x = @x

@@ -14,9 +14,9 @@ class Hardpoint < GeneralObject
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
   attr_accessor :item
 
-  def initialize(x, y, z, group_number, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner_id, options = {})
+  def initialize(x, y, z, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner_id, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
-    @group_number = group_number
+    # @group_number = group_number
 
     @center_x = x
     @center_y = y
@@ -52,7 +52,9 @@ class Hardpoint < GeneralObject
     if @item_klass
       @assigned_weapon_class = @item_klass
       @image_hardpoint = @item_klass.get_hardpoint_image
+      @group_number  = @item_klass::FIRING_GROUP_NUMBER
     else
+      @group_number  = 1 # by default
       @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     end
 

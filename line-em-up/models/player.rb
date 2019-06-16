@@ -19,7 +19,7 @@ class Player < ScreenFixedObject
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
-  # attr_reader :health, :armor These go onto ships..
+  attr_reader :current_momentum
   MAX_HEALTH = 200
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -100,10 +100,10 @@ class Player < ScreenFixedObject
     # @ship.mass = 100 # Get from ship
     # @ship.mass = 300 # Get from ship
     @current_momentum = 0
-    @max_momentum = @ship.mass * 3 # speed here?
+    @max_momentum = @ship.mass# * 3 # speed here?
     # @ship.speed = 50 #/ (@ship.mass / 2)
     # @ship.speed = 100 #/ (@ship.mass / 2)
-    @rotation_speed = 2
+    @rotation_speed = 2 # Get this from ship
 
     # if @debug
     #   @health = @ship.get_health * 100000
@@ -420,6 +420,10 @@ class Player < ScreenFixedObject
     @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
   end
  
+  def attack_group_3 pointer
+    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+  end
+
   def deactivate_group_2
     @ship.deactivate_group_2
   end

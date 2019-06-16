@@ -623,9 +623,9 @@ class GLBackground
 
 
     # Moving to the RIGHT
-    if @local_map_movement_x >= @tile_pixel_width 
-      puts "TEST HERE: #{@gps_map_center_x} - #{@map_tile_width}"
-    end
+    # if @local_map_movement_x >= @tile_pixel_width 
+    #   puts "TEST HERE: #{@gps_map_center_x} - #{@map_tile_width}"
+    # end
     if @local_map_movement_x >= @tile_pixel_width && !(@gps_map_center_x >= @map_tile_width - 1)
       puts "ADDING IN ARRAY 3 "
       puts "!(@gps_map_center_x >= @map_tile_width)"

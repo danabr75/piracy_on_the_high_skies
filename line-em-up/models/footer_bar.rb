@@ -1,3 +1,5 @@
+# Move to UI subfolder
+
 require_relative 'general_object.rb'
 
 class FooterBar < GeneralObject

@@ -1,4 +1,4 @@
-require_relative 'dumb_projectile.rb'
+require_relative 'projectile.rb'
 require 'gosu'
 # require 'opengl'
 # require 'glu'

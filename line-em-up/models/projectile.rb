@@ -69,13 +69,12 @@ class Projectile < ScreenMapFixedObject
     end
 
     # Angle init is always mandatory, why have 'else'?
-    if @refresh_angle_on_updates
-      if angle_init
-        @end_image_angle = @angle + 90
-        @current_image_angle = angle_init + 90
-      else
-        @current_image_angle = @angle + 90
-      end
+    if @refresh_angle_on_updates && angle_init 
+      # @end_image_angle = @angle + 90
+      # @current_image_angle = angle_init + 90
+      # How useful is this..... imlpement when needed
+      # just going with the usual
+      @current_image_angle = @end_image_angle = @angle
     else
       @current_image_angle = @end_image_angle = @angle
     end

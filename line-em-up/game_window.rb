@@ -161,7 +161,7 @@ class GameWindow < Gosu::Window
       true
     )
     
-    @grappling_hook = nil
+    # @grappling_hook = nil
     
     @buildings = Array.new
     @projectiles = Array.new
@@ -532,20 +532,23 @@ class GameWindow < Gosu::Window
         @projectiles = @projectiles + (results[:projectiles] || [])
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
-          if @grappling_hook == nil && @player.grapple_hook_cooldown_wait <= 0
-            @grappling_hook = GrapplingHook.new(@scale, @width, @height, @player, self.mouse_x, self.mouse_y)
-            @player.grapple_hook_cooldown_wait = @grappling_hook.cooldown_delay
-          end
+            @player.attack_group_3(@pointer).each do |results|
+              projectiles = results[:projectiles]
+              projectiles.each do |projectile|
+                @projectiles.push(projectile)
+              end
+            end
         end
 
         if Gosu.button_down?(Gosu::MS_LEFT)
-          new_projectiles = @player.attack_group_2(@pointer)
-          # puts "NEW PROJECTILES: #{new_projectiles}" if @debug
-          if @debug
-            raise "BAD Projectile found: #{new_projectiles}" if new_projectiles.include?(nil)
-          end
-          @projectiles = @projectiles + new_projectiles
+            @player.attack_group_2(@pointer).each do |results|
+              projectiles = results[:projectiles]
+              projectiles.each do |projectile|
+                @projectiles.push(projectile)
+              end
+            end
         else
+          # MOVE ELSEWHERE... KEY UP
           # @player.deactivate_group_2
         end
 
@@ -553,16 +556,7 @@ class GameWindow < Gosu::Window
           # Player cooldown no longer used.
           # if @player.cooldown_wait <= 0
             @player.attack_group_1(@pointer).each do |results|
-            # puts "NEW PROJECTILESv2: #{results}" if @debug
               projectiles = results[:projectiles]
-              # cooldown = results[:cooldown]
-              # @player.cooldown_wait = cooldown.to_f.fdiv(@player.attack_speed)
-
-              # puts "GOOD PROJECTILE:"
-              # puts projectiles
-              #PROJECTILE:
-              # <Bullet:0x00007f8fc833b3c8>
-
               projectiles.each do |projectile|
                 @projectiles.push(projectile)
               end
@@ -586,7 +580,7 @@ class GameWindow < Gosu::Window
         end
 
 
-        @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
+        # @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
       end
 
       if !@game_pause && !menus_active
@@ -605,10 +599,10 @@ class GameWindow < Gosu::Window
         
         @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player) }
 
-        if @player.is_alive && @grappling_hook
-          grap_result = @grappling_hook.update(@player)
-          @grappling_hook = nil if !grap_result
-        end
+        # if @player.is_alive && @grappling_hook
+        #   grap_result = @grappling_hook.update(@player)
+        #   @grappling_hook = nil if !grap_result
+        # end
 
         @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player) }
 
@@ -796,7 +790,7 @@ class GameWindow < Gosu::Window
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 
     @player.draw() if @player.is_alive && !@ship_loadout_menu.active
-    @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
+    # @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
     if !menus_active && !@player.is_alive
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -839,6 +833,7 @@ class GameWindow < Gosu::Window
       @font.draw("GPS: #{@player.current_map_tile_x} - #{@player.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("MAP PIXEL: #{@player.current_map_pixel_x.round(1)} - #{@player.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Angle: #{@player.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Momentum: #{@player.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
       @font.draw("Cursor MAP PIXEL: #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -858,6 +853,7 @@ class GameWindow < Gosu::Window
         @font.draw("E GPS: #{@ships.last.current_map_tile_x} - #{@ships.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("E MAP PIXEL: #{@ships.last.current_map_pixel_x.round(1)} - #{@ships.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("E Angle: #{@ships.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E Momentum: #{@ships.last.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
       # if @enemy_projectiles.any?
       #   @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

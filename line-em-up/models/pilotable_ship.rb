@@ -120,7 +120,7 @@ class PilotableShip < GeneralObject
       options[:block_initial_angle] = true if disable_hardpoint_angles
       # raise "STOP RIGHT HERE" if disable_hardpoint_angles
       hp = Hardpoint.new(
-        x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
+        x, y, hardpoint_z, location[:x_offset].call(get_image, @width_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner_id, options
       )
       @hardpoints[index] = hp
@@ -347,6 +347,10 @@ class PilotableShip < GeneralObject
     return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 2)
   end
 
+  def attack_group_3 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 3)
+  end
+
   def deactivate_group_1
     deactivate_group(1)
   end
@@ -355,6 +359,9 @@ class PilotableShip < GeneralObject
     deactivate_group(2)
   end
 
+  def deactivate_group_3
+    deactivate_group(3)
+  end
 
   def draw
     @drawable_items_near_self.reject! { |item| item.draw }
