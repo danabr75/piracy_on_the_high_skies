@@ -216,7 +216,7 @@ class GameWindow < Gosu::Window
 
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
-    @ships = values[:enemies]
+    @ships = values[:ships]
     @pickups = values[:pickups]
 
     # @scroll_factor = 1
@@ -621,8 +621,10 @@ class GameWindow < Gosu::Window
         @destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
 
-
+        # puts "SHIPS HERE: #{@ships.count}"
+        # puts "SHIPS ids: #{@ships.collect{|s| s.id }}"
         @ships.reject! do |ship|
+          # puts "CALLING SHIP UPDATE HERE: #{ship.id}"
           results = ship.update(nil, nil, @player, @ships + [@player], @buildings)
           # puts "RESULTS HERE: #{results}" if results[:projectiles]
           #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
@@ -634,8 +636,11 @@ class GameWindow < Gosu::Window
           end
 
           # @enemy_projectiles = @enemy_projectiles + results[:projectiles]
-          return results[:is_alive]
+          # puts "SHIP ID HERE: #{ship.id} and is alive? : #{results[:is_alive]}"
+          !results[:is_alive]
         end
+        # puts "END SHIP UPDATE HERE"
+        # raise "ERROR HERER" if @ships.count == 0
 
         # if @boss
         #   result = @boss.update(nil, nil, @player)

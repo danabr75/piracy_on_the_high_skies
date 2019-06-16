@@ -75,7 +75,7 @@ class AIShip < ScreenMapFixedObject
   end
 
   def rotate_counterclockwise
-    puts "ROTATING COUNTER AI"
+    # puts "ROTATING COUNTER AI"
     increment = @rotation_speed
     if @angle + increment >= 360
       @angle = (@angle + increment) - 360
@@ -88,7 +88,7 @@ class AIShip < ScreenMapFixedObject
   end
 
   def rotate_clockwise
-    puts "ROTATING AI"
+    # puts "ROTATING AI"
     increment = @rotation_speed
     if @angle - increment <= 0
       @angle = (@angle - increment) + 360
@@ -162,6 +162,8 @@ class AIShip < ScreenMapFixedObject
   end
 
   def draw
+    # puts "DRAWING AI SHIP: #{@id} - #{@x} - #{@y}"
+    # question = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
 
     # i2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
     # i2.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
@@ -169,12 +171,14 @@ class AIShip < ScreenMapFixedObject
     # @drawable_items_near_self.reject! { |item| item.draw }
     # puts "DRAWING SHIP - #{@x} - #{@y}"
     # @ship.front_hard_points.first.image_hardpoint.draw_rot(@x, @y, ZOrder::Hardpoint, @angle, 0.5, 0.5, @width_scale, @height_scale)
-    @ship.draw({test: true})
+    # question.draw(@x, @y, 5000, @width_scale, @height_scale)
+    @ship.draw
   end
 
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player, air_targets = [], ground_targets = []
+    puts "AI SHIP STARTING UPDATE: #{@id}"
     # START AGRO SECTION
     # @current_agro = current_agro - 0.1 if @current_agro > 0.0
     # need to remove from map when ship is destroyed.. maybe, would save memory space if that's important
@@ -194,6 +198,8 @@ class AIShip < ScreenMapFixedObject
       next if target.id == self.id
       # Implement relationships.
       # next if target.allied
+      # FOR TESTING, to keep them from murdering each other
+      next if target.id != player.id
 
       # check distance if not allied
       # if tile distance is less than agro distance, then you increase agro against that target
@@ -286,8 +292,9 @@ class AIShip < ScreenMapFixedObject
 
 
     @ship.update(mouse_x, mouse_y, player)
-    # puts "AI UPDATE: #{@x} - #{@y}"
+    puts "AI SHIP UPDATE: #{@id}"
     result = super(mouse_x, mouse_y, player)
+
     @ship.x = @x
     @ship.y = @y
 

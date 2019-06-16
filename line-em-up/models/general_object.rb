@@ -623,11 +623,13 @@ class GeneralObject
 
   def convert_map_pixel_location_to_screen player
     @x = (player.current_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
+    # puts "X #{@x} GENERATED FOR OBJECT ID: #{@id}"
     # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
 
     # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
     # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
     @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height / 2)
+    # puts "Y #{@y} GENERATED FOR OBJECT ID: #{@id}"
   end
 
   # object can be player.. or an enemy. This is used to calculate projectiles emerging from hardpoints.

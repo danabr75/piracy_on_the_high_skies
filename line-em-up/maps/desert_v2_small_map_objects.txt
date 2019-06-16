@@ -28,24 +28,24 @@
   },
 
 
-  "enemies":{
+  "ships":{
     "125":{
       "125":[
         {"klass_name":"AIShip","data":null}
       ]
     },
-    "125":{
-      "123":[
+    "124":{
+      "124":[
         {"klass_name":"AIShip","data":null}
       ]
     },
     "123":{
-      "125":[
+      "123":[
         {"klass_name":"AIShip","data":null}
       ]
     },
-    "121":{
-      "125":[
+    "122":{
+      "122":[
         {"klass_name":"AIShip","data":null}
       ]
     }

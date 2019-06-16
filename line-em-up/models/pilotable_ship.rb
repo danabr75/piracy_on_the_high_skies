@@ -356,7 +356,7 @@ class PilotableShip < GeneralObject
   end
 
 
-  def draw options = {}
+  def draw
     @drawable_items_near_self.reject! { |item| item.draw }
     # puts "DRAWING HARDPOINTS"
     # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
@@ -368,9 +368,6 @@ class PilotableShip < GeneralObject
     @image.draw_rot(@x, @y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
-
-  POINTS_X = 7
-  POINTS_Y = 7
 
   def draw_gl_list
     @drawable_items_near_self + [self]

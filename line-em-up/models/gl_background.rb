@@ -263,7 +263,7 @@ class GLBackground
     # @gps_map_center_y =  (@current_map_pixel_center_y / (@tile_pixel_height)).round
 
     buildings = []
-    enemies = []
+    ships = []
     pickups = []
     # puts "@map_objects"
     # puts @map_objects.inspect
@@ -297,9 +297,9 @@ class GLBackground
       end
     end
 
-    puts "ENEMEIS: #{@map_objects["enemies"].count}"
-    if @map_objects["enemies"]
-      datas = @map_objects["enemies"]
+    puts "ENEMEIS: #{@map_objects["ships"].count}"
+    if @map_objects["ships"]
+      datas = @map_objects["ships"]
       datas.each do |y_value, data|
         # puts "building DATA - #{y_index} - #{x_index}"
         puts "y_value: #{y_value}, data: #{data}"
@@ -307,7 +307,7 @@ class GLBackground
           elements.each do |element|
             klass = eval(element["klass_name"])
             # IF pixels exist in the future, load pixels.... If so, need to multiply pixels by scale., and then divide by scale before saving.
-            enemies << klass.new(nil, nil, x_value.to_i, y_value.to_i)
+            ships << klass.new(nil, nil, x_value.to_i, y_value.to_i)
           end
         end
       end
@@ -316,8 +316,8 @@ class GLBackground
     # @only return active objects?
     # Except enemies, cause they can have movement outside of the visible map?
     puts "RETURING BUILDINGS: #{buildings.count}"
-    puts "RETURING ENEMIES: #{enemies.count}"
-    return {enemies: enemies, pickups: pickups, buildings: buildings}
+    puts "RETURING ships: #{ships.count}"
+    return {ships: ships, pickups: pickups, buildings: buildings}
   end
 
   # def convert_gps_to_screen
