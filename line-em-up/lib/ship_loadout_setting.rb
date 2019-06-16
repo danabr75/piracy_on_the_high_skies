@@ -72,7 +72,7 @@ class ShipLoadoutSetting < Setting
 
 
     hardpoint_data = Player.get_hardpoint_data(@ship_value)
-    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, 0, {use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
+    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, 0, "INVENTORY_ID", {use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
 
     # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
@@ -507,7 +507,11 @@ class ShipLoadoutSetting < Setting
 
   def get_large_image
     klass = eval(@ship_value)
-    return klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY)
+    large_image = klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY)
+    # puts "LARGE IMAGE HERE"
+    # puts large_image
+    # stop
+    return large_image
   end
 
   # deprecated

@@ -274,12 +274,17 @@ class GeneralObject
   end
 
   # Which angle is nearest
-  # NOT SURE IF THIS IS FULLY WORKING
+  # FULLY WORKING
   def self.nearest_angle angle, min_angle, max_angle, options = {}
     # puts "NEAREST ANGLE #{angle} - #{min_angle} - #{max_angle}"
     value = nil
-    min_angle_diff = angle_1to360(angle - min_angle)
-    max_angle_diff = angle_1to360(angle - max_angle)
+
+    min_angle = angle_1to360(min_angle)
+    max_angle = angle_1to360(max_angle)
+    angle = angle_1to360(angle)
+
+    min_angle_diff = angle - min_angle
+    max_angle_diff = angle - max_angle
     first_diff = nil
     if min_angle_diff.abs > max_angle_diff.abs
       first_diff = max_angle_diff.abs
@@ -313,6 +318,14 @@ class GeneralObject
       return value
     end
   end
+  raise "Validation failed" unless GeneralObject.nearest_angle(0.0, 30.0, 340.0)    == 340.0
+  raise "Validation failed" unless GeneralObject.nearest_angle(5.0, 20.0, 359.0)    == 359.0
+  raise "Validation failed" unless GeneralObject.nearest_angle(359.0, 5.0, 275.0)   == 5.0
+  raise "Validation failed" unless GeneralObject.nearest_angle(136.0, 90.0, 180.0)  == 180.0
+  raise "Validation failed" unless GeneralObject.nearest_angle(275.0, 180.0, 270.0) == 270.0
+  raise "Validation failed" unless GeneralObject.nearest_angle(278, 320, 20) == 320.0
+  raise "Validation failed" unless GeneralObject.nearest_angle(278, 20, 320) == 320.0
+
 
   def nearest_angle angle, min_angle, max_angle
     return GeneralObject.nearest_angle(angle, min_angle, max_angle)
@@ -321,6 +334,8 @@ class GeneralObject
   def self.nearest_angle_with_diff angle, min_angle, max_angle
     return GeneralObject.nearest_angle(angle, min_angle, max_angle, {with_diff: true})
   end
+  raise "Validation failed" unless GeneralObject.nearest_angle_with_diff(278, 20, 320) == [320.0, 42]
+  raise "Validation failed" unless GeneralObject.nearest_angle_with_diff(278, 320, 20) == [320.0, 42]
 
   def nearest_angle_with_diff angle, min_angle, max_angle
     return GeneralObject.nearest_angle(angle, min_angle, max_angle, {with_diff: true})
@@ -466,7 +481,7 @@ class GeneralObject
     # puts "POST MOVE: #{new_x} x #{new_y}"
     # Because X is swapped
     # Not sure why we're reversing direction of x here.. maybe a miscalculation on the Math
-    x_diff = (@current_map_pixel_x - new_x) * -1
+    x_diff = (@current_map_pixel_x - new_x)# * -1
     y_diff = @current_map_pixel_y - new_y
 
     # puts "(#{@current_map_pixel_y} - #{y_diff}) > #{@map_pixel_height}"

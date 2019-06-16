@@ -19,6 +19,7 @@ class PilotableShip < GeneralObject
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   attr_accessor :hardpoints
   MAX_HEALTH = 200
+  INIT_HEALTH = 200
 
   # FRONT_HARDPOINT_LOCATIONS = []
   # PORT_HARDPOINT_LOCATIONS = []
@@ -52,8 +53,10 @@ class PilotableShip < GeneralObject
     # @left_image = self.class.get_left_image(path)
     # @right_broadside_image = self.class.get_right_broadside_image(path)
     # @left_broadside_image = self.class.get_left_broadside_image(path)
+    disable_hardpoint_angles = false
     if options[:use_large_image]
       @use_large_image = true
+      disable_hardpoint_angles = true
       @image = self.class.get_large_image(path)
     else
       @image = self.class.get_image(path)
@@ -71,7 +74,11 @@ class PilotableShip < GeneralObject
     @grapple_hook_cooldown_wait = 0
     @attack_speed = 3
     # @attack_speed = 3
-    @health = 100.0
+    if @debug
+      @health = INIT_HEALTH * 10000
+    else
+      @health = INIT_HEALTH
+    end
     @armor = 0
     @rockets = 50
     # @rockets = 250
@@ -110,6 +117,8 @@ class PilotableShip < GeneralObject
       item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       raise "bad slot type" if location[:slot_type].nil?
       raise "bad anlge"     if location[:angle_offset].nil?
+      options[:block_initial_angle] = true if disable_hardpoint_angles
+      # raise "STOP RIGHT HERE" if disable_hardpoint_angles
       hp = Hardpoint.new(
         x, y, hardpoint_z, 1, location[:x_offset].call(get_image, @width_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner_id, options
@@ -175,6 +184,7 @@ class PilotableShip < GeneralObject
     Gosu::Image.new("#{path}/large.png")
   end
 
+  # these should be get_init_*
   def self.get_mass
     self.class::MASS
   end
@@ -182,11 +192,11 @@ class PilotableShip < GeneralObject
     self.class::SPEED
   end
 
-  def get_armor
-    self.class::ARMOR
-  end
+  # def get_armor
+  #   self.class::ARMOR
+  # end
   def get_health
-    self.class::HEALTH
+    @health
   end
 
   # def self.get_right_image path
@@ -314,7 +324,8 @@ class PilotableShip < GeneralObject
   def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
     results = []
     @hardpoints.each do |hp|
-      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group
+      puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
+      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group && hp.item
     end
     # results = results.flatten
     results.reject!{|v| v.nil?}
@@ -354,7 +365,7 @@ class PilotableShip < GeneralObject
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
       @hardpoints.each { |item| item.draw(@x, @y, @angle) }
     end
-    @image.draw_rot(@x, @y, @z, @angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x, @y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 

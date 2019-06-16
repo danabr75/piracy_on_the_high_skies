@@ -36,7 +36,7 @@ class Projectile < ScreenMapFixedObject
 
     @launched_from_id = launched_from_id
 
-    @angle = destination_angle
+    @angle = self.class.angle_1to360(destination_angle)
     puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
 
     @radian = calc_radian(start_point, end_point)
@@ -54,29 +54,8 @@ class Projectile < ScreenMapFixedObject
       @angle = @angle - 360.0
     end
 
-    if angle_min
-      if angle_min < 0.0
-        # puts "1ANGLE WAS: #{angle_min}"
-        angle_min = 360 - angle_min.abs
-        # puts "1NEW ANGLE: #{angle_min}"
-      elsif angle_min > 360.0
-        # puts "2ANGLE WAS: #{angle_min}"
-        angle_min = angle_min - 360
-        # puts "2NEW ANGLE: #{angle_min}"
-      end
-    end
-
-    if angle_max
-      if angle_max < 0.0
-        # puts "3ANGLE WAS: #{angle_max}"
-        angle_max = 360 - angle_max.abs
-        # puts "3NEW ANGLE: #{angle_max}"
-      elsif angle_max > 360.0
-        # puts "4ANGLE WAS: #{angle_max}"
-        angle_max = angle_max - 360
-        # puts "4NEW ANGLE: #{angle_max}"
-      end
-    end
+    angle_min = self.class.angle_1to360(angle_min)
+    angle_max = self.class.angle_1to360(angle_max)
 
     if angle_min.nil? && angle_max.nil?
       # do nothing
@@ -98,7 +77,7 @@ class Projectile < ScreenMapFixedObject
         @current_image_angle = @angle + 90
       end
     else
-      @current_image_angle = @end_image_angle = @angle + 90
+      @current_image_angle = @end_image_angle = @angle
     end
 
     # if it's min, incrementer is negative, else pos
@@ -117,7 +96,6 @@ class Projectile < ScreenMapFixedObject
 
   def update mouse_x, mouse_y, player
     if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
-
       if @current_image_angle != @end_image_angle
         @current_image_angle = @current_image_angle + @image_angle_incrementor
         # if it's negative
@@ -156,7 +134,7 @@ class Projectile < ScreenMapFixedObject
   def draw
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle - 90, 0.5, 0.5, @width_scale, @height_scale)
+      @image.draw_rot(@x, @y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
     end
   end
 
@@ -219,9 +197,9 @@ class Projectile < ScreenMapFixedObject
           hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
         end
         if hit_object
-          puts "COLLISION DETECTED!!!!! - #{self.class.name} - to #{object.class.name}"
-          puts "Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius"
-          puts "Gosu.distance(#{@current_map_pixel_x}, #{@current_map_pixel_y}, #{object.current_map_pixel_x}, #{object.current_map_pixel_y}) < #{self.get_radius} + #{object.get_radius}"
+          # puts "COLLISION DETECTED!!!!! - #{self.class.name} - to #{object.class.name}"
+          # puts "Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius"
+          # puts "Gosu.distance(#{@current_map_pixel_x}, #{@current_map_pixel_y}, #{object.current_map_pixel_x}, #{object.current_map_pixel_y}) < #{self.get_radius} + #{object.get_radius}"
           # raise "STOP HERE"
           # hit_object = true
           if self.class.get_aoe <= 0

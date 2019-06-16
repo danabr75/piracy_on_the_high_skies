@@ -12,6 +12,7 @@ include GLUT
 class Hardpoint < GeneralObject
   attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle_from_center, :center_x, :center_y
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
+  attr_accessor :item
 
   def initialize(x, y, z, group_number, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner_id, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
@@ -27,20 +28,19 @@ class Hardpoint < GeneralObject
     puts "GHARDPOINT ID: #{@id}"
 
     # Scale is already built into offset, via the lambda call
-    @x_offset = x_offset #* -1#* width_scale
+    @x_offset = -x_offset #* -1#* width_scale
     @y_offset = y_offset #* height_scale
 
-    # Storing the angle offset here.. oddly enough, don't need it here. Could replace options[:image_angle]
-    # The actual angle is calculated via the start and end point
+    # Used for image calculation and firing angle
     @angle_offset = angle_offset
-    # @angle_offset = 90 if item
 
     if options[:block_initial_angle]
       puts "block_initial_angle"
-      # X IS flipped when non-angling, to be compatible to be displayed without using the angle system.
+      # We're minus, cause the screen and map x are opposed. If we're not angling, then we don't have to obey the map orientation.
       @x = x - @x_offset
       @y = y + @y_offset
     else
+      # X IS flipped when non-angling because the Screen X and the Map X are opposed
       @x = x + @x_offset
       @y = y + @y_offset
     end
@@ -66,10 +66,24 @@ class Hardpoint < GeneralObject
     end_point   = OpenStruct.new(:x => @x, :y => @y)
     # end_point = OpenStruct.new(:x => @center_x,        :y => @center_y)
     # start_point   = OpenStruct.new(:x => @x, :y => @y)
-    @angle_from_center = calc_angle(start_point, end_point)
+    @angle_from_center = self.class.angle_1to360(calc_angle(start_point, end_point) - 90)
+
+    # if @item_klass
+    #   puts "START: #{start_point}"
+    #   puts " END : #{end_point}"
+    #   puts "@angle_from_center: #{@angle_from_center}"
+    #   # START: #<OpenStruct x=450, y=450>
+    #   #  END : #<OpenStruct x=462.05357142857144, y=401.25>
+    #   # @angle_from_center: 346.1119988390932
+    #   # END HARDPOINT f16d336d-26ef-4a69-a132-ea131733c711
+    #   # @ANGLE_FROM_CENTER: 346.1119988390932
+    #   # stop
+
+    # end
+    @angle_from_center = @angle_from_center
+
     # ANGLE INIT HERE: 60.97169847574529
     # ANGLE IS OFF, NOT SURE WHY
-    @angle_from_center = @angle_from_center + 5
     # @init_angle = @angle_from_center + current_ship_angle
      # "INIT ANGLE HERE" if options[:from_player]
     # puts "#{@init_angle} = #{@angle_from_center} + #{current_ship_angle}"
@@ -103,6 +117,7 @@ class Hardpoint < GeneralObject
     @item = @item_klass.new({image_angle: @angle_from_center}) if @item_klass
     puts "END HARDPOINT #{@id}"
     @owner_id = owner_id
+    puts "@ANGLE_FROM_CENTER: #{@angle_from_center}" if @item
   end
 
 
@@ -151,12 +166,12 @@ class Hardpoint < GeneralObject
 
   # Pointer can be cursor.. or player..
   def attack current_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
-    puts "HARDPOINT ATTACK: #{[current_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
+    # puts "HARDPOINT ATTACK: #{[current_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
     # pointer convert to map_pixel_x and y!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     # puts "pointer"
     # puts pointer
     destination_map_pixel_x, destination_map_pixel_y = convert_pointer_to_map_pixel(pointer)
-    puts "DESTINATION ATTACK: #{[current_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
+    # puts "DESTINATION ATTACK: #{[current_ship_angle, current_map_pixel_x, current_map_pixel_y]}"
 
     # puts "destination_map_pixel_x, destination_map_pixel_y: #{destination_map_pixel_x}  -- #{destination_map_pixel_y}"
     # puts "current_map_pixel_x, current_map_pixel_y: #{current_map_pixel_x}  -- #{current_map_pixel_y}"
@@ -180,48 +195,49 @@ class Hardpoint < GeneralObject
     end
 
     if can_attack
+
+
+      # TECHNICALLY, should factor in hardpoint location, not player location here
       start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
       end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
       # Reorienting angle to make 0 north
-      destination_angle = calc_angle(start_point, end_point) - 90
-      if destination_angle < 0.0
-        destination_angle = 360.0 - destination_angle.abs
-      elsif destination_angle > 360.0
-        destination_angle = destination_angle - 360.0
-      end
+      destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
 
       raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
 
-      # DRAWING
-    # Pointed North
-    # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
-    # Pointed West
-    # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
-      # ATTACHKING NORTH
-      # ATTACking ANGLE HERE:  76.11199883909319 = 76.11199883909319 + 0
-      # ATTCKING WEST
-      # 
-      # puts "ATTACking ANGLE HERE:  #{@angle_from_center + current_ship_angle + @angle_offset} = #{@angle_from_center} + #{current_ship_angle}  + #{@angle_offset}"
-      step = (Math::PI/180 * (@angle_from_center + current_ship_angle)) + 90.0 + 45.0# - 180
+      # Calculate New Projectile location, based of ships angle, and the hardpoints angle from center
+      angle_correction = 5
+      step = (Math::PI/180 * (360 -  @angle_from_center + current_ship_angle + 90 + angle_correction)) + 90.0 + 45.0# - 180
       # step = step.round(5)
-      puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
+      # puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
       projectile_x = Math.cos(step) * @radius + current_map_pixel_x
       # Adjustment - due to X offset issue
-      projectile_x = current_map_pixel_x + (current_map_pixel_x - projectile_x)
+      # projectile_x = current_map_pixel_x + (current_map_pixel_x - projectile_x)
       projectile_y = Math.sin(step) * @radius + current_map_pixel_y
-      # projectile_y = current_map_pixel_y + (current_map_pixel_y - projectile_y)
-      puts "OUTGOING: #{projectile_x.round(2)} - #{projectile_y.round(2)}"
-      puts "WHATISB : #{(current_map_pixel_x + @x_offset).round(2)} - #{(current_map_pixel_y + @y_offset).round(2)}"
+      puts "NEW PROJECTILE LOCATION: #{projectile_x} - #{projectile_y}"
+      #                          14062.5 - 14062.5
+      # NEW PROJECTILE LOCATION: 14074   - 14013
 
-      # attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_map_pixel_x, destination_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {}
-      # 426.0202923020712 = 66.02029230207123 + 90 + 270
-      #   should be correct: initial_angle
-      #   should be correct: initial_angle
-      puts "BULLET LAUNCHER ANGLE ALLOWANCE:"
-      puts "current_ship_angle + @angle_offset"
-      puts "#{current_ship_angle + @angle_offset} = #{current_ship_angle} + #{@angle_offset}"
+
+
       # The attack angle should be opposite of the angle offset.
-      attack_projectile = @item.attack(current_ship_angle - @angle_offset, projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, @owner_id, options)
+      puts "ATTACK PROJECTILE ANGLE PARTS: #{@angle_from_center} + #{current_ship_angle}"
+      puts "ATTACK PROJECTILE ANGLE TOTAL: #{@angle_from_center + current_ship_angle}"
+      puts "PROJ X - Y: #{[projectile_x, projectile_y]}"
+      # ATTACK PROJECTILE ANGLE TOTAL: 346.1119988390932
+      # PROJ X - Y: [14015.005876306872, 14078.814389317577]
+
+
+      # HARDPOINT HERE: initial_ship_angle 0
+      # NEW PROJECTILE LOCATION: 14040.557574186598 - 14035.451149728948
+      # ATTACK PROJECTILE ANGLE PARTS: 33.979707697928774 + 0
+      # ATTACK PROJECTILE ANGLE TOTAL: 33.979707697928774
+      # PROJ X - Y: [14040.557574186598, 14035.451149728948]
+      
+      # stop
+
+      # Hardpoints angle_from_center IS USED TO CALCULATE POS X,Y, not to find firing angle.
+      attack_projectile = @item.attack(current_ship_angle - @angle_offset,  projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, @owner_id, options)
       @drawable_items_near_self << @item
     end
 
@@ -248,23 +264,19 @@ class Hardpoint < GeneralObject
   # end
 
   def draw center_x, center_y, ship_current_angle
-    # puts "DRAWING HARDPOINT ANGLE: #{angle + @angle_from_center} = #{angle} + #{@angle_from_center}" if @item
-    # Pointed North
-    # DRAWING HARDPOINT ANGLE: 76.11199883909319 = 0 + 76.11199883909319
-    # Pointed West
-    # DRAWING HARDPOINT ANGLE: 346.1119988390932 = 270 + 76.11199883909319
-    step = (Math::PI/180 * (ship_current_angle + @angle_from_center)) + 90.0 + 45.0# - 180
+    drawing_correction  = 6
+    step = (Math::PI/180 * (360 - ship_current_angle + @angle_from_center + 90 + drawing_correction)) + 90.0 + 45.0# - 180
     # step = step.round(5)
     @x = Math.cos(step) * @radius + center_x
     @y = Math.sin(step) * @radius + center_y
 
     # puts "DRAWING HARDPOINT: #{@x} and #{@y}"
-    @drawable_items_near_self.reject! { |item| item.draw }
+    # @drawable_items_near_self.reject! { |item| item.draw }
 
     # if @image_angle != nil
     # angle = @angle_from_center + @image_angle
     # puts "ANGLE HERE: #{angle}"
-    @image_hardpoint.draw_rot(@x, @y, @z, ship_current_angle - @angle_offset, 0.5, 0.5, @width_scale, @height_scale)
+    @image_hardpoint.draw_rot(@x, @y, @z, -ship_current_angle + @angle_offset, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def draw_gl

@@ -187,19 +187,19 @@ class GameWindow < Gosu::Window
     reset_font_ui_y
 
     # @boss_active_at_enemies_killed = 500
-    if @difficulty == 'easy'
-      @boss_active_at_enemies_killed = 300
-      @boss_active_at_level          = 2
-      @handicap = 0.3
-    elsif @difficulty == "medium"
-      @boss_active_at_level          = 3
-      @boss_active_at_enemies_killed = 450
-      @handicap = 0.6
-    else
-      @boss_active_at_level          = 4
-      @boss_active_at_enemies_killed = 700
-      @handicap = 1
-    end
+    # if @difficulty == 'easy'
+    #   @boss_active_at_enemies_killed = 300
+    #   @boss_active_at_level          = 2
+    #   @handicap = 0.3
+    # elsif @difficulty == "medium"
+    #   @boss_active_at_level          = 3
+    #   @boss_active_at_enemies_killed = 450
+    #   @handicap = 0.6
+    # else
+    #   @boss_active_at_level          = 4
+    #   @boss_active_at_enemies_killed = 700
+    #   @handicap = 1
+    # end
 
     # @player = Player.new(
     #   @scale, @width / 2, @height / 2, @width, @height,
@@ -508,13 +508,13 @@ class GameWindow < Gosu::Window
         end
 
         if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
-          @player.rotate_clockwise
           # @can_toggle_scroll_factor = false
+          @player.rotate_counterclockwise
         end
 
         if Gosu.button_down?(Gosu::KB_D)# && @can_toggle_scroll_factor
           # @can_toggle_scroll_factor = false
-          @player.rotate_counterclockwise
+          @player.rotate_clockwise
         end
 
         @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
@@ -815,7 +815,7 @@ class GameWindow < Gosu::Window
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Armor: #{@player.armor}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Armor: #{@player.armor}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Rockets: #{@player.rockets}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'missile'
       # @font.draw("Bombs: #{@player.bombs}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'bomb'
       @font.draw("Time Alive: #{@player.time_alive}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

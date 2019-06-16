@@ -19,7 +19,7 @@ class Player < ScreenFixedObject
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
-  attr_reader :health, :armor
+  # attr_reader :health, :armor These go onto ships..
   MAX_HEALTH = 200
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -105,13 +105,21 @@ class Player < ScreenFixedObject
     # @ship.speed = 100 #/ (@ship.mass / 2)
     @rotation_speed = 2
 
-    @health = @ship.get_health
-    @armor = @ship.get_armor
+    # if @debug
+    #   @health = @ship.get_health * 100000
+    # else
+    #   @health = @ship.get_health
+    # end
+    # @armor = @ship.get_armor
   end
 
   # def get_armor
   #   @ship.armor    
   # end
+
+  def health
+    @ship.get_health
+  end
 
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
@@ -438,6 +446,7 @@ class Player < ScreenFixedObject
   end
   
   def update mouse_x, mouse_y, player, movement_x, movement_y
+    # puts "PLAYER ANGLE: #{@angle}"
     # run_pixel_to_tile_validations
     # raise "ISSUE" if movement_x.class != Integer || movement_y.class != Integer 
     # puts "HERE: #{@current_map_pixel_x.class} - #{@current_map_pixel_y.class}"

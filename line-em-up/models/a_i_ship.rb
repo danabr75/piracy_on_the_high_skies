@@ -15,7 +15,7 @@ class AIShip < ScreenMapFixedObject
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
   MAX_HEALTH = 200
-  AGRO_TILE_DISTANCE = 2
+  AGRO_TILE_DISTANCE = 3
   # in seconds
   # ANGRO MAX is 10 seconds
   AGRO_MAX = 10 * 60
@@ -33,7 +33,7 @@ class AIShip < ScreenMapFixedObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @angle = 0
+    @angle = 90
 
     hardpoint_data = Player.get_hardpoint_data('BasicShip')
     @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, @id, hardpoint_data)
@@ -41,10 +41,16 @@ class AIShip < ScreenMapFixedObject
     @ship.y = @y
     @current_momentum = 0
     @max_momentum = @ship.mass # speed here?
-    @rotation_speed = 2
+
+    if @debug
+      @rotation_speed = 1
+    else
+
+      @rotation_speed = 2
+    end
 
     @health = @ship.get_health
-    @armor = @ship.get_armor
+    # @armor = @ship.get_armor
 
     # 0 is north
     # Angle the broadsides at the target
@@ -66,6 +72,7 @@ class AIShip < ScreenMapFixedObject
   end
 
   def rotate_counterclockwise
+    puts "ROTATING COUNTER AI"
     increment = @rotation_speed
     if @angle + increment >= 360
       @angle = (@angle + increment) - 360
@@ -78,6 +85,7 @@ class AIShip < ScreenMapFixedObject
   end
 
   def rotate_clockwise
+    puts "ROTATING AI"
     increment = @rotation_speed
     if @angle - increment <= 0
       @angle = (@angle - increment) + 360
@@ -212,20 +220,83 @@ class AIShip < ScreenMapFixedObject
         start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
         end_point   = OpenStruct.new(:x => agro_target.current_map_pixel_x, :y => agro_target.current_map_pixel_y)
         # Reorienting angle to make 0 north
-        destination_angle = calc_angle(start_point, end_point) - 90
-        if destination_angle < 0.0
-          destination_angle = 360.0 - destination_angle.abs
-        elsif destination_angle > 360.0
-          destination_angle = destination_angle - 360.0
-        end
+        # WHY IS DESTINATION ANGLE OFF? IT"S REVERSED
+        destination_angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+        puts "DESTINATION ANGLE: #{destination_angle}"
         # if destination_angle is within one of the preferred angles?
-        puts "AI: destination_angle: #{destination_angle}"
+        # puts "AI: destination_angle: #{destination_angle}"
         is_within_preferred_angle = false
         # @firing_angle_preferences = [(240..300), (60..120)]
         @firing_angle_preferences.each do |ap|
           # NOTE: is_angle_between_two_angles is currently not working.. issues with the 0.. FIX IT HERE AND HOW
-          is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle, ap[0], ap[1])
+          is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle + @angle, ap[0] + @angle, ap[1] + @angle)
+          puts "is_angle_between_two_angles?(#{destination_angle + @angle}, #{ap[0] + @angle},#{ ap[1] + @angle}) WAS TRUE while angle was #{@angle}".upcase if is_within_preferred_angle
           break if is_within_preferred_angle
+        end
+
+        if is_within_preferred_angle 
+          # Do not rotate
+        else
+          # find_nearest_angle_group ..maybe? nearest preferred angle would suffice.
+          lowest_angle_diff = nil
+          desired_angle = nil
+          @firing_angle_preferences.each_with_index do |ap, index|
+            # 0 - INPUTTING: nearest_angle_with_diff(209.50974470853072, 240.0 + 31, 300.0 + 31)
+            # 0-local_nearest_angle, angle_diff: 271.0, 61.49025529146928
+
+            # 1 - INPUTTING: nearest_angle_with_diff(209.50974470853072, 60.0 + 31, 120.0 + 31)
+            # 1-local_nearest_angle, angle_diff: 151.0, 0.5097447085307181
+
+            # GOT: 0.5097447085307181
+            # desired_angle > @angle
+            # 151.0 - 31
+            puts "#{index} - INPUTTING: nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle}, #{ap[1]} + #{@angle})"
+            local_nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)
+            puts "#{index}-local_nearest_angle, angle_diff: #{local_nearest_angle}, #{angle_diff}"
+
+            # puts "nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)"
+            # puts "#{nearest_angle}, #{angle_diff} = nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle}, #{ap[1]} + #{@angle})"
+            if lowest_angle_diff.nil? || angle_diff < lowest_angle_diff
+              lowest_angle_diff = angle_diff
+              desired_angle = local_nearest_angle
+            end
+          end
+          puts "GOT: #{lowest_angle_diff} w/ #{desired_angle}"
+          raise "BAD ANGLE PREFERENCES" if lowest_angle_diff.nil?
+
+          # FIRING ANGLE PREF CALC
+          # 0 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 240.0 + 270, 300.0 + 270)
+          # 0-local_nearest_angle, angle_diff: 150.0, 54.20935659756685
+
+          # 1 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 60.0 + 270, 120.0 + 270)
+          # 1-local_nearest_angle, angle_diff: 30.0, 65.79064340243315
+          # GOT: 54.20935659756685
+          # desired_angle > @angle
+          # 150.0 > 270
+          # ROTATE COUNTERCLOCKWISE
+          # ROTATING COUNTER AI
+
+          # FIRING ANGLE PREF CALC
+          # 0 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 240.0 + 271, 300.0 + 271)
+          # 0-local_nearest_angle, angle_diff: 211.0, 53.20935659756685
+
+          # 1 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 60.0 + 271, 120.0 + 271)
+          # 1-local_nearest_angle, angle_diff: 31.0, 64.79064340243315
+          # GOT: 53.20935659756685
+          # desired_angle > @angle
+          # 211.0 > 271
+
+          puts "desired_angle & @angle"
+          puts "#{desired_angle} & #{@angle}"
+          # first_diff = desired_angle + angle
+          # second_diff = 360 - desired_angle + angle
+          # # Desired angle already has angle factored into it.
+          # if first_diff < second_diff
+          #   rotate_counterclockwise
+          # else
+          #   rotate_clockwise
+          # end
+
         end
 
 

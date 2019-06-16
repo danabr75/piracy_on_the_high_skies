@@ -131,6 +131,7 @@ class Launcher < GeneralObject
   # end
 
   def draw
+    raise "Deprecated"
     if @inited
       if @active
         if @image_optional
