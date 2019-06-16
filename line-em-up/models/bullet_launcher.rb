@@ -33,14 +33,14 @@ class BulletLauncher < Launcher
     angle_max = self.class.angle_1to360(LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
 
     # hardpoint_angle: 13 THIS IS INCORRECT< SHOULD BE 0
-    puts "hardpoint_firing_angle: #{hardpoint_firing_angle}"
-    puts "BULLET ATTACk here MIN : #{LAUNCHER_MIN_ANGLE}"
-    puts "BULLET ATTACk here MAX : #{LAUNCHER_MAX_ANGLE}"
+    # puts "hardpoint_firing_angle: #{hardpoint_firing_angle}"
+    # puts "BULLET ATTACk here MIN : #{LAUNCHER_MIN_ANGLE}"
+    # puts "BULLET ATTACk here MAX : #{LAUNCHER_MAX_ANGLE}"
 
 
-    puts "BULLET LAUNCHER ATTACK: #{angle_min} and #{angle_max}"
+    # puts "BULLET LAUNCHER ATTACK: #{angle_min} and #{angle_max}"
     if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
-      puts "ANGLE WAS BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
+      # puts "ANGLE WAS BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
       if @cooldown_wait <= 0
         # new_map_pixel_x, new_map_pixel_y = convert_screen_to_map_pixel_location(current_map_pixel_x, current_map_pixel_y)
         # projectile = init_projectile(initial_angle, new_map_pixel_x, new_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, options)
@@ -50,7 +50,7 @@ class BulletLauncher < Launcher
         return projectile
       end
     else
-      puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
+      # puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
     end
   end
 

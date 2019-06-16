@@ -37,7 +37,7 @@ class Projectile < ScreenMapFixedObject
     @launched_from_id = launched_from_id
 
     @angle = self.class.angle_1to360(destination_angle)
-    puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
+    # puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
 
     @radian = calc_radian(start_point, end_point)
 

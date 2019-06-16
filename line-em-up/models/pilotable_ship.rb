@@ -324,7 +324,7 @@ class PilotableShip < GeneralObject
   def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
     results = []
     @hardpoints.each do |hp|
-      puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
+      # puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
       results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group && hp.item
     end
     # results = results.flatten

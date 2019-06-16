@@ -276,46 +276,24 @@ class GeneralObject
   # Which angle is nearest
   # FULLY WORKING
   def self.nearest_angle angle, min_angle, max_angle, options = {}
-    # puts "NEAREST ANGLE #{angle} - #{min_angle} - #{max_angle}"
-    value = nil
+    min_value = min_angle - angle
+    min_value = (min_value + 180) % 360 - 180
 
-    min_angle = angle_1to360(min_angle)
-    max_angle = angle_1to360(max_angle)
-    angle = angle_1to360(angle)
-
-    min_angle_diff = angle - min_angle
-    max_angle_diff = angle - max_angle
-    first_diff = nil
-    if min_angle_diff.abs > max_angle_diff.abs
-      first_diff = max_angle_diff.abs
-      value = max_angle
+    max_value = max_angle - angle
+    max_value = (max_value + 180) % 360 - 180
+    # puts "MIN VALUE, MAX VALUE: #{[min_value, max_value]}"
+    if min_value.abs < max_value.abs
+      if options[:with_diff]
+        return [min_angle, min_value]
+      else
+        return min_angle
+      end
     else
-      first_diff = min_angle_diff.abs
-      value = min_angle
-    end
-    # puts "VALUE: #{value}"
-
-    alt_value = nil
-    alt_angle = (angle - 360).abs
-    min_angle_diff = alt_angle - min_angle
-    max_angle_diff = alt_angle - max_angle
-    second_diff = nil
-    if min_angle_diff.abs > max_angle_diff.abs
-      second_diff = max_angle_diff.abs
-      alt_value = max_angle
-    else
-      second_diff = min_angle_diff.abs
-      alt_value = min_angle
-    end
-    # puts "VALUE: #{value}"
-    if first_diff > second_diff
-      value = alt_value
-    end
-    # puts "VALUE: #{value}"
-    if options[:with_diff]
-      return [value, [first_diff, second_diff].min]
-    else
-      return value
+      if options[:with_diff]
+        return [max_angle, max_value]
+      else
+        return max_angle
+      end
     end
   end
   raise "Validation failed" unless GeneralObject.nearest_angle(0.0, 30.0, 340.0)    == 340.0
@@ -327,6 +305,7 @@ class GeneralObject
   raise "Validation failed" unless GeneralObject.nearest_angle(278, 20, 320) == 320.0
 
 
+
   def nearest_angle angle, min_angle, max_angle
     return GeneralObject.nearest_angle(angle, min_angle, max_angle)
   end
@@ -336,6 +315,7 @@ class GeneralObject
   end
   raise "Validation failed" unless GeneralObject.nearest_angle_with_diff(278, 20, 320) == [320.0, 42]
   raise "Validation failed" unless GeneralObject.nearest_angle_with_diff(278, 320, 20) == [320.0, 42]
+  raise "Validation failed" unless GeneralObject.nearest_angle_with_diff(0.5, 240.0, 300.0) == [300.0, -60.5]
 
   def nearest_angle_with_diff angle, min_angle, max_angle
     return GeneralObject.nearest_angle(angle, min_angle, max_angle, {with_diff: true})

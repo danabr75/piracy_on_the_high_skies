@@ -214,16 +214,16 @@ class Hardpoint < GeneralObject
       # Adjustment - due to X offset issue
       # projectile_x = current_map_pixel_x + (current_map_pixel_x - projectile_x)
       projectile_y = Math.sin(step) * @radius + current_map_pixel_y
-      puts "NEW PROJECTILE LOCATION: #{projectile_x} - #{projectile_y}"
+      # puts "NEW PROJECTILE LOCATION: #{projectile_x} - #{projectile_y}"
       #                          14062.5 - 14062.5
       # NEW PROJECTILE LOCATION: 14074   - 14013
 
 
 
       # The attack angle should be opposite of the angle offset.
-      puts "ATTACK PROJECTILE ANGLE PARTS: #{@angle_from_center} + #{current_ship_angle}"
-      puts "ATTACK PROJECTILE ANGLE TOTAL: #{@angle_from_center + current_ship_angle}"
-      puts "PROJ X - Y: #{[projectile_x, projectile_y]}"
+      # puts "ATTACK PROJECTILE ANGLE PARTS: #{@angle_from_center} + #{current_ship_angle}"
+      # puts "ATTACK PROJECTILE ANGLE TOTAL: #{@angle_from_center + current_ship_angle}"
+      # puts "PROJ X - Y: #{[projectile_x, projectile_y]}"
       # ATTACK PROJECTILE ANGLE TOTAL: 346.1119988390932
       # PROJ X - Y: [14015.005876306872, 14078.814389317577]
 

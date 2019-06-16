@@ -9,7 +9,7 @@ class ScreenMapFixedObject < GeneralObject
   attr_reader :angle
 
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
-  puts "RIGHT HERE: #{[current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y]}"
+  # puts "RIGHT HERE: #{[current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y]}"
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)

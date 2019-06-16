@@ -222,15 +222,19 @@ class AIShip < ScreenMapFixedObject
         # Reorienting angle to make 0 north
         # WHY IS DESTINATION ANGLE OFF? IT"S REVERSED
         destination_angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
-        puts "DESTINATION ANGLE: #{destination_angle}"
+        # puts "DESTINATION ANGLE: #{destination_angle}"
         # if destination_angle is within one of the preferred angles?
         # puts "AI: destination_angle: #{destination_angle}"
         is_within_preferred_angle = false
         # @firing_angle_preferences = [(240..300), (60..120)]
         @firing_angle_preferences.each do |ap|
           # NOTE: is_angle_between_two_angles is currently not working.. issues with the 0.. FIX IT HERE AND HOW
-          is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle + @angle, ap[0] + @angle, ap[1] + @angle)
-          puts "is_angle_between_two_angles?(#{destination_angle + @angle}, #{ap[0] + @angle},#{ ap[1] + @angle}) WAS TRUE while angle was #{@angle}".upcase if is_within_preferred_angle
+          is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle, ap[0] + @angle, ap[1] + @angle)
+          # puts "is_angle_between_two_angles?(#{destination_angle + @angle}, #{ap[0] + @angle},#{ ap[1] + @angle}) WAS TRUE while angle was #{@angle}".upcase if is_within_preferred_angle
+
+          # IS_ANGLE_BETWEEN_TWO_ANGLES?(412.2784989373889, 360.0,420.0) WAS TRUE WHILE ANGLE WAS 120
+          # DESTINATION ANGLE: 292.2784989373889
+
           break if is_within_preferred_angle
         end
 
@@ -241,61 +245,79 @@ class AIShip < ScreenMapFixedObject
           lowest_angle_diff = nil
           desired_angle = nil
           @firing_angle_preferences.each_with_index do |ap, index|
-            # 0 - INPUTTING: nearest_angle_with_diff(209.50974470853072, 240.0 + 31, 300.0 + 31)
-            # 0-local_nearest_angle, angle_diff: 271.0, 61.49025529146928
-
-            # 1 - INPUTTING: nearest_angle_with_diff(209.50974470853072, 60.0 + 31, 120.0 + 31)
-            # 1-local_nearest_angle, angle_diff: 151.0, 0.5097447085307181
-
-            # GOT: 0.5097447085307181
-            # desired_angle > @angle
-            # 151.0 - 31
-            puts "#{index} - INPUTTING: nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle}, #{ap[1]} + #{@angle})"
+            # puts "#{index} - INPUTTING: nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle} (#{self.class.angle_1to360(ap[0] + @angle)}), #{ap[1]} + #{@angle} (#{self.class.angle_1to360(ap[1] + @angle)}) )"
+            # puts "#{index} - INPUTTING: nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle} (#{self.class.angle_1to360(ap[0] + @angle)}), #{ap[1]} + #{@angle} (#{self.class.angle_1to360(ap[1] + @angle)}))"
+            # factor_out_angle_differences = 
             local_nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)
-            puts "#{index}-local_nearest_angle, angle_diff: #{local_nearest_angle}, #{angle_diff}"
+            # puts "#{index}-local_nearest_angle, angle_diff: #{local_nearest_angle}, #{angle_diff}"
 
-            # puts "nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)"
-            # puts "#{nearest_angle}, #{angle_diff} = nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle}, #{ap[1]} + #{@angle})"
-            if lowest_angle_diff.nil? || angle_diff < lowest_angle_diff
+            if lowest_angle_diff.nil? || angle_diff.abs < lowest_angle_diff.abs
               lowest_angle_diff = angle_diff
               desired_angle = local_nearest_angle
             end
           end
-          puts "GOT: #{lowest_angle_diff} w/ #{desired_angle}"
+          # puts "GOT: desired_angle: #{desired_angle} - diff: #{lowest_angle_diff}"
           raise "BAD ANGLE PREFERENCES" if lowest_angle_diff.nil?
 
-          # FIRING ANGLE PREF CALC
-          # 0 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 240.0 + 270, 300.0 + 270)
-          # 0-local_nearest_angle, angle_diff: 150.0, 54.20935659756685
+          # DESTINATION ANGLE: 0.518194833834059
+          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 359 (239.0), 300.0 + 359 (299.0))
 
-          # 1 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 60.0 + 270, 120.0 + 270)
-          # 1-local_nearest_angle, angle_diff: 30.0, 65.79064340243315
-          # GOT: 54.20935659756685
-          # desired_angle > @angle
-          # 150.0 > 270
-          # ROTATE COUNTERCLOCKWISE
+          # GeneralObject.nearest_angle_with_diff(0.518194833834059, (239.0), (299.0)) = diff 60.48
+
+          # 0-local_nearest_angle, angle_diff: 299.0, 60.48180516616594
+          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 359 (59.0), 120.0 + 359 (119.0))
+
+          # GeneralObject.nearest_angle_with_diff(0.518194833834059, (59.0), (119.0))
+
+          # 1-local_nearest_angle, angle_diff: 59.0, 58.48180516616594
+
+          # GOT: desired_angle: 59.0 - diff: 58.48180516616594
+          # desired_angle & @angle
+          # 59.0 & 359
           # ROTATING COUNTER AI
 
-          # FIRING ANGLE PREF CALC
-          # 0 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 240.0 + 271, 300.0 + 271)
-          # 0-local_nearest_angle, angle_diff: 211.0, 53.20935659756685
+          # # IS !!!GOOD HERE!!!
 
-          # 1 - INPUTTING: nearest_angle_with_diff(95.79064340243315, 60.0 + 271, 120.0 + 271)
-          # 1-local_nearest_angle, angle_diff: 31.0, 64.79064340243315
-          # GOT: 53.20935659756685
-          # desired_angle > @angle
-          # 211.0 > 271
+          # DESTINATION ANGLE: 0.518194833834059
+          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 0 (240.0), 300.0 + 0 (300.0))
+          # 0-local_nearest_angle, angle_diff: 300.0, 59.48180516616594
+          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 0 (60.0), 120.0 + 0 (120.0))
+          # 1-local_nearest_angle, angle_diff: 60.0,  59.48180516616594
+          # GOT: desired_angle: 300.0 - diff: 59.48180516616594
+          # desired_angle & @angle
+          # 300.0 & 0
+          # ROTATING AI
 
-          puts "desired_angle & @angle"
-          puts "#{desired_angle} & #{@angle}"
+          # DESTINATION ANGLE: 0.518194833834059
+          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 359 (239.0), 300.0 + 359 (299.0))
+          # 0-local_nearest_angle, angle_diff: 299.0, 60.48180516616594
+          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 359 (59.0), 120.0 + 359 (119.0))
+          # 1-local_nearest_angle, angle_diff: 59.0, 58.48180516616594
+          # GOT: desired_angle: 59.0 - diff: 58.48180516616594
+          # desired_angle & @angle
+          # 59.0 & 359
+          # ROTATING COUNTER AI
+
+          # DESTINATION ANGLE: 0.518194833834059
+          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 0 (240.0), 300.0 + 0 (300.0))
+          # 0-local_nearest_angle, angle_diff: 300.0, 59.48180516616594
+          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 0 (60.0), 120.0 + 0 (120.0))
+          # 1-local_nearest_angle, angle_diff: 60.0, 59.48180516616594
+          # GOT: desired_angle: 300.0 - diff: 59.48180516616594
+          # desired_angle & @angle
+          # 300.0 & 0
+          # ROTATING AI
+
+          # puts "desired_angle & @angle"
+          # puts "#{desired_angle} & #{@angle}"
           # first_diff = desired_angle + angle
           # second_diff = 360 - desired_angle + angle
-          # # Desired angle already has angle factored into it.
-          # if first_diff < second_diff
-          #   rotate_counterclockwise
-          # else
-          #   rotate_clockwise
-          # end
+          # Desired angle already has angle factored into it.
+          if lowest_angle_diff > 0.0
+            rotate_clockwise
+          else
+            rotate_counterclockwise
+          end
 
         end
 
