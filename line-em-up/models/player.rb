@@ -392,7 +392,7 @@ class Player < ScreenFixedObject
     x_diff, y_diff = self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
 
     if @current_momentum >= -@max_momentum
-      @current_momentum -= 2
+      @current_momentum -= 0.6
     end
 
     return [(movement_x - x_diff), (movement_y - y_diff)]

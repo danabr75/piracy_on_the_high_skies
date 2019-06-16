@@ -16,6 +16,8 @@ class AIShip < ScreenMapFixedObject
   attr_accessor :drawable_items_near_self
   MAX_HEALTH = 200
   AGRO_TILE_DISTANCE = 3
+  PREFERRED_MIN_TILE_DISTANCE = 1
+  PREFERRED_MAX_TILE_DISTANCE = 2
   # in seconds
   # ANGRO MAX is 10 seconds
   AGRO_MAX = 10 * 60
@@ -40,13 +42,13 @@ class AIShip < ScreenMapFixedObject
     @ship.x = @x
     @ship.y = @y
     @current_momentum = 0
-    @max_momentum = @ship.mass # speed here?
+    # @max_momentum = @ship.mass # speed here?
 
     if @debug
-      @rotation_speed = 1
+      @rotation_speed = 1.0
     else
 
-      @rotation_speed = 2
+      @rotation_speed = 2.0
     end
 
     @health = @ship.get_health
@@ -62,12 +64,13 @@ class AIShip < ScreenMapFixedObject
       # hp.inspect
     end
 
-    @distance_preference_max = 3 * @average_tile_size
+    @distance_preference_max = PREFERRED_MAX_TILE_DISTANCE * @average_tile_size
     # Don't want to get boarded also
-    @distance_preference_min = 1 * @average_tile_size
+    @distance_preference_min = PREFERRED_MIN_TILE_DISTANCE * @average_tile_size
 
     @agro_map_pixel_distance = AGRO_TILE_DISTANCE * @average_tile_size
     @argo_target_map = {}
+
     # stop
   end
 
@@ -107,42 +110,51 @@ class AIShip < ScreenMapFixedObject
     # health > 0
   end
 
-
-  def move_left movement_x = 0, movement_y = 0
-    # new_speed = (@speed  / (@mass.to_f)) * -1.5
-    new_speed = (@speed  / (@mass.to_f)) * -100
-    x_diff, y_diff = self.movement(new_speed, @angle + 90, false)
-    return [movement_x - x_diff, movement_y - y_diff]
+  def update_momentum
+    if @current_momentum > 0.0
+      speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
+      x_diff, y_diff, halt = self.movement(speed, @angle)
+      if halt
+        @current_momentum = 0
+      else
+        @current_momentum -= 1
+        @current_momentum = 0 if @current_momentum < 0
+      end
+    elsif @current_momentum < 0.0
+      speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      garbage1, garbage2, halt = self.movement(-speed, @angle + 180)
+      if halt
+        @current_momentum = 0
+      else
+        @current_momentum += 1
+        @current_momentum = 0 if @current_momentum > 0
+      end
+    end
   end
-  
-  def move_right movement_x = 0, movement_y = 0
-    # new_speed = (@speed  / (@mass.to_f)) * -1.5
-    new_speed = (@speed  / (@mass.to_f)) * -100
-    x_diff, y_diff = self.movement(new_speed, @angle - 90, false)
-    return [movement_x - x_diff, movement_y - y_diff]
-  end
-  def accelerate movement_x = 0, movement_y = 0
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle, false)
 
-    if @current_momentum <= @max_momentum
+  def accelerate
+    garbage1, garbage2, halt = self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
+    if halt
+      @current_momentum = 0
+    elsif @current_momentum + 1.2 >= @ship.mass.to_f
+      @current_momentum = @ship.mass.to_f
+    else
       @current_momentum += 1.2
     end
-    # puts "PLAYER ACCELETATE:"
-    # puts "[movement_x - x_diff, movement_y - y_diff]"
-    # puts "[#{movement_x} - #{x_diff}, #{movement_y} - #{y_diff}]"
-    return [(movement_x - x_diff), (movement_y - y_diff)]
   end
   
-  def brake movement_x = 0, movement_y = 0
+  def reverse
     # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "ACCELERATE: #{movement_x} - #{movement_y}"
-    x_diff, y_diff = self.movement( @speed / (@mass.to_f), @angle - 180, false)
-
-    if @current_momentum >= -@max_momentum
-      @current_momentum -= 2
+    garbage1, garbage2, halt = self.movement( @ship.speed / (@ship.mass.to_f ), @angle - 180, false)
+    if halt
+      @current_momentum = 0
+    elsif @current_momentum - 0.6 <= -@ship.mass.to_f
+      @current_momentum = -@ship.mass.to_f
+    else
+      @current_momentum -= 0.6
     end
-
-    return [(movement_x - x_diff), (movement_y - y_diff)]
   end
 
   def get_draw_ordering
@@ -175,6 +187,7 @@ class AIShip < ScreenMapFixedObject
     projectiles = []
     local_max_agro = 0
     agro_target = nil
+    agro_target_distance = nil
 
     air_targets.each do |target|
       # Don't fire at self. don't fire at allies. Figure out ally logic
@@ -186,13 +199,15 @@ class AIShip < ScreenMapFixedObject
       # if tile distance is less than agro distance, then you increase agro against that target
       # update max_agro
       # NEED TO ALSO INCREASE AGRO when taking damage from target.. and more so than just being within distance...
-      within_range = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y) < @agro_map_pixel_distance
+      distance_to_target = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y)
+      within_range = distance_to_target < @agro_map_pixel_distance
       if within_range
         @argo_target_map[target.id] = AGRO_MAX
       end
       if @argo_target_map[target.id] && @argo_target_map[target.id] > local_max_agro
         local_max_agro = @argo_target_map[target.id] 
         agro_target = target
+        agro_target_distance = distance_to_target
       end
     end
     # END AGRO SECTION
@@ -210,28 +225,54 @@ class AIShip < ScreenMapFixedObject
 
 
     # START MOVING SECTION
+    destination_angle = nil
+    if agro_target
+      start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => agro_target.current_map_pixel_x, :y => agro_target.current_map_pixel_y)
+      destination_angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+    end
+
     need_to_move = false
-    # Is target within distance ? move closer, move further
+    if agro_target
+      if agro_target_distance > @distance_preference_max
+        # Move to player
+        need_to_move = true
+        is_within_preferred_angle = angle_is_within_angle_preferences([[359,1.0]], destination_angle)
+        if is_within_preferred_angle
+          # just keep accelerating
+        else
+          desired_angle, lowest_angle_diff = get_preferred_angle_and_rotational_diff([[359,1.0]], destination_angle)
+          rotate_towards_destination(lowest_angle_diff)
+        end
+        # If not pointed at the target, then rotate towards it
+        # if !(GeneralObject.angle_1to360((@angle - desired_angle)).abs <= @rotation_speed)
+        # end
+        accelerate
+
+      elsif agro_target_distance < @distance_preference_min
+        need_to_move = true
+        # Move away from player
+        puts "IMPLEMENT REVERSE LATER FOR AI"
+      end
+    end
     # END MOVING SECTION
 
     # START ANGLING PREFERENCE SECTION
     if !need_to_move && agro_target
       # if don't need to move, check firing angle preference.
-        start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
-        end_point   = OpenStruct.new(:x => agro_target.current_map_pixel_x, :y => agro_target.current_map_pixel_y)
         # Reorienting angle to make 0 north
         # WHY IS DESTINATION ANGLE OFF? IT"S REVERSED
-        destination_angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+        
         # puts "DESTINATION ANGLE: #{destination_angle}"
         # if destination_angle is within one of the preferred angles?
         # puts "AI: destination_angle: #{destination_angle}"
-        is_within_preferred_angle = angle_is_within_angle_preferences(destination_angle)
+        is_within_preferred_angle = angle_is_within_angle_preferences(@firing_angle_preferences, destination_angle)
 
         if is_within_preferred_angle 
           # Do not rotate
         else
           # find_nearest_angle_group ..maybe? nearest preferred angle would suffice.
-          desired_angle, lowest_angle_diff = get_preferred_angle_and_rotational_diff(destination_angle)
+          desired_angle, lowest_angle_diff = get_preferred_angle_and_rotational_diff(@firing_angle_preferences, destination_angle)
           rotate_towards_destination(lowest_angle_diff)
         end
     end
@@ -249,6 +290,9 @@ class AIShip < ScreenMapFixedObject
     result = super(mouse_x, mouse_y, player)
     @ship.x = @x
     @ship.y = @y
+
+
+    update_momentum
     # puts "attack_results: "
     # puts attack_results.class.name
     # puts attack_results
@@ -257,16 +301,19 @@ class AIShip < ScreenMapFixedObject
     # Array
     # {:projectiles=>[#<Bullet:0x00007fd57b17b800 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="38a6d435-ad58-4263-807e-cd040cbf5c30", @image=#######
     # , @time_alive=0, @image_width=9.375, @image_height=45.0, @image_size=210.9375, @image_radius=13.59375, @image_width_half=4.6875, @image_height_half=22.5, @inited=true, @x=-50, @y=-50, @x_offset=0, @y_offset=0, @current_map_pixel_x=14618, @current_map_pixel_y=13618, @current_map_tile_x=129, @current_map_tile_y=121, @angle=45.0, @radian=2.356194490192345, @health=1, @refresh_angle_on_updates=false, @speed=3, @end_image_angle=135.0, @current_image_angle=135.0>], :cooldown=>15}
+      # factor_in_scale_speed = @speed * @average_scale
 
+      # movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
 
 
     return {is_alive: result, projectiles: projectiles }
   end
 
-  def angle_is_within_angle_preferences destination_angle
+
+  def angle_is_within_angle_preferences preferred_angles, destination_angle
     is_within_preferred_angle = false
     # @firing_angle_preferences = [(240..300), (60..120)]
-    @firing_angle_preferences.each do |ap|
+    preferred_angles.each do |ap|
       # NOTE: is_angle_between_two_angles is currently not working.. issues with the 0.. FIX IT HERE AND HOW
       is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle, ap[0] + @angle, ap[1] + @angle)
       # puts "is_angle_between_two_angles?(#{destination_angle + @angle}, #{ap[0] + @angle},#{ ap[1] + @angle}) WAS TRUE while angle was #{@angle}".upcase if is_within_preferred_angle
@@ -279,10 +326,10 @@ class AIShip < ScreenMapFixedObject
     return is_within_preferred_angle
   end
 
-  def get_preferred_angle_and_rotational_diff destination_angle
+  def get_preferred_angle_and_rotational_diff angle_preferences, destination_angle
     lowest_angle_diff = nil
     desired_angle = nil
-    @firing_angle_preferences.each_with_index do |ap, index|
+    angle_preferences.each_with_index do |ap, index|
       local_nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)
 
       if lowest_angle_diff.nil? || angle_diff.abs < lowest_angle_diff.abs
