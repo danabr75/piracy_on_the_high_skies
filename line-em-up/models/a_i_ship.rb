@@ -225,104 +225,17 @@ class AIShip < ScreenMapFixedObject
         # puts "DESTINATION ANGLE: #{destination_angle}"
         # if destination_angle is within one of the preferred angles?
         # puts "AI: destination_angle: #{destination_angle}"
-        is_within_preferred_angle = false
-        # @firing_angle_preferences = [(240..300), (60..120)]
-        @firing_angle_preferences.each do |ap|
-          # NOTE: is_angle_between_two_angles is currently not working.. issues with the 0.. FIX IT HERE AND HOW
-          is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle, ap[0] + @angle, ap[1] + @angle)
-          # puts "is_angle_between_two_angles?(#{destination_angle + @angle}, #{ap[0] + @angle},#{ ap[1] + @angle}) WAS TRUE while angle was #{@angle}".upcase if is_within_preferred_angle
-
-          # IS_ANGLE_BETWEEN_TWO_ANGLES?(412.2784989373889, 360.0,420.0) WAS TRUE WHILE ANGLE WAS 120
-          # DESTINATION ANGLE: 292.2784989373889
-
-          break if is_within_preferred_angle
-        end
+        is_within_preferred_angle = angle_is_within_angle_preferences(destination_angle)
 
         if is_within_preferred_angle 
           # Do not rotate
         else
           # find_nearest_angle_group ..maybe? nearest preferred angle would suffice.
-          lowest_angle_diff = nil
-          desired_angle = nil
-          @firing_angle_preferences.each_with_index do |ap, index|
-            # puts "#{index} - INPUTTING: nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle} (#{self.class.angle_1to360(ap[0] + @angle)}), #{ap[1]} + #{@angle} (#{self.class.angle_1to360(ap[1] + @angle)}) )"
-            # puts "#{index} - INPUTTING: nearest_angle_with_diff(#{destination_angle}, #{ap[0]} + #{@angle} (#{self.class.angle_1to360(ap[0] + @angle)}), #{ap[1]} + #{@angle} (#{self.class.angle_1to360(ap[1] + @angle)}))"
-            # factor_out_angle_differences = 
-            local_nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)
-            # puts "#{index}-local_nearest_angle, angle_diff: #{local_nearest_angle}, #{angle_diff}"
-
-            if lowest_angle_diff.nil? || angle_diff.abs < lowest_angle_diff.abs
-              lowest_angle_diff = angle_diff
-              desired_angle = local_nearest_angle
-            end
-          end
-          # puts "GOT: desired_angle: #{desired_angle} - diff: #{lowest_angle_diff}"
-          raise "BAD ANGLE PREFERENCES" if lowest_angle_diff.nil?
-
-          # DESTINATION ANGLE: 0.518194833834059
-          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 359 (239.0), 300.0 + 359 (299.0))
-
-          # GeneralObject.nearest_angle_with_diff(0.518194833834059, (239.0), (299.0)) = diff 60.48
-
-          # 0-local_nearest_angle, angle_diff: 299.0, 60.48180516616594
-          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 359 (59.0), 120.0 + 359 (119.0))
-
-          # GeneralObject.nearest_angle_with_diff(0.518194833834059, (59.0), (119.0))
-
-          # 1-local_nearest_angle, angle_diff: 59.0, 58.48180516616594
-
-          # GOT: desired_angle: 59.0 - diff: 58.48180516616594
-          # desired_angle & @angle
-          # 59.0 & 359
-          # ROTATING COUNTER AI
-
-          # # IS !!!GOOD HERE!!!
-
-          # DESTINATION ANGLE: 0.518194833834059
-          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 0 (240.0), 300.0 + 0 (300.0))
-          # 0-local_nearest_angle, angle_diff: 300.0, 59.48180516616594
-          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 0 (60.0), 120.0 + 0 (120.0))
-          # 1-local_nearest_angle, angle_diff: 60.0,  59.48180516616594
-          # GOT: desired_angle: 300.0 - diff: 59.48180516616594
-          # desired_angle & @angle
-          # 300.0 & 0
-          # ROTATING AI
-
-          # DESTINATION ANGLE: 0.518194833834059
-          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 359 (239.0), 300.0 + 359 (299.0))
-          # 0-local_nearest_angle, angle_diff: 299.0, 60.48180516616594
-          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 359 (59.0), 120.0 + 359 (119.0))
-          # 1-local_nearest_angle, angle_diff: 59.0, 58.48180516616594
-          # GOT: desired_angle: 59.0 - diff: 58.48180516616594
-          # desired_angle & @angle
-          # 59.0 & 359
-          # ROTATING COUNTER AI
-
-          # DESTINATION ANGLE: 0.518194833834059
-          # 0 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 240.0 + 0 (240.0), 300.0 + 0 (300.0))
-          # 0-local_nearest_angle, angle_diff: 300.0, 59.48180516616594
-          # 1 - INPUTTING: nearest_angle_with_diff(0.518194833834059, 60.0 + 0 (60.0), 120.0 + 0 (120.0))
-          # 1-local_nearest_angle, angle_diff: 60.0, 59.48180516616594
-          # GOT: desired_angle: 300.0 - diff: 59.48180516616594
-          # desired_angle & @angle
-          # 300.0 & 0
-          # ROTATING AI
-
-          # puts "desired_angle & @angle"
-          # puts "#{desired_angle} & #{@angle}"
-          # first_diff = desired_angle + angle
-          # second_diff = 360 - desired_angle + angle
-          # Desired angle already has angle factored into it.
-          if lowest_angle_diff > 0.0
-            rotate_clockwise
-          else
-            rotate_counterclockwise
-          end
-
+          desired_angle, lowest_angle_diff = get_preferred_angle_and_rotational_diff(destination_angle)
+          rotate_towards_destination(lowest_angle_diff)
         end
-
-
     end
+
     # END ANGLING PREFERENCE SECTION
 
 
@@ -350,4 +263,41 @@ class AIShip < ScreenMapFixedObject
     return {is_alive: result, projectiles: projectiles }
   end
 
+  def angle_is_within_angle_preferences destination_angle
+    is_within_preferred_angle = false
+    # @firing_angle_preferences = [(240..300), (60..120)]
+    @firing_angle_preferences.each do |ap|
+      # NOTE: is_angle_between_two_angles is currently not working.. issues with the 0.. FIX IT HERE AND HOW
+      is_within_preferred_angle = true if is_angle_between_two_angles?(destination_angle, ap[0] + @angle, ap[1] + @angle)
+      # puts "is_angle_between_two_angles?(#{destination_angle + @angle}, #{ap[0] + @angle},#{ ap[1] + @angle}) WAS TRUE while angle was #{@angle}".upcase if is_within_preferred_angle
+
+      # IS_ANGLE_BETWEEN_TWO_ANGLES?(412.2784989373889, 360.0,420.0) WAS TRUE WHILE ANGLE WAS 120
+      # DESTINATION ANGLE: 292.2784989373889
+
+      break if is_within_preferred_angle
+    end
+    return is_within_preferred_angle
+  end
+
+  def get_preferred_angle_and_rotational_diff destination_angle
+    lowest_angle_diff = nil
+    desired_angle = nil
+    @firing_angle_preferences.each_with_index do |ap, index|
+      local_nearest_angle, angle_diff = nearest_angle_with_diff(destination_angle, ap[0] + @angle, ap[1] + @angle)
+
+      if lowest_angle_diff.nil? || angle_diff.abs < lowest_angle_diff.abs
+        lowest_angle_diff = angle_diff
+        desired_angle = local_nearest_angle
+      end
+    end
+    return [desired_angle, lowest_angle_diff]
+  end
+
+  def rotate_towards_destination angle_diff
+    if angle_diff > 0.0
+      rotate_clockwise
+    else
+      rotate_counterclockwise
+    end
+  end
 end
