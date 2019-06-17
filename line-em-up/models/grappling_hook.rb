@@ -1,238 +1,223 @@
-require_relative 'general_object.rb'
+require_relative 'projectile.rb'
+require 'gosu'
+# require 'opengl'
+# require 'glu'
 
-class GrapplingHook < GeneralObject
-  attr_reader :x, :y, :time_alive, :active, :angle, :end_point_x, :end_point_y
-  attr_accessor :active
+require 'opengl'
+require 'glut'
 
-  COOLDOWN_DELAY = 45
-  # MAX_SPEED      = 2
-  # STARTING_SPEED = 0.0
-  # INITIAL_DELAY  = 2
-  # SPEED_INCREASE_FACTOR = 0.5
+
+include OpenGL
+include GLUT
+
+# For opengl-bindings
+# OpenGL.load_lib()
+
+# GLUT.load_lib()
+
+
+class GrapplingHook < Projectile
+  MAX_SPEED      = 3
+  STARTING_SPEED = 3
+  INITIAL_DELAY  = 0.0
+  SPEED_INCREASE_FACTOR = 2
   DAMAGE = 0
+  AOE = 0
+  MAX_TILE_LENGTH = 3
   
-  # MAX_CURSOR_FOLLOW = 15
-  MAX_SPEED      = 20
+  # MAX_CURSOR_FOLLOW = 4
+  # ADVANCED_HIT_BOX_DETECTION = true
 
-  def cooldown_delay
-    COOLDOWN_DELAY
-  end
-
-  def initialize(scale, screen_pixel_width, screen_pixel_height, object, mouse_x, mouse_y, options = {})
-    # object.grapple_hook_cooldown_wait = COOLDOWN_DELAY
-    @scale = scale
-
-    # image = Magick::Image::read("#{MEDIA_DIRECTORY}/grappling_hook.png").first.resize(0.1)
-    # @image = Gosu::Image.new(image, :tileable => true)
-    @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
-
-    # chain = Magick::Image::read("#{MEDIA_DIRECTORY}/chain.png").first.resize(0.1)
-    # @chain = Gosu::Image.new(chain, :tileable => true)
-    @chain = Gosu::Image.new("#{MEDIA_DIRECTORY}/chain.png")
-
-    @x = object.x - (@image.width / 2 * @scale)
-    @y = object.y
-    @end_point_x = mouse_x
-    @end_point_y = mouse_y
-
-    @active = true
-    @acquired_items = 0
-    start_point = OpenStruct.new(:x => @x, :y => @y)
-    end_point   = OpenStruct.new(:x => @end_point_x, :y => @end_point_y)
-    @angle = calc_angle(start_point, end_point)
-    # @radian = calc_radian(start_point, end_point)
-    @image_angle = @angle
-    if @angle < 0
-      @angle = 360 - @angle.abs
-      @image_angle = (@angle - 90) * -1
-    else
-      @image_angle = (@angle - 90) * -1
+  # Might not be necessary to override
+  def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options = {})
+    super(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options)
+    @chain_image = get_chain_image
+    if @image
+      @chain_image_width  = @chain_image.width  * (@width_scale)
+      @chain_image_height = @chain_image.height * (@height_scale)
+      @chain_image_size   = @chain_image_width  * @chain_image_height / 2
+      @chain_image_radius = (@chain_image_width  + @chain_image_height) / 4
     end
-
-    @max_length = 7 * @scale
-    @max_length_counter = 0
-    @reached_end_point = false
-    @reached_back_to_player = false
-    @reached_max_length = false
-    @image_width  = @image.width  * @scale
-    @image_height = @image.height * @scale
-    @image_size   = @image_width  * @image_height / 2
-    @image_radius = (@image_width  + @image_height) / 4
-    @current_speed = (self.class.get_max_speed * @scale).round
-    #Chain Image pre-calc
-    @chain_height  = @chain.width * @scale
-    @chain_width  = @chain.height * @scale
-    @chain_size   = @chain_width  * @chain_height / 2
-    @chain_radius = ((@chain_height + @chain_width) / 4) * @scale
-
-    # @screen_pixel_width  = screen_width
-    # @screen_pixel_height = screen_height
-    # @off_screen = screen_height + screen_height
+    @player_reference = nil
   end
 
-  def draw player
-
-    start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
-    # end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2) + @chain.width / 2, :y => player.y - (player.get_height / 2))
-    end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2) + @chain.width, :y => player.y - (player.get_height / 2))
-    chain_angle = calc_angle(start_point, end_point)
-    if chain_angle < 0
-      chain_angle = 360 - chain_angle.abs
-    end
-
-    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @width_scale, @height_scale)
-    # @image.draw_rot(@x - get_width / 2 - get_height / 2, @y, ZOrder::Cursor, (@angle - 90) * -1, 0.5, 0.5, @width_scale, @height_scale)
-    @image.draw_rot(@x, @y, ZOrder::Cursor, @image_angle, 0.5, 0.5, @width_scale, @height_scale)
-
-    chain_x = @x# - (get_width / 2)  - (@chain.width / 2)
-    chain_y = @y# - (get_height / 2)  - (@chain.height / 2)
-    loop_count = 0
-    max_loop_count = 250
-    # Subtracting 5, to get close to player coords
-    while Gosu.distance(chain_x,  chain_y, player.x, player.y) > (@chain_radius + player.get_radius) && loop_count < max_loop_count
-      vx = 0
-      vy = 0
-      vx = 5 * Math.cos(chain_angle * Math::PI / 180)
-
-      vy = 5 * Math.sin(chain_angle * Math::PI / 180)
-      vy = vy * -1
-        # Because our y is inverted
-        # vy = vy - ((new_speed / 3) * 2)
-
-      chain_x = chain_x + vx
-      chain_y = chain_y + vy
-      @chain.draw(chain_x - @chain_width / 2, chain_y - @chain_height / 2, ZOrder::Cursor, @width_scale, @height_scale)
-      loop_count += 1
-    end
+  def get_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
+  end
+  def get_chain_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/grappling_hook_launcher/chain.png")
   end
 
-  def get_chain_height
-    @chain_height
+  def drops
+    [
+      # Add back in once SE has been updated to display on map, not on screen.
+      # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+    ]
   end
 
-  def get_chain_width
-    @chain_width
-  end
-
-  def get_chain_size
-    @chain_size
-  end
-
-  def get_chain_radius
-    @chain_radius
-  end
-
-
-  def active
-    @active# && @acquired_items == 0
-  end
-
-  def deactivate
-    @active = false
-  end
-
-  def activate
-    @active = true
-  end
-
-  # def self.get_max_cursor_follow scale
-    
-  # end
   
-  def update player = nil
-    # puts "GRAP UPDATE:#{@reached_max_length} and #{@max_length_counter}"
-    if !@reached_end_point
-      current_angle = @angle
-    end
-    if @reached_end_point || @reached_max_length
-      # Recalc back to player
-      start_point = OpenStruct.new(:x => @x - get_width / 2, :y => @y - get_height / 2)
-      end_point   = OpenStruct.new(:x => player.x - (player.get_width / 2), :y => player.y)
-      angle = calc_angle(start_point, end_point)
-      # radian = calc_radian(start_point, end_point)
-      if angle < 0
-        angle = 360 - angle.abs
-      end
-      current_angle = angle
-    end
-    # new_speed = 0
-    # if @time_alive > self.class.get_initial_delay
-    new_speed = @current_speed
-    new_speed = new_speed.fdiv(@acquired_items + 1) if @acquired_items > 0 && @reached_end_point
-    # new_speed = new_speed * @scale
-    # end
-
-    vx = 0
-    vy = 0
-    if new_speed > 0
-      vx = new_speed * Math.cos(current_angle * Math::PI / 180)
-
-      vy = new_speed * Math.sin(current_angle * Math::PI / 180)
-      vy = vy * -1
-      # Because our y is inverted
-      # vy = vy - ((new_speed / 3) * 2)
-    end
-
-    @x = @x + vx
-    @y = @y + vy
-
-    if !@reached_max_length
-      @reached_max_length = true if @max_length_counter >= @max_length
-    end
-
-    if !@reached_max_length
-      @max_length_counter += 1
-      # Not stopping on the mouse end_point
-      # @reached_end_point = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, @end_point_x, @end_point_y) < self.get_radius * @scale
-    end
-
-    if @reached_end_point || @reached_max_length
-      @reached_back_to_player = true if Gosu.distance(@x - get_width / 2,  @y - get_height / 2, player.x, player.y) < ((self.get_radius * 2) * @scale)
-    end
-
-
-    return !@reached_back_to_player
-  end
-
-
-  def collect_pickups(player, pickups)
-    pickups.reject! do |pickup|
-      # puts "PICKUP GET RADIUS: #{pickup.get_radius}"
-      if Gosu.distance(@x, @y, pickup.x, pickup.y) < ((self.get_radius) + (pickup.get_radius)) * 1.2 && pickup.respond_to?(:collected_by_player)
-
-        pickup.collected_by_player(player)
-        if pickup.respond_to?(:get_points)
-          player.score += pickup.get_points
-        end
-        @acquired_items += 1
-        true
-      else
-        false
+  def update mouse_x, mouse_y, player
+    @player_reference = player
+    # puts "MISSILE: #{@health}"
+    returned_to_player = false
+    distance = Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
+    if @returning_to_player 
+      if distance < player.get_radius
+        returned_to_player = true
       end
     end
+
+    if !@returning_to_player && distance >= MAX_TILE_LENGTH * @average_tile_size
+      @returning_to_player = true
+    end
+    if @returning_to_player
+      start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => player.current_map_pixel_x, :y => player.current_map_pixel_y)
+      @angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+    end
+    return !returned_to_player && super(mouse_x, mouse_y, player)
   end
 
-  def hit_objects(objects)
+  def draw
+    if @player_reference
+      start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => @owner.current_map_pixel_x, :y => @owner.current_map_pixel_y)
+      angle_to_origin = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+      # Reversing direction
+      angle_to_origin = self.class.angle_1to360(angle_to_origin - 180)
+      # distance = Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
+      # if @returning_to_player 
+      #   if distance < player.get_radius
+      #     returned_to_player = true
+      #   end
+      # end
+      step = (Math::PI/180 * (angle_to_origin + 90))
+      base = @chain_image_radius
+      new_x = Math.cos(step) * base + @current_map_pixel_x
+      new_y = Math.sin(step) * base + @current_map_pixel_y
+      i = 0
+      while i < 100 && Gosu.distance(@owner.current_map_pixel_x, @owner.current_map_pixel_y, new_x, new_y) > (@owner.get_radius / 2)
+        x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
+        @chain_image.draw_rot(x, y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+        #
+        step = (Math::PI/180 * (angle_to_origin + 90))
+        new_x = Math.cos(step) * base + new_x
+        new_y = Math.sin(step) * base + new_y
+        i += 1
+      end
+    end
+
+
+    # @chain_image.draw_rot(@x, @y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+    super()
+  end
+
+  def hit_objects(object_groups)
+    # hit only ships, that aren't the owner
+    return false
+    raise "grapple hit"
     drops = []
-    objects.each do |object|
-      if Gosu.distance(@x, @y, object.x, object.y) < self.get_radius * @scale
-        # Missile destroyed
-        # @y = -100
-        if object.respond_to?(:health) && object.respond_to?(:take_damage)
-          object.take_damage(DAMAGE)
+    points = 0
+    hit_object = false
+    killed = 0
+    object_groups.each do |group|
+      group.each do |object|
+        next if object.nil?
+        # Don't hit yourself
+        next if object.id == @id
+        # Don't hit the ship that launched it
+        next if object.id == @launched_from_id
+        break if hit_object
+        # don't hit a dead object
+        if object.health <= 0
+          next
         end
+        # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
+        # maybe add advanced collision in when support multi-threads
+        if false && self.class.get_advanced_hit_box_detection
+          # Disabling advanced hit detection for now
+          self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
+          other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
+          hit_object = rec_intersection(self_object, other_object)
+        else
+          # puts "HIT OBJECT DETECTION: proj-size: #{(self.get_size / 2)}"
+          # puts "HIT OBJECT DETECTION:  obj-size: #{(self.get_size / 2)}"
+          raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
+          raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
+          raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
+          raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
+          if @debug
+            if self.get_radius.nil?
+              raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
+            end
+            if object.get_radius.nil?
+              raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
+            end
+          end
+          hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
+        end
+        if hit_object
+          # puts "COLLISION DETECTED!!!!! - #{self.class.name} - to #{object.class.name}"
+          # puts "Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius"
+          # puts "Gosu.distance(#{@current_map_pixel_x}, #{@current_map_pixel_y}, #{object.current_map_pixel_x}, #{object.current_map_pixel_y}) < #{self.get_radius} + #{object.get_radius}"
+          # raise "STOP HERE"
+          # hit_object = true
+          if self.class.get_aoe <= 0
+            if object.respond_to?(:health) && object.respond_to?(:take_damage)
+              object.take_damage(self.class.get_damage * @damage_increase)
+            end
 
-        if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
-          # puts "CALLING THE DROP"
-          object.drops.each do |drop|
-            drops << drop
+            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+
+              object.drops.each do |drop|
+                drops << drop
+              end
+            end
+
+            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
+              killed += 1
+              points = points + object.get_points
+            end
           end
         end
-
       end
     end
-    return {drops: drops, point_value: 0}
-  end
+    if hit_object && self.class.get_aoe > 0
+      object_groups.each do |group|
+        group.each do |object|
+          next if object.nil?
+          if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @scale
+            if object.respond_to?(:health) && object.respond_to?(:take_damage)
+              object.take_damage(self.class.get_damage * @damage_increase)
+            end
 
+            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+              object.drops.each do |drop|
+                drops << drop
+              end
+            end
+
+            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
+              killed += 1
+              points = points + object.get_points
+            end
+          end
+        end
+      end
+    end
+
+    # Drop projectile explosions
+    if hit_object
+      if self.respond_to?(:drops)
+        self.drops.each do |drop|
+          drops << drop
+        end
+      end
+    end
+
+    @health = 0 if hit_object
+    puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
+    return {drops: drops, point_value: points, killed: killed}
+  end
 
 end

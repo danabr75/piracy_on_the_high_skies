@@ -611,7 +611,7 @@ class GeneralObject
   end
 
   def self.convert_map_pixel_location_to_screen player, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
-    puts "HERE: (#{player.current_map_pixel_x} - #{current_map_pixel_x}) + (#{screen_pixel_width} / 2)"
+    # puts "HERE: (#{player.current_map_pixel_x} - #{current_map_pixel_x}) + (#{screen_pixel_width} / 2)"
     x = (player.current_map_pixel_x - current_map_pixel_x) + (screen_pixel_width / 2)
     # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
 

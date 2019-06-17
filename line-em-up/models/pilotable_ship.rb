@@ -29,7 +29,7 @@ class PilotableShip < GeneralObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
-  def initialize(x, y, z, hardpoint_z, angle, owner_id, options = {})
+  def initialize(x, y, z, hardpoint_z, angle, owner, options = {})
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -121,7 +121,7 @@ class PilotableShip < GeneralObject
       # raise "STOP RIGHT HERE" if disable_hardpoint_angles
       hp = Hardpoint.new(
         x, y, hardpoint_z, location[:x_offset].call(get_image, @width_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner_id, options
+        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner, options
       )
       @hardpoints[index] = hp
     end

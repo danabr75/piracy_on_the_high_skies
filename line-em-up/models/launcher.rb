@@ -15,25 +15,25 @@ class Launcher < GeneralObject
   HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
   PROJECTILE_CLASS = nil
 
-  def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options = {}
+  def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     validate_not_nil([options], self.class.name, __callee__)
     self.class::PROJECTILE_CLASS.new(
       current_map_pixel_x, current_map_pixel_y, 
       destination_angle, start_point, end_point,
       self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle, self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle, hardpoint_firing_angle,
       current_map_tile_x, current_map_tile_y,
-      owner_id, options
+      owner, options
     )
   end
 
-  def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options = {}
+  def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     validate_not_nil([options], self.class.name, __callee__) 
     angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
     angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
 
     if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
       if @cooldown_wait <= 0
-        projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options)
+        projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
         @cooldown_wait = get_cooldown
         return projectile
       end
@@ -57,6 +57,7 @@ class Launcher < GeneralObject
 
   def initialize(options = {})
     super(options)
+    @image_hardpoint = self.class.get_hardpoint_image
     @active = true
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
@@ -136,23 +137,8 @@ class Launcher < GeneralObject
   #   return last_active_particle
   # end
 
-  def draw
-    raise "Deprecated"
-    if @inited
-      if @active
-        if @image_optional
-          # if @image_angle != nil
-          #   @image_optional.draw_rot(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @image_angle, 0.5, 0.5, @width_scale, @height_scale)
-          # else
-            @image_optional.draw(@x - @image_width_half, @y - @image_height_half, get_draw_ordering, @width_scale, @height_scale)
-          # end
-        end
-      end
-
-      return true
-    else
-      return false
-    end
+  def draw angle, x, y, z
+    @image_hardpoint.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 
   def draw_gl

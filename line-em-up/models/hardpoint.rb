@@ -14,7 +14,7 @@ class Hardpoint < GeneralObject
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
   attr_accessor :item
 
-  def initialize(x, y, z, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner_id, options = {})
+  def initialize(x, y, z, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # @group_number = group_number
 
@@ -51,11 +51,11 @@ class Hardpoint < GeneralObject
     @item_klass = item_klass
     if @item_klass
       @assigned_weapon_class = @item_klass
-      @image_hardpoint = @item_klass.get_hardpoint_image
+      # @image_hardpoint = @item_klass.get_hardpoint_image
       @group_number  = @item_klass::FIRING_GROUP_NUMBER
     else
       @group_number  = 1 # by default
-      @image_hardpoint = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
+      @image_hardpoint_empty = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     end
 
 
@@ -118,7 +118,7 @@ class Hardpoint < GeneralObject
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
     @item = @item_klass.new({image_angle: @angle_from_center}) if @item_klass
     puts "END HARDPOINT #{@id}"
-    @owner_id = owner_id
+    @owner = owner
     puts "@ANGLE_FROM_CENTER: #{@angle_from_center}" if @item
   end
 
@@ -239,7 +239,7 @@ class Hardpoint < GeneralObject
       # stop
 
       # Hardpoints angle_from_center IS USED TO CALCULATE POS X,Y, not to find firing angle.
-      attack_projectile = @item.attack(current_ship_angle - @angle_offset,  projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, @owner_id, options)
+      attack_projectile = @item.attack(current_ship_angle - @angle_offset,  projectile_x, projectile_y, destination_angle, start_point, end_point, nil, nil, @owner, options)
       @drawable_items_near_self << @item
     end
 
@@ -272,13 +272,8 @@ class Hardpoint < GeneralObject
     @x = Math.cos(step) * @radius + center_x
     @y = Math.sin(step) * @radius + center_y
 
-    # puts "DRAWING HARDPOINT: #{@x} and #{@y}"
-    # @drawable_items_near_self.reject! { |item| item.draw }
-
-    # if @image_angle != nil
-    # angle = @angle_from_center + @image_angle
-    # puts "ANGLE HERE: #{angle}"
-    @image_hardpoint.draw_rot(@x, @y, @z, -ship_current_angle + @angle_offset, 0.5, 0.5, @width_scale, @height_scale)
+    @item.draw(-ship_current_angle + @angle_offset, @x, @y, @z) if @item
+    @image_hardpoint_empty.draw_rot(@x, @y, @z, -ship_current_angle + @angle_offset, 0.5, 0.5, @width_scale, @height_scale) if !@item
   end
 
   def draw_gl

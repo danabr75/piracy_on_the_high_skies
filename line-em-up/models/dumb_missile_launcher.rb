@@ -17,7 +17,7 @@ class DumbMissileLauncher < Launcher
 
 
   # # Calculate offset in the hardpoint, not on the launcher side (multiple projectiles).
-  # def attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options = {}
+  # def attack initial_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
   #   validate_not_nil([options], self.class.name, __callee__) 
   #   angle_min = LAUNCHER_MIN_ANGLE + initial_angle
   #   angle_max = LAUNCHER_MAX_ANGLE + initial_angle
@@ -34,7 +34,7 @@ class DumbMissileLauncher < Launcher
   #   if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
   #     if @cooldown_wait <= 0
   #       new_map_pixel_x, new_map_pixel_y = convert_screen_to_map_pixel_location(current_map_pixel_x, current_map_pixel_y)
-  #       projectile = init_projectile(initial_angle, new_map_pixel_x, new_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner_id, options)
+  #       projectile = init_projectile(initial_angle, new_map_pixel_x, new_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
   #       # @projectiles << projectile
   #       @cooldown_wait = get_cooldown
   #       return projectile

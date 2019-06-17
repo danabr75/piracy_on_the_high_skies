@@ -33,7 +33,7 @@ Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
 
 def populate_inventory
   @config_file_path = CONFIG_FILE
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '0'.to_s], 'DumbMissileLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '0'.to_s], 'GrapplingHookLauncher')
   ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '0'.to_s], 'DumbMissileLauncher')
   ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '0'.to_s], 'DumbMissileLauncher')
   ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '1'.to_s], 'LaserLauncher')

@@ -416,6 +416,9 @@ class GameWindow < Gosu::Window
     if id == Gosu::KB_EQUALS
       @can_resize = true
     end
+    if id == Gosu::MS_RIGHT
+      @player.deactivate_group_3
+    end
     if id == Gosu::MS_LEFT
       @player.deactivate_group_2
     end

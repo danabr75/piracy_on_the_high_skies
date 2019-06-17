@@ -39,7 +39,7 @@ class AIShip < ScreenMapFixedObject
     @angle = 90
 
     hardpoint_data = Player.get_hardpoint_data('BasicShip')
-    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, @id, hardpoint_data)
+    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, self, hardpoint_data)
     @ship.x = @x
     @ship.y = @y
     @current_momentum = 0
