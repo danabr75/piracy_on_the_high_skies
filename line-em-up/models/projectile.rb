@@ -212,29 +212,9 @@ class Projectile < ScreenMapFixedObject
           end
           hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
         end
-        if hit_object
-          # puts "COLLISION DETECTED!!!!! - #{self.class.name} - to #{object.class.name}"
-          # puts "Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius"
-          # puts "Gosu.distance(#{@current_map_pixel_x}, #{@current_map_pixel_y}, #{object.current_map_pixel_x}, #{object.current_map_pixel_y}) < #{self.get_radius} + #{object.get_radius}"
-          # raise "STOP HERE"
-          # hit_object = true
-          if self.class.get_aoe <= 0
-            if object.respond_to?(:health) && object.respond_to?(:take_damage)
-              object.take_damage(self.class.get_damage * @damage_increase)
-            end
-
-            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
-
-              object.drops.each do |drop|
-                drops << drop
-              end
-            end
-
-            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
-              killed += 1
-              points = points + object.get_points
-            end
-          end
+        if hit_object && self.class.get_aoe <= 0
+          result = trigger_object_collision(object) 
+          drops = drops + result[:drops] if result[:drops].any?
         end
       end
     end
@@ -242,22 +222,8 @@ class Projectile < ScreenMapFixedObject
       object_groups.each do |group|
         group.each do |object|
           next if object.nil?
-          if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @scale
-            if object.respond_to?(:health) && object.respond_to?(:take_damage)
-              object.take_damage(self.class.get_damage * @damage_increase)
-            end
-
-            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
-              object.drops.each do |drop|
-                drops << drop
-              end
-            end
-
-            if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:get_points)
-              killed += 1
-              points = points + object.get_points
-            end
-          end
+          result = trigger_aoe_object_collision(object)
+          drops = drops + result[:drops] if result[:drops].any?
         end
       end
     end
@@ -272,11 +238,44 @@ class Projectile < ScreenMapFixedObject
     end
 
     @health = 0 if hit_object
-    puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
+    # puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
     return {drops: drops, point_value: points, killed: killed}
   end
 
   protected
+
+  def trigger_aoe_object_collision object
+    value = {drops: []}
+    if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @average_scale
+      if object.respond_to?(:health) && object.respond_to?(:take_damage)
+        object.take_damage(self.class.get_damage * @damage_increase)
+      end
+
+      if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+        object.drops.each do |drop|
+          value[:drops] << drop
+        end
+      end
+    end
+    return value
+  end
+
+  def trigger_object_collision(object)
+    value = {drops: []}
+    if object.respond_to?(:health) && object.respond_to?(:take_damage)
+      object.take_damage(self.class.get_damage * @damage_increase)
+    end
+
+    if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+      object.drops.each do |drop|
+        value[:drops] << drop
+      end
+    end
+    puts "RETURNING VALUE: #{value}"
+    return value
+  end
+
+
   def self.get_damage
     self::DAMAGE
   end
