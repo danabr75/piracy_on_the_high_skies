@@ -10,6 +10,7 @@ include OpenGL
 include GLUT
 
 class PilotableShip < GeneralObject
+
   SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0

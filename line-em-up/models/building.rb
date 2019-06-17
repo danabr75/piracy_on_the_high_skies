@@ -10,6 +10,8 @@ include GLU # - defined gluProject
 class Building < BackgroundFixedObject
   POINT_VALUE_BASE = 1
   HEALTH = 100
+  CLASS_TYPE = :building
+
 
   # For radius size calculations
   def self.get_image

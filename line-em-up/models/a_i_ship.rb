@@ -24,6 +24,8 @@ class AIShip < ScreenMapFixedObject
   AGRO_MAX = 10 * 60
   AGRO_DECREMENT = 1
 
+  CLASS_TYPE = :ship
+
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)

@@ -21,6 +21,9 @@ class Player < ScreenFixedObject
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
   attr_reader :current_momentum
   MAX_HEALTH = 200
+  
+  CLASS_TYPE = :ship
+
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle

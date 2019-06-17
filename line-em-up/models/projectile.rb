@@ -21,6 +21,10 @@ class Projectile < ScreenMapFixedObject
   # IMPLEMENT THIS
   MAX_TILE_TRAVEL = 12
 
+  CLASS_TYPE = :projectile
+  # CLASS_TYPEs that are in play right now :ship, :building, :projectile
+  HIT_OBJECT_CLASS_FILTER = nil
+
 
   def get_image
     puts "override get_image!"
@@ -37,6 +41,8 @@ class Projectile < ScreenMapFixedObject
     # puts "#{[current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options]}"
     # validate_not_nil([current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+
+    @hit_objects_class_filter = self.class::HIT_OBJECT_CLASS_FILTER
 
     @owner = owner
 
@@ -176,6 +182,7 @@ class Projectile < ScreenMapFixedObject
         next if object.id == @id
         # Don't hit the ship that launched it
         next if object.id == @owner.id
+        next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
         break if hit_object
         # don't hit a dead object
         if object.health <= 0
