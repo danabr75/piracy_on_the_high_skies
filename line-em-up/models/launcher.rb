@@ -17,6 +17,8 @@ class Launcher < GeneralObject
 
   def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     validate_not_nil([options], self.class.name, __callee__)
+    options[:hp_reference] = @hp_reference if @hp_reference
+    # validate_not_nil([current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
     self.class::PROJECTILE_CLASS.new(
       current_map_pixel_x, current_map_pixel_y, 
       destination_angle, start_point, end_point,

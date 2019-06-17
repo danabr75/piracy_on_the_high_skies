@@ -19,7 +19,7 @@ include GLUT
 class GrapplingHook < Projectile
   MAX_SPEED      = 3
   STARTING_SPEED = 3
-  INITIAL_DELAY  = 0.0
+  INITIAL_DELAY  = false
   SPEED_INCREASE_FACTOR = 2
   DAMAGE = 0
   AOE = 0
@@ -39,6 +39,9 @@ class GrapplingHook < Projectile
       @chain_image_radius = (@chain_image_width  + @chain_image_height) / 4
     end
     @player_reference = nil
+    @hp_reference     = options[:hp_reference]
+    @returned_to_player = false
+    @returning_to_player  = false
   end
 
   def get_image
@@ -58,30 +61,34 @@ class GrapplingHook < Projectile
   
   def update mouse_x, mouse_y, player
     @player_reference = player
+    returning_to_object = @hp_reference || @owner
     # puts "MISSILE: #{@health}"
-    returned_to_player = false
-    distance = Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
+    # returned_to_player = false
+    distance = Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
     if @returning_to_player 
-      if distance < player.get_radius
-        returned_to_player = true
+      if distance < returning_to_object.get_radius
+        @returned_to_player = true
       end
     end
 
     if !@returning_to_player && distance >= MAX_TILE_LENGTH * @average_tile_size
       @returning_to_player = true
+      # puts "RETURING TO PLAYER"
+      @speed = @speed / 2.0
     end
     if @returning_to_player
       start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
-      end_point   = OpenStruct.new(:x => player.current_map_pixel_x, :y => player.current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => returning_to_object.current_map_pixel_x, :y => returning_to_object.current_map_pixel_y)
       @angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
     end
-    return !returned_to_player && super(mouse_x, mouse_y, player)
+    return !@returned_to_player && super(mouse_x, mouse_y, player)
   end
 
   def draw
     if @player_reference
+      returning_to_object = @hp_reference || @owner
       start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
-      end_point   = OpenStruct.new(:x => @owner.current_map_pixel_x, :y => @owner.current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => returning_to_object.current_map_pixel_x, :y => returning_to_object.current_map_pixel_y)
       angle_to_origin = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
       # Reversing direction
       angle_to_origin = self.class.angle_1to360(angle_to_origin - 180)
@@ -92,11 +99,22 @@ class GrapplingHook < Projectile
       #   end
       # end
       step = (Math::PI/180 * (angle_to_origin + 90))
-      base = @chain_image_radius
+      base = @chain_image_radius #* 1.2
       new_x = Math.cos(step) * base + @current_map_pixel_x
       new_y = Math.sin(step) * base + @current_map_pixel_y
+      # puts "@hp_reference: RIGHT HERE: #{@hp_reference.current_map_pixel_x} - #{@hp_reference.current_map_pixel_y}"
       i = 0
-      while i < 100 && Gosu.distance(@owner.current_map_pixel_x, @owner.current_map_pixel_y, new_x, new_y) > (@owner.get_radius / 2)
+      while i < 200 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius)
+        x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
+        @chain_image.draw_rot(x, y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+        #
+        step = (Math::PI/180 * (angle_to_origin + 90))
+        new_x = Math.cos(step) * base + new_x
+        new_y = Math.sin(step) * base + new_y
+        i += 1
+      end
+      # A little past the returning object.
+      (0..3).each do |i|
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
         @chain_image.draw_rot(x, y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
         #

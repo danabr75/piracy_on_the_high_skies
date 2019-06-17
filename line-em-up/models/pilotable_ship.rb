@@ -436,6 +436,7 @@ class PilotableShip < GeneralObject
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
     @hardpoints.each do |hardpoint|
+      # puts "UPDATING HARDPOINT HERE: #{self}"
       hardpoint.update(mouse_x, mouse_y, self)
     end
 

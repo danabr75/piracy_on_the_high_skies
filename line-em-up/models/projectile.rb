@@ -32,6 +32,10 @@ class Projectile < ScreenMapFixedObject
 
   # destination_map_pixel_x, destination_map_pixel_y params will become destination_angle
   def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options = {})
+    # puts "PROJETIL PARALMS"
+    # puts "current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options"
+    # puts "#{[current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options]}"
+    # validate_not_nil([current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
     @owner = owner
@@ -94,6 +98,7 @@ class Projectile < ScreenMapFixedObject
   end
 
   def update mouse_x, mouse_y, player
+    # puts "PROJ SPEED: #{@speed}"
     if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
       if @current_image_angle != @end_image_angle
         @current_image_angle = @current_image_angle + @image_angle_incrementor
@@ -108,7 +113,7 @@ class Projectile < ScreenMapFixedObject
     end
 
     # new_speed = 0
-    if @time_alive > (@custom_initial_delay || self.class.get_initial_delay)
+    if self.class.get_initial_delay && (@time_alive > (@custom_initial_delay || self.class.get_initial_delay))
       speed_factor = self.class.get_speed_increase_factor
       if @speed < self.class.get_max_speed
         if speed_factor && speed_factor > 0.0
@@ -122,8 +127,13 @@ class Projectile < ScreenMapFixedObject
         @speed = self.class.get_max_speed if @speed > self.class.get_max_speed
       end
 
+      # puts "SPEED HERE: #{@speed}"
       factor_in_scale_speed = @speed * @average_scale
 
+      movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
+    else
+      @speed = self.class.get_max_speed if @speed.nil?
+      factor_in_scale_speed = @speed * @average_scale
       movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
     end
 
