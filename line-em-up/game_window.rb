@@ -226,21 +226,38 @@ class GameWindow < Gosu::Window
 
     init_quest = {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
-      victory_condition_string: "lambda { |map_name, ships, buildings, player| ships.count == 0             }",
-      active_condition_string:  "lambda { |map_name, ships, buildings, player| map_name == active_condition }"
+      "starting-level-quest": {
+        victory_condition_string:     "lambda { |map_name, ships, buildings, player| ships.count == 0                               }",
+        post_victory_triggers_string: "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
+        active_condition_string:      "lambda { |map_name, ships, buildings, player| map_name == active_condition                   }"
+      },
+      "followup-level-quest": {
+        victory_condition_string: "lambda { |map_name, ships, buildings, player| buildings.count == 0             }",
+        active_condition_string:  "lambda { |map_name, ships, buildings, player| map_name == active_condition }"
+      },
     }
     # init_quest_data = init_quest_data.to_json
     quests = [init_quest]
     active_quest_data = ConfigSetting.get_setting(@config_path, 'ActiveQuests', quests.to_json)
     puts "ACTIVE_QUEST"
     puts active_quest_data.inspect
-    active_quests = eval(active_quest_data)
-    active_quests.each do |quest_hash|
-      quest_hash[:victory_condition] = eval(quest_hash[:victory_condition_string])
+    active_quests_data = eval(active_quest_data)
+    active_quests = {}
+    active_quests_data.each do |quest|
+      quest.each do |quest_id, quest_hash|
+        active_quests[quest_id] = {}
+        puts "active_quests[quest_id]: #{active_quests[quest_id]}"
+        puts "quest_hash: #{quest_hash}"
+        active_quests[quest_id][:victory_condition]     = eval(quest_hash[:victory_condition_string]) if quest_hash[:victory_condition_string] && quest_hash[:victory_condition_string] != ''
+        active_quests[quest_id][:post_victory_triggers] = eval(quest_hash[:post_victory_triggers_string]) if quest_hash[:post_victory_triggers_string] && quest_hash[:post_victory_triggers_string] != ''
+        active_quests[quest_id][:active_condition]      = eval(quest_hash[:active_condition_string]) if quest_hash[:active_condition_string] && quest_hash[:active_condition_string] != ''
+      end
     end
     puts "ACTIVE_QUESTV2"
     puts active_quests
     @active_quests = active_quests
+    # Run these active quests through the update block. If the victory condition is met, need to update the json data. And move it to inactive.
+    # Create quest management interface module... can retrieve, store, etc.
     raise "STOP HERE"
     # Inactive quests are dormant until triggered. Map location.. or death of a special ship.
     # One triggered, they should be moved into the active_quest_data
