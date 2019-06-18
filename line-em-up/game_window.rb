@@ -138,6 +138,7 @@ class GameWindow < Gosu::Window
     super(@width, @height)
     # @width, @height = [@width.to_f, @height.to_f]
     
+
     @game_pause = false
     # @menu = nil
     # @can_open_menu = true
@@ -218,6 +219,35 @@ class GameWindow < Gosu::Window
     @buildings = values[:buildings]
     @ships = values[:ships]
     @pickups = values[:pickups]
+
+    # Loading in ActiveQuests .. start off with kill all enemie ships in the area
+    # every ship killed must be checked against the quests
+    # Move these to right after map init?
+
+    init_quest = {
+      # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
+      victory_condition_string: "lambda { |map_name, ships, buildings, player| ships.count == 0             }",
+      active_condition_string:  "lambda { |map_name, ships, buildings, player| map_name == active_condition }"
+    }
+    # init_quest_data = init_quest_data.to_json
+    quests = [init_quest]
+    active_quest_data = ConfigSetting.get_setting(@config_path, 'ActiveQuests', quests.to_json)
+    puts "ACTIVE_QUEST"
+    puts active_quest_data.inspect
+    active_quests = eval(active_quest_data)
+    active_quests.each do |quest_hash|
+      quest_hash[:victory_condition] = eval(quest_hash[:victory_condition_string])
+    end
+    puts "ACTIVE_QUESTV2"
+    puts active_quests
+    @active_quests = active_quests
+    raise "STOP HERE"
+    # Inactive quests are dormant until triggered. Map location.. or death of a special ship.
+    # One triggered, they should be moved into the active_quest_data
+    inactive_quest_data = ConfigSetting.get_setting(@config_path, 'InactiveQuests', "[]")
+    # For the journal
+    completed_quest_data = ConfigSetting.get_setting(@config_path, 'CompletedQuests', "[]")
+
 
     # @scroll_factor = 1
     @movement_x = 0

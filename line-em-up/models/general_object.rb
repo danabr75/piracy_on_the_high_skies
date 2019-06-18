@@ -79,7 +79,7 @@ class GeneralObject
     validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
     validate_not_nil([@width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
 
-    @id    = SecureRandom.uuid
+    @id    = options[:id] || SecureRandom.uuid
     # @class = self.class.name
     @image = options[:image] || get_image
     if self.class.name == "Player"
