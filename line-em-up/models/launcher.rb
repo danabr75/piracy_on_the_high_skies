@@ -16,6 +16,17 @@ class Launcher < GeneralObject
   PROJECTILE_CLASS = nil
   ACTIVE_PROJECTILE_LIMIT = nil
 
+  def initialize(options = {})
+    super(options)
+    @image_hardpoint = self.class.get_hardpoint_image
+    @active = true
+    @projectiles = []
+    @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
+
+    @inited = true
+    @cooldown_wait = 0
+  end
+
   def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     validate_not_nil([options], self.class.name, __callee__)
     options[:hp_reference] = @hp_reference if @hp_reference
@@ -35,8 +46,12 @@ class Launcher < GeneralObject
     angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
 
     if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
-      if @cooldown_wait <= 0
+      if @cooldown_wait <= 0 && (self.class::ACTIVE_PROJECTILE_LIMIT.nil? || @projectiles.count < self.class::ACTIVE_PROJECTILE_LIMIT)
+        # puts "TEST!!!!!" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
+        puts "LAUCHING ATTACK HERE #{@projectiles.count} and limit: #{self.class::ACTIVE_PROJECTILE_LIMIT}" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
+        # raise "STOP HERE" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
         projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+        @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
         @cooldown_wait = get_cooldown
         return projectile
       end
@@ -56,17 +71,6 @@ class Launcher < GeneralObject
     raise "You forgot to override the launcher's 'HARDPOINT_NAME' here - for this class: #{self.name}"
     # # puts "HERE IT IS: #{self.class.name} with #{get_hardpoint_media_location}"
     # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{using_name}/hardpoint.png")
-  end
-
-  def initialize(options = {})
-    super(options)
-    @image_hardpoint = self.class.get_hardpoint_image
-    @active = true
-    @projectiles = []
-    @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
-
-    @inited = true
-    @cooldown_wait = 0
   end
 
   def get_cooldown
@@ -103,18 +107,19 @@ class Launcher < GeneralObject
     # end
   end
 
-  def update mouse_x = nil, mouse_y = nil, object = nil, scroll_factor = 1
-    if @inited && @active
-      @x = object.x
-      @y = object.y
-    end
+  # This section is heavily outdated.
+  def update mouse_x = nil, mouse_y = nil, object = nil
+    # if @inited && @active
+      # @x = object.x
+      # @y = object.y
+    # end
     @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
     if !@active && @projectiles.count == 0
       return false
     else
-      # @projectiles.reject! do |particle|
-      #   !particle.parental_update(nil, nil, nil)
-      # end
+      @projectiles.reject! do |projectile|
+        !projectile.is_alive
+      end
 
       return true
     end

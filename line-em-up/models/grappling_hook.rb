@@ -23,7 +23,7 @@ class GrapplingHook < Projectile
   SPEED_INCREASE_FACTOR = 2
   DAMAGE = 0
   AOE = 0
-  MAX_TILE_LENGTH = 3
+  MAX_TILE_LENGTH = 3.5
   HIT_OBJECT_CLASS_FILTER = [:ship]
   # BOARDING_TILE_DISTANCE = 0.5
   PULL_STRENGTH = 1.0
@@ -89,16 +89,14 @@ class GrapplingHook < Projectile
       # Reversing direction
       # angle_to_origin = self.class.angle_1to360(angle_to_origin - 180)
       @attached_target.movement(@pull_strength, angle_to_origin)
+      @owner.movement(@pull_strength, angle_to_origin + 180)
 
       @current_map_pixel_x = @attached_target.current_map_pixel_x
       @current_map_pixel_y = @attached_target.current_map_pixel_y
 
-      #if distance from target to owner <  boarding distance
-      #end
       if Gosu.distance(@attached_target.current_map_pixel_x, @attached_target.current_map_pixel_y, returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y) < @boarding_tile_distance
-        #  trigger boarding process
+        #  trigger boarding process HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
         @dissengage = true
-        # raise "TRIGGER BOARDING PROCESS"
       end
     end
 
@@ -113,6 +111,14 @@ class GrapplingHook < Projectile
       keep_alive_if_attached = true
     else
       keep_alive_if_attached = super(mouse_x, mouse_y, player)
+    end
+
+    # To release it from being tracked from the launcher
+    if @dissengage
+      @health = 0
+      puts "SETTING COOLDOWN DELY HERE. #{@hp_reference.item.class} - #{@hp_reference.item.class::COOLDOWN_DELAY}"
+      @hp_reference.item.cooldown_wait = @hp_reference.item.class::COOLDOWN_DELAY
+      puts "@hp_reference.item.cooldown_wait: #{@hp_reference.item.cooldown_wait}"
     end
 
     # return !@dissengage && super(mouse_x, mouse_y, player)

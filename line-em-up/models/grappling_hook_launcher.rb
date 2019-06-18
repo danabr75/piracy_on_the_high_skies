@@ -6,7 +6,8 @@ class GrapplingHookLauncher < Launcher
   LAUNCHER_MAX_ANGLE = 60
   PROJECTILE_CLASS = GrapplingHook
   FIRING_GROUP_NUMBER = 3
-  COOLDOWN_DELAY = 200
+  COOLDOWN_DELAY = 240
+  ACTIVE_PROJECTILE_LIMIT = 1
 
   def initialize(options = {})
     @hp_reference = options[:hp_reference]
@@ -20,7 +21,7 @@ class GrapplingHookLauncher < Launcher
 
 
   def draw angle, x, y, z
-    if @cooldown_wait <= 0.0
+    if @cooldown_wait <= 0.0 && (self.class::ACTIVE_PROJECTILE_LIMIT.nil? || @projectiles.count < self.class::ACTIVE_PROJECTILE_LIMIT)
       @image_hardpoint.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale, @height_scale)
     else
       @image_hardpoint_empty.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale, @height_scale)
