@@ -24,6 +24,7 @@ class GrapplingHook < Projectile
   DAMAGE = 0
   AOE = 0
   MAX_TILE_LENGTH = 3.5
+  BREAKING_POINT_TILE_LENGTH = 10
   HIT_OBJECT_CLASS_FILTER = [:ship]
   # BOARDING_TILE_DISTANCE = 0.5
   PULL_STRENGTH = 1.0
@@ -48,6 +49,7 @@ class GrapplingHook < Projectile
     @attached_target = nil
     @boarding_tile_distance = nil# self.class::BOARDING_TILE_DISTANCE * @average_tile_size
     @pull_strength = self.class::PULL_STRENGTH * @average_scale
+    @breaking_point_tile_length = self.class::BREAKING_POINT_TILE_LENGTH * @average_tile_size
   end
 
   def get_image
@@ -111,6 +113,11 @@ class GrapplingHook < Projectile
       keep_alive_if_attached = true
     else
       keep_alive_if_attached = super(mouse_x, mouse_y, player)
+    end
+
+    # Chain breaking point
+    if Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y) > @breaking_point_tile_length
+      @dissengage = true
     end
 
     # To release it from being tracked from the launcher
