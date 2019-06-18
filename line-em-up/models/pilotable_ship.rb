@@ -135,8 +135,8 @@ class PilotableShip < GeneralObject
     end
 
     @theta = nil
-    @speed = self.class::SPEED
-    @mass = self.class::MASS
+    @speed = self.class::SPEED * @average_scale
+    @mass  = self.class::MASS  * @average_scale
   end
 
   # right broadside

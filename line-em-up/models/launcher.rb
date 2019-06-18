@@ -14,6 +14,7 @@ class Launcher < GeneralObject
   HARDPOINT_NAME = "replace_me"  
   HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
   PROJECTILE_CLASS = nil
+  ACTIVE_PROJECTILE_LIMIT = nil
 
   def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     validate_not_nil([options], self.class.name, __callee__)
