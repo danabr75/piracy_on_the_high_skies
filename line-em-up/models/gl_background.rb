@@ -1,3 +1,5 @@
+# Class Needs to be renamed.. 
+
 require 'gosu'
 # # require 'opengl'
 # # require 'glu'
@@ -61,13 +63,13 @@ class GLBackground
 
 
   # not sure if include_adjustments_for_not_exact_opengl_dimensions works yet or not
-  def convert_opengl_to_screen opengl_x, opengl_y, include_adjustments_for_not_exact_opengl_dimensions = false
-    opengl_x = 1.2 / opengl_x if opengl_x != 0 && include_adjustments_for_not_exact_opengl_dimensions
-    x = ((opengl_x + 1) / 2.0) * @screen_pixel_width.to_f
-    opengl_y = 0.92 / opengl_y if opengl_y != 0 && include_adjustments_for_not_exact_opengl_dimensions
-    y = ((opengl_y + 1) / 2.0) * @screen_pixel_height.to_f
-    return [x, y]
-  end
+  # def convert_opengl_to_screen opengl_x, opengl_y, include_adjustments_for_not_exact_opengl_dimensions = false
+  #   opengl_x = 1.2 / opengl_x if opengl_x != 0 && include_adjustments_for_not_exact_opengl_dimensions
+  #   x = ((opengl_x + 1) / 2.0) * @screen_pixel_width.to_f
+  #   opengl_y = 0.92 / opengl_y if opengl_y != 0 && include_adjustments_for_not_exact_opengl_dimensions
+  #   y = ((opengl_y + 1) / 2.0) * @screen_pixel_height.to_f
+  #   return [x, y]
+  # end
 
   #   convert_screen_to_opengl
   # 225.0, 675.0, 450.0 , 450.0

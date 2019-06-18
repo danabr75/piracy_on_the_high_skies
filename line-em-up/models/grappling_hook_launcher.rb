@@ -28,6 +28,18 @@ class GrapplingHookLauncher < Launcher
     end
   end
 
+  def update mouse_x = nil, mouse_y = nil, object = nil
+    @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
+    if !@active && @projectiles.count == 0
+      return false
+    else
+      @projectiles.reject! do |projectile|
+        projectile.dissengage
+      end
+
+      return true
+    end
+  end
 
   def self.name
     "Grappling Hook Launcher"

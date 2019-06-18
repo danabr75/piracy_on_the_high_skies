@@ -24,13 +24,14 @@ class GrapplingHook < Projectile
   DAMAGE = 0
   AOE = 0
   MAX_TILE_LENGTH = 3.5
-  BREAKING_POINT_TILE_LENGTH = 10
+  BREAKING_POINT_TILE_LENGTH = 15
   HIT_OBJECT_CLASS_FILTER = [:ship]
   # BOARDING_TILE_DISTANCE = 0.5
   PULL_STRENGTH = 1.0
 
   # MAX_CURSOR_FOLLOW = 4
   # ADVANCED_HIT_BOX_DETECTION = true
+  attr_reader :dissengage
 
   # Might not be necessary to override
   def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options = {})
@@ -122,10 +123,10 @@ class GrapplingHook < Projectile
 
     # To release it from being tracked from the launcher
     if @dissengage
-      @health = 0
-      puts "SETTING COOLDOWN DELY HERE. #{@hp_reference.item.class} - #{@hp_reference.item.class::COOLDOWN_DELAY}"
+      # @health = 0
+      # puts "SETTING COOLDOWN DELY HERE. #{@hp_reference.item.class} - #{@hp_reference.item.class::COOLDOWN_DELAY}"
       @hp_reference.item.cooldown_wait = @hp_reference.item.class::COOLDOWN_DELAY
-      puts "@hp_reference.item.cooldown_wait: #{@hp_reference.item.cooldown_wait}"
+      # puts "@hp_reference.item.cooldown_wait: #{@hp_reference.item.cooldown_wait}"
     end
 
     # return !@dissengage && super(mouse_x, mouse_y, player)
@@ -153,7 +154,7 @@ class GrapplingHook < Projectile
       new_y = Math.sin(step) * base + @current_map_pixel_y
       # puts "@hp_reference: RIGHT HERE: #{@hp_reference.current_map_pixel_x} - #{@hp_reference.current_map_pixel_y}"
       i = 0
-      while i < 200 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius)
+      while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius)
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
         @chain_image.draw_rot(x, y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
         #
