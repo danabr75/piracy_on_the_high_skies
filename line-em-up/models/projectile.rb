@@ -18,6 +18,8 @@ class Projectile < ScreenMapFixedObject
 
   HEALTH = 1
 
+  MAX_TIME_ALIVE = 300
+
   # IMPLEMENT THIS
   MAX_TILE_TRAVEL = 12
 
@@ -104,6 +106,7 @@ class Projectile < ScreenMapFixedObject
   end
 
   def update mouse_x, mouse_y, player
+
     # puts "PROJ SPEED: #{@speed}"
     if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
       if @current_image_angle != @end_image_angle
@@ -142,6 +145,8 @@ class Projectile < ScreenMapFixedObject
       factor_in_scale_speed = @speed * @average_scale
       movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
     end
+
+    @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
     return super(mouse_x, mouse_y, player)
   end

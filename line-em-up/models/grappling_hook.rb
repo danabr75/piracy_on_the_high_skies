@@ -28,6 +28,9 @@ class GrapplingHook < Projectile
   HIT_OBJECT_CLASS_FILTER = [:ship]
   # BOARDING_TILE_DISTANCE = 0.5
   PULL_STRENGTH = 1.0
+  MAX_TIME_ALIVE = nil
+  # seperate from normal alive max. Only dies when not grappled to something
+  GRAPPLE_MAX_TIME_ALIVE = 1200
 
   # MAX_CURSOR_FOLLOW = 4
   # ADVANCED_HIT_BOX_DETECTION = true
@@ -130,7 +133,10 @@ class GrapplingHook < Projectile
     end
 
     # return !@dissengage && super(mouse_x, mouse_y, player)
-    puts "GRAP UPDATE RETURNING: #{!@dissengage} - #{keep_alive_if_attached}"
+    if !@attached_target 
+      @health = 0 if self.class::GRAPPLE_MAX_TIME_ALIVE && @time_alive >= self.class::GRAPPLE_MAX_TIME_ALIVE
+    end
+
     return !@dissengage && keep_alive_if_attached
   end
 
