@@ -224,6 +224,7 @@ class GameWindow < Gosu::Window
 
 
     @quest_data, @ships, @buildings = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
+    # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
 
     # Loading in ActiveQuests .. start off with kill all enemie ships in the area
     # every ship killed must be checked against the quests

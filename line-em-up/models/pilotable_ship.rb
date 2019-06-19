@@ -75,11 +75,11 @@ class PilotableShip < GeneralObject
     @grapple_hook_cooldown_wait = 0
     @attack_speed = 3
     # @attack_speed = 3
-    if @debug
-      @health = INIT_HEALTH * 10000
-    else
+    # if @debug
+    #   @health = INIT_HEALTH * 10000
+    # else
       @health = INIT_HEALTH
-    end
+    # end
     @armor = 0
     @rockets = 50
     # @rockets = 250

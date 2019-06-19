@@ -139,7 +139,18 @@ module QuestInterface
   # this is necessary for on-map-load inits..
   # What if a player enters an area, the updates creates a ship, the player leaves. Need to have on-load inits.
   def self.init_quests config_path, quest_datas, map_name, ships, buildings, player
-
+    quest_datas.each do |quest_key, values|
+      state = values["state"]
+      if state == 'active'
+        if values["init_ships"] && values["init_ships"].any?
+          values["init_ships"].each do |ship_string|
+            puts "1loading in ship here for : #{quest_key}"
+            ships << eval(ship_string)
+          end
+        end
+        # Load in buildings
+      end
+    end
     return [quest_datas, ships, buildings]
   end
 
@@ -170,6 +181,16 @@ module QuestInterface
 
         end
       elsif state == 'pending_activation' || state == 'inactive' && values["active_condition"] && values["active_condition"].call(map_name, ships, buildings, player)
+        # In this special case, run init functions, as if the map were just loaded
+        # if state == 'pending_activation'
+          if values["init_ships"] && values["init_ships"].any?
+            values["init_ships"].each do |ship_string|
+              puts "2loading in ship here for : #{quest_key}"
+              ships << eval(ship_string)
+            end
+          end
+          # Load in buildings
+        # end
         updated_quest_keys[quest_key] = 'active'
         values["state"] = 'active'
         # Trigger state changes
