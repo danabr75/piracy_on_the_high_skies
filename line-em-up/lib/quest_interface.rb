@@ -47,7 +47,7 @@ module QuestInterface
 
       },
       "followup-level-quest": {
-        init_ships:     ["AIShip.new(nil, nil, 125, 125, {id: 'starting-level-quest-ship-2'})"],
+        init_ships:     ["AIShip.new(nil, nil, 125, 125, {id: 'starting-level-quest-ship-2'})", "AIShip.new(nil, nil, 124, 124, {id: 'starting-level-quest-ship-3'})", "AIShip.new(nil, nil, 122, 122, {id: 'starting-level-quest-ship-4'})"],
         init_buildings: [],
         init_effects:   [], # earth_quakes?, trigger dialogue
         post_effects:   [], # earth_quakes?, trigger dialogue
@@ -56,7 +56,7 @@ module QuestInterface
             found_ship = false
             if map_name == 'desert_v2_small'
               ships.each do |ship|
-                found_ship = true if ship.id == 'starting-level-quest-ship-2'
+                found_ship = true if ['starting-level-quest-ship-2', 'starting-level-quest-ship-3', 'starting-level-quest-ship-4'].include?(ship.id)
               end
             end
             return !found_ship

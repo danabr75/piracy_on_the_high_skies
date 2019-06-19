@@ -29,25 +29,5 @@
 
 
   "ships":{
-    "125":{
-      "125":[
-        {"klass_name":"AIShip","data":null}
-      ]
-    },
-    "124":{
-      "124":[
-        {"klass_name":"AIShip","data":null}
-      ]
-    },
-    "123":{
-      "123":[
-        {"klass_name":"AIShip","data":null}
-      ]
-    },
-    "122":{
-      "122":[
-        {"klass_name":"AIShip","data":null}
-      ]
-    }
   }
 }

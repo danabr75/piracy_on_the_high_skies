@@ -104,11 +104,11 @@ class AIShip < ScreenMapFixedObject
   end
 
   def take_damage damage
-    if @debug
-      @ship.take_damage(damage * 50)
-    else
+    # if @debug
+    #   @ship.take_damage(damage * 50)
+    # else
       @ship.take_damage(damage)
-    end
+    # end
     # @health -= damage * @damage_reduction
   end
 
