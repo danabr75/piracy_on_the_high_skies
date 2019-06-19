@@ -215,55 +215,61 @@ class GameWindow < Gosu::Window
     
     @pointer = Cursor.new(@width, @height, @width_scale, @height_scale, @player)
 
+    @quest_data = QuestInterface.get_quests(CONFIG_FILE)
+
     values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
     @buildings = values[:buildings]
     @ships = values[:ships]
     @pickups = values[:pickups]
 
+
+    @quest_data, @ships, @buildings = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
+
     # Loading in ActiveQuests .. start off with kill all enemie ships in the area
     # every ship killed must be checked against the quests
     # Move these to right after map init?
 
-    init_quest = {
-      # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
-      "starting-level-quest": {
-        victory_condition_string:     "lambda { |map_name, ships, buildings, player| ships.count == 0                               }",
-        post_victory_triggers_string: "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
-        active_condition_string:      "lambda { |map_name, ships, buildings, player| map_name == active_condition                   }"
-      },
-      "followup-level-quest": {
-        victory_condition_string: "lambda { |map_name, ships, buildings, player| buildings.count == 0             }",
-        active_condition_string:  "lambda { |map_name, ships, buildings, player| map_name == active_condition }"
-      },
-    }
+    # init_quest = {
+    #   # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
+    #   "starting-level-quest": {
+    #     victory_condition_string:      "lambda { |map_name, ships, buildings, player| ships.count == 0                               }",
+    #     post_victory_triggers_string:  "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
+    #     active_condition_string:       "lambda { |map_name, ships, buildings, player| map_name == active_condition                   }"
+    #   },
+    #   "followup-level-quest": {
+    #     victory_condition_string:      "lambda { |map_name, ships, buildings, player| buildings.count == 0                           }",
+    #     post_victory_triggers_string:  "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
+    #     active_condition_string:       "lambda { |map_name, ships, buildings, player| map_name == active_condition }",
+    #     map_init_string:               "lambda { |map_name, ships, buildings, player|  ships << AIShip.new(nil, nil, x_value.to_i, y_value.to_i) if map_name == 'desert_v2_small'; return {ships: ships, buildings: buildings} }"
+
+    #   }
+    # }
+    # test = AIShip.new(nil, nil, 123, 123, {:id=>"starting-level-quest-ship-1"})
     # init_quest_data = init_quest_data.to_json
-    quests = [init_quest]
-    active_quest_data = ConfigSetting.get_setting(@config_path, 'ActiveQuests', quests.to_json)
-    puts "ACTIVE_QUEST"
-    puts active_quest_data.inspect
-    active_quests_data = eval(active_quest_data)
-    active_quests = {}
-    active_quests_data.each do |quest|
-      quest.each do |quest_id, quest_hash|
-        active_quests[quest_id] = {}
-        puts "active_quests[quest_id]: #{active_quests[quest_id]}"
-        puts "quest_hash: #{quest_hash}"
-        active_quests[quest_id][:victory_condition]     = eval(quest_hash[:victory_condition_string]) if quest_hash[:victory_condition_string] && quest_hash[:victory_condition_string] != ''
-        active_quests[quest_id][:post_victory_triggers] = eval(quest_hash[:post_victory_triggers_string]) if quest_hash[:post_victory_triggers_string] && quest_hash[:post_victory_triggers_string] != ''
-        active_quests[quest_id][:active_condition]      = eval(quest_hash[:active_condition_string]) if quest_hash[:active_condition_string] && quest_hash[:active_condition_string] != ''
-      end
-    end
-    puts "ACTIVE_QUESTV2"
-    puts active_quests
-    @active_quests = active_quests
+    # quests = [init_quest]
+    # active_quest_data = ConfigSetting.get_setting(@config_path, 'Quests', quests.to_json)
+    # puts "ACTIVE_QUEST"
+    # puts active_quest_data.inspect
+    # active_quests_data = eval(active_quest_data)
+    # active_quests = {}
+    # active_quests_data.each do |quest|
+    #   quest.each do |quest_id, quest_hash|
+    #     active_quests[quest_id] = {}
+    #     puts "active_quests[quest_id]: #{active_quests[quest_id]}"
+    #     puts "quest_hash: #{quest_hash}"
+    #     active_quests[quest_id][:victory_condition]     = eval(quest_hash[:victory_condition_string]) if quest_hash[:victory_condition_string] && quest_hash[:victory_condition_string] != ''
+    #     active_quests[quest_id][:post_victory_triggers] = eval(quest_hash[:post_victory_triggers_string]) if quest_hash[:post_victory_triggers_string] && quest_hash[:post_victory_triggers_string] != ''
+    #     active_quests[quest_id][:active_condition]      = eval(quest_hash[:active_condition_string]) if quest_hash[:active_condition_string] && quest_hash[:active_condition_string] != ''
+    #   end
+    # end
+    # puts "ACTIVE_QUESTV2"
+    # puts active_quests
+    # @active_quests = active_quests
     # Run these active quests through the update block. If the victory condition is met, need to update the json data. And move it to inactive.
     # Create quest management interface module... can retrieve, store, etc.
-    raise "STOP HERE"
+    # raise "STOP HERE"
     # Inactive quests are dormant until triggered. Map location.. or death of a special ship.
     # One triggered, they should be moved into the active_quest_data
-    inactive_quest_data = ConfigSetting.get_setting(@config_path, 'InactiveQuests', "[]")
-    # For the journal
-    completed_quest_data = ConfigSetting.get_setting(@config_path, 'CompletedQuests', "[]")
 
 
     # @scroll_factor = 1
@@ -494,6 +500,9 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
+
+
     if @ship_loadout_menu.refresh_player_ship
       @player.refresh_ship
       @ship_loadout_menu.refresh_player_ship = false
@@ -887,7 +896,7 @@ class GameWindow < Gosu::Window
       @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
       @font.draw("Cursor MAP PIXEL: #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      if @projectiles.any?
+      if @projectiles.any? && false
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("P GPS: #{@projectiles.last.current_map_tile_x} - #{@projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("P MAP PIXEL: #{@projectiles.last.current_map_pixel_x.round(1)} - #{@projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -904,7 +913,25 @@ class GameWindow < Gosu::Window
         @font.draw("E MAP PIXEL: #{@ships.last.current_map_pixel_x.round(1)} - #{@ships.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("E Angle: #{@ships.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("E Momentum: #{@ships.last.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("E ID: #{@ships.last.id}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
+      @font.draw("Active Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @quest_data.each do |quest_key, values|
+        if values['state'] == 'active'
+          @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        end
+      end
+      @font.draw("Completed Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @quest_data.each do |quest_key, values|
+        if values['state'] == 'complete'
+          @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        end
+      end
+
+      # @font.draw("Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @quest_data.each do |quest_key, values|
+      #   @font.draw("- #{quest_key} annd state - #{values['state']}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # end
       # if @enemy_projectiles.any?
       #   @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       #   @font.draw("EP GPS: #{@enemy_projectiles.last.current_map_tile_x} - #{@enemy_projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

@@ -51,6 +51,7 @@ class GLBackground
   attr_accessor :tile_pixel_width, :tile_pixel_height
   attr_accessor :current_map_pixel_center_x, :current_map_pixel_center_y
   attr_reader :gps_map_center_x, :gps_map_center_y
+  attr_reader :map_name
 
   # tile size is 1 GPS (location_x, location_y)
   # Screen size changes. At 900x900, it should be 900 (screen_pixel_width) / 15 (VISIBLE_MAP_WIDTH) = 60 pixels
@@ -213,8 +214,8 @@ class GLBackground
 
     @map_pixel_width  = (@map_tile_width  * @tile_pixel_width ).to_i
     @map_pixel_height = (@map_tile_height * @tile_pixel_height).to_i
-    puts "@map_pixel_height = (EXTERIOR_MAP_HEIGHT * @tile_pixel_height)"
-    puts "#{@map_pixel_height} = (#{EXTERIOR_MAP_HEIGHT} * #{@tile_pixel_height})"
+    # puts "@map_pixel_height = (EXTERIOR_MAP_HEIGHT * @tile_pixel_height)"
+    # puts "#{@map_pixel_height} = (#{EXTERIOR_MAP_HEIGHT} * #{@tile_pixel_height})"
 
     # @map_tile_width = @map["map_width"]
     # @map_tile_height = @map["map_height"]

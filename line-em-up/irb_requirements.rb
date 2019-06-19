@@ -44,3 +44,30 @@ def populate_inventory
   ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '2'.to_s], 'BulletLauncher')
   return true
 end
+
+include GlobalVariables
+
+
+@tile_pixel_width  = 450 / GLBackground::VISIBLE_MAP_WIDTH.to_f
+
+@tile_pixel_height = 450 / GLBackground::VISIBLE_MAP_HEIGHT.to_f
+
+@map_tile_width =  250
+@map_tile_height = 250
+
+@map_pixel_width  = (@map_tile_width  * @tile_pixel_width ).to_i
+@map_pixel_height = (@map_tile_height * @tile_pixel_height).to_i
+
+GlobalVariables.set_config(1, 1, 450, 450,
+  @map_pixel_width, @map_pixel_height,
+  @map_tile_width, @map_tile_height,
+  @tile_pixel_width, @tile_pixel_height, true
+)
+
+
+
+
+
+
+
+

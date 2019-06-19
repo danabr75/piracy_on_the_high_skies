@@ -75,7 +75,7 @@ class GeneralObject
     # puts "@tile_pixel_width: #{@tile_pixel_width}"
     validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
 
-    validate_float([@width_scale, @height_scale],  self.class.name, __callee__)
+    validate_float_or_int([@width_scale, @height_scale],  self.class.name, __callee__)
     validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
     validate_not_nil([@width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
 
@@ -575,6 +575,7 @@ class GeneralObject
 
   def validate_not_nil parameters, klass_name, method_name
     parameters.each_with_index do |param, index|
+      puts caller if param.nil?
       raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected not Nil. Got Nil" if param.nil?
     end
   end
@@ -583,6 +584,7 @@ class GeneralObject
     class_type = [class_type] unless class_type.class == Array
     parameters.each_with_index do |param, index|
       next if param.nil?
+      puts caller if  !class_type.include?(param.class)
       raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class} w/ value: #{param}" if !class_type.include?(param.class)
     end
   end

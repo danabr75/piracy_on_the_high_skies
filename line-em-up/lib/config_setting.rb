@@ -17,6 +17,8 @@ module ConfigSetting
     end
   end
 
+  # deprecate in favor of get_mapped_setting
+  # Not Deprecated. Only use for one level depth in settings (just the name)
   def self.get_setting file_location, setting_name, default_value = nil
     raise "NO FILE LOCATION PATH" if file_location.nil?
     create_file_if_non_existent(file_location)
@@ -36,8 +38,10 @@ module ConfigSetting
     return test ? test.gsub(';', '') : test
   end
 
+  # WARNING! Can't be used by 
   def self.set_mapped_setting file_location, setting_names, setting_value
     raise "NO FILE LOCATION PATH" if file_location.nil?
+    raise "Warning! This won't work if you don't give it at least 2 setting_names.. or else update me! I already tried once" if  setting_names.count < 2
     puts "set_mapped_setting".upcase
     puts setting_names
     puts setting_value
@@ -52,7 +56,13 @@ module ConfigSetting
         text = text.first if text
         data = ::JSON.parse(text)
         indexing_values = data
-        indexer = setting_names.shift
+        # if setting_names.any?
+          indexer = setting_names.shift
+        # else
+        #   indexer = setting_name
+        # end
+        puts "WHAT IS INDEXER?: #{indexer}"
+        puts indexer.inspect
         while indexer
           puts "indexing_values: #{indexing_values}"
           puts "INDEXER - #{indexer}"
@@ -85,7 +95,11 @@ module ConfigSetting
         # puts "DIDIT FIND IT- setting_name: #{setting_name}"
         root_values = {}
         values = root_values
-        indexer = setting_names.shift
+        # if setting_names.any?
+          indexer = setting_names.shift
+        # else
+        #   indexer = setting_name
+        # end
         while setting_names.any?
           values[indexer] ||= {}
           values = values[indexer]
@@ -120,6 +134,7 @@ module ConfigSetting
 
   def self.get_mapped_setting file_location, setting_names = [], default_value = nil
     raise "NO FILE LOCATION PATH" if file_location.nil?
+    raise "Warning! This won't probably won't work if you don't give it at least 2 setting_names." if  setting_names.count < 2
     create_file_if_non_existent(file_location)
     setting_name = setting_names.shift
     text = (File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }).first
