@@ -24,6 +24,9 @@ class Player < ScreenFixedObject
   
   CLASS_TYPE = :ship
 
+  # lets not set a timer that will kill us.
+  MAX_TIME_ALIVE = nil
+
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
   # Range goes clockwise around the 0-360 angle

@@ -1,4 +1,5 @@
 require_relative '../lib/config_setting.rb'
+require_relative '../models/message_flash.rb'
 
 module QuestInterface
 
@@ -14,32 +15,32 @@ module QuestInterface
         init_buildings: [],
         init_effects:   [], # earth_quakes?, trigger dialogue
         post_effects:   [], # earth_quakes?, trigger dialogue
+        map_name:       "desert_v2_small",
         complete_condition_string: "
-          lambda { |map_name, ships, buildings, player|
+          lambda { |ships, buildings, player|
             found_ship = false
-            if map_name == 'desert_v2_small'
-              ships.each do |ship|
-                found_ship = true if ship.id == 'starting-level-quest-ship-1'
-              end
+            ships.each do |ship|
+              found_ship = true if ship.id == 'starting-level-quest-ship-1'
             end
             return !found_ship
           }
         ",
         # special 'activate_quests' key
         post_complete_triggers_string: "
-          lambda { |map_name, ships, buildings, player|
+          lambda { |ships, buildings, player|
             return {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
           }
         ",
         # Should not change any ships or buildings in play. Including them in parameters to check IDs
+        # Can be nil or can return true
         active_condition_string: "
-          lambda { |map_name, ships, buildings, player|
-            return map_name == 'desert_v2_small'
+          lambda { |ships, buildings, player|
+            return true
           }
         ",
         # Don't have to insert ships here.. this is destroy existing ships (health = 0), boost player health, etc..
         post_active_triggers_string: "
-          lambda { |map_name, ships, buildings, player|
+          lambda { |ships, buildings, player|
             return {ships: ships, buildings: buildings}
           }
         ",
@@ -51,13 +52,12 @@ module QuestInterface
         init_buildings: [],
         init_effects:   [], # earth_quakes?, trigger dialogue
         post_effects:   [], # earth_quakes?, trigger dialogue
+        map_name:       "desert_v2_small",
         complete_condition_string: "
-          lambda { |map_name, ships, buildings, player|
+          lambda { |ships, buildings, player|
             found_ship = false
-            if map_name == 'desert_v2_small'
-              ships.each do |ship|
-                found_ship = true if ['starting-level-quest-ship-2', 'starting-level-quest-ship-3', 'starting-level-quest-ship-4'].include?(ship.id)
-              end
+            ships.each do |ship|
+              found_ship = true if ['starting-level-quest-ship-2', 'starting-level-quest-ship-3', 'starting-level-quest-ship-4'].include?(ship.id)
             end
             return !found_ship
           }
@@ -65,7 +65,7 @@ module QuestInterface
         post_complete_triggers_string: nil,
         active_condition_string: nil, # is triggered to active by another quest
         post_active_triggers_string: "
-          lambda { |map_name, ships, buildings, player|
+          lambda { |ships, buildings, player|
             return {ships: ships, buildings: buildings}
           }
         ",
@@ -138,10 +138,13 @@ module QuestInterface
   # Will run init_ships and init_buildings for each active quest
   # this is necessary for on-map-load inits..
   # What if a player enters an area, the updates creates a ship, the player leaves. Need to have on-load inits.
-  def self.init_quests config_path, quest_datas, map_name, ships, buildings, player
+  def self.init_quests config_path, quest_datas, map_name, ships, buildings, player, messages
+    local_messages = []
     quest_datas.each do |quest_key, values|
       state = values["state"]
+      next if values["map_name"] != map_name
       if state == 'active'
+        local_messages << "#{quest_key}"
         if values["init_ships"] && values["init_ships"].any?
           values["init_ships"].each do |ship_string|
             puts "1loading in ship here for : #{quest_key}"
@@ -151,21 +154,27 @@ module QuestInterface
         # Load in buildings
       end
     end
-    return [quest_datas, ships, buildings]
+    messages << MessageFlash.new("Active Quests in This Area") if local_messages.any?
+    local_messages.each do |message|
+      messages << MessageFlash.new(message)
+    end
+
+    return [quest_datas, ships, buildings, messages]
   end
 
-  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player
+  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages
     updated_quest_keys = {}
     quest_datas.each do |quest_key, values|
       state = values["state"]
+      next if values["map_name"] != map_name
       next if state == 'complete'
-      if state == 'active' && values["complete_condition"] && values["complete_condition"].call(map_name, ships, buildings, player)
+      if state == 'active' && values["complete_condition"] && values["complete_condition"].call(ships, buildings, player)
         updated_quest_keys[quest_key] = 'complete'
         values["state"] = 'complete'
         # Trigger state changes
         if values["post_complete_triggers"]
           # LAMBDA returns hash w/ symbols
-          results = values["post_complete_triggers"].call(map_name, ships, buildings, player)
+          results = values["post_complete_triggers"].call(ships, buildings, player)
           puts "IS RESULTS KEYS STRINGS OR SYMBOLS?2"
           puts results
           ships     = results[:ships]
@@ -180,7 +189,7 @@ module QuestInterface
           end
 
         end
-      elsif state == 'pending_activation' || state == 'inactive' && values["active_condition"] && values["active_condition"].call(map_name, ships, buildings, player)
+      elsif state == 'pending_activation' || state == 'inactive' && values["active_condition"] && values["active_condition"].call(ships, buildings, player)
         # In this special case, run init functions, as if the map were just loaded
         # if state == 'pending_activation'
           if values["init_ships"] && values["init_ships"].any?
@@ -196,7 +205,7 @@ module QuestInterface
         # Trigger state changes
         if values["post_active_triggers"]
           # LAMBDA returns hash w/ symbols
-          results = values["post_active_triggers"].call(map_name, ships, buildings, player)
+          results = values["post_active_triggers"].call(ships, buildings, player)
           puts "IS RESULTS KEYS STRINGS OR SYMBOLS?"
           puts results
           ships     = results[:ships]
@@ -215,12 +224,11 @@ module QuestInterface
     # Only if stage change
     # ConfigSetting.set_mapped_setting(config_path, ['Inventory', '2'.to_s, '2'.to_s], 'BulletLauncher')
     updated_quest_keys.each do |quest_key, state|
-      puts "SETTING KEY HERE!!"
-      puts "updtating quest keys: #{quest_key} - #{state} - what is class: #{quest_key.class}"
+      messages << MessageFlash.new("#{quest_key} is now #{state}!")
       ConfigSetting.set_mapped_setting(config_path, ['Quests', quest_key.to_s, 'state'], state)
     end
     # return {quest_datas: quest_datas, ships: ships, buildings: buildings}
-    return [quest_datas, ships, buildings]
+    return [quest_datas, ships, buildings, messages]
   end
 
 end

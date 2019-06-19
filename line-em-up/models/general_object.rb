@@ -73,11 +73,12 @@ class GeneralObject
     # validate_int([], self.class.name, __callee__)
     # validate_not_nil([], self.class.name, __callee__)
     # puts "@tile_pixel_width: #{@tile_pixel_width}"
-    validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
-
-    validate_float_or_int([@width_scale, @height_scale],  self.class.name, __callee__)
-    validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
-    validate_not_nil([@width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+    if @debug
+      validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
+      validate_float_or_int([@width_scale, @height_scale],  self.class.name, __callee__)
+      validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+      validate_not_nil([@width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+    end
 
     @id    = options[:id] || SecureRandom.uuid
     # @class = self.class.name

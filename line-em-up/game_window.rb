@@ -222,8 +222,10 @@ class GameWindow < Gosu::Window
     @ships = values[:ships]
     @pickups = values[:pickups]
 
+    @messages = []
 
-    @quest_data, @ships, @buildings = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
+    @quest_data, @ships, @buildings, @messages = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages)
+
     # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
 
     # Loading in ActiveQuests .. start off with kill all enemie ships in the area
@@ -501,8 +503,11 @@ class GameWindow < Gosu::Window
   end
 
   def update
-    @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
-
+    @quest_data, @ships, @buildings, @messages = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages)
+    
+    # if @player.time_alive % 500 == 0
+    #   @messages << MessageFlash.new("This is a test - #{@player.time_alive}")
+    # end    
 
     if @ship_loadout_menu.refresh_player_ship
       @player.refresh_ship
@@ -525,6 +530,7 @@ class GameWindow < Gosu::Window
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
 
     if !@block_all_controls
+      @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player) }
       if Gosu.button_down?(Gosu::KbEscape) && !menus_active
         @menu.enable
       end
@@ -840,6 +846,7 @@ class GameWindow < Gosu::Window
     # puts "@enemy_projectiles:"
     # puts @enemy_projectiles.class
     # puts @enemy_projectiles
+
     @open_gl_executer.draw(@gl_background, @projectiles + @destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     @menu.draw
@@ -871,6 +878,9 @@ class GameWindow < Gosu::Window
     # @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Boss Health: #{@boss.health.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @boss
+    @messages.each_with_index do |message, index|
+      message.draw(index)
+    end
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -908,6 +918,7 @@ class GameWindow < Gosu::Window
         @font.draw("B GPS: #{@buildings.last.current_map_tile_x} - #{@buildings.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("B MAP PIXEL: #{@buildings.last.current_map_pixel_x.round(1)} - #{@buildings.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
+      # @font.draw("@messages: #{@messages.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # if @ships.any?
       #   @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       #   @font.draw("E GPS: #{@ships.last.current_map_tile_x} - #{@ships.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -918,12 +929,14 @@ class GameWindow < Gosu::Window
       # end
       @font.draw("Active Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @quest_data.each do |quest_key, values|
+        next if values["map_name"] != @gl_background.map_name
         if values['state'] == 'active'
           @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         end
       end
       @font.draw("Completed Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @quest_data.each do |quest_key, values|
+        next if values["map_name"] != @gl_background.map_name
         if values['state'] == 'complete'
           @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         end
