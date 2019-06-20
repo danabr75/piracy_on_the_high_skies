@@ -27,6 +27,7 @@ CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 
 Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
+# Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
 Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
 

@@ -1,5 +1,7 @@
 require_relative '../lib/config_setting.rb'
 require_relative '../models/message_flash.rb'
+require_relative '../models/effect/group.rb'
+require_relative '../models/effect/focus.rb'
 
 module QuestInterface
 
@@ -13,7 +15,7 @@ module QuestInterface
       "starting-level-quest" => {
         "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 123, {id: 'starting-level-quest-ship-1'})"],
         "init_buildings_string" => [],
-        "init_effects" =>   ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}], # earth_quakes?, trigger dialogue
+        "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "
@@ -124,10 +126,8 @@ module QuestInterface
 
 
   def self.get_quests config_path
-    # puts "GET HERE"
     found_errors = false
     raw_data = get_quests_data(config_path)
-    # puts raw_data.inspect
     quest_datas = JSON.parse(raw_data)
     quest_datas.each do |quest_key, quest_data|
       QUEST_KEYS_TO_EVAL.each do |string_key, values|
@@ -158,7 +158,7 @@ module QuestInterface
   # Will run init_ships and init_buildings for each active quest
   # this is necessary for on-map-load inits..
   # What if a player enters an area, the updates creates a ship, the player leaves. Need to have on-load inits.
-  def self.init_quests config_path, quest_datas, map_name, ships, buildings, player, messages
+  def self.init_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects
     local_messages = []
     quest_datas.each do |quest_key, values|
       # puts "INIT QUEST HEY : #{quest_key} and values"
@@ -173,6 +173,39 @@ module QuestInterface
             ships << ship
           end
         end
+        puts "INIT HERE, WHY NOT INIT"
+        if values["init_effects"] && values["init_effects"].any?
+          puts "INIT EFFECTS FOUND"
+        # "init_effects" =>   [["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]],
+          values["init_effects"].each do |effect_groups|
+            puts "CASE 1"
+            # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
+            effect_groups.each do |effect_group|
+              puts "CASE 2"
+              group = Effect::Group.new
+
+              effect_group.each do |key, effect_data|
+                effect = nil
+                puts "CASE 3"
+                # puts "KEY HERE: #{key}"
+                # puts effect_data.inspect
+                # raise "what is it"
+                if key == "focus"
+                  puts "CASE 4"
+                  # {"id"=>"starting-level-quest-ship-1", "time"=>300}
+                  effect = Effect::Focus.new(effect_data['id'], effect_data['time'])
+                end
+                raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
+                group.effects << effect if effect
+              end
+                # {"focus_on"=>{"id"=>"starting-level-quest-ship-1", "time"=>300}}
+              # "focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}`
+              # if effect
+              effects << group
+
+            end
+          end
+        end
         # Load in buildings
       end
     end
@@ -181,10 +214,10 @@ module QuestInterface
       messages << MessageFlash.new(message)
     end
 
-    return [quest_datas, ships, buildings, messages]
+    return [quest_datas, ships, buildings, messages, effects]
   end
 
-  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages
+  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects
     updated_quest_keys = {}
     quest_datas.each do |quest_key, values|
       state = values["state"]
@@ -247,7 +280,7 @@ module QuestInterface
       ConfigSetting.set_mapped_setting(config_path, ['Quests', quest_key.to_s, 'state'], state)
     end
     # return {quest_datas: quest_datas, ships: ships, buildings: buildings}
-    return [quest_datas, ships, buildings, messages]
+    return [quest_datas, ships, buildings, messages, effects]
   end
 
 end

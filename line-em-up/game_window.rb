@@ -212,19 +212,23 @@ class GameWindow < Gosu::Window
       @gl_background.map_pixel_width / 2.0, @gl_background.map_pixel_height / 2.0,
       @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2
     )
+
+    @center_target = @player
     
     @pointer = Cursor.new(@width, @height, @width_scale, @height_scale, @player)
 
     @quest_data = QuestInterface.get_quests(CONFIG_FILE)
 
-    values = @gl_background.init_map(@player.current_map_tile_x, @player.current_map_tile_y)
+    values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y)
     @buildings = values[:buildings]
     @ships = values[:ships]
     @pickups = values[:pickups]
 
     @messages = []
+    @effects = []
 
-    @quest_data, @ships, @buildings, @messages = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages)
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects)
+    puts "EFFECTS COUNT ON INIT: #{@effects.count}"
 
     # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
 
@@ -276,8 +280,10 @@ class GameWindow < Gosu::Window
 
 
     # @scroll_factor = 1
-    @movement_x = 0
-    @movement_y = 0
+    # @movement_x = 0
+    # @movement_y = 0
+    @viewable_offset_x = 0
+    @viewable_offset_y = 0
     # @can_toggle_scroll_factor = true
     @boss_active = false
     @boss = nil
@@ -503,7 +509,7 @@ class GameWindow < Gosu::Window
   end
 
   def update
-    @quest_data, @ships, @buildings, @messages = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages)
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects)
     
     # if @player.time_alive % 500 == 0
     #   @messages << MessageFlash.new("This is a test - #{@player.time_alive}")
@@ -531,6 +537,11 @@ class GameWindow < Gosu::Window
 
     if !@block_all_controls
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player) }
+      @effects.reject! do |effect_group|
+        @gl_background, @ships, @buildings, @player, @center_target = effect_group.update(@gl_background, @ships, @buildings, @player, @center_target)
+        !effect_group.is_active
+      end
+
       if Gosu.button_down?(Gosu::KbEscape) && !menus_active
         @menu.enable
       end
@@ -583,14 +594,14 @@ class GameWindow < Gosu::Window
           @player.rotate_clockwise
         end
 
-        @movement_x, @movement_y = @player.update(self.mouse_x, self.mouse_y, @player, @movement_x, @movement_y)
-        @movement_x, @movement_y = @player.move_left(@movement_x, @movement_y)  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
-        @movement_x, @movement_y = @player.move_right(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
+        @player.update(self.mouse_x, self.mouse_y, @player)
+        @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
+        @player.move_right if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
-        @movement_x, @movement_y = @player.accelerate(@movement_x, @movement_y) if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
-        @movement_x, @movement_y = @player.brake(@movement_x, @movement_y)      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
+        @player.accelerate if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
+        @player.brake      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
-        results = @gl_background.update(@player, @player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @projectiles)
+        results = @gl_background.update(@center_target.current_map_pixel_x, @center_target.current_map_pixel_y, @buildings, @pickups, @projectiles)
         @buildings = results[:buildings]
         @pickups = results[:pickups]
         # NEED to update background's projectiles
@@ -881,6 +892,9 @@ class GameWindow < Gosu::Window
     @messages.each_with_index do |message, index|
       message.draw(index)
     end
+    @effects.each_with_index do |effect, index|
+      effect.draw
+    end
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -946,12 +960,10 @@ class GameWindow < Gosu::Window
       # @quest_data.each do |quest_key, values|
       #   @font.draw("- #{quest_key} annd state - #{values['state']}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # end
-      # if @enemy_projectiles.any?
-      #   @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      #   @font.draw("EP GPS: #{@enemy_projectiles.last.current_map_tile_x} - #{@enemy_projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      #   @font.draw("EP MAP PIXEL: #{@enemy_projectiles.last.current_map_pixel_x.round(1)} - #{@enemy_projectiles.last.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      #   @font.draw("EP Angle: #{@enemy_projectiles.last.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      # end
+      if @effects.any?
+        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
 
     end
     # @gl_background.draw(ZOrder::Background)

@@ -358,18 +358,16 @@ class Player < ScreenFixedObject
 
   # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
 
-  def move_left movement_x = 0, movement_y = 0
-    # new_speed = (@ship.speed  / (@ship.mass.to_f)) * -1.5
+  def move_left
     new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
-    x_diff, y_diff = self.movement(new_speed, @angle + 90, false)
-    return [movement_x - x_diff, movement_y - y_diff]
+    self.movement(new_speed, @angle + 90, false)
+    return true
   end
   
-  def move_right movement_x = 0, movement_y = 0
-    # new_speed = (@ship.speed  / (@ship.mass.to_f)) * -1.5
+  def move_right
     new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
-    x_diff, y_diff = self.movement(new_speed, @angle - 90, false)
-    return [movement_x - x_diff, movement_y - y_diff]
+    self.movement(new_speed, @angle - 90, false)
+    return true
   end
   
   # Calculate W movement
@@ -380,28 +378,21 @@ class Player < ScreenFixedObject
     # @rotation_speed = 2
 
   # Figure out why these got switched later, accelerate and brake
-  def accelerate movement_x = 0, movement_y = 0
-    x_diff, y_diff = self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
+  def accelerate
+    self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
 
     if @current_momentum <= @max_momentum
       @current_momentum += 1.2
     end
-    # puts "PLAYER ACCELETATE:"
-    # puts "[movement_x - x_diff, movement_y - y_diff]"
-    # puts "[#{movement_x} - #{x_diff}, #{movement_y} - #{y_diff}]"
-    return [(movement_x - x_diff), (movement_y - y_diff)]
+    return true
   end
   
-  def brake movement_x = 0, movement_y = 0
-    # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
-    # puts "ACCELERATE: #{movement_x} - #{movement_y}"
-    x_diff, y_diff = self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
-
+  def brake
+    self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
     if @current_momentum >= -@max_momentum
       @current_momentum -= 0.6
     end
-
-    return [(movement_x - x_diff), (movement_y - y_diff)]
+    return true
   end
 
   def attack_group_1 pointer
@@ -459,7 +450,7 @@ class Player < ScreenFixedObject
     @ship.draw_gl
   end
   
-  def update mouse_x, mouse_y, player, movement_x, movement_y
+  def update mouse_x, mouse_y, player
     # puts "PLAYER ANGLE: #{@angle}"
     # run_pixel_to_tile_validations
     # raise "ISSUE" if movement_x.class != Integer || movement_y.class != Integer 
@@ -529,7 +520,7 @@ class Player < ScreenFixedObject
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER UPDATE: #{@x} - #{@y}"
     super(mouse_x, mouse_y, player)
-    return [(movement_x - x_diff), (movement_y - y_diff)]
+    return true
   end
 
   def collect_pickups(pickups)

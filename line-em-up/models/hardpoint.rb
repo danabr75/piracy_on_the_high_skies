@@ -29,7 +29,7 @@ class Hardpoint < GeneralObject
     @slot_type = slot_type
 
     super(options)
-    puts "GHARDPOINT ID: #{@id}"
+    # puts "GHARDPOINT ID: #{@id}"
 
     # Scale is already built into offset, via the lambda call
     @x_offset = -x_offset #* -1#* width_scale
@@ -39,7 +39,7 @@ class Hardpoint < GeneralObject
     @angle_offset = angle_offset
 
     if options[:block_initial_angle]
-      puts "block_initial_angle"
+      # puts "block_initial_angle"
       # We're minus, cause the screen and map x are opposed. If we're not angling, then we don't have to obey the map orientation.
       @x = x - @x_offset
       @y = y + @y_offset
@@ -121,9 +121,9 @@ class Hardpoint < GeneralObject
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
     @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self}) if @item_klass
-    puts "END HARDPOINT #{@id}"
+    # puts "END HARDPOINT #{@id}"
     @owner = owner
-    puts "@ANGLE_FROM_CENTER: #{@angle_from_center}" if @item
+    # puts "@ANGLE_FROM_CENTER: #{@angle_from_center}" if @item
     @current_map_pixel_x = nil
     @current_map_pixel_y = nil
   end

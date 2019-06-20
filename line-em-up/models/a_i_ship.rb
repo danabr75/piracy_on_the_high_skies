@@ -207,6 +207,7 @@ class AIShip < ScreenMapFixedObject
       # next if target.allied
       # FOR TESTING, to keep them from murdering each other
       next if target.id != player.id
+      next if target.id == player.id && !player.is_alive
 
       # check distance if not allied
       # if tile distance is less than agro distance, then you increase agro against that target

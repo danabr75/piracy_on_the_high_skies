@@ -255,12 +255,36 @@ class GLBackground
     # puts @visible_map
   end
 
+  def recenter_map center_target
+    @gps_map_center_x  = center_target.current_map_tile_x
+    @gps_map_center_y  = center_target.current_map_tile_x
+
+    (0..VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT - 1).each_with_index do |visible_height, index_h|
+      y_offset = visible_height - VISIBLE_MAP_HEIGHT / 2
+      y_offset = y_offset - EXTRA_MAP_HEIGHT / 2
+      # @y_add_top_tracker << (player_y + y_offset)
+      (0..VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH - 1).each_with_index do |visible_width, index_w|
+        x_offset = visible_width  - VISIBLE_MAP_WIDTH  / 2
+        x_offset = x_offset - EXTRA_MAP_WIDTH / 2
+        y_index = @gps_map_center_y + y_offset
+        x_index = @gps_map_center_x + x_offset
+        @visible_map[index_h][index_w] = @map_data[y_index][x_index]
+        @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
+      end
+    end
+    @current_map_pixel_center_x = center_target_map.pixel_movement_x
+    @current_map_pixel_center_y = center_target_map.pixel_movement_y
+
+    @local_map_movement_y = @current_map_pixel_center_x
+    @local_map_movement_x = @current_map_pixel_center_y
+  end
+
   # @current_map_pixel_center_x and @current_map_pixel_center_y must be defined at this point.
   # Shouldn't use center here.. should use player center..
-  def init_map player_tile_x, player_tile_y
-    puts "INIT MAP"
-    @gps_map_center_x =  player_tile_x
-    @gps_map_center_y =  player_tile_y
+  def init_map current_target_tile_x, current_target_tile_y
+    # puts "INIT MAP"
+    @gps_map_center_x = current_target_tile_x
+    @gps_map_center_y = current_target_tile_y
 
     # @gps_map_center_x =  (@current_map_pixel_center_x / (@tile_pixel_width)).round
     # @gps_map_center_y =  (@current_map_pixel_center_y / (@tile_pixel_height)).round
@@ -268,6 +292,7 @@ class GLBackground
     buildings = []
     ships = []
     pickups = []
+    projectiles = []
     # puts "@map_objects"
     # puts @map_objects.inspect
 
@@ -290,7 +315,7 @@ class GLBackground
       datas = @map_objects["buildings"]
       datas.each do |y_value, data|
         # puts "building DATA - #{y_index} - #{x_index}"
-        puts "y_value: #{y_value}, data: #{data}"
+        # puts "y_value: #{y_value}, data: #{data}"
         data.each do |x_value, elements|
           elements.each do |element|
             klass = eval(element["klass_name"])
@@ -300,12 +325,12 @@ class GLBackground
       end
     end
 
-    puts "ENEMEIS: #{@map_objects["ships"].count}"
+    # puts "ENEMEIS: #{@map_objects["ships"].count}"
     if @map_objects["ships"]
       datas = @map_objects["ships"]
       datas.each do |y_value, data|
         # puts "building DATA - #{y_index} - #{x_index}"
-        puts "y_value: #{y_value}, data: #{data}"
+        # puts "y_value: #{y_value}, data: #{data}"
         data.each do |x_value, elements|
           elements.each do |element|
             klass = eval(element["klass_name"])
@@ -458,7 +483,7 @@ class GLBackground
   end
 
 
-  def update player, player_map_pixel_movement_x, player_map_pixel_movement_y, buildings, pickups, projectiles
+  def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, projectiles
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
 
@@ -468,14 +493,16 @@ class GLBackground
 
     @time_alive += 1
 
-    @current_map_pixel_center_x = player_map_pixel_movement_x if @current_map_pixel_center_x.nil?
-    @current_map_pixel_center_y = player_map_pixel_movement_y if @current_map_pixel_center_y.nil?
+    @current_map_pixel_center_x = center_target_map_pixel_movement_x if @current_map_pixel_center_x.nil?
+    @current_map_pixel_center_y = center_target_map_pixel_movement_y if @current_map_pixel_center_y.nil?
 
     # puts "PLAYER: #{player_x} - #{player_y} against #{@current_map_pixel_center_x} - #{@current_map_pixel_center_y}"
-    @local_map_movement_y = player_map_pixel_movement_y - @current_map_pixel_center_y
-    # puts "@local_map_movement_y = player_y - @current_map_pixel_center_y"
+    @local_map_movement_y = (center_target_map_pixel_movement_y) - @current_map_pixel_center_y
+    puts "@local_map_movement_y = #{@local_map_movement_y}"
     # puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_pixel_center_y}"
-    @local_map_movement_x = player_map_pixel_movement_x - @current_map_pixel_center_x
+    @local_map_movement_x = (center_target_map_pixel_movement_x) - @current_map_pixel_center_x
+    # puts "HERE:#{ @local_map_movement_x} = (#{center_target_map_pixel_movement_x} + #{viewable_offset_x}) - #{@current_map_pixel_center_x}"
+    # puts "@local_map_movement_x = #{@local_map_movement_x}"
 
     # player.relative_object_offset_x = @local_map_movement_x
     # player.relative_object_offset_y = @local_map_movement_y
