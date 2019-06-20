@@ -10,13 +10,13 @@ module QuestInterface
     # ships << AIShip.new(nil, nil, x_value.to_i, y_value.to_i)
     return {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
-      "starting-level-quest": {
-        init_ships:     ["AIShip.new(nil, nil, 123, 123, {id: 'starting-level-quest-ship-1'})"],
-        init_buildings: [],
-        init_effects:   [], # earth_quakes?, trigger dialogue
-        post_effects:   [], # earth_quakes?, trigger dialogue
-        map_name:       "desert_v2_small",
-        complete_condition_string: "
+      "starting-level-quest" => {
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 123, {id: 'starting-level-quest-ship-1'})"],
+        "init_buildings_string" => [],
+        "init_effects" =>   ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}], # earth_quakes?, trigger dialogue
+        "post_effects" =>   [], # earth_quakes?, trigger dialogue
+        "map_name" =>       "desert_v2_small",
+        "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
             ships.each do |ship|
@@ -26,34 +26,34 @@ module QuestInterface
           }
         ",
         # special 'activate_quests' key
-        post_complete_triggers_string: "
+        "post_complete_triggers_string" => "
           lambda { |ships, buildings, player|
             return {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
           }
         ",
         # Should not change any ships or buildings in play. Including them in parameters to check IDs
         # Can be nil or can return true
-        active_condition_string: "
+        "active_condition_string" => "
           lambda { |ships, buildings, player|
             return true
           }
         ",
         # Don't have to insert ships here.. this is destroy existing ships (health = 0), boost player health, etc..
-        post_active_triggers_string: "
+        "post_active_triggers_string" => "
           lambda { |ships, buildings, player|
             return {ships: ships, buildings: buildings}
           }
         ",
-        state: 'inactive' #[inactive, active, complete]
+        "state" => 'inactive' #[inactive, active, complete]
 
       },
-      "followup-level-quest": {
-        init_ships:     ["AIShip.new(nil, nil, 125, 125, {id: 'starting-level-quest-ship-2'})", "AIShip.new(nil, nil, 124, 124, {id: 'starting-level-quest-ship-3'})", "AIShip.new(nil, nil, 122, 122, {id: 'starting-level-quest-ship-4'})"],
-        init_buildings: [],
-        init_effects:   [], # earth_quakes?, trigger dialogue
-        post_effects:   [], # earth_quakes?, trigger dialogue
-        map_name:       "desert_v2_small",
-        complete_condition_string: "
+      "followup-level-quest" => {
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 125, {id: 'starting-level-quest-ship-2'})", "AIShip.new(nil, nil, 124, 124, {id: 'starting-level-quest-ship-3'})", "AIShip.new(nil, nil, 122, 122, {id: 'starting-level-quest-ship-4'})"],
+        "init_buildings_string" => [],
+        "init_effects" =>   [], # earth_quakes?, trigger dialogue
+        "post_effects" =>   [], # earth_quakes?, trigger dialogue
+        "map_name" =>       "desert_v2_small",
+        "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
             ships.each do |ship|
@@ -62,35 +62,32 @@ module QuestInterface
             return !found_ship
           }
         ",
-        post_complete_triggers_string: nil,
-        active_condition_string: nil, # is triggered to active by another quest
-        post_active_triggers_string: "
+        "post_complete_triggers_string" => nil,
+        "active_condition_string" => nil, # is triggered to active by another quest
+        "post_active_triggers_string" => "
           lambda { |ships, buildings, player|
             return {ships: ships, buildings: buildings}
           }
         ",
-        state: 'inactive'
+        "state" => 'inactive'
 
       }
     }
   end
 
-  def self.validate_inital_lambdas
-    quest_keys_to_eval = {
-      complete_condition_string: :complete_condition, post_complete_triggers_string: :post_complete_triggers,
-      active_condition_string: :active_condition, post_active_triggers_string: :post_active_triggers
-    }
-    initial_quests_data.each do |quest_key, values|
-      quest_keys_to_eval.each do |string_key, evaled_key|
-        begin
-          eval(values[string_key.to_s]) if values[string_key.to_s]
-        rescue SyntaxError => e
-          puts "ISSUE WITH: #{quest_key} on key: #{string_key}"
-        end
-      end
-    end
-    return true
-  end
+  QUEST_KEYS_TO_EVAL = {
+      "complete_condition_string" =>        {"new_key" => "complete_condition"     },
+      "post_complete_triggers_string" =>    {"new_key" => "post_complete_triggers" },
+      "active_condition_string" =>          {"new_key" => "active_condition"       },
+      "post_active_triggers_string" =>      {"new_key" => "post_active_triggers"   },
+      "init_ships_string" =>                {"new_key" => "init_ships",            "type" => 'array'},
+      "init_buildings_string" =>            {"new_key" => "init_buildings",        "type" => 'array'}
+  }
+
+    # eval(values[string_key.to_s]) if values[string_key.to_s]
+
+# string_key.to_s: init_ships_string
+# HEREL [:init_ships_string, :init_buildings_string, :init_effects, :post_effects, :map_name, :complete_condition_string, :post_complete_triggers_string, :active_condition_string, :post_active_triggers_string, :state]
 
   def self.get_quests_data config_path
     quests_json_data = ConfigSetting.get_setting(config_path, 'Quests', nil)
@@ -102,30 +99,53 @@ module QuestInterface
     return quests_json_data
   end
 
+
+  def self.validate_inital_lambdas
+    found_errors = true
+    initial_quests_data.each do |quest_key, quest_data|
+      QUEST_KEYS_TO_EVAL.each do |string_key, values|
+        begin
+          if values['type'] == 'array'
+            quest_data[values["new_key"]] = []
+            quest_data[string_key].each do |element|
+              quest_data[values["new_key"]] << eval(element)
+            end
+          else
+            quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
+          end
+        rescue SyntaxError, NoMethodError => e
+          found_errors = false
+          puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
+        end
+      end
+    end
+    return found_errors
+  end
+
+
   def self.get_quests config_path
     # puts "GET HERE"
     found_errors = false
     raw_data = get_quests_data(config_path)
     # puts raw_data.inspect
     quest_datas = JSON.parse(raw_data)
-    # puts "PARSED DATA HERE"
-    # puts quest_datas.inspect
-    quest_keys_to_eval = {
-      complete_condition_string: :complete_condition, post_complete_triggers_string: :post_complete_triggers,
-      active_condition_string: :active_condition, post_active_triggers_string: :post_active_triggers
-    }
-    # quest_datas = quest_datas
-    quest_datas.each do |quest_key, values|
-      quest_keys_to_eval.each do |string_key, evaled_key|
-        # puts "ABOUT TO EVAL - #{string_key}"
-        # puts values[string_key.to_s].inspect
+    quest_datas.each do |quest_key, quest_data|
+      QUEST_KEYS_TO_EVAL.each do |string_key, values|
         begin
-          values[evaled_key.to_s] = eval(values[string_key.to_s]) if values[string_key.to_s]
-        rescue SyntaxError => e
+          if values["type"] == 'array'
+            quest_data[values["new_key"]] = []
+            quest_data[string_key].each do |element|
+              quest_data[values["new_key"]] << eval(element)
+            end
+          else
+            quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
+          end
+        rescue SyntaxError, NoMethodError => e
           found_errors = true
           puts e.backtrace
           puts "ISSUE WITH: #{quest_key} on key: #{string_key}"
-          puts "RAW DATA: #{values[string_key.to_s]}"
+          puts "RAW DATA: #{quest_data[string_key]}"
+          puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
         end
       end
     end
@@ -141,14 +161,16 @@ module QuestInterface
   def self.init_quests config_path, quest_datas, map_name, ships, buildings, player, messages
     local_messages = []
     quest_datas.each do |quest_key, values|
+      # puts "INIT QUEST HEY : #{quest_key} and values"
+      # puts values.inspect
       state = values["state"]
       next if values["map_name"] != map_name
       if state == 'active'
         local_messages << "#{quest_key}"
         if values["init_ships"] && values["init_ships"].any?
-          values["init_ships"].each do |ship_string|
+          values["init_ships"].each do |ship|
             puts "1loading in ship here for : #{quest_key}"
-            ships << eval(ship_string)
+            ships << ship
           end
         end
         # Load in buildings
@@ -191,15 +213,12 @@ module QuestInterface
         end
       elsif state == 'pending_activation' || state == 'inactive' && values["active_condition"] && values["active_condition"].call(ships, buildings, player)
         # In this special case, run init functions, as if the map were just loaded
-        # if state == 'pending_activation'
-          if values["init_ships"] && values["init_ships"].any?
-            values["init_ships"].each do |ship_string|
-              puts "2loading in ship here for : #{quest_key}"
-              ships << eval(ship_string)
-            end
+        if values["init_ships"] && values["init_ships"].any?
+          values["init_ships"].each do |ship|
+            ships << ship
           end
+        end
           # Load in buildings
-        # end
         updated_quest_keys[quest_key] = 'active'
         values["state"] = 'active'
         # Trigger state changes
