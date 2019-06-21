@@ -33,11 +33,39 @@ class GrapplingHookLauncher < Launcher
     if !@active && @projectiles.count == 0
       return false
     else
-      @projectiles.reject! do |projectile|
-        projectile.dissengage
+      @projectiles.reject! do |hook|
+        hook.dissengage
       end
 
       return true
+    end
+  end
+
+  # def @active= value
+  #   puts "THIS IUS AN ACTIVE TEST HERE"
+  #   super(value)
+  # end
+
+  # def deactivate
+  #   @active = false
+  #   @active_for = 0
+  # end
+
+  def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
+    angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
+    angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
+    # puts "GRAPPLING HOOK L ATTACK HERE: #{@active} -test: #{@test}"
+    # puts "#{@projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT} && #{!@active} && #{is_angle_between_two_angles?(destination_angle, angle_min, angle_max)}"
+    # @projectiles.last.time_alive check is to prevent accidental quick double-clicks
+    puts "GRAP ATTACK HERE: #{@active_for}"
+    if @projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT && !@active && @projectiles.last.time_alive > 15 && is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
+      puts "DETACHING HOOK"
+      @projectiles.each do |hook|
+        hook.detach_hook
+      end
+      return nil
+    else
+      return super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
     end
   end
 

@@ -15,9 +15,9 @@ module QuestInterface
       "starting-level-quest" => {
         "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting-level-quest-ship-1'})"],
         "init_buildings_string" => [],
-        "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300, type: 'ship'}]], # earth_quakes?, trigger dialogue
-        # KEEP THE ABOVE LINE.. focus is just a bit difficult
-        # "init_effects" =>   [], # earth_quakes?, trigger dialogue
+        # "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300, type: 'ship'}]], # earth_quakes?, trigger dialogue
+        # KEEP THE ABOVE LINE. 
+        "init_effects" =>   [], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "

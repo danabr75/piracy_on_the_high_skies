@@ -160,7 +160,6 @@ class Hardpoint < GeneralObject
   def stop_attack
     # puts "HARDPOINT STOP ATTACK"
     @item.deactivate if @item
-
   end
 
   def convert_pointer_to_map_pixel pointer
@@ -199,7 +198,8 @@ class Hardpoint < GeneralObject
         can_attack = true
       end
     else
-      @item.active = true if @item.active == false
+      # Let the item decide whether it's active or not.
+      # @item.active = true if @item.active == false
       can_attack = true
     end
 

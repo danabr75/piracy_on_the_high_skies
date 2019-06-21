@@ -32,6 +32,10 @@ class Bullet < Projectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
   end
 
+  def get_init_sound
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
+  end
+
   def drops
     [
       # Add back in once SE has been updated to display on map, not on screen.
@@ -44,6 +48,7 @@ class Bullet < Projectile
     # puts "MISSILE: #{@health}"
     return super(mouse_x, mouse_y, player)
   end
+
 
 
 end

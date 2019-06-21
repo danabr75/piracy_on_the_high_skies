@@ -19,12 +19,13 @@ class Launcher < GeneralObject
   def initialize(options = {})
     super(options)
     @image_hardpoint = self.class.get_hardpoint_image
-    @active = true
+    @active = false
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
 
     @inited = true
     @cooldown_wait = 0
+    @active_for  = 0
   end
 
   def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
@@ -49,6 +50,8 @@ class Launcher < GeneralObject
       if @cooldown_wait <= 0 && (self.class::ACTIVE_PROJECTILE_LIMIT.nil? || @projectiles.count < self.class::ACTIVE_PROJECTILE_LIMIT)
         # puts "TEST!!!!!" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
         puts "LAUCHING ATTACK HERE #{@projectiles.count} and limit: #{self.class::ACTIVE_PROJECTILE_LIMIT}" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
+        puts "REACTIVATING LAUNCHER"
+        @active = true
         # raise "STOP HERE" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
         projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
         @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
@@ -102,6 +105,7 @@ class Launcher < GeneralObject
 
   def deactivate
     @active = false
+    @active_for = 0
     # @projectiles.each do |particle|
     #   particle.active = false
     # end
@@ -109,6 +113,7 @@ class Launcher < GeneralObject
 
   # This section is heavily outdated.
   def update mouse_x = nil, mouse_y = nil, object = nil
+    @active_for += 1 if @active
     # if @inited && @active
       # @x = object.x
       # @y = object.y

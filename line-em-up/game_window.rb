@@ -25,10 +25,10 @@
 # require 'rubygems'
 require 'gosu'
 
-CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
-MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
-VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors"
-require "#{VENDOR_DIRECTORY}/lib/luit.rb"
+# CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
+# MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
+# VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors"
+
 
 # ONLY ENABLE FOR WINDOWS COMPILATION
 # Place opengl lib in lib library
@@ -53,9 +53,11 @@ require "#{VENDOR_DIRECTORY}/lib/luit.rb"
 # FOR Linux\OSX - using opengl gem
 require 'opengl'
 
-Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
-Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
-
+require_relative "lib/global_constants.rb"
+include GlobalConstants
+Dir["#{LIB_DIRECTORY  }/*.rb"].each { |f| require f }
+Dir["#{MODEL_DIRECTORY}/*.rb"].each { |f| require f }
+Dir["#{VENDOR_LIB_DIRECTORY}/*.rb"].each { |f| require f }
 # require_relative 'media'
 # Dir["/path/to/directory/*.rb"].each {|file| require file }
 # 
@@ -70,8 +72,8 @@ class GameWindow < Gosu::Window
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
   DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
-  CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
-  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+  include GlobalConstants
+  # CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
   attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
 

@@ -56,6 +56,10 @@ class GrapplingHook < Projectile
     @breaking_point_tile_length = self.class::BREAKING_POINT_TILE_LENGTH * @average_tile_size
   end
 
+  def detach_hook
+    @dissengage = true
+  end
+
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
   end

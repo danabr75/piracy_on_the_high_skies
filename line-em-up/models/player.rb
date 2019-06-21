@@ -11,7 +11,7 @@ include OpenGL
 include GLUT
 
 class Player < ScreenFixedObject
-  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+  CONFIG_FILE = "#{APP_DIRECTORY}/config.txt"
   puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   # SPEED = 7
   # MAX_ATTACK_SPEED = 3.0

@@ -1,6 +1,3 @@
-
-
-
 module GlobalVariables
   class << self
     attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height

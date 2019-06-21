@@ -1,7 +1,9 @@
 require 'securerandom'
 require_relative '../lib/global_variables.rb'
+require_relative '../lib/global_constants.rb'
 
 class GeneralObject
+
   attr_reader :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
   attr_reader :current_map_pixel_x, :current_map_pixel_y
   attr_reader :current_map_tile_x,  :current_map_tile_y
@@ -35,6 +37,7 @@ class GeneralObject
     self.class.get_image_path
   end
 
+  include GlobalVariables
   include GlobalVariables
 
   attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
