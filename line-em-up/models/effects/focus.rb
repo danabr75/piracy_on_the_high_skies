@@ -8,7 +8,7 @@ module Effects
       super(options)
       @debug = options[:debug]
       @time_alive = 0
-      @max_time_alive = 500 #time || 100
+      @max_time_alive = time || 100
       @id = id
       @radius = 5 * @average_scale
       @speed = 1 * @average_scale
@@ -73,6 +73,8 @@ module Effects
 
     # OFFSET moves background... needs to move players and ships too. + projectiles.
     # THIS SECTION HAS HUGE ISSUES WITH CALCING ANGLES AND OFFSETs
+    # BLOCK PLAYER CONTROLLERS and FIRING WHEN MOVING .. speed up movement, fix glitchyness.. lock onto map_pixels, only update offset when locked on, when they move
+    # Block enemies from firing as well.
     def update gl_background, ships, buildings, player, offset_target, viewable_pixel_offset_x, viewable_pixel_offset_y
       puts "EFFECT UPDATE : #{[@moving_to_target, @hovering_over_target, @moving_to_player, @returned_to_player]}"
       puts "PLAYER LOC: #{player.current_map_pixel_x} - #{player.current_map_pixel_y}"
