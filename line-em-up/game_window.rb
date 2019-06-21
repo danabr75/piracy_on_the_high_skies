@@ -538,7 +538,8 @@ class GameWindow < Gosu::Window
     @menu.update
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
 
-    if !@game_pause && !@menu_open
+    # puts "HERE UPDATE: [@game_pause, menus_active, @menu_open, @menu.active]"
+    if !@game_pause && !menus_active && !@menu_open && !@menu.active
       @effects.reject! do |effect_group|
         @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
         !effect_group.is_active
@@ -666,7 +667,7 @@ class GameWindow < Gosu::Window
         # @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
       end
 
-      if !@game_pause && !menus_active && !@menu_open
+      if !@game_pause && !menus_active && !@menu_open && !@menu.active
 
         @projectiles.each do |projectile|
           # Excluding buildings.. add back in when can aim bullets at ground.@buildings
