@@ -77,6 +77,10 @@ class AIShip < ScreenMapFixedObject
     # stop
   end
 
+  def get_speed
+    return @ship.speed
+  end
+  
   def rotate_counterclockwise
     # puts "ROTATING COUNTER AI"
     increment = @rotation_speed

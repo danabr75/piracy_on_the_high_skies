@@ -13,9 +13,11 @@ module QuestInterface
     return {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
       "starting-level-quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 123, {id: 'starting-level-quest-ship-1'})"],
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 123, 123, {id: 'starting-level-quest-ship-1'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300, type: 'ship'}]], # earth_quakes?, trigger dialogue
+        # KEEP THE ABOVE LINE.. focus is just a bit difficult
+        # "init_effects" =>   [], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "
@@ -178,35 +180,37 @@ module QuestInterface
         puts "INIT HERE, WHY NOT INIT"
         if values["init_effects"] && values["init_effects"].any?
           puts "INIT EFFECTS FOUND"
+          ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
+          # effects = effects + init_effects(values["init_effects"], options)
         # "init_effects" =>   [["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]],
-          values["init_effects"].each do |effect_groups|
-            puts "CASE 1"
-            # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
-            effect_groups.each do |effect_group|
-              puts "CASE 2"
-              group = Effects::Group.new(options)
+          # values["init_effects"].each do |effect_groups|
+          #   puts "CASE 1"
+          #   # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
+          #   effect_groups.each do |effect_group|
+          #     puts "CASE 2"
+          #     group = Effects::Group.new(options)
 
-              effect_group.each do |key, effect_data|
-                effect = nil
-                puts "CASE 3"
-                # puts "KEY HERE: #{key}"
-                # puts effect_data.inspect
-                # raise "what is it"
-                if key == "focus"
-                  puts "CASE 4"
-                  # {"id"=>"starting-level-quest-ship-1", "time"=>300}
-                  effect = Effects::Focus.new(effect_data['id'], effect_data['type'], effect_data['time'], ships, buildings, options)
-                end
-                raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
-                group.effects << effect if effect
-              end
-                # {"focus_on"=>{"id"=>"starting-level-quest-ship-1", "time"=>300}}
-              # "focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}`
-              # if effect
-              effects << group
+          #     effect_group.each do |key, effect_data|
+          #       effect = nil
+          #       puts "CASE 3"
+          #       # puts "KEY HERE: #{key}"
+          #       # puts effect_data.inspect
+          #       # raise "what is it"
+          #       if key == "focus"
+          #         puts "CASE 4"
+          #         # {"id"=>"starting-level-quest-ship-1", "time"=>300}
+          #         effect = Effects::Focus.new(effect_data['id'], effect_data['type'], effect_data['time'], ships, buildings, options)
+          #       end
+          #       raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
+          #       group.effects << effect if effect
+          #     end
+          #       # {"focus_on"=>{"id"=>"starting-level-quest-ship-1", "time"=>300}}
+          #     # "focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}`
+          #     # if effect
+          #     effects << group
 
-            end
-          end
+          #   end
+          # end
         end
         # Load in buildings
       end
@@ -219,7 +223,7 @@ module QuestInterface
     return [quest_datas, ships, buildings, messages, effects]
   end
 
-  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects
+  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects, options = {}
     updated_quest_keys = {}
     quest_datas.each do |quest_key, values|
       state = values["state"]
@@ -271,6 +275,10 @@ module QuestInterface
           end
           # {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
         end
+        
+        ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
+
+
       end
       # return {quest_datas: quest_datas, ships: ships, buildings: buildings}
     end
@@ -284,6 +292,38 @@ module QuestInterface
     # return {quest_datas: quest_datas, ships: ships, buildings: buildings}
     return [quest_datas, ships, buildings, messages, effects]
   end
+
+
+  def self.init_effects config_path, effects_datas, map_name, ships, buildings, player, messages, effects, options
+    effects_datas.each do |effect_groups|
+      puts "CASE 1"
+      # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
+      effect_groups.each do |effect_group|
+        puts "CASE 2"
+        group = Effects::Group.new(options)
+
+        effect_group.each do |key, effect_data|
+          effect = nil
+          puts "CASE 3"
+          # puts "KEY HERE: #{key}"
+          # puts effect_data.inspect
+          # raise "what is it"
+          if key == "focus"
+            puts "CASE 4"
+            # {"id"=>"starting-level-quest-ship-1", "time"=>300}
+            puts "PASSING SHIPS:L #{ships}"
+            puts "#{ships.first}"
+            effect = Effects::Focus.new(effect_data['id'], effect_data['type'], effect_data['time'], ships, buildings, options)
+          end
+          raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
+          group.effects << effect if effect
+        end
+        effects << group
+      end
+    end
+    return [ships, buildings, messages, effects]
+  end
+
 
 end
 

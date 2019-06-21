@@ -449,6 +449,10 @@ class Player < ScreenFixedObject
   def draw_gl
     @ship.draw_gl
   end
+
+  def get_speed
+    return @ship.speed
+  end
   
   def update mouse_x, mouse_y, player
     # puts "PLAYER ANGLE: #{@angle}"

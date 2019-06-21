@@ -373,7 +373,7 @@ class PilotableShip < GeneralObject
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
       @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
     end
-    @image.draw_rot(@x + viewable_pixel_offset_x, @y + viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 

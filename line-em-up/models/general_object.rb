@@ -209,10 +209,13 @@ class GeneralObject
   #   # @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Player)
   #   @y > (0 - get_height) && @y < (HEIGHT + get_height) && @x > (0 - get_width) && @x < (WIDTH + get_width)
   # end
-
-  def calc_angle(point1, point2)
+  def self.calc_angle(point1, point2)
     bearing = (180/Math::PI)*Math.atan2(point1.y-point2.y, point2.x-point1.x)
     return bearing
+  end
+
+  def calc_angle(point1, point2)
+    return self.class.calc_angle(point1, point2)
   end
 
   # https://www.mathsisfun.com/geometry/radians.html
