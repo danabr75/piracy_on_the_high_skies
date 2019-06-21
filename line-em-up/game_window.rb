@@ -529,7 +529,7 @@ class GameWindow < Gosu::Window
 
 
 
-    @pointer.update(self.mouse_x, self.mouse_y, @player) if @pointer
+    @pointer.update(self.mouse_x, self.mouse_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
     if @start_fullscreen
       @start_fullscreen = false
       GameWindow.fullscreen(self)
