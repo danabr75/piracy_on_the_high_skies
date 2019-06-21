@@ -364,7 +364,7 @@ class PilotableShip < GeneralObject
     deactivate_group(3)
   end
 
-  def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+  def draw viewable_pixel_offset_x = 0, viewable_pixel_offset_y = 0
     @drawable_items_near_self.reject! { |item| item.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
     # puts "DRAWING HARDPOINTS"
     # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
