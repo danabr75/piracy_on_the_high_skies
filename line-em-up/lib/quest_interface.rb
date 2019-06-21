@@ -181,36 +181,6 @@ module QuestInterface
         if values["init_effects"] && values["init_effects"].any?
           puts "INIT EFFECTS FOUND"
           ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
-          # effects = effects + init_effects(values["init_effects"], options)
-        # "init_effects" =>   [["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]],
-          # values["init_effects"].each do |effect_groups|
-          #   puts "CASE 1"
-          #   # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
-          #   effect_groups.each do |effect_group|
-          #     puts "CASE 2"
-          #     group = Effects::Group.new(options)
-
-          #     effect_group.each do |key, effect_data|
-          #       effect = nil
-          #       puts "CASE 3"
-          #       # puts "KEY HERE: #{key}"
-          #       # puts effect_data.inspect
-          #       # raise "what is it"
-          #       if key == "focus"
-          #         puts "CASE 4"
-          #         # {"id"=>"starting-level-quest-ship-1", "time"=>300}
-          #         effect = Effects::Focus.new(effect_data['id'], effect_data['type'], effect_data['time'], ships, buildings, options)
-          #       end
-          #       raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
-          #       group.effects << effect if effect
-          #     end
-          #       # {"focus_on"=>{"id"=>"starting-level-quest-ship-1", "time"=>300}}
-          #     # "focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}`
-          #     # if effect
-          #     effects << group
-
-          #   end
-          # end
         end
         # Load in buildings
       end
@@ -275,7 +245,7 @@ module QuestInterface
           end
           # {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
         end
-        
+
         ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
 
 

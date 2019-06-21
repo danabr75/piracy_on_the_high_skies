@@ -8,7 +8,7 @@ module Effects
       super(options)
       @debug = options[:debug]
       @time_alive = 0
-      @max_time_alive = 50 #time || 100
+      @max_time_alive = 500 #time || 100
       @id = id
       @radius = 5 * @average_scale
       @speed = 1 * @average_scale
@@ -132,8 +132,10 @@ module Effects
         if distance < @radius
           @moving_to_player   = false
           @returned_to_player = true
+          viewable_pixel_offset_x = 0
+          viewable_pixel_offset_y = 0
         else
-          start_point   = OpenStruct.new(:x => player.current_map_pixel_x + viewable_pixel_offset_x, :y => player.current_map_pixel_y + viewable_pixel_offset_x)
+          start_point   = OpenStruct.new(:x => player.current_map_pixel_x + viewable_pixel_offset_x, :y => player.current_map_pixel_y + (viewable_pixel_offset_y * -1))
           end_point     = OpenStruct.new(:x => player.current_map_pixel_x, :y => player.current_map_pixel_y)
 
 

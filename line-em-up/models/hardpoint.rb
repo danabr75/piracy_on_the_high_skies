@@ -271,8 +271,8 @@ class Hardpoint < GeneralObject
     @x = Math.cos(step) * @radius + center_x
     @y = Math.sin(step) * @radius + center_y
 
-    @item.draw(-ship_current_angle + @angle_offset, @x + viewable_pixel_offset_x, @y + viewable_pixel_offset_y, @z) if @item
-    @image_hardpoint_empty.draw_rot(@x + viewable_pixel_offset_x, @y + viewable_pixel_offset_y, @z, -ship_current_angle + @angle_offset, 0.5, 0.5, @width_scale, @height_scale) if !@item
+    @item.draw(-ship_current_angle + @angle_offset, @x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z) if @item
+    @image_hardpoint_empty.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -ship_current_angle + @angle_offset, 0.5, 0.5, @width_scale, @height_scale) if !@item
   end
 
   def draw_gl
