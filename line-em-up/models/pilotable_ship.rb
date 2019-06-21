@@ -364,16 +364,16 @@ class PilotableShip < GeneralObject
     deactivate_group(3)
   end
 
-  def draw
-    @drawable_items_near_self.reject! { |item| item.draw }
+  def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+    @drawable_items_near_self.reject! { |item| item.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
     # puts "DRAWING HARDPOINTS"
     # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
     if !@hide_hardpoints
       # puts "AI DRAWING HARDPOINT HERE" if options[:test]
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
-      @hardpoints.each { |item| item.draw(@x, @y, @angle) }
+      @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
     end
-    @image.draw_rot(@x, @y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x + viewable_pixel_offset_x, @y + viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 

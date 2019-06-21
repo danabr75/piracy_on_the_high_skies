@@ -151,10 +151,10 @@ class Projectile < ScreenMapFixedObject
     return super(mouse_x, mouse_y, player)
   end
 
-  def draw
+  def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x, @y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
+      @image.draw_rot(@x + viewable_pixel_offset_x, @y + viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
     end
   end
 

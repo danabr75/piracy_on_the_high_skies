@@ -433,9 +433,9 @@ class Player < ScreenFixedObject
     ZOrder::Player
   end
 
-  def draw
+  def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # @drawable_items_near_self.reject! { |item| item.draw }
-    @ship.draw
+    @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
   end
 
   POINTS_X = 7

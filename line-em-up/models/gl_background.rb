@@ -256,6 +256,7 @@ class GLBackground
   end
 
   def recenter_map center_target
+    raise "did not work"
     @gps_map_center_x  = center_target.current_map_tile_x
     @gps_map_center_y  = center_target.current_map_tile_x
 
@@ -272,8 +273,8 @@ class GLBackground
         @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
       end
     end
-    @current_map_pixel_center_x = center_target_map.pixel_movement_x
-    @current_map_pixel_center_y = center_target_map.pixel_movement_y
+    @current_map_pixel_center_x = center_target.current_map_pixel_x
+    @current_map_pixel_center_y = center_target.current_map_pixel_y
 
     @local_map_movement_y = @current_map_pixel_center_x
     @local_map_movement_x = @current_map_pixel_center_y
@@ -427,6 +428,7 @@ class GLBackground
 
   # I think this is dependent on the map being square
   def verify_visible_map
+    # Doesn't work with recenter function
     if @map_inited && @debug
 
       @visual_map_of_visible_to_map.each_with_index do |y_row, index|
@@ -483,7 +485,7 @@ class GLBackground
   end
 
 
-  def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, projectiles
+  def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, projectiles, viewable_pixel_offset_x, viewable_pixel_offset_y
     raise "WRONG MAP WIDTH! Expected #{VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH} Got #{@visible_map[0].length}" if @visible_map[0].length != VISIBLE_MAP_WIDTH + EXTRA_MAP_WIDTH
     raise "WRONG MAP HEIGHT! Expected #{VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT} Got #{@visible_map.length}" if @visible_map.length != VISIBLE_MAP_HEIGHT + EXTRA_MAP_HEIGHT
 
@@ -493,14 +495,16 @@ class GLBackground
 
     @time_alive += 1
 
+    # viewable_pixel_offset_x, viewable_pixel_offset_y
+
     @current_map_pixel_center_x = center_target_map_pixel_movement_x if @current_map_pixel_center_x.nil?
     @current_map_pixel_center_y = center_target_map_pixel_movement_y if @current_map_pixel_center_y.nil?
 
     # puts "PLAYER: #{player_x} - #{player_y} against #{@current_map_pixel_center_x} - #{@current_map_pixel_center_y}"
-    @local_map_movement_y = (center_target_map_pixel_movement_y) - @current_map_pixel_center_y
-    puts "@local_map_movement_y = #{@local_map_movement_y}"
+    @local_map_movement_y = (center_target_map_pixel_movement_y + viewable_pixel_offset_y) - @current_map_pixel_center_y
+    # puts "@local_map_movement_y = #{@local_map_movement_y}"
     # puts "#{@local_map_movement_y} = #{player_y} -#{ @current_map_pixel_center_y}"
-    @local_map_movement_x = (center_target_map_pixel_movement_x) - @current_map_pixel_center_x
+    @local_map_movement_x = (center_target_map_pixel_movement_x + viewable_pixel_offset_x) - @current_map_pixel_center_x
     # puts "HERE:#{ @local_map_movement_x} = (#{center_target_map_pixel_movement_x} + #{viewable_offset_x}) - #{@current_map_pixel_center_x}"
     # puts "@local_map_movement_x = #{@local_map_movement_x}"
 

@@ -168,7 +168,7 @@ class AIShip < ScreenMapFixedObject
     ZOrder::AIShip
   end
 
-  def draw
+  def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # puts "DRAWING AI SHIP: #{@id} - #{@x} - #{@y}"
     # question = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
 
@@ -179,7 +179,7 @@ class AIShip < ScreenMapFixedObject
     # puts "DRAWING SHIP - #{@x} - #{@y}"
     # @ship.front_hard_points.first.image_hardpoint.draw_rot(@x, @y, ZOrder::Hardpoint, @angle, 0.5, 0.5, @width_scale, @height_scale)
     # question.draw(@x, @y, 5000, @width_scale, @height_scale)
-    @ship.draw
+    @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
   end
 
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro

@@ -1,7 +1,7 @@
 require_relative '../lib/config_setting.rb'
 require_relative '../models/message_flash.rb'
-require_relative '../models/effect/group.rb'
-require_relative '../models/effect/focus.rb'
+require_relative '../models/effects/group.rb'
+require_relative '../models/effects/focus.rb'
 
 module QuestInterface
 
@@ -15,7 +15,7 @@ module QuestInterface
       "starting-level-quest" => {
         "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 123, {id: 'starting-level-quest-ship-1'})"],
         "init_buildings_string" => [],
-        "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]], # earth_quakes?, trigger dialogue
+        "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300, type: 'ship'}]], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "
@@ -158,12 +158,14 @@ module QuestInterface
   # Will run init_ships and init_buildings for each active quest
   # this is necessary for on-map-load inits..
   # What if a player enters an area, the updates creates a ship, the player leaves. Need to have on-load inits.
-  def self.init_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects
+  def self.init_quests_on_map_load config_path, quest_datas, map_name, ships, buildings, player, messages, effects, options
+    puts "INITING QUESTS HERE"
     local_messages = []
     quest_datas.each do |quest_key, values|
-      # puts "INIT QUEST HEY : #{quest_key} and values"
+      puts "INIT QUEST HEY : #{quest_key} and values"
       # puts values.inspect
       state = values["state"]
+      puts "MAYP NAME: #{map_name} and state: #{state}"
       next if values["map_name"] != map_name
       if state == 'active'
         local_messages << "#{quest_key}"
@@ -182,7 +184,7 @@ module QuestInterface
             # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
             effect_groups.each do |effect_group|
               puts "CASE 2"
-              group = Effect::Group.new
+              group = Effects::Group.new(options)
 
               effect_group.each do |key, effect_data|
                 effect = nil
@@ -193,7 +195,7 @@ module QuestInterface
                 if key == "focus"
                   puts "CASE 4"
                   # {"id"=>"starting-level-quest-ship-1", "time"=>300}
-                  effect = Effect::Focus.new(effect_data['id'], effect_data['time'])
+                  effect = Effects::Focus.new(effect_data['id'], effect_data['type'], effect_data['time'], ships, buildings, options)
                 end
                 raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
                 group.effects << effect if effect

@@ -84,7 +84,7 @@ class GameWindow < Gosu::Window
     # GET difficulty from config file.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     @difficulty = options[:difficulty]
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
-    @debug = options[:debug]
+    @debug = true #options[:debug]
     # GameWindow.fullscreen(self) if fullscreen
     @start_fullscreen = fullscreen
     @center_ui_y = 0
@@ -227,7 +227,10 @@ class GameWindow < Gosu::Window
     @messages = []
     @effects = []
 
-    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects)
+    @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
+    viewable_center_target = nil
+
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, {debug: @debug})
     puts "EFFECTS COUNT ON INIT: #{@effects.count}"
 
     # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
@@ -538,7 +541,7 @@ class GameWindow < Gosu::Window
     if !@block_all_controls
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player) }
       @effects.reject! do |effect_group|
-        @gl_background, @ships, @buildings, @player, @center_target = effect_group.update(@gl_background, @ships, @buildings, @player, @center_target)
+        @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
         !effect_group.is_active
       end
 
@@ -601,7 +604,7 @@ class GameWindow < Gosu::Window
         @player.accelerate if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @player.brake      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
 
-        results = @gl_background.update(@center_target.current_map_pixel_x, @center_target.current_map_pixel_y, @buildings, @pickups, @projectiles)
+        results = @gl_background.update(@player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @projectiles, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
         @buildings = results[:buildings]
         @pickups = results[:pickups]
         # NEED to update background's projectiles
@@ -867,7 +870,7 @@ class GameWindow < Gosu::Window
     @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 
-    @player.draw() if @player.is_alive && !@ship_loadout_menu.active
+    @player.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) if @player.is_alive && !@ship_loadout_menu.active
     # @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
     if !menus_active && !@player.is_alive
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -878,13 +881,13 @@ class GameWindow < Gosu::Window
       @font.draw("You won! Your score: #{@player.score}", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
-    @ships.each { |ship| ship.draw() }
-    @projectiles.each { |projectile| projectile.draw() }
+    @ships.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @enemy_projectiles.each { |projectile| projectile.draw() }
-    @destructable_projectiles.each { |projectile| projectile.draw() }
+    @destructable_projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @stars.each { |star| star.draw }
-    @pickups.each { |pickup| pickup.draw() }
-    @buildings.each { |building| building.draw() }
+    @pickups.each { |pickup| pickup.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @buildings.each { |building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
