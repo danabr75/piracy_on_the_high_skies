@@ -8,6 +8,7 @@ class Launcher < GeneralObject
   attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited, :cooldown_wait
   # DAMAGE = 0.001
   COOLDOWN_DELAY = 15
+  ACTIVE_DELAY = nil
   # Friendly projects are + speeds
   MAX_SPEED      = 15
 
@@ -20,12 +21,20 @@ class Launcher < GeneralObject
     super(options)
     @image_hardpoint = self.class.get_hardpoint_image
     @active = false
+    @within_angle = false
     @projectiles = []
     @image_optional = self.class.get_image#Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
 
     @inited = true
     @cooldown_wait = 0
+    # necessary for startup
     @active_for  = 0
+    @spinning_up = false
+    @spinning_up_sound = self.class.get_starting_sound
+  end
+
+  def self.get_starting_sound
+    return nil
   end
 
   def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
@@ -47,18 +56,34 @@ class Launcher < GeneralObject
     angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
 
     if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
+      @within_angle = true
+
+      if !self.class::ACTIVE_DELAY.nil? && @active
+        @active_for += 1                       if @active_for != self.class::ACTIVE_DELAY
+        @active_for = self.class::ACTIVE_DELAY if @active_for > self.class::ACTIVE_DELAY
+      end
+      # puts " HWAT SI GOING ON HERE: @active_for #{@active_for} - @active #{@active}"
+
       if @cooldown_wait <= 0 && (self.class::ACTIVE_PROJECTILE_LIMIT.nil? || @projectiles.count < self.class::ACTIVE_PROJECTILE_LIMIT)
         # puts "TEST!!!!!" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
-        puts "LAUCHING ATTACK HERE #{@projectiles.count} and limit: #{self.class::ACTIVE_PROJECTILE_LIMIT}" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
-        puts "REACTIVATING LAUNCHER"
+        # puts "LAUCHING ATTACK HERE #{@projectiles.count} and limit: #{self.class::ACTIVE_PROJECTILE_LIMIT}" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
+        # puts "REACTIVATING LAUNCHER"
         @active = true
+        # puts "HERE: self.class::ACTIVE_DELAY < @active_for: #{self.class::ACTIVE_DELAY < @active_for} = #{self.class::ACTIVE_DELAY} < #{@active_for}"
+        if self.class::ACTIVE_DELAY.nil? || self.class::ACTIVE_DELAY <= @active_for
+          @spinning_up = false
         # raise "STOP HERE" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
-        projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
-        @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
-        @cooldown_wait = get_cooldown
+          projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+          @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
+          @cooldown_wait = get_cooldown
+        else
+          @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up_sound && @active_for == 0 && #@spinning_up == false
+          @spinning_up = true
+        end
         return projectile
       end
     else
+      @within_angle = false
       # puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
     end
   end
@@ -105,15 +130,29 @@ class Launcher < GeneralObject
 
   def deactivate
     @active = false
-    @active_for = 0
+    # @active_for = 0
+    @spinning_up = false
+    @within_angle = false
     # @projectiles.each do |particle|
     #   particle.active = false
     # end
   end
 
-  # This section is heavily outdated.
+  # This section is somehwat outdated.
   def update mouse_x = nil, mouse_y = nil, object = nil
-    @active_for += 1 if @active
+    # puts "MINIGUN ACTIVE FOR: #{@active_for}"
+    # Moving to attack section
+    # if !self.class::ACTIVE_DELAY.nil? && @active
+    #   @active_for += 1                       if @active_for != self.class::ACTIVE_DELAY
+    #   @active_for = self.class::ACTIVE_DELAY if @active_for > self.class::ACTIVE_DELAY
+    # end
+   
+    if !self.class::ACTIVE_DELAY.nil? && (!@within_angle || !@active) && @active_for > 0
+      @active_for -= 1                       if @active_for != 0
+      @active_for = 0                        if @active_for <  0
+    end
+
+    # @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up && @spinning_up_sound 
     # if @inited && @active
       # @x = object.x
       # @y = object.y

@@ -32,8 +32,8 @@ class Bullet < Projectile
     Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
   end
 
-  def get_init_sound
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
+  def self.get_init_sound
+    Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
   end
 
   def drops

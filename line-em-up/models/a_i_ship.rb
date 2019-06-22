@@ -40,7 +40,8 @@ class AIShip < ScreenMapFixedObject
     @grapple_hook_cooldown_wait = 0
     @angle = 90
 
-    hardpoint_data = Player.get_hardpoint_data('BasicShip')
+    # hardpoint_data = Player.get_hardpoint_data('BasicShip')
+    hardpoint_data = {:hardpoint_data=>{"0"=>"BulletLauncher", "3"=>"BulletLauncher", "1"=>"BulletLauncher", "4"=>"BulletLauncher", "5"=>"BulletLauncher", "6"=>"BulletLauncher", "2"=>"BulletLauncher", "7"=>"BulletLauncher"}}
     @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, self, hardpoint_data)
     @ship.x = @x
     @ship.y = @y

@@ -103,6 +103,13 @@ class Projectile < ScreenMapFixedObject
       end
     end
 
+    @init_sound = self.class.get_init_sound
+
+    @init_sound.play(@effects_volume, 1, false) if @init_sound
+  end
+
+  def self.get_init_sound
+    return nil
   end
 
   def update mouse_x, mouse_y, player
@@ -276,7 +283,7 @@ class Projectile < ScreenMapFixedObject
         value[:drops] << drop
       end
     end
-    puts "RETURNING VALUE: #{value}"
+    # puts "RETURNING VALUE: #{value}"
     return value
   end
 

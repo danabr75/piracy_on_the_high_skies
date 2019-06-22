@@ -2,7 +2,7 @@ module GlobalVariables
   class << self
     attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
     attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height, :debug, :damage_increase, :average_scale
-    attr_reader  :average_tile_size
+    attr_reader  :average_tile_size, :effects_volume, :music_volume
   end
 
   def self.set_config(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, debug)
@@ -25,6 +25,9 @@ module GlobalVariables
     @debug = debug
     @damage_increase = 1
     @average_scale = (@width_scale * @height_scale) / 2.0
+    # Grab from config, default to 0.2
+    @effects_volume = 0.1
+    @music_volume   = 0.1
   end
 
 

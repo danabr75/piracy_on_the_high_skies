@@ -38,7 +38,7 @@ class GeneralObject
   end
 
   include GlobalVariables
-  include GlobalVariables
+  include GlobalConstants
 
   attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
   attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height, :damage_increase, :average_scale
@@ -58,6 +58,8 @@ class GeneralObject
     @debug               = GlobalVariables.debug
     @damage_increase     = GlobalVariables.damage_increase
     @average_scale       = GlobalVariables.average_scale
+    @effects_volume      = GlobalVariables.effects_volume
+    @music_volume        = GlobalVariables.music_volume
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
