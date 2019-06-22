@@ -1,0 +1,12 @@
+{
+  "level_1":  [
+    {
+      "from": "Player",
+      "text": ["This is a test of text"]
+    },
+    {
+      "from": "Friend",
+      "text": ["This is also a test of text", "Fun, huh?"]
+    }
+  ]
+}

@@ -30,6 +30,11 @@ Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
 # Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
 Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
+# Get subfolders
+Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
+# Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
+Dir["#{CURRENT_DIRECTORY}/lib/**/*.rb"].each { |f| require f }
+Dir["#{VENDOR_DIRECTORY}/lib/**/*.rb"].each { |f| require f }
 
 
 def populate_inventory

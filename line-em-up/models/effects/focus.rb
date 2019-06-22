@@ -8,7 +8,7 @@ module Effects
       super(options)
       @debug = options[:debug]
       @time_alive = 0
-      @max_time_alive = time || 100
+      @max_time_alive = time #|| 100
       @id = id
       @radius = 5 * @average_scale
       # SPEED IS WAYY TO SLOW!!!!!!!!!!!

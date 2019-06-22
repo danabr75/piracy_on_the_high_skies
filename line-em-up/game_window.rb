@@ -58,6 +58,10 @@ include GlobalConstants
 Dir["#{LIB_DIRECTORY  }/*.rb"].each { |f| require f }
 Dir["#{MODEL_DIRECTORY}/*.rb"].each { |f| require f }
 Dir["#{VENDOR_LIB_DIRECTORY}/*.rb"].each { |f| require f }
+# Sub folders as well.
+Dir["#{LIB_DIRECTORY  }/**/*.rb"].each { |f| require f }
+Dir["#{MODEL_DIRECTORY}/**/*.rb"].each { |f| require f }
+Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
 # require_relative 'media'
 # Dir["/path/to/directory/*.rb"].each {|file| require file }
 # 
@@ -244,7 +248,7 @@ class GameWindow < Gosu::Window
 
     # init_quest = {
     #   # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
-    #   "starting-level-quest": {
+    #   "starting_level_quest": {
     #     victory_condition_string:      "lambda { |map_name, ships, buildings, player| ships.count == 0                               }",
     #     post_victory_triggers_string:  "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
     #     active_condition_string:       "lambda { |map_name, ships, buildings, player| map_name == active_condition                   }"
@@ -257,7 +261,7 @@ class GameWindow < Gosu::Window
 
     #   }
     # }
-    # test = AIShip.new(nil, nil, 123, 123, {:id=>"starting-level-quest-ship-1"})
+    # test = AIShip.new(nil, nil, 123, 123, {:id=>"starting_level_quest_ship_1"})
     # init_quest_data = init_quest_data.to_json
     # quests = [init_quest]
     # active_quest_data = ConfigSetting.get_setting(@config_path, 'Quests', quests.to_json)
@@ -374,21 +378,14 @@ class GameWindow < Gosu::Window
 
   # required for LUIT objects, passes id of element
   def onClick element_id
-    # Block any clicks unless curser object is nil
-    # Don't navigate unless cursor is clear of tracked objects
-    # puts "1ONCLICK HERE!: #{element_id}"
-    # if !@cursor_object
-      @menu.onClick(element_id)
-      @ship_loadout_menu.onClick(element_id)
+    @menu.onClick(element_id)              if @menu.active
+    @ship_loadout_menu.onClick(element_id) if @ship_loadout_menu.active
 
-      # Should not be handled at this level. 
-      # button_clicked_exists = @button_id_mapping.key?(element_id)
-      # if button_clicked_exists
-      #   @button_id_mapping[element_id].call(self, element_id)
-      # else
-      #   puts "Clicked button that is not mapped: #{element_id}"
-      # end
-    # end
+    if @effects.any?
+      @effects.each do |effect|
+        effect.onClick(element_id)
+      end
+    end
   end
 
 

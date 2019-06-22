@@ -24,5 +24,16 @@ module Effects
       init_global_vars
     end
 
+    def onClick element_id
+      # override me
+    end
+
+    def update
+      # override me
+    end
+
+    def draw
+      # override me
+    end
   end
 end

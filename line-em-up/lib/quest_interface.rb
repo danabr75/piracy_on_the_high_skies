@@ -7,18 +7,22 @@ module QuestInterface
 
   # Need a dialogue series module?
 
+  def self.dialogue_data
+  end
+
   # This is where we create new quests
   def self.initial_quests_data
     # ships << AIShip.new(nil, nil, x_value.to_i, y_value.to_i)
     return {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
-      "starting-level-quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting-level-quest-ship-1'})"],
+      "starting_level_quest" => {
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting_level_quest_ship_1'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [
           [
-            {effect_type: "focus", "id" => 'starting-level-quest-ship-1', "time" => 300, target_type: 'ship'},
-            {effect_type: "focus", "id" => 'player', "time" => 0, target_type: 'player'},
+            {effect_type: "focus",    "id" => 'starting_level_quest_ship_1', "time" => 5, target_type: 'ship'},
+            {effect_type: "dialogue", "section_id" => 'level_1'},
+            {effect_type: "focus",    "id" => 'player', "time" => 0, target_type: 'player'},
           ]
         ],
         # KEEP THE ABOVE LINE. 
@@ -29,7 +33,7 @@ module QuestInterface
           lambda { |ships, buildings, player|
             found_ship = false
             ships.each do |ship|
-              found_ship = true if ship.id == 'starting-level-quest-ship-1'
+              found_ship = true if ship.id == 'starting_level_quest_ship_1'
             end
             return !found_ship
           }
@@ -57,17 +61,17 @@ module QuestInterface
 
       },
       "followup-level-quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 125, {id: 'starting-level-quest-ship-2'})", "AIShip.new(nil, nil, 124, 124, {id: 'starting-level-quest-ship-3'})", "AIShip.new(nil, nil, 122, 122, {id: 'starting-level-quest-ship-4'})"],
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 125, {id: 'starting_level_quest-ship-2'})", "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest-ship-3'})", "AIShip.new(nil, nil, 122, 122, {id: 'starting_level_quest-ship-4'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [], # earth_quakes?, trigger dialogue
-        # "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
+        # "init_effects" =>   [["focus" => {"id" => 'starting_level_quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
             ships.each do |ship|
-              found_ship = true if ['starting-level-quest-ship-2', 'starting-level-quest-ship-3', 'starting-level-quest-ship-4'].include?(ship.id)
+              found_ship = true if ['starting_level_quest-ship-2', 'starting_level_quest-ship-3', 'starting_level_quest-ship-4'].include?(ship.id)
             end
             return !found_ship
           }
@@ -187,7 +191,7 @@ module QuestInterface
         if values["init_effects"] && values["init_effects"].any?
           puts "INIT EFFECTS FOUND - on map load"
           puts values["init_effects"]
-          ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
+          ships, buildings, messages, effects = init_effects(config_path, quest_key, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
         end
         # Load in buildings
       end
@@ -255,7 +259,7 @@ module QuestInterface
         puts "WHAT WAS INIT FFECTS? "
         puts values["init_effects"].class
         puts values["init_effects"]
-        ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
+        ships, buildings, messages, effects = init_effects(config_path, quest_key, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
 
 
       end
@@ -273,7 +277,7 @@ module QuestInterface
   end
 
 
-  def self.init_effects config_path, effects_datas, map_name, ships, buildings, player, messages, effects, options
+  def self.init_effects config_path, quest_key, effects_datas, map_name, ships, buildings, player, messages, effects, options
     puts "CASE 0"
     puts "effects_datas"
     raise "BAD INPUT HERE, effects_datas not an array" if !effects_datas.is_a?(Array)
@@ -284,14 +288,14 @@ module QuestInterface
       puts effect_groups.inspect
       raise "BAD INPUT HERE, effect_groups not an array" if !effect_groups.is_a?(Array)
       # [
-      #   {"effect_type"=>"focus", "id"=>"starting-level-quest-ship-1", "time"=>300, "target_type"=>"ship"},
+      #   {"effect_type"=>"focus", "id"=>"starting_level_quest_ship_1", "time"=>300, "target_type"=>"ship"},
       #   {"effect_type"=>"focus", "id"=>"player", "time"=>0, "target_type"=>"player"}
       # ]
       group = Effects::Group.new(options)
       effect_groups.each do |effect_group|
         puts effect_group.inspect if !effect_group.is_a?(Hash) 
         # HERE!!!!!!
-        # {"effect_type"=>"focus", "id"=>"starting-level-quest-ship-1", "time"=>300, "target_type"=>"ship"}
+        # {"effect_type"=>"focus", "id"=>"starting_level_quest_ship_1", "time"=>300, "target_type"=>"ship"}
         raise "BAD INPUT HERE, effect_group not an array. Found: #{effect_group.class}" if !effect_group.is_a?(Hash) 
         # HERE!!!!!!
         puts "CASE 2"
@@ -310,10 +314,14 @@ module QuestInterface
         # puts effect_group['options'].inspect
         if key == "focus"
           puts "CASE 4"
-          # {"id"=>"starting-level-quest-ship-1", "time"=>300}
+          # {"id"=>"starting_level_quest_ship_1", "time"=>300}
           puts "PASSING SHIPS:L #{ships}"
           puts "#{ships.first}"
           effect = Effects::Focus.new(effect_group['id'], effect_group['target_type'], effect_group['time'], ships, buildings, player, options.merge(effect_options))
+        elsif key == 'dialogue'
+          puts "CASE 5"
+          # def initialize quest_key, section_key, options = {}
+          effect = Effects::Dialogue.new(quest_key, effect_group['section_id'])
         end
         raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
         group.effects << effect if effect

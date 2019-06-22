@@ -33,6 +33,13 @@ module Effects
 
     def draw
       # Do nothing for now
+      first_effect = @effects.first
+      first_effect.draw
+    end
+
+    def onClick element_id
+      first_effect = @effects.first
+      first_effect.onClick(element_id)
     end
 
   end

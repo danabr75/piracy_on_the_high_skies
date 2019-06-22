@@ -5,6 +5,7 @@ module GlobalConstants
   MEDIA_DIRECTORY   = File.join(APP_DIRECTORY, "line-em-up/media")
   SOUND_DIRECTORY   = File.join(APP_DIRECTORY, "line-em-up/sounds")
   MODEL_DIRECTORY   = File.join(APP_DIRECTORY, "line-em-up/models")
+  DIALOGUE_DIRECTORY   = File.join(APP_DIRECTORY, "line-em-up/dialogues")
   VENDOR_LIB_DIRECTORY  = File.join(APP_DIRECTORY, "vendors", "lib")
   CONFIG_FILE           = File.join(APP_DIRECTORY, "config.txt")
 end
