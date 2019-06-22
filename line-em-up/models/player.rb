@@ -64,7 +64,7 @@ class Player < ScreenFixedObject
     ship_klass = eval(ship_klass_name)
   
     # I HATE this image retrieval system!!!!
-    super({image: ship_klass.get_image(ship_klass::SHIP_MEDIA_DIRECTORY) })
+    super({image: ship_klass.get_image(ship_klass::ITEM_MEDIA_DIRECTORY) })
     update_x_and_y(@screen_pixel_width  / 2, @screen_pixel_height / 2)
     puts "NEW2 X AND Y: #{@x} - #{@y}"
     # super(@screen_pixel_width  / 2, @screen_pixel_height / 2)

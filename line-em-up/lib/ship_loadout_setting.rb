@@ -502,12 +502,12 @@ class ShipLoadoutSetting < Setting
 
   def get_image
     klass = eval(@ship_value)
-    return klass.get_right_broadside_image(klass::SHIP_MEDIA_DIRECTORY)
+    return klass.get_right_broadside_image(klass::ITEM_MEDIA_DIRECTORY)
   end
 
   def get_large_image
     klass = eval(@ship_value)
-    large_image = klass.get_large_image(klass::SHIP_MEDIA_DIRECTORY)
+    large_image = klass.get_large_image(klass::ITEM_MEDIA_DIRECTORY)
     # puts "LARGE IMAGE HERE"
     # puts large_image
     # stop

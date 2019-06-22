@@ -57,9 +57,9 @@ class GrapplingHookLauncher < Launcher
     # puts "GRAPPLING HOOK L ATTACK HERE: #{@active} -test: #{@test}"
     # puts "#{@projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT} && #{!@active} && #{is_angle_between_two_angles?(destination_angle, angle_min, angle_max)}"
     # @projectiles.last.time_alive check is to prevent accidental quick double-clicks
-    puts "GRAP ATTACK HERE: #{@active_for}"
+    # puts "GRAP ATTACK HERE: #{@active_for}"
     if @projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT && !@active && @projectiles.last.time_alive > 15 && is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
-      puts "DETACHING HOOK"
+      # puts "DETACHING HOOK"
       @projectiles.each do |hook|
         hook.detach_hook
       end

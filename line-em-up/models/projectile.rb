@@ -104,7 +104,10 @@ class Projectile < ScreenMapFixedObject
     end
 
     @init_sound = self.class.get_init_sound
-
+    # @i ||= 1
+    # @i += 1
+    # @i = -50 if @i > 50
+    # @init_sound.play_pan(-5000,@effects_volume, 1, false) if @init_sound
     @init_sound.play(@effects_volume, 1, false) if @init_sound
   end
 

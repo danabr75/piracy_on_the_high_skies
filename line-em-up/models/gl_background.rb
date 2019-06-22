@@ -1164,7 +1164,11 @@ class GLBackground
           # Pickups update the x and y coords, and then the pickup draws itself.
           buildings.each do |building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-            building.class.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+            if building.respond_to?(:alt_draw)
+              building.alt_draw(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            else
+              building.class.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+            end
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 

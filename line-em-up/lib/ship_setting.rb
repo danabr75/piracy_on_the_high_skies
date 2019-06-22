@@ -62,8 +62,8 @@ class ShipSetting < Setting
 
   # def get_image
     # klass = eval(@value)
-    # puts "KLASS HERE : #{klass.get_image_assets_path(klass::SHIP_MEDIA_DIRECTORY)}"
-    # return klass.get_right_broadside_image(klass::SHIP_MEDIA_DIRECTORY)
+    # puts "KLASS HERE : #{klass.get_image_assets_path(klass::ITEM_MEDIA_DIRECTORY)}"
+    # return klass.get_right_broadside_image(klass::ITEM_MEDIA_DIRECTORY)
   # end
 
   def update mouse_x, mouse_y

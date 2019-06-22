@@ -54,8 +54,8 @@ module QuestInterface
       "followup-level-quest" => {
         "init_ships_string" =>     ["AIShip.new(nil, nil, 125, 125, {id: 'starting-level-quest-ship-2'})", "AIShip.new(nil, nil, 124, 124, {id: 'starting-level-quest-ship-3'})", "AIShip.new(nil, nil, 122, 122, {id: 'starting-level-quest-ship-4'})"],
         "init_buildings_string" => [],
-        # "init_effects" =>   [], # earth_quakes?, trigger dialogue
-        "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
+        "init_effects" =>   [], # earth_quakes?, trigger dialogue
+        # "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "

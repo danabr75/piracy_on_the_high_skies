@@ -26,7 +26,7 @@ class ScreenMapFixedObject < GeneralObject
     if (@current_map_pixel_x.nil? || @current_map_pixel_y.nil?) && (@current_map_tile_x && @current_map_tile_y)
       @current_map_pixel_x = ((@current_map_tile_x * @tile_pixel_width)  + @tile_pixel_width  / 2).to_i
       @current_map_pixel_y = ((@current_map_tile_y * @tile_pixel_height) + @tile_pixel_height / 2).to_i
-    elsif (@current_map_tile_x.nil? || @current_map_tile_y.nil?) && (@current_map_pixel_x && @current_map_pixel_y)
+    elsif (@current_map_pixel_x && @current_map_pixel_y)
       get_map_tile_location_from_map_pixel_location
     else
       raise "You have to provide either map pixels or map tiles! #{[@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"

@@ -2,11 +2,11 @@ require_relative 'launcher.rb'
 require_relative 'bullet.rb'
 class MinigunLauncher < Launcher
   HARDPOINT_NAME = "minigun_launcher"
-  LAUNCHER_MIN_ANGLE = -45
-  LAUNCHER_MAX_ANGLE = 45
+  LAUNCHER_MIN_ANGLE = -30
+  LAUNCHER_MAX_ANGLE = 30
   PROJECTILE_CLASS = Bullet
   FIRING_GROUP_NUMBER = 2
-  COOLDOWN_DELAY = 8
+  COOLDOWN_DELAY = 20
   ACTIVE_DELAY   = 120
 
   # def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}

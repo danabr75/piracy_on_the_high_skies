@@ -172,7 +172,8 @@ class GameWindow < Gosu::Window
     @destructable_projectiles = Array.new
     @pickups = Array.new
 
-    @ships = Array.new
+    @ships      = Array.new
+    @shipwrecks = Array.new
     # @enemies_random_spawn_timer = 100
     # @enemies_random_spawn_timer = 5
     # @enemies_spawner_counter = 0
@@ -701,6 +702,11 @@ class GameWindow < Gosu::Window
         @destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
 
 
+        @shipwrecks.reject! do |ship|
+          result = ship.update(nil, nil, @player)
+          @buildings << result[:building] if result[:building]
+          !result[:is_alive]
+        end
         # puts "SHIPS HERE: #{@ships.count}"
         # puts "SHIPS ids: #{@ships.collect{|s| s.id }}"
         @ships.reject! do |ship|
@@ -714,6 +720,7 @@ class GameWindow < Gosu::Window
           results[:projectiles].each do |projectile|
             @projectiles.push(projectile)
           end
+          @shipwrecks << results[:shipwreck] if results[:shipwreck]
 
           # @enemy_projectiles = @enemy_projectiles + results[:projectiles]
           # puts "SHIP ID HERE: #{ship.id} and is alive? : #{results[:is_alive]}"
@@ -888,6 +895,7 @@ class GameWindow < Gosu::Window
     end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     @ships.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @enemy_projectiles.each { |projectile| projectile.draw() }
     @destructable_projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
@@ -973,6 +981,7 @@ class GameWindow < Gosu::Window
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
+      @font.draw("SHIPWRECK COUNT: #{@shipwrecks.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
     end
     # @gl_background.draw(ZOrder::Background)

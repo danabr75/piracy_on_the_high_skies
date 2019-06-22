@@ -7,7 +7,7 @@ require 'glut'
 class Launcher < GeneralObject
   attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited, :cooldown_wait
   # DAMAGE = 0.001
-  COOLDOWN_DELAY = 15
+  COOLDOWN_DELAY = 45
   ACTIVE_DELAY = nil
   # Friendly projects are + speeds
   MAX_SPEED      = 15
@@ -148,8 +148,13 @@ class Launcher < GeneralObject
     # end
    
     if !self.class::ACTIVE_DELAY.nil? && (!@within_angle || !@active) && @active_for > 0
-      @active_for -= 1                       if @active_for != 0
-      @active_for = 0                        if @active_for <  0
+      if !@active
+        @active_for -= 5   if @active_for != 0.0
+        @active_for  = 0   if @active_for <  0.0
+      else
+        @active_for -= 0.3 if @active_for != 0.0
+        @active_for  = 0   if @active_for <  0.0
+      end
     end
 
     # @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up && @spinning_up_sound 

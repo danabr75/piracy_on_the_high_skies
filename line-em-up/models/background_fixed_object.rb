@@ -23,7 +23,21 @@ class BackgroundFixedObject < GeneralObject
     @current_map_tile_x  = current_map_tile_x
     @current_map_tile_y  = current_map_tile_y
 
-    get_map_pixel_location_from_map_tile_location
+
+    if options[:current_map_pixel_x] && options[:current_map_pixel_y]
+      @current_map_pixel_x = options[:current_map_pixel_x]
+      @current_map_pixel_y = options[:current_map_pixel_y]
+
+      # @x_offset, @y_offset = get_tile_pixel_remainder
+      puts "PIXEL: #{[@current_map_pixel_x, @current_map_pixel_y]}"
+      puts "GPS: #{[@current_map_tile_x, @current_map_tile_y]}"
+      puts "TILE PIXEL: #{[@tile_pixel_width, @tile_pixel_height]}"
+
+      # raise "GOT THESE AS OFFSET: #{[@x_offset, @y_offset]}"
+
+    else
+      get_map_pixel_location_from_map_tile_location
+    end
 
     # if options[:relative_y_padding]
       # puts "options[:relative_y_padding]: #{options[:relative_y_padding]}"

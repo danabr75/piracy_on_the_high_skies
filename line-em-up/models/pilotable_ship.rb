@@ -11,7 +11,7 @@ include GLUT
 
 class PilotableShip < GeneralObject
 
-  SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
+  ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
@@ -48,7 +48,7 @@ class PilotableShip < GeneralObject
     @z = z
     puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     @angle = angle
-    media_path = self.class::SHIP_MEDIA_DIRECTORY
+    media_path = self.class::ITEM_MEDIA_DIRECTORY
     path = media_path
     # @right_image = self.class.get_right_image(path)
     # @left_image = self.class.get_left_image(path)
@@ -165,7 +165,7 @@ class PilotableShip < GeneralObject
   end
 
   def self.get_image_assets_path
-    SHIP_MEDIA_DIRECTORY
+    ITEM_MEDIA_DIRECTORY
   end
 
   # def self.get_right_broadside_image path
@@ -179,6 +179,14 @@ class PilotableShip < GeneralObject
   end
   def self.get_image path
     Gosu::Image.new("#{path}/default.png")
+  end
+
+  def self.get_tilable_image path
+    Gosu::Image.new("#{path}/default.png", :tileable => true)
+  end
+
+  def self.get_destroyed_image path
+    Gosu::Image.new("#{path}/destroyed_default.png")
   end
 
   def self.get_large_image path
@@ -364,7 +372,15 @@ class PilotableShip < GeneralObject
     deactivate_group(3)
   end
 
-  def draw viewable_pixel_offset_x = 0, viewable_pixel_offset_y = 0
+  def switch_to_destroyed_image path
+    @image = self.class.get_destroyed_image(path)
+  end
+
+  def turn_off_hardpoints
+    @hide_hardpoints = true
+  end
+
+  def draw viewable_pixel_offset_x = 0, viewable_pixel_offset_y = 0, scale_offset = 1, options = {}
     @drawable_items_near_self.reject! { |item| item.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
     # puts "DRAWING HARDPOINTS"
     # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
@@ -373,7 +389,7 @@ class PilotableShip < GeneralObject
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
       @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
     end
-    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @width_scale * scale_offset, @height_scale * scale_offset)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 
@@ -436,9 +452,11 @@ class PilotableShip < GeneralObject
   def update mouse_x, mouse_y, player
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
-    @hardpoints.each do |hardpoint|
-      # puts "UPDATING HARDPOINT HERE: #{self}"
-      hardpoint.update(mouse_x, mouse_y, self)
+    if !@hide_hardpoints
+      @hardpoints.each do |hardpoint|
+        # puts "UPDATING HARDPOINT HERE: #{self}"
+        hardpoint.update(mouse_x, mouse_y, self)
+      end
     end
 
     # @cooldown_wait -= 1              if @cooldown_wait > 0

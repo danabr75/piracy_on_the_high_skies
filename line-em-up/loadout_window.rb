@@ -119,7 +119,7 @@ class LoadoutWindow < Gosu::Window
     @ship_menu = ShipSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path)
     @ship_loadout_menu = ShipLoadoutSetting.new(@window, fullscreen_window_height, @width, @height, get_center_font_ui_y, config_path, @ship_menu.value, {scale: @scale})
     increase_center_font_ui_y(@ship_loadout_menu.get_image.height + @ship_loadout_menu.get_large_image.height)
-    # puts "KLASS HERE : #{klass.get_image_assets_path(klass::SHIP_MEDIA_DIRECTORY)}"
+    # puts "KLASS HERE : #{klass.get_image_assets_path(klass::ITEM_MEDIA_DIRECTORY)}"
 
     # start_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/menu/start.png")
     @game_window_width, @game_window_height, @full_screen = [nil, nil, nil]

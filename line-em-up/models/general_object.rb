@@ -33,6 +33,10 @@ class GeneralObject
     "#{MEDIA_DIRECTORY}/question.png"
   end
 
+  def self.get_tilable_image
+    return nil
+  end
+
   def get_image_path
     self.class.get_image_path
   end
@@ -87,7 +91,11 @@ class GeneralObject
 
     @id    = options[:id] || SecureRandom.uuid
     # @class = self.class.name
-    @image = options[:image] || get_image
+    if !options[:no_image]
+      @image = options[:image] || get_image
+    else
+      @image = nil
+    end
     if self.class.name == "Player"
       raise "DIDN't GET IMAGE from player" if @image.nil?
     end
@@ -142,13 +150,13 @@ class GeneralObject
 
   def draw
     # Will generate error if class name is not listed on ZOrder
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
+    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale) if @image
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @width_scale, @height_scale) if @image
   end
 
   def get_height
@@ -548,11 +556,25 @@ class GeneralObject
     # puts "update_from_3D: #{[ox, oy, oz]}"
     # oz = z
     oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
-    x, y, z = convert3DTo2D(vert0[0] - (vert0[0] - vert2[0]) / 2, vert2[1] - (vert2[1] - vert3[1]) / 2, oz2, viewMatrix, projectionMatrix, viewport)
+    x, y, z = convert3DTo2D((vert0[0] - (vert0[0] - vert2[0]) / 2.0), (vert2[1] - (vert2[1] - vert3[1]) / 2.0), oz2, viewMatrix, projectionMatrix, viewport)
     y = @screen_pixel_height - y
     @x = x
     @y = y
   end
+
+  # Not used
+  # def self.update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
+  #   # left-top, left-bottom, right-top, right-bottom
+  #   ox = vert0[0] - (vert0[0] - vert2[0])
+  #   oy = vert2[1] + (vert2[1] - vert3[1])
+  #   # puts "update_from_3D: #{[ox, oy, oz]}"
+  #   # oz = z
+  #   oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
+  #   x, y, z = convert3DTo2D(vert0[0] - (vert0[0] - vert2[0]) / 2, vert2[1] - (vert2[1] - vert3[1]) / 2, oz2, viewMatrix, projectionMatrix, viewport)
+  #   y = @screen_pixel_height - y
+  #   @x = x
+  #   @y = y
+  # end
 
   def convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
     return self.class.convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
@@ -605,6 +627,16 @@ class GeneralObject
     # It is possible to exceed the mapped areas, like projectiles flying off the edge of the map.
     @current_map_tile_x = (@current_map_pixel_x / (@tile_pixel_width)).to_i  if @current_map_pixel_x && @tile_pixel_width
     @current_map_tile_y = (@current_map_pixel_y / (@tile_pixel_height)).to_i if @current_map_pixel_y && @tile_pixel_height
+  end
+
+  def get_tile_pixel_remainder
+    # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
+    # If statement is due to the fact that some objects are created without these variables being initted.
+    # Indexed at 0. on a 250 x 250 tile map, values are 0..249
+    # It is possible to exceed the mapped areas, like projectiles flying off the edge of the map.
+    x_offset = @current_map_pixel_x - (@current_map_tile_x * @tile_pixel_width )
+    y_offset = @current_map_pixel_y - (@current_map_tile_y * @tile_pixel_height)
+    return [x_offset, y_offset]
   end
 
   # Used a lot by buildings

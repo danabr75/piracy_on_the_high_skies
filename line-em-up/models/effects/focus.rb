@@ -11,7 +11,9 @@ module Effects
       @max_time_alive = time || 100
       @id = id
       @radius = 5 * @average_scale
+      # SPEED IS WAYY TO SLOW!!!!!!!!!!!
       @speed = 1 * @average_scale
+
       # puts "ID"
       # puts @id.inspect
       # puts @id.class

@@ -11,7 +11,7 @@ include OpenGL
 include GLUT
 
 class BasicShip < PilotableShip
-  SHIP_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
+  ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
   SPEED = 7
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :rockets, :score, :time_alive

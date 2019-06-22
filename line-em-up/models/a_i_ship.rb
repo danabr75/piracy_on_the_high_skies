@@ -31,7 +31,7 @@ class AIShip < ScreenMapFixedObject
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
 
-    options[:image] = BasicShip.get_image(BasicShip::SHIP_MEDIA_DIRECTORY)
+    options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
     @score = 0
@@ -118,8 +118,21 @@ class AIShip < ScreenMapFixedObject
   end
 
   def is_alive
-    @ship.is_alive
-    # health > 0
+    if @ship.is_alive
+      return true
+    else
+
+      if rand(2) == 0
+        file = "ship_dead_2.ogg"
+      else
+        file = "ship_dead_1.ogg"
+      end
+
+
+      sound = Gosu::Sample.new("#{SOUND_DIRECTORY}/#{file}")
+      sound.play(@effects_volume, 1, false) 
+      return false
+    end
   end
 
   def update_momentum
@@ -330,9 +343,13 @@ class AIShip < ScreenMapFixedObject
       # factor_in_scale_speed = @speed * @average_scale
 
       # movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
+    shipwreck = nil
+    if !result
+      shipwreck = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle)
+    end
 
 
-    return {is_alive: result, projectiles: projectiles }
+    return {is_alive: result, projectiles: projectiles, shipwreck: shipwreck}
   end
 
 
