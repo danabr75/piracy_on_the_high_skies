@@ -725,6 +725,28 @@ class GeneralObject
     raise "STOP USING ME"
   end
 
+  def self.convert_screen_pixels_to_opengl screen_width, screen_height, x = nil, y = nil, w = nil, h = nil
+    # puts "IT's SET RIUGHT HERE2!!: #{@screen_pixel_height} - #{y}"
+    opengl_x, opengl_y, open_gl_w, open_gl_h = [nil, nil, nil, nil]
+    if x && y
+      opengl_x   = ((x / (screen_width.to_f )) * 2.0) - 1
+      # puts "GENOBJ: ((x / (screen_width.to_f )) * 2.0) - 1"
+      # puts "GENOBJ: ((#{x} / (#{screen_width}.to_f )) * #{2.0}) - #{1}"
+      # opengl_x   = opengl_x * 1.2 if include_adjustments_for_not_exact_opengl_dimensions
+      opengl_y   = ((y / (screen_height.to_f)) * 2.0) - 1
+      # opengl_y   = opengl_y * 0.92 if include_adjustments_for_not_exact_opengl_dimensions
+    end
+    if w && h
+      open_gl_w  = ((w / (screen_width.to_f )) * 2.0)
+      # open_gl_w = open_gl_w - opengl_x
+      open_gl_h  = ((h / (screen_height.to_f )) * 2.0)
+      # open_gl_h = open_gl_h - opengl_y
+      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}}"
+    end
+    return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
+  end
+
+
   def stop
     if @debug
       raise "STOP HERE"

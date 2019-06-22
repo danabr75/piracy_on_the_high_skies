@@ -75,24 +75,24 @@ class GLBackground
   #   convert_screen_to_opengl
   # 225.0, 675.0, 450.0 , 450.0
   # RETURNING: {:o_x=>-0.5, :o_y=>0.5, :o_w=>0.0, :o_h=>0.0}
-  def convert_screen_to_opengl x, y, w = nil, h = nil, include_adjustments_for_not_exact_opengl_dimensions = false
-    # puts "IT's SET RIUGHT HERE2!!: #{@screen_pixel_height} - #{y}"
-    opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
-    # opengl_x   = opengl_x * 1.2 if include_adjustments_for_not_exact_opengl_dimensions
-    opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
-    # opengl_y   = opengl_y * 0.92 if include_adjustments_for_not_exact_opengl_dimensions
-    if w && h
-      open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
-      # open_gl_w = open_gl_w - opengl_x
-      open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
-      # open_gl_h = open_gl_h - opengl_y
-      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}}"
-      return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
-    else
-      # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y}}"
-      return {o_x: opengl_x, o_y: opengl_y}
-    end
-  end
+  # def convert_screen_to_opengl x, y, w = nil, h = nil, include_adjustments_for_not_exact_opengl_dimensions = false
+  #   # puts "IT's SET RIUGHT HERE2!!: #{@screen_pixel_height} - #{y}"
+  #   opengl_x   = ((x / (@screen_pixel_width.to_f )) * 2.0) - 1
+  #   # opengl_x   = opengl_x * 1.2 if include_adjustments_for_not_exact_opengl_dimensions
+  #   opengl_y   = ((y / (@screen_pixel_height.to_f)) * 2.0) - 1
+  #   # opengl_y   = opengl_y * 0.92 if include_adjustments_for_not_exact_opengl_dimensions
+  #   if w && h
+  #     open_gl_w  = ((w / (@screen_pixel_width.to_f )) * 2.0)
+  #     # open_gl_w = open_gl_w - opengl_x
+  #     open_gl_h  = ((h / (@screen_pixel_height.to_f )) * 2.0)
+  #     # open_gl_h = open_gl_h - opengl_y
+  #     # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}}"
+  #     return {o_x: opengl_x, o_y: opengl_y, o_w: open_gl_w, o_h: open_gl_h}
+  #   else
+  #     # puts "RETURNING: #{{o_x: opengl_x, o_y: opengl_y}}"
+  #     return {o_x: opengl_x, o_y: opengl_y}
+  #   end
+  # end
 
 
   def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height
@@ -939,9 +939,12 @@ class GLBackground
     # puts "#{gps_offs_y} = #{@local_map_movement_y} / (#{@tile_pixel_height} )"
     screen_offset_x = @tile_pixel_width  * gps_offs_x * -1
     screen_offset_y = @tile_pixel_height * gps_offs_y * -1
-    offset_result = convert_screen_to_opengl(screen_offset_x, screen_offset_y)
+    # puts "@screen_pixel_width, @screen_pixel_height, screen_offset_x, screen_offset_y"
+    # puts [@screen_pixel_width, @screen_pixel_height, screen_offset_x, screen_offset_y  ]
+    offset_result = GeneralObject.convert_screen_pixels_to_opengl(@screen_pixel_width, @screen_pixel_height, screen_offset_x, screen_offset_y)
     opengl_offset_x = offset_result[:o_x]# >= @tile_pixel_width ? 0 : offset_result[:o_x]
     opengl_offset_y = offset_result[:o_y]# >= @tile_pixel_height ? 0 : offset_result[:o_y]
+    # raise "SHOUD NOT BE NIL" if opengl_offset_x.nil? || opengl_offset_y.nil?
 
     # puts "OLD OPENGL: #{opengl_offset_y}"
     # opengl_offset_y = opengl_offset_y * -1
@@ -1077,7 +1080,8 @@ class GLBackground
           # puts "screen_y = @tile_pixel_height  * new_y_index"
           # puts "#{screen_y} = #{@tile_pixel_height}  * #{new_y_index}"
 
-          result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
+          # result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
+          result = GeneralObject.convert_screen_pixels_to_opengl(@screen_pixel_width, @screen_pixel_height, screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
           # puts "X and Y INDEX: #{x_index} - #{y_index}"
           # puts "RESULT HERE: #{result}"
           opengl_coord_x = result[:o_x]
@@ -1087,6 +1091,37 @@ class GLBackground
           opengl_increment_x = result[:o_w]
           opengl_increment_y = result[:o_h]
 
+          # raise "SHOUD NOT BE NIL" if opengl_coord_x.nil? || opengl_coord_y.nil?
+          # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
+          # puts "NEW DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
+
+          # result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
+          # opengl_coord_x = result[:o_x]
+          # opengl_coord_y = result[:o_y]
+          # # opengl_coord_y = opengl_coord_y * -1
+          # # opengl_coord_x = opengl_coord_x * -1
+          # opengl_increment_x = result[:o_w]
+          # opengl_increment_y = result[:o_h]
+
+          # raise "SHOUD NOT BE NIL" if opengl_coord_x.nil? || opengl_coord_y.nil?
+          # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
+          # puts "ORIGINAL DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
+
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [-1.25, -2.25, 0.25, 0.25]
+
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [-1.0, -2.25, 0.25, 0.25]
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [-0.75, -2.25, 0.25, 0.25]
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [-0.5, -2.25, 0.25, 0.25]
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [-0.25, -2.25, 0.25, 0.25]
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [0.0, -2.25, 0.25, 0.25]
+          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
+          # ORIGINAL DATA TILE OPENGL DATA: [0.25, -2.25, 0.25, 0.25]
 
           
           info =  @infos[x_element['terrain_index']]
@@ -1164,8 +1199,13 @@ class GLBackground
           # Pickups update the x and y coords, and then the pickup draws itself.
           buildings.each do |building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-            if building.respond_to?(:alt_draw)
-              building.alt_draw(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            if building.respond_to?(:alt_alt_draw)
+              # puts "UPDATING BUILDING ALT ALT"
+              building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+
+              # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
+
+              # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
             else
               building.class.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
             end

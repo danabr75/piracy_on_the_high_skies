@@ -9,13 +9,21 @@ class Shipwreck < ScreenMapFixedObject
     @scale_end   = 0.7
     @current_scale = @scale_start
     # @scare_decrement = momentum * (@scale_start - @scale_end)
-    @scare_decrement = 0.0016
+    @scare_decrement = 0.0018
     # WHAT If momentum is 0, which it often is..
     # puts "#{@scare_decrement} = #{momentum} * (#{@scale_start} - #{@scale_end})"
     # puts "@scare_decrement: #{@scare_decrement}"
     @current_momentum = momentum
 
     options[:no_image] = true
+
+    @angle_direction = rand(2)
+    if @angle_direction == 0
+      @angle_direction = -1
+    else
+      @angle_direction = 1
+    end
+
     @health = 1
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
   end
@@ -25,6 +33,12 @@ class Shipwreck < ScreenMapFixedObject
     building = nil
     @ship.x = @x
     @ship.y = @y
+    if @time_alive > 0
+      new_angle_offset = @angle_direction + @angle_direction * (@time_alive / 100.0)
+      @angle = @angle + new_angle_offset
+      @ship.angle = @angle
+    end
+
     update_momentum if @current_momentum != 0
     if @current_scale != @scale_end
       @current_scale -= @scare_decrement
@@ -34,7 +48,8 @@ class Shipwreck < ScreenMapFixedObject
       options = {}
       options[:current_map_pixel_x] = @current_map_pixel_x
       options[:current_map_pixel_y] = @current_map_pixel_y
-      building = Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, @current_scale, options)
+      revised_scale = 1.0 - ((1.0 - @current_scale) / 2.0)
+      building = Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, revised_scale, @angle, options)
       @health = 0
     end
     return {is_alive: is_alive, building: building }

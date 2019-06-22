@@ -982,6 +982,11 @@ class GameWindow < Gosu::Window
         @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
       @font.draw("SHIPWRECK COUNT: #{@shipwrecks.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      local_count = 0
+      @buildings.each do |b|
+        local_count += 1 if b.class::CLASS_TYPE == :landwreck
+      end
+      @font.draw("LANDWRECK COUNT: #{local_count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
     end
     # @gl_background.draw(ZOrder::Background)

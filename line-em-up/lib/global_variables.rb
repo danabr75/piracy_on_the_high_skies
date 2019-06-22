@@ -26,8 +26,8 @@ module GlobalVariables
     @damage_increase = 1
     @average_scale = (@width_scale * @height_scale) / 2.0
     # Grab from config, default to 0.2
-    @effects_volume = 0.001
-    @music_volume   = 0.001
+    @effects_volume = 0.01
+    @music_volume   = 0.01
   end
 
 
