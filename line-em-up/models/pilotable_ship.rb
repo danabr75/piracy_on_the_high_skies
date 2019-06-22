@@ -46,7 +46,7 @@ class PilotableShip < GeneralObject
     @x = x
     @y = y
     @z = z
-    puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
+    # puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     @angle = angle
     media_path = self.class::ITEM_MEDIA_DIRECTORY
     path = media_path

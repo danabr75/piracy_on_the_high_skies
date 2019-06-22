@@ -15,9 +15,14 @@ module QuestInterface
       "starting-level-quest" => {
         "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting-level-quest-ship-1'})"],
         "init_buildings_string" => [],
-        # "init_effects" =>   [["focus" => {"id" => 'starting-level-quest-ship-1', "time" => 300, type: 'ship'}]], # earth_quakes?, trigger dialogue
+        "init_effects" =>   [
+          [
+            {effect_type: "focus", "id" => 'starting-level-quest-ship-1', "time" => 300, target_type: 'ship'},
+            {effect_type: "focus", "id" => 'player', "time" => 0, target_type: 'player'},
+          ]
+        ],
         # KEEP THE ABOVE LINE. 
-        "init_effects" =>   [], # earth_quakes?, trigger dialogue
+        # "init_effects" =>   [], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v2_small",
         "complete_condition_string" => "
@@ -180,7 +185,8 @@ module QuestInterface
         end
         puts "INIT HERE, WHY NOT INIT"
         if values["init_effects"] && values["init_effects"].any?
-          puts "INIT EFFECTS FOUND"
+          puts "INIT EFFECTS FOUND - on map load"
+          puts values["init_effects"]
           ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
         end
         # Load in buildings
@@ -246,7 +252,9 @@ module QuestInterface
           end
           # {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
         end
-
+        puts "WHAT WAS INIT FFECTS? "
+        puts values["init_effects"].class
+        puts values["init_effects"]
         ships, buildings, messages, effects = init_effects(config_path, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
 
 
@@ -266,31 +274,51 @@ module QuestInterface
 
 
   def self.init_effects config_path, effects_datas, map_name, ships, buildings, player, messages, effects, options
+    puts "CASE 0"
+    puts "effects_datas"
+    raise "BAD INPUT HERE, effects_datas not an array" if !effects_datas.is_a?(Array)
+    puts effects_datas
     effects_datas.each do |effect_groups|
       puts "CASE 1"
-      # ["focus_on" => {"id" => 'starting-level-quest-ship-1', "time" => 300}]`
+      puts "EFFECT DATAS:"
+      puts effect_groups.inspect
+      raise "BAD INPUT HERE, effect_groups not an array" if !effect_groups.is_a?(Array)
+      # [
+      #   {"effect_type"=>"focus", "id"=>"starting-level-quest-ship-1", "time"=>300, "target_type"=>"ship"},
+      #   {"effect_type"=>"focus", "id"=>"player", "time"=>0, "target_type"=>"player"}
+      # ]
+      group = Effects::Group.new(options)
       effect_groups.each do |effect_group|
+        puts effect_group.inspect if !effect_group.is_a?(Hash) 
+        # HERE!!!!!!
+        # {"effect_type"=>"focus", "id"=>"starting-level-quest-ship-1", "time"=>300, "target_type"=>"ship"}
+        raise "BAD INPUT HERE, effect_group not an array. Found: #{effect_group.class}" if !effect_group.is_a?(Hash) 
+        # HERE!!!!!!
         puts "CASE 2"
-        group = Effects::Group.new(options)
-
-        effect_group.each do |key, effect_data|
-          effect = nil
-          puts "CASE 3"
-          # puts "KEY HERE: #{key}"
-          # puts effect_data.inspect
-          # raise "what is it"
-          if key == "focus"
-            puts "CASE 4"
-            # {"id"=>"starting-level-quest-ship-1", "time"=>300}
-            puts "PASSING SHIPS:L #{ships}"
-            puts "#{ships.first}"
-            effect = Effects::Focus.new(effect_data['id'], effect_data['type'], effect_data['time'], ships, buildings, options)
-          end
-          raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
-          group.effects << effect if effect
+        # effect_group.each do |key, effect_data|
+        # effect_group.each do |effect_data|
+        #   puts effect_data.inspect if !effect_data.is_a?(Hash)
+        #   raise "BAD INPUT HERE, effect_data not an hash. Found: #{effect_data.class}" if !effect_data.is_a?(Hash)
+        effect = nil
+        key = effect_group['effect_type']
+        puts "CASE 3"
+        # puts "KEY HERE: #{key}"
+        # puts effect_data.inspect
+        # raise "what is it"
+        effect_options = effect_group['options'] || {}
+        # puts "WHAT WAS THIS: #{effect_group['options']}"
+        # puts effect_group['options'].inspect
+        if key == "focus"
+          puts "CASE 4"
+          # {"id"=>"starting-level-quest-ship-1", "time"=>300}
+          puts "PASSING SHIPS:L #{ships}"
+          puts "#{ships.first}"
+          effect = Effects::Focus.new(effect_group['id'], effect_group['target_type'], effect_group['time'], ships, buildings, player, options.merge(effect_options))
         end
-        effects << group
+        raise "Found case that effect did not match known key. Key Found: #{key}" if effect.nil?
+        group.effects << effect if effect
       end
+      effects << group
     end
     return [ships, buildings, messages, effects]
   end

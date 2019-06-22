@@ -2,8 +2,8 @@ require_relative 'effect.rb'
 
 module Effects
   class Focus < Effects::Effect
-
-    def initialize id, type, time, ships, buildings, options = {}
+    attr_reader :target
+    def initialize id, type, time, ships, buildings, player, options = {}
       puts "NEW FOCUS HERE: #{time}"
       super(options)
       @debug = options[:debug]
@@ -12,7 +12,7 @@ module Effects
       @id = id
       @radius = 5 * @average_scale
       # SPEED IS WAYY TO SLOW!!!!!!!!!!!
-      @speed = 1 * @average_scale
+      @speed = 2 * @average_scale
 
       # puts "ID"
       # puts @id.inspect
@@ -22,12 +22,18 @@ module Effects
       @location_y = nil
       @moving_to_target = true
       @hovering_over_target = false
-      @moving_to_player = false
-      @returned_to_player  = false
+      @complete = false
+      # @moving_to_player = false
+      # @returned_to_player  = false
       # @viewable_pixel_offset_x_bank = 0
       # @viewable_pixel_offset_y_bank = 0
-
-      if type == 'ship'
+      if type == 'player'
+        puts "TYPE WAS PLAYER HERE: #{type}"
+        @target = player
+        # Can put special option to allow death, but for now, this is the default.
+        player.enable_invulnerability
+        player.disable_controls
+      elsif type == 'ship'
         ships.each do |ship|
           # puts "SHIP HERE: #{ship.id}"
           # puts ship.id.inspect
@@ -42,10 +48,13 @@ module Effects
       end
       puts "DID NOT FIND TARGET WITH ID AND TYPE: #{id} - #{type}" if @target.nil?
       raise "DID NOT FIND TARGET WITH ID AND TYPE: #{id} - #{type}" if @target.nil? && @debug
+
+      # @nullify_view_offset = options
+
     end
 
     def is_active
-      !@returned_to_player
+      !@complete
     end
 
 # START
@@ -88,9 +97,10 @@ module Effects
       if @time_alive > @max_time_alive && @hovering_over_target
         # raise "OK, got here"
         @hovering_over_target = false
-        @moving_to_player = true
-        @location_x = offset_target.current_map_pixel_x
-        @location_y = offset_target.current_map_pixel_y
+        @complete             = true
+        # @moving_to_player = true
+        # @location_x = offset_target.current_map_pixel_x
+        # @location_y = offset_target.current_map_pixel_y
         # @viewable_pixel_offset_x_bank = viewable_pixel_offset_x
         # @viewable_pixel_offset_y_bank = viewable_pixel_offset_y
       end
@@ -100,11 +110,7 @@ module Effects
       else
         offset_target = @target
       end
-      if @returned_to_player 
-        offset_target = nil
-        viewable_pixel_offset_x = 0
-        viewable_pixel_offset_y = 0
-      elsif @moving_to_target || @hovering_over_target
+      if @moving_to_target || @hovering_over_target
 
         distance = Gosu.distance(player.current_map_pixel_x + viewable_pixel_offset_x, player.current_map_pixel_y + viewable_pixel_offset_y, offset_target.current_map_pixel_x, offset_target.current_map_pixel_y)
 
@@ -128,36 +134,43 @@ module Effects
           viewable_pixel_offset_x += (viewable_pixel_offset_x - new_x)
           viewable_pixel_offset_y += (viewable_pixel_offset_y - new_y)
         end
-      elsif @moving_to_player
-
-        # This is wrong, will never stop at player need to include offset.. or create new offect
-        distance = Gosu.distance(player.current_map_pixel_x + viewable_pixel_offset_x, player.current_map_pixel_y + viewable_pixel_offset_y, player.current_map_pixel_x, player.current_map_pixel_y)
-
-        if distance < @radius
-          @moving_to_player   = false
-          @returned_to_player = true
-          viewable_pixel_offset_x = 0
-          viewable_pixel_offset_y = 0
-        else
-          start_point   = OpenStruct.new(:x => player.current_map_pixel_x + viewable_pixel_offset_x, :y => player.current_map_pixel_y + (viewable_pixel_offset_y * -1))
-          end_point     = OpenStruct.new(:x => player.current_map_pixel_x, :y => player.current_map_pixel_y)
-
-
-          angle = GeneralObject.angle_1to360(GeneralObject.calc_angle(start_point, end_point) - 90)
-          # if angle == 315.0
-          puts "ANGLE2 HERE: #{angle}"
-
-          base = speed * @average_scale
-
-          step = (Math::PI/180 * (angle + 90))# - 180
-          new_x = Math.cos(step) * base + viewable_pixel_offset_x
-          new_y = Math.sin(step) * base + viewable_pixel_offset_y
-
-          viewable_pixel_offset_x -= (viewable_pixel_offset_x - new_x)
-          viewable_pixel_offset_y -= (viewable_pixel_offset_y - new_y)
-          # end
-        end
       end
+      # elsif @moving_to_player
+
+      #   # This is wrong, will never stop at player need to include offset.. or create new offect
+      #   distance = Gosu.distance(player.current_map_pixel_x + viewable_pixel_offset_x, player.current_map_pixel_y + viewable_pixel_offset_y, player.current_map_pixel_x, player.current_map_pixel_y)
+
+      #   if distance < @radius
+      #     @moving_to_player   = false
+      #     @returned_to_player = true
+      #     viewable_pixel_offset_x = 0
+      #     viewable_pixel_offset_y = 0
+      #   else
+      #     start_point   = OpenStruct.new(:x => player.current_map_pixel_x + viewable_pixel_offset_x, :y => player.current_map_pixel_y + (viewable_pixel_offset_y * -1))
+      #     end_point     = OpenStruct.new(:x => player.current_map_pixel_x, :y => player.current_map_pixel_y)
+
+
+      #     angle = GeneralObject.angle_1to360(GeneralObject.calc_angle(start_point, end_point) - 90)
+      #     # if angle == 315.0
+      #     puts "ANGLE2 HERE: #{angle}"
+
+      #     base = speed * @average_scale
+
+      #     step = (Math::PI/180 * (angle + 90))# - 180
+      #     new_x = Math.cos(step) * base + viewable_pixel_offset_x
+      #     new_y = Math.sin(step) * base + viewable_pixel_offset_y
+
+      #     viewable_pixel_offset_x -= (viewable_pixel_offset_x - new_x)
+      #     viewable_pixel_offset_y -= (viewable_pixel_offset_y - new_y)
+      #     # end
+      #   end
+      # end
+       if @complete && @target.id == 'player'
+        viewable_pixel_offset_x, viewable_pixel_offset_y = [0,0]
+        player.disable_invulnerability
+        player.enable_controls
+       end
+
       puts "POST  UPDATE : #{[@moving_to_target, @hovering_over_target, @moving_to_player, @returned_to_player]}"
       return [gl_background, ships, buildings, player, offset_target, viewable_pixel_offset_x, viewable_pixel_offset_y]
     end

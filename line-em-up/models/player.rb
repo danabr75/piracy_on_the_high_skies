@@ -64,7 +64,9 @@ class Player < ScreenFixedObject
     ship_klass = eval(ship_klass_name)
   
     # I HATE this image retrieval system!!!!
-    super({image: ship_klass.get_image(ship_klass::ITEM_MEDIA_DIRECTORY) })
+    options[:image] = ship_klass.get_image(ship_klass::ITEM_MEDIA_DIRECTORY)
+    options[:id]    = 'player'
+    super(options)
     update_x_and_y(@screen_pixel_width  / 2, @screen_pixel_height / 2)
     puts "NEW2 X AND Y: #{@x} - #{@y}"
     # super(@screen_pixel_width  / 2, @screen_pixel_height / 2)
@@ -117,8 +119,24 @@ class Player < ScreenFixedObject
     #   @health = @ship.get_health
     # end
     # @armor = @ship.get_armor
+    @can_take_damage  = true
+    @controls_enabled = true
   end
 
+  def disable_controls
+    @controls_enabled = false
+  end
+  def enable_controls
+    @controls_enabled = true
+  end
+
+  def enable_invulnerability
+    @can_take_damage = false
+  end
+
+  def disable_invulnerability
+    @can_take_damage = true
+  end
   # def get_armor
   #   @ship.armor    
   # end
@@ -265,25 +283,29 @@ class Player < ScreenFixedObject
   # end
 
   def rotate_counterclockwise
-    increment = @rotation_speed
-    if @angle + increment >= 360
-      @angle = (@angle + increment) - 360
-    else
-      @angle += increment
+    if @controls_enabled
+      increment = @rotation_speed
+      if @angle + increment >= 360
+        @angle = (@angle + increment) - 360
+      else
+        @angle += increment
+      end
+      @ship.angle = @angle
     end
-    @ship.angle = @angle
     # @ship.rotate_hardpoints_counterclockwise(increment.to_f)
     return 1
   end
 
   def rotate_clockwise
-    increment = @rotation_speed
-    if @angle - increment <= 0
-      @angle = (@angle - increment) + 360
-    else
-      @angle -= increment
+    if @controls_enabled
+      increment = @rotation_speed
+      if @angle - increment <= 0
+        @angle = (@angle - increment) + 360
+      else
+        @angle -= increment
+      end
+      @ship.angle = @angle
     end
-    @ship.angle = @angle
     # @ship.rotate_hardpoints_clockwise(increment.to_f)
     return 1
   end
@@ -310,8 +332,9 @@ class Player < ScreenFixedObject
 
 
   def take_damage damage
-    @ship.take_damage(damage)
-    # @health -= damage * @damage_reduction
+    if @can_take_damage 
+      @ship.take_damage(damage)
+    end
   end
 
   def toggle_secondary
@@ -359,14 +382,18 @@ class Player < ScreenFixedObject
   # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
 
   def move_left
-    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
-    self.movement(new_speed, @angle + 90, false)
+    if @controls_enabled
+      new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
+      self.movement(new_speed, @angle + 90, false)
+    end
     return true
   end
   
   def move_right
-    new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
-    self.movement(new_speed, @angle - 90, false)
+    if @controls_enabled 
+      new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
+      self.movement(new_speed, @angle - 90, false)
+    end
     return true
   end
   
@@ -379,25 +406,32 @@ class Player < ScreenFixedObject
 
   # Figure out why these got switched later, accelerate and brake
   def accelerate
-    self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
+    if @controls_enabled 
+      self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
 
-    if @current_momentum <= @max_momentum
-      @current_momentum += 1.2
+      if @current_momentum <= @max_momentum
+        @current_momentum += 1.2
+      end
     end
     return true
   end
   
   def brake
-    self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
-    if @current_momentum >= -@max_momentum
-      @current_momentum -= 0.6
+    if @controls_enabled 
+      self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
+      if @current_momentum >= -@max_momentum
+        @current_momentum -= 0.6
+      end
     end
     return true
   end
 
   def attack_group_1 pointer
+    attack_results = {}
     # puts "PLAYER ATTACKING w/ ANGLE: #{@angle}"
-    attack_results = @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    if @controls_enabled
+      attack_results = @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    end
     # puts "attack_results"
     # puts attack_results.class
     # puts attack_results
@@ -414,11 +448,19 @@ class Player < ScreenFixedObject
   end
 
   def attack_group_2 pointer
-    @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    attack_results = {}
+    if @controls_enabled
+      attack_results = @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    end
+    return attack_results
   end
  
   def attack_group_3 pointer
-    @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    attack_results = {}
+    if @controls_enabled
+      attack_results = @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
+    end
+    return attack_results
   end
 
   def deactivate_group_2

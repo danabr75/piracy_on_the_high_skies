@@ -987,6 +987,7 @@ class GameWindow < Gosu::Window
         local_count += 1 if b.class::CLASS_TYPE == :landwreck
       end
       @font.draw("LANDWRECK COUNT: #{local_count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("VIEW OFFSET: #{[@viewable_pixel_offset_x.round(1), @viewable_pixel_offset_y.round(1)]}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
     end
     # @gl_background.draw(ZOrder::Background)

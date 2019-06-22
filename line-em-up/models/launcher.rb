@@ -78,7 +78,7 @@ class Launcher < GeneralObject
           @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
           @cooldown_wait = get_cooldown
         else
-          @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up_sound && @active_for == 0 && #@spinning_up == false
+          @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up_sound && @active_for == 0 #&& @spinning_up == false
           @spinning_up = true
         end
         return projectile
