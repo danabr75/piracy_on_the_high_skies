@@ -5,7 +5,7 @@ require 'glu'
 require 'glut'
 
 class Launcher < GeneralObject
-  attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited, :cooldown_wait
+  attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited, :cooldown_wait, :cooldown_penalty
   # DAMAGE = 0.001
   COOLDOWN_DELAY = 45
   ACTIVE_DELAY = nil
@@ -31,6 +31,7 @@ class Launcher < GeneralObject
     @active_for  = 0
     @spinning_up = false
     @spinning_up_sound = self.class.get_starting_sound
+    @cooldown_penalty = 0
   end
 
   def self.get_starting_sound

@@ -128,11 +128,18 @@ class GrapplingHook < Projectile
       @dissengage = true
     end
 
-    # To release it from being tracked from the launcher
+    # To release it from being tracked from the launcher. 
+    # Dissengaging doubles cooldown
     if @dissengage
       # @health = 0
       # puts "SETTING COOLDOWN DELY HERE. #{@hp_reference.item.class} - #{@hp_reference.item.class::COOLDOWN_DELAY}"
-      @hp_reference.item.cooldown_wait = @hp_reference.item.class::COOLDOWN_DELAY
+      # Should be handled on the launcher.. not the projectile.
+      @hp_reference.item.cooldown_wait = @hp_reference.item.class::COOLDOWN_DELAY # * 5.0
+      if @hp_reference.item.cooldown_penalty > 0
+        # puts "RIGHT HERE: #{@hp_reference.item.cooldown_penalty}  + #{@hp_reference.item.cooldown_wait}"
+        @hp_reference.item.cooldown_wait    = @hp_reference.item.cooldown_penalty + @hp_reference.item.cooldown_wait
+        @hp_reference.item.cooldown_penalty = 0
+      end
       # puts "@hp_reference.item.cooldown_wait: #{@hp_reference.item.cooldown_wait}"
     end
 

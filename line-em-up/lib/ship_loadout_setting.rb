@@ -563,7 +563,13 @@ class ShipLoadoutSetting < Setting
           texts << object[:klass].name
         end
         if object[:klass].description
-          texts << object[:klass].description
+          if object[:klass].description.is_a?(String)
+            texts << object[:klass].description
+          elsif object[:klass].description.is_a?(Array)
+            object[:klass].description.each do |description|
+              texts << description
+            end
+          end
         end
       end
 

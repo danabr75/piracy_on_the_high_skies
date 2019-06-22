@@ -6,7 +6,7 @@ class GrapplingHookLauncher < Launcher
   LAUNCHER_MAX_ANGLE = 60
   PROJECTILE_CLASS = GrapplingHook
   FIRING_GROUP_NUMBER = 3
-  COOLDOWN_DELAY = 240
+  COOLDOWN_DELAY = 120
   ACTIVE_PROJECTILE_LIMIT = 1
 
   def initialize(options = {})
@@ -60,6 +60,7 @@ class GrapplingHookLauncher < Launcher
     # puts "GRAP ATTACK HERE: #{@active_for}"
     if @projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT && !@active && @projectiles.last.time_alive > 15 && is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
       # puts "DETACHING HOOK"
+      @cooldown_penalty = self.class::COOLDOWN_DELAY * 2
       @projectiles.each do |hook|
         hook.detach_hook
       end
@@ -74,7 +75,11 @@ class GrapplingHookLauncher < Launcher
   end
 
   def self.description
-    "This is a grappling hook. Allows boarding enemy ships."
+    return [
+      "This is a grappling hook. Allows boarding enemy ships.",
+      "Right-click to launch hook. Right-click again to drop hook.",
+      "Hook can only Grapple on launch, not on return."
+    ]
   end
 
 end
