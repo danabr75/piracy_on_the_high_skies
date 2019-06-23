@@ -8,5 +8,17 @@
       "from": "Friend",
       "text": ["This is also a test of text", "Fun, huh?"]
     }
+  ],
+
+  "level_2":  [
+    {
+      "from": "Player",
+      "text": ["That was easy"]
+    },
+    {
+      "from": "Friend",
+      "text": ["Too easy."]
+    }
   ]
+
 }

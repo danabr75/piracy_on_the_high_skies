@@ -7,7 +7,7 @@ module Effects
     include GlobalConstants
     attr_reader :target
     attr_accessor :dialogue_index
-    def initialize quest_key, section_key, options = {}
+    def initialize quest_key, section_key, player, options = {}
       puts "INIT DIALOGUE HERE: #{quest_key} - #{section_key}"
       super(options)
       @debug = options[:debug]
@@ -25,6 +25,8 @@ module Effects
       # @button_y_offset = @font_height * 13
       @button_id_mapping = self.class.get_id_button_mapping
       @next_button = LUIT::Button.new(self, :next, (@screen_pixel_width / 2), @screen_pixel_height - (@font_height * 3), ZOrder::UI, "Next", 0, 1)
+      player.enable_invulnerability
+      player.disable_controls
     end
 
     def self.get_id_button_mapping
@@ -55,6 +57,12 @@ module Effects
 
     def update gl_background, ships, buildings, player, offset_target, viewable_pixel_offset_x, viewable_pixel_offset_y
       @next_button.update(-(@next_button.w / 2), -(@next_button.h))
+
+      if !is_active
+        player.disable_invulnerability
+        player.enable_controls
+      end
+
       return [gl_background, ships, buildings, player, offset_target, viewable_pixel_offset_x, viewable_pixel_offset_y]
     end
 
