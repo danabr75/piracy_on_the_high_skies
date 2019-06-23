@@ -28,7 +28,7 @@ class OffensiveStore < Building
     # Also need to cost credits, add credits to player.
     @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
       if !window.ship_loadout_menu.active
-        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits); window.ship_loadout_menu.enable
+        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits, :store); window.ship_loadout_menu.enable
       end
     }
     @is_hovering = false
@@ -47,8 +47,12 @@ class OffensiveStore < Building
     @drops = drops
     puts 'END'
   end
-  def set_credits credits
-    @credits = credits
+
+  def add_credits new_credits
+    @credits += credits
+  end
+  def subtract_credits new_credits
+    @credits -= credits
   end
   # Not needed on OffensiveStore
   def set_window window

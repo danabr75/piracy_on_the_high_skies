@@ -18,6 +18,7 @@ class Menu
     # Add to it while the buttons are being added, in add_item
     @button_id_mapping = {}
     @active = false
+    @button_size = (40 * scale).to_i
   end
 
   def enable
@@ -36,7 +37,7 @@ class Menu
   def add_item(key, text, x, y, callback, hover_image = nil, options = {})
       @button_id_mapping[key] = callback
 
-      button = LUIT::Button.new(self, key, self.x, self.y + self.current_height, @z, text, 0, 1)
+      button = LUIT::Button.new(self, key, self.x, self.y + self.current_height, @z, text, @button_size, @button_size)
 
       if options[:is_button]
         @current_height = @current_height + button.h + @cell_padding

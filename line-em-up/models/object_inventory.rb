@@ -11,7 +11,6 @@ class ObjectInventory
   include GlobalVariables
   include GlobalConstants
 
-  attr_accessor :attached_to
 
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
@@ -33,9 +32,13 @@ class ObjectInventory
   end
 
 
+  attr_reader :credits, :holding_type
+  attr_accessor :attached_to
 
-  def initialize window, name, item_list, credits, attached_to#, parent_container
-    raise "INVALID PARMS: #{[window, name, item_list, attached_to]}" if [window, name, item_list, attached_to].include?(nil)
+  def initialize window, name, item_list, credits, attached_to, holding_type, options = {}
+    raise "INVALID PARMS: #{[window, name, item_list, attached_to, holding_type]}" if [window, name, item_list, attached_to, holding_type].include?(nil)
+    @holding_type = holding_type
+
     @attached_to = attached_to
     @name = name
     @credits = credits
@@ -65,13 +68,31 @@ class ObjectInventory
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
     init_matrix
+
+    @allow_credit_collection = options[:allow_credit_collection]
+    if @allow_credit_collection
+      collect_credits_button_x = (@screen_pixel_width + (@cell_width_padding / 2.0) - @inventory_width - (@cell_width / 2.0)) + (@inventory_width + @cell_width_padding) / 2.0
+      collect_credits_button_y = ((@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height) + (@inventory_height + @cell_height_padding + @font_height)
+      @collect_credits_button  = LUIT::Button.new(@window, :collect_credits, collect_credits_button_x, collect_credits_button_y, ZOrder::UI, "Collect Credits", (12 * @average_scale).to_i , (12 * @average_scale).to_i)
+      @button_id_mapping[:collect_credits] = lambda { |window, menu, id| window.ship_loadout_menu.add_to_ship_inventory_credits(menu.credits); menu.subtract_credits(menu.credits) }
+    end
+  end
+
+  def add_credits new_credits
+    @credits += new_credits
+    attached_to.add_credits(new_credits)
+  end
+  def subtract_credits new_credits
+    @credits -= new_credits
+    attached_to.subtract_credits(new_credits)
   end
 
   def unload_inventory
     puts "ObjectInventory#unload_inventory"
     puts get_matrix_items
     @attached_to.set_drops(get_matrix_items)
-    @attached_to.set_credits(@credits)
+    # any changes to credits have already been made.
+    # @attached_to.set_credits(@credits)
     @attached_to = nil
   end
 
@@ -106,7 +127,7 @@ class ObjectInventory
         if klass_name
           klass = eval(klass_name)
           image = klass.get_hardpoint_image
-          item = {key: key, klass: klass, image: image}
+          item = {key: key, klass: klass, image: image, value: klass.value}
         end
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
@@ -131,16 +152,24 @@ class ObjectInventory
     return button_clicked_exists
   end
 
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player, other_inventory_credit_limit = nil
     # puts "SHIP INVENTORY HAS CORSURE OBJECT" if @window.cursor_object
     hover_object = nil
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
-        is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
-        hover_object = {item: @inventory_matrix[x][y][:item], holding_type: :inventory} if is_hover
+        item = @inventory_matrix[x][y][:item]
+        # is_hover = false
+        # if item.nil? || other_inventory_credit_limit.nil?
+        #   is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
+        # elsif other_inventory_credit_limit >= item[:value]
+          is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
+        # end
+
+        hover_object = {item: item, holding_type: @holding_type} if is_hover
       end
     end
+    @collect_credits_button.update(0, 0) if @allow_credit_collection
     return hover_object
   end
 
@@ -176,10 +205,19 @@ class ObjectInventory
     text = "#{@name} $#{@credits}"
     @font.draw(text, @screen_pixel_width - (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@screen_pixel_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     Gosu::draw_rect(
+      # X
       @screen_pixel_width + (@cell_width_padding / 2.0) - @inventory_width - (@cell_width / 2.0),
+      # Y
       (@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height,
+      # W
       @inventory_width + @cell_width_padding,
-      @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
+      # H
+      @allow_credit_collection ? @inventory_height + @cell_height_padding + @font_height + @collect_credits_button.h : @inventory_height + @cell_height_padding + @font_height,
+      # Color and Depth
+      Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground
+    )
+    # @button.draw(-(@button.w / 2), -(@button.h / 2))
+    @collect_credits_button.draw(0, 0) if @allow_credit_collection
 
     # if @window.cursor_object
     #   @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)

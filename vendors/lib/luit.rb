@@ -224,13 +224,16 @@ module LUIT
 
   class Button < LUITElement
     #w and h will auto adjust to the text size + 10px padding if its not set (or set lower than acceptable)
-    def initialize(holder, id, x, y, z, text, w = 0, h = 0)
-      h = [50, h].max
+    def initialize(holder, id, x, y, z, text, w = 20, h = 50)
+      puts "PARAMS: #{w} - #{h}"
+      # h = [50, h].max
+      inner_h = (h * 2.0 / 3.0).to_i
       @text = text
       @buttonColor = LUIT.uiColor
-      @font = Gosu::Font.new(h - 20)
+      puts "what is h and inner_h: #{h} - #{inner_h}"
+      @font = Gosu::Font.new(inner_h)
       @textW = @font.text_width(@text)
-      w = @textW + 20 if w < @textW + 20
+      w = @textW + inner_h if w < @textW + inner_h
       super(holder, id, x, y, z, w, h)
     end
 

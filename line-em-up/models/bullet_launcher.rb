@@ -19,4 +19,8 @@ class BulletLauncher < Launcher
     "This is a standard bullet launcher. Fires bullets."
   end
 
+  def self.value
+    30
+  end
+
 end

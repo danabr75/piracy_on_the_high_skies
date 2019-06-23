@@ -50,4 +50,9 @@ class DumbMissileLauncher < Launcher
   def self.description
     "This is a standard missile launcher. Fires missiles."
   end
+
+  def self.value
+    60
+  end
+
 end

@@ -26,6 +26,8 @@ class ShipInventory
     # @music_volume        = GlobalVariables.music_volume
   end
 
+  attr_reader :credits
+
   def initialize window#, parent_container
     init_global_vars
     @window = window
@@ -50,7 +52,8 @@ class ShipInventory
     @font = Gosu::Font.new(@font_height)
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
-    @credits = ConfigSetting.get_setting(@config_file_path, 'Credits', 0)
+    @credits = JSON.parse(ConfigSetting.get_setting(@config_file_path, 'Credits', '0'))
+    raise "INVALID CREDIT TYPE: #{@credits.class}" if !@credits.kind_of?(Integer)
     init_matrix
   end
 
@@ -73,7 +76,7 @@ class ShipInventory
         if klass_name
           klass = eval(klass_name)
           image = klass.get_hardpoint_image
-          item = {key: key, klass: klass, image: image}
+          item = {key: key, klass: klass, image: image, value: klass.value}
         end
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
@@ -85,7 +88,13 @@ class ShipInventory
     end
   end
 
-  def save_credits
+  def add_credits new_credits
+    puts "ADDING CREDITS #{@credits.class} w new credits #{new_credits.class} on ShipInventory"
+    @credits += new_credits
+    ConfigSetting.set_setting(@config_file_path, 'Credits', @credits)
+  end
+  def subtract_credits new_credits
+    @credits -= new_credits
     ConfigSetting.set_setting(@config_file_path, 'Credits', @credits)
   end
 
@@ -108,8 +117,9 @@ class ShipInventory
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
+        item = @inventory_matrix[x][y][:item]
         is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
-        hover_object = {item: @inventory_matrix[x][y][:item], holding_type: :inventory} if is_hover
+        hover_object = {item: item, holding_type: :inventory} if is_hover
       end
     end
     return hover_object

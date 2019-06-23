@@ -19,6 +19,7 @@ module ConfigSetting
 
   # deprecate in favor of get_mapped_setting
   # Not Deprecated. Only use for one level depth in settings (just the name)
+  # DOES NOT PARSE JSON
   def self.get_setting file_location, setting_name, default_value = nil
     raise "NO FILE LOCATION PATH" if file_location.nil?
     create_file_if_non_existent(file_location)
@@ -36,9 +37,6 @@ module ConfigSetting
       test = default_value
       return test
     else
-      # puts "WhAT IS TEST? "
-      # puts test.inspect
-      # puts test.class
       return test ? test.gsub(';', '') : test
     end
   end

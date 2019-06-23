@@ -50,7 +50,7 @@ class Landwreck < Building
     @button_id_mapping = {}
     @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
       if !window.ship_loadout_menu.active
-        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits); window.ship_loadout_menu.enable
+        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits, :lootable, {allow_credit_collection: true}); window.ship_loadout_menu.enable
       end
     }
     @is_hovering = false
@@ -59,11 +59,15 @@ class Landwreck < Building
     @credits = rand(50) # in the future, grab from AIShip.. or whatever the original owner was
   end
 
+  def add_credits new_credits
+    @credits += new_credits
+  end
+  def subtract_credits new_credits
+    @credits -= new_credits
+  end
+
   def set_drops drops
     @drops = drops
-  end
-  def set_credits credits
-    @credits = credits
   end
   def set_window window
     @window = window

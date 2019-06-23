@@ -206,4 +206,7 @@ class LaserLauncher < Launcher
     "This does not work yet. Do not fire"
   end
 
+  def self.value
+    400
+  end
 end

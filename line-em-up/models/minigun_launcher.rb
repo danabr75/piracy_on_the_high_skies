@@ -38,4 +38,8 @@ class MinigunLauncher < Launcher
     "This is a standard MiniGun launcher. Fires bullets."
   end
 
+  def self.value
+    120
+  end
+
 end

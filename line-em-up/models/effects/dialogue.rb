@@ -24,7 +24,8 @@ module Effects
       @y_offset        = @font_height * 10
       # @button_y_offset = @font_height * 13
       @button_id_mapping = self.class.get_id_button_mapping
-      @next_button = LUIT::Button.new(self, :next, (@screen_pixel_width / 2), @screen_pixel_height - (@font_height * 3), ZOrder::UI, "Next", 0, 1)
+      @button_size = (40 * @average_scale).to_i
+      @next_button = LUIT::Button.new(self, :next, (@screen_pixel_width / 2), @screen_pixel_height - (@font_height * 3), ZOrder::UI, "Next", @button_size, (@button_size / 2.0).to_i )
       player.enable_invulnerability
       player.disable_controls
     end

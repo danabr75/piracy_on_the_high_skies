@@ -82,4 +82,8 @@ class GrapplingHookLauncher < Launcher
     ]
   end
 
+  def self.value
+    500
+  end
+
 end

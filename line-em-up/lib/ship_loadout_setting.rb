@@ -14,6 +14,7 @@ require 'gosu'
 # require "#{MODEL_DIRECTORY}/basic_ship.rb"
 # require_relative "config_settings.rb"
 
+# THIS IS THE MAIN INVENTORY CONTROLLER, controls the player inventory, hardpoint inventory, and any other container that opens up on the screen.
 class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
@@ -117,12 +118,18 @@ class ShipLoadoutSetting < Setting
     @hover_object = nil
 
     @object_inventory = nil
+    @object_inventory_holding_type = :none
   end
 
-  def loading_object_inventory object, drops = [], credits = 0
+  def add_to_ship_inventory_credits new_credits
+    @ship_inventory.add_credits(new_credits)
+  end
+
+  def loading_object_inventory object, drops = [], credits = 0, holding_type = :not_available, options = {}
     puts "LAODING OJECT INVENTORY #{drops}"
     puts "WHAT WAS ON THE OBHECT: #{object.drops}"
-    @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object)
+    @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object, holding_type, options)
+    @object_inventory_holding_type = holding_type
   end 
 
   def unloading_object_inventory
@@ -137,6 +144,7 @@ class ShipLoadoutSetting < Setting
       # puts "POST HERE: #{@object_inventory.attached_to.drops}"
       @object_inventory.unload_inventory
       @object_inventory = nil
+      @object_inventory_holding_type = :none
     end
   end 
 
@@ -210,8 +218,7 @@ class ShipLoadoutSetting < Setting
       if hp.assigned_weapon_class
         image = hp.assigned_weapon_class.get_hardpoint_image
         item = {
-          image: image, key: button_key, 
-          klass: hp.assigned_weapon_class
+          image: image, key: button_key, klass: hp.assigned_weapon_class, value: hp.assigned_weapon_class.value
         }
 
       else
@@ -336,8 +343,13 @@ class ShipLoadoutSetting < Setting
 
 
       # hover_object = matrix_update
-      hover_object = @ship_inventory.update(mouse_x, mouse_y, player)
-      hover_object = @object_inventory.update(mouse_x, mouse_y, player) if !hover_object && @object_inventory
+      if @object_inventory && @object_inventory.holding_type == :store
+        hover_object = @ship_inventory.update(mouse_x,   mouse_y, player)
+        hover_object = @object_inventory.update(mouse_x, mouse_y, player, @ship_inventory.credits) if !hover_object
+      else
+        hover_object = @ship_inventory.update(mouse_x, mouse_y, player)
+        hover_object = @ship_inventory.update(mouse_x, mouse_y, player) if !hover_object && @object_inventory
+      end
       # puts "GOT OBJECT FROM " if hover_object
 
       # Was there a point to this line?
@@ -427,13 +439,24 @@ class ShipLoadoutSetting < Setting
       text = nil
 
       # Are these necessary here? Is there a difference? Maybe if it's a store, we can show a price.
-      if @hover_object[:holding_type] == :inventory
-      end
-      if @hover_object[:holding_type] == :hardpoint
-      end
+
 
       if @hover_object[:item]
         object = @hover_object[:item]
+        value_text = "Sell Value: $#{object[:value]}"
+        if @object_inventory_holding_type == :store
+          # In the future, can get store rate from where we get `@object_inventory_holding_type`
+          value_text = "Sell Value: $#{object[:value] / 10}"
+          if @hover_object[:holding_type] == :inventory
+          elsif @hover_object[:holding_type] == :lootable
+          elsif @hover_object[:holding_type] == :store
+            value_text = "Buy Value: $#{object[:value] * 1.2}"
+          elsif @hover_object[:holding_type] == :hardpoint
+          end
+        else
+          value_text = "Value: $#{object[:value]}"
+        end
+
         if object[:klass].name
           texts << object[:klass].name
         end
@@ -445,6 +468,7 @@ class ShipLoadoutSetting < Setting
               texts << description
             end
           end
+          texts << value_text
         end
       end
 
