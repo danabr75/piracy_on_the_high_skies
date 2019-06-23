@@ -47,7 +47,7 @@ class Landwreck < Building
     @image_width_half  = @image_width  / 2.0
     @image_height_half = @image_height / 2.0
 
-    @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height)
+    @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
     @button_id_mapping = {}
     @button_id_mapping[:object_inventory] = lambda { |window, menu, id| window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable }
   end
@@ -73,15 +73,8 @@ class Landwreck < Building
     return button_clicked_exists
   end
 
+  # Need to calculate distance to player, only allow click when close, and maybe not use a left-click button to activate?  
   def update mouse_x, mouse_y, player
-    # convert_map_pixel_location_to_screen player
-    # if is_on_screen?
-    #   # Update from gl_background
-    # else
-    #   # lol don't need to update x and y if off screen.
-    #   # convert_map_pixel_location_to_screen(player)
-    #   get_map_pixel_location_from_map_tile_location
-    # end
     @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
     return super(mouse_x, mouse_y, player)
   end

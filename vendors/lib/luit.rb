@@ -95,12 +95,13 @@ module LUIT
   end
 
   class ClickArea < LUITElement
-    def initialize(holder, id, x, y, z, w = 0, h = 0, color = nil, hover_color = nil)
+    def initialize(holder, id, x, y, z, w = 0, h = 0, color = nil, hover_color = nil, options = {})
       puts "INITING H HERE: #{h}"
       h = [1, h].max
       puts "NEW H IS : #{h}"
       w = [1, w].max
       puts "HOVLER COLOR: #{hover_color }"
+      @hide_rect_draw = options[:hide_rect_draw]
       super(holder, id, x, y, z, w, h, color, hover_color)
     end
 
@@ -108,7 +109,9 @@ module LUIT
       # puts "DRAWING HOVER: #{@hover_color}" if @hover
       # puts "WHAT IS H?: #{@h}" if @hover
           # .draw_rect(x, y, z, width, height, c, z = 0, mode = :default) ⇒ void
-      Gosu::draw_rect(@x + x, @y + y, @w, @h, @hover ? @hover_color : @color, @z)
+      if !@hide_rect_draw 
+        Gosu::draw_rect(@x + x, @y + y, @w, @h, @hover ? @hover_color : @color, @z)
+      end
     end
     # def update(x = 0, y = 0)
     #   if Gosu::distance($mx, $my, x, y) <= @r
