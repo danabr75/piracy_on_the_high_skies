@@ -32,11 +32,13 @@ class ObjectInventory
   end
 
 
-  attr_reader :credits, :holding_type
+  attr_reader :credits, :holding_type, :buy_rate, :sell_rate
   attr_accessor :attached_to
 
   def initialize window, name, item_list, credits, attached_to, holding_type, options = {}
     raise "INVALID PARMS: #{[window, name, item_list, attached_to, holding_type]}" if [window, name, item_list, attached_to, holding_type].include?(nil)
+    puts "NEW OBJECT INVENOTRY HERE: "
+    puts [window, name, item_list, credits, attached_to, holding_type, options]
     @holding_type = holding_type
 
     @attached_to = attached_to
@@ -67,6 +69,13 @@ class ObjectInventory
     @font = Gosu::Font.new(@font_height)
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
+    if @holding_type == :store
+      @buy_rate  = 0.1
+      @sell_rate = 1.2
+    else
+      @buy_rate  = 1.0
+      @sell_rate = 1.0
+    end
     init_matrix
 
     @allow_credit_collection = options[:allow_credit_collection]
@@ -76,6 +85,7 @@ class ObjectInventory
       @collect_credits_button  = LUIT::Button.new(@window, :collect_credits, collect_credits_button_x, collect_credits_button_y, ZOrder::UI, "Collect Credits", (12 * @average_scale).to_i , (12 * @average_scale).to_i)
       @button_id_mapping[:collect_credits] = lambda { |window, menu, id| window.ship_loadout_menu.add_to_ship_inventory_credits(menu.credits); menu.subtract_credits(menu.credits) }
     end
+
   end
 
   def add_credits new_credits
@@ -127,12 +137,12 @@ class ObjectInventory
         if klass_name
           klass = eval(klass_name)
           image = klass.get_hardpoint_image
-          item = {key: key, klass: klass, image: image, value: klass.value}
+          item = {key: key, klass: klass, image: image, value: klass.value, from_store: true, buy_rate: @buy_rate, sell_rate: @sell_rate}
         end
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
         current_x = current_x - (@cell_width + @cell_width_padding)
-        @button_id_mapping[key] = lambda { |window, menu, id| menu.click_inventory(id) }
+        @button_id_mapping[key] = lambda { |window, menu, id| menu.click_inventory(window, menu, id) }
       end
       current_x = @screen_pixel_width - (@next_x + @cell_width_padding + @cell_width)
       current_y = current_y + @cell_height + @cell_height_padding
@@ -159,13 +169,8 @@ class ObjectInventory
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
         item = @inventory_matrix[x][y][:item]
-        # is_hover = false
-        # if item.nil? || other_inventory_credit_limit.nil?
-        #   is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
-        # elsif other_inventory_credit_limit >= item[:value]
-          is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
-        # end
-
+        is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
+        # puts "OBJECT INVENTORY IF HOVER" if is_hover
         hover_object = {item: item, holding_type: @holding_type} if is_hover
       end
     end
@@ -224,18 +229,29 @@ class ObjectInventory
     # end
   end
 
-  def click_inventory id
+  def click_inventory window, menu, id
+
+    # if @holding_type == :store
+    #   window
+    # end
     puts "LUANCHER: #{id}"
     puts "click_inventory: "
     x, y = id.scan(/oi_matrix_(\d+)_(\d+)/).first
     x, y = [x.to_i, y.to_i]
     puts "LCICKED: #{x} and #{y}"
     matrix_element = @inventory_matrix[x][y]
+
+    if !@window.cursor_object.nil? && (@window.cursor_object[:value].nil? || @window.cursor_object[:buy_rate].nil? || @window.cursor_object[:sell_rate].nil?)
+      puts @window.cursor_object
+      raise "INVALID STATE of window.cursor_object"
+    end
+
     element = matrix_element ? matrix_element[:item] : nil
 
     # Resave new key when dropping element in.
-
-    if @window.cursor_object && element
+    if @window.cursor_object && element && @holding_type == :store
+      # Do nothing, not a use case that is supposed to work for the store.
+    elsif @window.cursor_object && element
       puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
       puts "ID: #{id}"
       puts "== #{@window.cursor_object[:key] == id}"
@@ -261,19 +277,44 @@ class ObjectInventory
         # WRRROOOONNGGG!
         # element = 
       end
-    elsif element
+    elsif element # Buying from Store, if store
       # Pick up element, no current object
       # element[:follow_cursor] = true
-      @window.cursor_object = element
-      matrix_element[:item] = nil
-      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
-    elsif @window.cursor_object
+      if @holding_type == :store
+        element_value = (element[:value] * (element[:sell_rate] || @sell_rate)).to_i
+        if @window.ship_loadout_menu.get_ship_inventory_credits >= element_value
+          @window.ship_loadout_menu.subtract_from_ship_inventory_credits(element_value)
+          menu.add_credits(element_value)
+          @window.cursor_object = element
+          matrix_element[:item] = nil
+          ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
+        end
+      else
+        @window.cursor_object = element
+        matrix_element[:item] = nil
+        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
+      end
+    elsif @window.cursor_object # Selling to store, if store,
       # Placeing something new in inventory
-      matrix_element[:item] = @window.cursor_object
-      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
-      matrix_element[:item][:key] = id
-      # matrix_element[:item][:follow_cursor] = false
-      @window.cursor_object = nil
+      if @holding_type == :store
+        puts "CURSOR OBJECT"
+        puts @window.cursor_object
+        element_value = (@window.cursor_object[:value] * @window.cursor_object[:buy_rate]).to_i
+        if menu.credits >= element_value # Do nothing if store doesn't have enough mon 
+          @window.ship_loadout_menu.add_to_ship_inventory_credits(element_value)
+          menu.subtract_credits(element_value)
+          # ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
+          # matrix_element[:item][:key] = id
+          # matrix_element[:item][:follow_cursor] = false
+          @window.cursor_object = nil
+        end
+      else
+        matrix_element[:item] = @window.cursor_object
+        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
+        matrix_element[:item][:key] = id
+        # matrix_element[:item][:follow_cursor] = false
+        @window.cursor_object = nil
+      end
     end
     return @window.cursor_object
   end

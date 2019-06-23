@@ -9,7 +9,7 @@ class DumbMissileLauncher < Launcher
   # COOLDOWN_DELAY = 15
   HARDPOINT_NAME = "missile_launcher"
   PROJECTILE_CLASS = Missile
-  FIRING_GROUP_NUMBER = 1
+  FIRING_GROUP_NUMBER = 2
   STORE_RARITY = 5 # 1 is lowest
   def self.get_hardpoint_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")

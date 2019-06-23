@@ -108,8 +108,6 @@ class ShipLoadoutSetting < Setting
     # @window.cursor_object = nil
     @hardpoints_height = nil
     @hardpoints_width  = nil
-    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
-    @active = false
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
     @button = LUIT::Button.new(@window, :back, max_width / 2, 50, ZOrder::UI, "Return to Game", 30, 30)
     @font_height  = (12 * @average_scale).to_i
@@ -119,16 +117,35 @@ class ShipLoadoutSetting < Setting
 
     @object_inventory = nil
     @object_inventory_holding_type = :none
+    @buy_rate_from_store  = 1.0
+    @sell_rate_from_store = 1.0
+    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
+    @active = false
   end
 
   def add_to_ship_inventory_credits new_credits
     @ship_inventory.add_credits(new_credits)
+  end
+  def subtract_from_ship_inventory_credits new_credits
+    @ship_inventory.subtract_credits(new_credits)
+  end
+  def get_ship_inventory_credits
+    @ship_inventory.credits
   end
 
   def loading_object_inventory object, drops = [], credits = 0, holding_type = :not_available, options = {}
     puts "LAODING OJECT INVENTORY #{drops}"
     puts "WHAT WAS ON THE OBHECT: #{object.drops}"
     @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object, holding_type, options)
+
+    @buy_rate_from_store  = @object_inventory.buy_rate
+    @sell_rate_from_store = @object_inventory.sell_rate
+
+    if @buy_rate_from_store.nil? || @sell_rate_from_store.nil?
+      raise "INVALID OBJECT INVENTORY RATES"
+    end
+    # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
+    @ship_inventory = ShipInventory.new(window, {sell_rate: @sell_rate_from_store, buy_rate: @buy_rate_from_store})
     @object_inventory_holding_type = holding_type
   end 
 
@@ -144,7 +161,11 @@ class ShipLoadoutSetting < Setting
       # puts "POST HERE: #{@object_inventory.attached_to.drops}"
       @object_inventory.unload_inventory
       @object_inventory = nil
+      @buy_rate_from_store  = 1.0
+      @sell_rate_from_store = 1.0
+      @ship_inventory = ShipInventory.new(window)
       @object_inventory_holding_type = :none
+      # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     end
   end 
 
@@ -216,9 +237,14 @@ class ShipLoadoutSetting < Setting
       click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
       @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
       if hp.assigned_weapon_class
+        if @buy_rate_from_store.nil? || @sell_rate_from_store.nil?
+          raise "INVALID OBJECT INVENTORY RATES"
+        end
         image = hp.assigned_weapon_class.get_hardpoint_image
         item = {
-          image: image, key: button_key, klass: hp.assigned_weapon_class, value: hp.assigned_weapon_class.value
+          image: image, key: button_key, klass: hp.assigned_weapon_class, value: hp.assigned_weapon_class.value,
+          sell_rate: @sell_rate_from_store,
+          buy_rate:  @buy_rate_from_store
         }
 
       else
@@ -244,6 +270,7 @@ class ShipLoadoutSetting < Setting
     return value
   end
 
+  # THIS IS NOT WORKING CORRECTKLY.
   def click_ship_hardpoint id
     puts "click_ship_hardpoint: #{id}"
     # Key is front, right, or left
@@ -258,6 +285,8 @@ class ShipLoadoutSetting < Setting
 
     hardpoint_element = @ship_hardpoints[i]
     element = hardpoint_element ? hardpoint_element[:item] : nil
+    puts "@window.cursor_object:"
+    puts @window.cursor_object.inspect
 
     if @window.cursor_object && element
       puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
@@ -348,7 +377,7 @@ class ShipLoadoutSetting < Setting
         hover_object = @object_inventory.update(mouse_x, mouse_y, player, @ship_inventory.credits) if !hover_object
       else
         hover_object = @ship_inventory.update(mouse_x, mouse_y, player)
-        hover_object = @ship_inventory.update(mouse_x, mouse_y, player) if !hover_object && @object_inventory
+        hover_object = @object_inventory.update(mouse_x, mouse_y, player) if !hover_object && @object_inventory
       end
       # puts "GOT OBJECT FROM " if hover_object
 
@@ -445,14 +474,17 @@ class ShipLoadoutSetting < Setting
         object = @hover_object[:item]
         value_text = "Sell Value: $#{object[:value]}"
         if @object_inventory_holding_type == :store
-          # In the future, can get store rate from where we get `@object_inventory_holding_type`
-          value_text = "Sell Value: $#{object[:value] / 10}"
-          if @hover_object[:holding_type] == :inventory
-          elsif @hover_object[:holding_type] == :lootable
-          elsif @hover_object[:holding_type] == :store
-            value_text = "Buy Value: $#{object[:value] * 1.2}"
-          elsif @hover_object[:holding_type] == :hardpoint
+          if object[:from_store]
+            value_text = "Buy Value: $#{(object[:value] * object[:sell_rate]).to_i}"
+          else
+            # In the future, can get sell rate from store from where we get `@object_inventory_holding_type`
+            value_text = "Sell Value: $#{(object[:value] * 0.1).to_i}"
           end
+          # if @hover_object[:holding_type] == :inventory
+          # elsif @hover_object[:holding_type] == :lootable
+          # elsif @hover_object[:holding_type] == :store
+          # elsif @hover_object[:holding_type] == :hardpoint
+          # end
         else
           value_text = "Value: $#{object[:value]}"
         end
