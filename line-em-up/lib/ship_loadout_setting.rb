@@ -120,15 +120,15 @@ class ShipLoadoutSetting < Setting
   end
 
   def loading_object_inventory object, drops = []
-    # puts "WHAT FUCKING DROPS DID WE GET HERE? #{drops}"
-    # puts "WHAT WAS ON THE OBHECT: #{object.drops}"
+    puts "LAODING OJECT INVENTORY #{drops}"
+    puts "WHAT WAS ON THE OBHECT: #{object.drops}"
     @object_inventory = ObjectInventory.new(@window, object.class.to_s, object.drops, object)
   end 
 
   def unloading_object_inventory
-    # puts "TRYING TO UNLOAD OBJECT INVENTORY"
+    puts "TRYING TO UNLOAD OBJECT INVENTORY"
     if @object_inventory
-      # puts 'GET HERE'
+      puts 'GET HERE'
       # puts "IT HAS CURRENTLY: #{@object_inventory.attached_to.drops}"
       # # puts "WERE GIVING IT:"
       # # puts @object_inventory.get_matrix_items
@@ -328,7 +328,7 @@ class ShipLoadoutSetting < Setting
 
   def update mouse_x, mouse_y, player
     if @active
-      puts "SHIP LOADOUT SETTING - HAD CURSOR OJBECT" if @window.cursor_object
+      # puts "SHIP LOADOUT SETTING - HAD CURSOR OJBECT" if @window.cursor_object
       # if @window.cursor_object.nil? && @ship_inventory
       @mouse_x, @mouse_y = [mouse_x, mouse_y]
 

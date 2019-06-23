@@ -170,7 +170,7 @@ module QuestInterface
   # Will run init_ships and init_buildings for each active quest
   # this is necessary for on-map-load inits..
   # What if a player enters an area, the updates creates a ship, the player leaves. Need to have on-load inits.
-  def self.init_quests_on_map_load config_path, quest_datas, map_name, ships, buildings, player, messages, effects, options
+  def self.init_quests_on_map_load config_path, quest_datas, map_name, ships, buildings, player, messages, effects, window, options
     puts "INITING QUESTS HERE"
     local_messages = []
     quest_datas.each do |quest_key, values|
@@ -204,7 +204,7 @@ module QuestInterface
     return [quest_datas, ships, buildings, messages, effects]
   end
 
-  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects, options = {}
+  def self.update_quests config_path, quest_datas, map_name, ships, buildings, player, messages, effects, window, options = {}
     updated_quest_keys = {}
     quest_datas.each do |quest_key, values|
       state = values["state"]
@@ -217,8 +217,8 @@ module QuestInterface
         if values["post_complete_triggers"]
           # LAMBDA returns hash w/ symbols
           results = values["post_complete_triggers"].call(ships, buildings, player)
-          puts "IS RESULTS KEYS STRINGS OR SYMBOLS?2"
-          puts results
+          # puts "IS RESULTS KEYS STRINGS OR SYMBOLS?2"
+          # puts results
           ships     = results[:ships]
           buildings = results[:buildings]
           if results[:activate_quests]
@@ -248,8 +248,8 @@ module QuestInterface
         if values["post_active_triggers"]
           # LAMBDA returns hash w/ symbols
           results = values["post_active_triggers"].call(ships, buildings, player)
-          puts "IS RESULTS KEYS STRINGS OR SYMBOLS?"
-          puts results
+          # puts "IS RESULTS KEYS STRINGS OR SYMBOLS?"
+          # puts results
           ships     = results[:ships]
           buildings = results[:buildings]
           if results[:activate_quests]

@@ -35,6 +35,7 @@ class ObjectInventory
 
 
   def initialize window, name, item_list, attached_to#, parent_container
+    raise "INVALID PARMS: #{[window, name, item_list, attached_to]}" if [window, name, item_list, attached_to].include?(nil)
     @attached_to = attached_to
     @name = name
     puts "WHAT WAS NAME? #{@name}"
@@ -66,6 +67,8 @@ class ObjectInventory
   end
 
   def unload_inventory
+    puts "ObjectInventory#unload_inventory"
+    puts get_matrix_items
     @attached_to.set_drops(get_matrix_items)
     @attached_to = nil
   end
@@ -127,7 +130,7 @@ class ObjectInventory
   end
 
   def update mouse_x, mouse_y, player
-    puts "SHIP INVENTORY HAS CORSURE OBJECT" if @window.cursor_object
+    # puts "SHIP INVENTORY HAS CORSURE OBJECT" if @window.cursor_object
     hover_object = nil
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
     (0..@inventory_matrix_max_height - 1).each do |y|
@@ -176,9 +179,9 @@ class ObjectInventory
       @inventory_width + @cell_width_padding,
       @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
 
-    if @window.cursor_object
-      @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
-    end
+    # if @window.cursor_object
+    #   @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
+    # end
   end
 
   def click_inventory id

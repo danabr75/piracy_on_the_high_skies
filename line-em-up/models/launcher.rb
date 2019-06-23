@@ -16,6 +16,8 @@ class Launcher < GeneralObject
   HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
   PROJECTILE_CLASS = nil
   ACTIVE_PROJECTILE_LIMIT = nil
+  STORE_RARITY = 1 # 1 is lowest, cap it at 100
+  RARITY_MAX   = 100
 
   def initialize(options = {})
     super(options)

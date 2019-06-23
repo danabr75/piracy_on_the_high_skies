@@ -229,7 +229,7 @@ class GameWindow < Gosu::Window
 
     @quest_data = QuestInterface.get_quests(CONFIG_FILE)
 
-    values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y)
+    values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
     @buildings = values[:buildings]
     @ships = values[:ships]
     @pickups = values[:pickups]
@@ -240,7 +240,7 @@ class GameWindow < Gosu::Window
     @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
     viewable_center_target = nil
 
-    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, {debug: @debug})
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
     puts "EFFECTS COUNT ON INIT: #{@effects.count}"
 
     # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
@@ -517,8 +517,10 @@ class GameWindow < Gosu::Window
   end
 
   def update
-    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects)
-    
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
+       
+
+
     # if @player.time_alive % 500 == 0
     #   @messages << MessageFlash.new("This is a test - #{@player.time_alive}")
     # end    

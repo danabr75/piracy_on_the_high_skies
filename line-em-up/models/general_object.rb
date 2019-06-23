@@ -4,6 +4,10 @@ require_relative '../lib/global_constants.rb'
 
 class GeneralObject
 
+  def self.descendants
+    ObjectSpace.each_object(Class).select { |klass| klass < self }
+  end
+
   attr_reader :id, :time_alive, :x, :y, :health, :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half, :image_path, :inited
   attr_reader :current_map_pixel_x, :current_map_pixel_y
   attr_reader :current_map_tile_x,  :current_map_tile_y

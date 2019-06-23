@@ -282,7 +282,7 @@ class GLBackground
 
   # @current_map_pixel_center_x and @current_map_pixel_center_y must be defined at this point.
   # Shouldn't use center here.. should use player center..
-  def init_map current_target_tile_x, current_target_tile_y
+  def init_map current_target_tile_x, current_target_tile_y, window
     # puts "INIT MAP"
     @gps_map_center_x = current_target_tile_x
     @gps_map_center_y = current_target_tile_y
@@ -320,7 +320,7 @@ class GLBackground
         data.each do |x_value, elements|
           elements.each do |element|
             klass = eval(element["klass_name"])
-            buildings << klass.new(x_value.to_i, y_value.to_i, {z: @map_data[y_value.to_i][x_value.to_i]['height']})
+            buildings << klass.new(x_value.to_i, y_value.to_i, window, {z: @map_data[y_value.to_i][x_value.to_i]['height']})
           end
         end
       end
@@ -1199,14 +1199,14 @@ class GLBackground
           # Pickups update the x and y coords, and then the pickup draws itself.
           buildings.each do |building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-            if building.respond_to?(:alt_alt_draw)
-              # puts "UPDATING BUILDING ALT ALT"
-              building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
-
+            building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            # if building.kind_of?(Landwreck) || building.kind_of?(OffensiveStore)
+            #   # puts "UPDATING BUILDING ALT ALT"
+            # end
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
 
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
-            else
+            if !building.kind_of?(Landwreck) #&& !building.kind_of?(OffensiveStore)
               building.class.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
             end
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))

@@ -11,9 +11,7 @@ class Landwreck < Building
     @image = @item.class.get_tilable_image(@item.class::ITEM_MEDIA_DIRECTORY)
     @info = @image.gl_tex_info
 
-    @drops = drops
-
-    super(current_map_tile_x, current_map_tile_y, options)
+    super(current_map_tile_x, current_map_tile_y, nil, options.merge({drops: drops}))
 
     # if @image
     #   @image_width  = @image.width  * (@width_scale  || @average_scale)
@@ -49,8 +47,14 @@ class Landwreck < Building
 
     @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
     @button_id_mapping = {}
-    @button_id_mapping[:object_inventory] = lambda { |window, menu, id| window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable }
+    @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
+      if !window.ship_loadout_menu.active
+        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable
+      end
+    }
     @is_hovering = false
+    @is_close_enough_to_open = false
+    @max_lootable_pixel_distance = 2 * @average_tile_size 
   end
 
   def set_drops drops
@@ -64,25 +68,46 @@ class Landwreck < Building
   def onClick element_id
     # puts "ONCLICK mappuing"
     # puts @button_id_mapping
-    button_clicked_exists = @button_id_mapping.key?(element_id)
-    if button_clicked_exists
-      puts "BUTTON EXISTS: #{element_id}"
-      @button_id_mapping[element_id].call(@window, self, element_id)
+    if @is_close_enough_to_open
+      button_clicked_exists = @button_id_mapping.key?(element_id)
+      if button_clicked_exists
+        puts "BUTTON EXISTS: #{element_id}"
+        @button_id_mapping[element_id].call(@window, self, element_id)
+      else
+        puts "Clicked button that is not mapped: #{element_id}"
+      end
+      return button_clicked_exists
     else
-      puts "Clicked button that is not mapped: #{element_id}"
+      return false
     end
-    return button_clicked_exists
   end
 
   # Need to calculate distance to player, only allow click when close, and maybe not use a left-click button to activate?  
   def update mouse_x, mouse_y, player
     @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
+    distance = Gosu.distance(player.x, player.y, @x, @y)
+    if @is_hovering
+      if distance < @max_lootable_pixel_distance
+        @is_close_enough_to_open = true
+      else
+        @is_close_enough_to_open = false
+      end
+    else
+      @is_close_enough_to_open = false
+    end
     return super(mouse_x, mouse_y, player)
   end
 
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
     @click_area.draw(@x - @image_width_half, @y - @image_height_half) if @drops.any?
-    color = @is_hovering && @drops.any? ? Gosu::Color.argb(0xff_e1ffcd) : Gosu::Color.argb(0xff_ffffff)
+    color = Gosu::Color.argb(0xff_ffffff)
+    if @drops.any?
+      if @is_hovering && @is_close_enough_to_open
+        color = Gosu::Color.argb(0xff_e1ffcd)
+      elsif @is_hovering
+        color = Gosu::Color.argb(0xff_ff9479)
+      end
+    end
     if @item.image
       @item.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, -@current_angle, 0.5, 0.5, @current_scale, @current_scale, color)
     end
