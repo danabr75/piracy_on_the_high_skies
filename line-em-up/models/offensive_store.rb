@@ -4,6 +4,8 @@ require_relative 'building.rb'
 class OffensiveStore < Building
 
 
+  attr_reader :credits
+
   def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
     @window = window
     super(current_map_tile_x, current_map_tile_y, options)
@@ -26,13 +28,14 @@ class OffensiveStore < Building
     # Also need to cost credits, add credits to player.
     @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
       if !window.ship_loadout_menu.active
-        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable
+        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits); window.ship_loadout_menu.enable
       end
     }
     @is_hovering = false
     @is_close_enough_to_open = false
     @max_lootable_pixel_distance = 2 * @average_tile_size
     @image = self.class::get_image
+    @credits = rand(500) + 500
   end
 
   def set_drops drops
@@ -44,7 +47,9 @@ class OffensiveStore < Building
     @drops = drops
     puts 'END'
   end
-
+  def set_credits credits
+    @credits = credits
+  end
   # Not needed on OffensiveStore
   def set_window window
     @window = window

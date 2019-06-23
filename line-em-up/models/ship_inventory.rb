@@ -50,6 +50,7 @@ class ShipInventory
     @font = Gosu::Font.new(@font_height)
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
+    @credits = ConfigSetting.get_setting(@config_file_path, 'Credits', 0)
     init_matrix
   end
 
@@ -82,6 +83,10 @@ class ShipInventory
       current_x = @next_x + @cell_width_padding
       current_y = current_y + @cell_height + @cell_height_padding
     end
+  end
+
+  def save_credits
+    ConfigSetting.set_setting(@config_file_path, 'Credits', @credits)
   end
 
   def onClick element_id
@@ -139,7 +144,7 @@ class ShipInventory
         end
       end
     end
-    text = "Inventory"
+    text = "Inventory $#{@credits}"
     @font.draw(text, (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@screen_pixel_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     Gosu::draw_rect(@cell_width_padding / 2.0, (@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height, @inventory_width + @cell_width_padding, @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
 

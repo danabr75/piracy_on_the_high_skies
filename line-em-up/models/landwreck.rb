@@ -4,6 +4,7 @@ class Landwreck < Building
   CLASS_TYPE = :landwreck
 
   attr_accessor :drops
+  attr_reader :credits
 
   def initialize current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, drops = [], options = {}
     puts "LANDWRECK SCALE: #{current_scale}"
@@ -49,18 +50,21 @@ class Landwreck < Building
     @button_id_mapping = {}
     @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
       if !window.ship_loadout_menu.active
-        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable
+        window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits); window.ship_loadout_menu.enable
       end
     }
     @is_hovering = false
     @is_close_enough_to_open = false
-    @max_lootable_pixel_distance = 2 * @average_tile_size 
+    @max_lootable_pixel_distance = 2 * @average_tile_size
+    @credits = rand(50) # in the future, grab from AIShip.. or whatever the original owner was
   end
 
   def set_drops drops
     @drops = drops
   end
-
+  def set_credits credits
+    @credits = credits
+  end
   def set_window window
     @window = window
   end

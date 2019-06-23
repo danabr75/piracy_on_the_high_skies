@@ -34,8 +34,13 @@ module ConfigSetting
     end
     if (test == [] || test.nil? || test == '')
       test = default_value
+      return test
+    else
+      # puts "WhAT IS TEST? "
+      # puts test.inspect
+      # puts test.class
+      return test ? test.gsub(';', '') : test
     end
-    return test ? test.gsub(';', '') : test
   end
 
   # WARNING! Can't be used by 

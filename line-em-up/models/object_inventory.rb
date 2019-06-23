@@ -34,10 +34,11 @@ class ObjectInventory
 
 
 
-  def initialize window, name, item_list, attached_to#, parent_container
+  def initialize window, name, item_list, credits, attached_to#, parent_container
     raise "INVALID PARMS: #{[window, name, item_list, attached_to]}" if [window, name, item_list, attached_to].include?(nil)
     @attached_to = attached_to
     @name = name
+    @credits = credits
     puts "WHAT WAS NAME? #{@name}"
     init_global_vars
     @window = window
@@ -70,6 +71,7 @@ class ObjectInventory
     puts "ObjectInventory#unload_inventory"
     puts get_matrix_items
     @attached_to.set_drops(get_matrix_items)
+    @attached_to.set_credits(@credits)
     @attached_to = nil
   end
 
@@ -171,7 +173,7 @@ class ObjectInventory
         end
       end
     end
-    text = @name
+    text = "#{@name} $#{@credits}"
     @font.draw(text, @screen_pixel_width - (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@screen_pixel_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     Gosu::draw_rect(
       @screen_pixel_width + (@cell_width_padding / 2.0) - @inventory_width - (@cell_width / 2.0),

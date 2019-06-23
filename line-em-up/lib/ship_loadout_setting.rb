@@ -119,10 +119,10 @@ class ShipLoadoutSetting < Setting
     @object_inventory = nil
   end
 
-  def loading_object_inventory object, drops = []
+  def loading_object_inventory object, drops = [], credits = 0
     puts "LAODING OJECT INVENTORY #{drops}"
     puts "WHAT WAS ON THE OBHECT: #{object.drops}"
-    @object_inventory = ObjectInventory.new(@window, object.class.to_s, object.drops, object)
+    @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object)
   end 
 
   def unloading_object_inventory
