@@ -3,7 +3,7 @@ class Main < Gosu::Window
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   require "#{CURRENT_DIRECTORY}/../game_window.rb"
-  require "#{CURRENT_DIRECTORY}/../loadout_window.rb"
+  # require "#{CURRENT_DIRECTORY}/../loadout_window.rb"
 
   # block_controls_until_button_up: true
   attr_accessor :block_all_controls, :config_path

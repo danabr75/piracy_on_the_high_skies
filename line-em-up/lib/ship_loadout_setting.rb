@@ -7,6 +7,7 @@
 require_relative 'setting.rb'
 require_relative '../models/basic_ship.rb'
 require_relative '../models/launcher.rb'
+require_relative '../models/ship_inventory.rb'
 
 require 'gosu'
 # require "#{MODEL_DIRECTORY}/basic_ship.rb"
@@ -26,6 +27,9 @@ class ShipLoadoutSetting < Setting
   attr_accessor :mouse_x, :mouse_y
   attr_reader :active
   attr_accessor :refresh_player_ship
+
+  # attr_accessor :cursor_object
+
   def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
     @width_scale  = width_scale
     @height_scale = height_scale
@@ -44,12 +48,14 @@ class ShipLoadoutSetting < Setting
     @y = current_height
     @max_width = max_width
     @max_height = max_height
-    @next_x = 5 * @scale
+    # @next_x = 5 * @scale
     @prev_x = @max_width - 5 * @scale - @font.text_width('>')
     @selection = []
+
+    @ship_inventory = ShipInventory.new(window)
     # @launchers = ::Launcher.descendants.collect{|d| d.name}
-    @meta_launchers = {}
-    @filler_items = []
+    # @meta_launchers = {}
+    # @filler_items = []
     # @launchers.each_with_index do |klass_name, index|
     #   klass = eval(klass_name)
     #   image = klass.get_hardpoint_image
@@ -82,22 +88,22 @@ class ShipLoadoutSetting < Setting
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     # @window = window
     # first array is rows at the top, 2nd goes down through the rows
-    @inventory_matrix = []
-    @inventory_matrix_max_width = 4
-    @inventory_matrix_max_height = 7
+    # @inventory_matrix = []
+    # @inventory_matrix_max_width = 4
+    # @inventory_matrix_max_height = 7
     @cell_width  = 25 * @width_scale
     @cell_height = 25 * @height_scale
     @cell_width_padding = 5 * @width_scale
     @cell_height_padding = 5 * @height_scale
     @button_id_mapping = self.class.get_id_button_mapping
 
-    @inventory_height = nil
-    @inventory_width  = nil
-    init_matrix
+    # @inventory_height = nil
+    # @inventory_width  = nil
+    # init_matrix
     # puts "FILLER ITEMS: #{@filler_items}"
     # @inventory_items = retrieve_inventory_items
     # fill_matrix(@filler_items)
-    @cursor_object = nil
+    # @window.cursor_object = nil
     @hardpoints_height = nil
     @hardpoints_width  = nil
     @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
@@ -128,83 +134,9 @@ class ShipLoadoutSetting < Setting
     }
   end
 
-  # Use to fill when dropped on screen somewhere..
-  # Currently not used
-  def fill_matrix elements
-    elements.each do |element|
-      space = find_next_matrix_space
-      if space
-        # puts "ASSIGNING ELEMENT:"
-        # puts element.inspect
-        @inventory_matrix[space[:x]][space[:y]][:item] = element.merge({key: space[:key]})
-      else
-        puts "NO SPACE LEFT"
-      end
-    end
-  end
-
-  def find_next_matrix_space
-    found_space = nil
-    (0..@inventory_matrix_max_height - 1).each do |y|
-      (0..@inventory_matrix_max_width - 1).each do |x|
-        if @inventory_matrix[x][y][:item].nil?
-          key = "matrix_#{x}_#{y}"            
-          found_space = {x: x, y: y, key: key}
-        end
-        break if found_space
-      end
-      break if found_space
-    end
-    return found_space
-  end
-
-  def init_matrix
-    (0..@inventory_matrix_max_width - 1).each do |i|
-      @inventory_matrix[i] = Array.new(@inventory_matrix_max_height)
-    end
-    # puts "@inventory_matrix_max_height: #{@inventory_matrix_max_height}"
-    @inventory_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
-    @inventory_width  = (@inventory_matrix_max_width  * @cell_width)  + (@inventory_matrix_max_width  * @cell_width_padding)
-    # raise "GOT THIS for height: #{max_y_height} - Y was: #{@y}"
-    current_y = (@max_height / 2) - (@inventory_height / 2)
-    current_x = @next_x + @cell_width_padding
-    (0..@inventory_matrix_max_height - 1).each do |y|
-      (0..@inventory_matrix_max_width - 1).each do |x|
-        key = "matrix_#{x}_#{y}"
-        puts "CELL HEIGHT HERE: #{@cell_height}"
-        click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
-        klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
-        item = nil
-        if klass_name
-          klass = eval(klass_name)
-          image = klass.get_hardpoint_image
-          item = {key: key, klass: klass, image: image}
-        end
-        # @filler_items << {follow_cursor: false, klass: klass, image: image}
-        @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
-        current_x = current_x + @cell_width + @cell_width_padding
-        @button_id_mapping[key] = lambda { |window, menu, id| menu.click_inventory(id) }
-      end
-      current_x = @next_x + @cell_width_padding
-      current_y = current_y + @cell_height + @cell_height_padding
-    end
-  end
-
-  def matrix_draw
-    (0..@inventory_matrix_max_height - 1).each do |y|
-      (0..@inventory_matrix_max_width - 1).each do |x|
-        element = @inventory_matrix[x][y]
-        element[:click_area].draw(0,0)
-        # puts "element[:item]: #{element[:item]}"
-        if !element[:item].nil? && element[:item][:follow_cursor] != true
-          image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z, @width_scale, @height_scale)
-        end
-      end
-    end
-    text = "Inventory"
-    @font.draw(text, (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@max_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    Gosu::draw_rect(@cell_width_padding / 2.0, (@max_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height, @inventory_width + @cell_width_padding, @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
+  def onClick element_id
+    found_button = @ship_inventory.onClick(element_id)
+    super(element_id) if !found_button
   end
 
   def hardpoint_draw
@@ -233,43 +165,9 @@ class ShipLoadoutSetting < Setting
     end
   end
 
-  def matrix_update
-    hover_object = nil
-    (0..@inventory_matrix_max_height - 1).each do |y|
-      (0..@inventory_matrix_max_width - 1).each do |x|
-        is_hover = @inventory_matrix[x][y][:click_area].update(0,0)
-        hover_object = {item: @inventory_matrix[x][y][:item], holding_type: :inventory} if is_hover
-      end
-    end
-    return hover_object
-  end
-
-  def print_out_matrix
-    (0..@inventory_matrix_max_height - 1).each do |y|
-      row_value = []
-      (0..@inventory_matrix_max_width - 1).each do |x|
-        value = @inventory_matrix[x][y]
-        if value.nil?
-          value = 'O'
-        else
-          value = 'X'
-        end
-        row_value << value
-      end
-      puts row_value.join(', ')
-    end
-  end
-
-# front-SHIP LOADOUT: 412 => 474 + -38.671875 - (46.875/ 2) ; 111.56828170050284 => 291.09953170050284 + -156.09375 - 46.875 / 2
-# front-SHIP LOADOUT: 412 => 397 + 38.671875 - (46.875/ 2) ; 118.40304726635867 => 297.93429726635867 + -156.09375 - 46.875 / 2
-
   def init_hardpoints_clickable_areas ship
     # Populate ship hardpoints from save file here.
     # will be populated from the ship, don't need to here.
-
-    # HARD TO APPLY HERE
-    # @hardpoints_height = (@inventory_matrix_max_height * @cell_height) + (@inventory_matrix_max_height * @cell_height_padding)
-    # @hardpoints_width  = (@inventory_matrix_max_width  * @cell_width)  + (@inventory_matrix_max_width  * @cell_width_padding)
 
     value = []
     ship.hardpoints.each_with_index do |hp, index|
@@ -318,6 +216,7 @@ class ShipLoadoutSetting < Setting
     puts "click_ship_hardpoint: #{id}"
     # Key is front, right, or left
     # left_hardpoint_0
+    # current_object = @window.cursor_object || @ship_inventory.cursor_object
 
 
     result = id.scan(/hardpoint_(\d+)/).first
@@ -328,46 +227,46 @@ class ShipLoadoutSetting < Setting
     hardpoint_element = @ship_hardpoints[i]
     element = hardpoint_element ? hardpoint_element[:item] : nil
 
-    if @cursor_object && element
-      puts "@cursor_object[:key]: #{@cursor_object[:key]}"
+    if @window.cursor_object && element
+      puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
       puts "ID: #{id}"
-      puts "== #{@cursor_object[:key] == id}"
-      if @cursor_object[:key] == id
+      puts "== #{@window.cursor_object[:key] == id}"
+      if @window.cursor_object[:key] == id
         # Same Object, Unstick it, put it back
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
-        hardpoint_element[:item] = @cursor_object
+        hardpoint_element[:item] = @window.cursor_object
         puts "CONFIG SETTING 1"
         ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         hardpoint_element[:item][:key] = id
-        @cursor_object = nil
+        @window.cursor_object = nil
       else
         # Else, drop object, pick up new object
-        # @cursor_object[:follow_cursor] = false
+        # @window.cursor_object[:follow_cursor] = false
         # element[:follow_cursor] = true
         temp_element = element
-        hardpoint_element[:item] = @cursor_object
+        hardpoint_element[:item] = @window.cursor_object
         hardpoint_element[:item][:key] = id
         puts "CONFIG SETTING 2 "
         ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
-        @cursor_object = temp_element
-        @cursor_object[:key] = nil # Original home lost, no last home of key present
-        # @cursor_object[:follow_cursor] = true
+        @window.cursor_object = temp_element
+        @window.cursor_object[:key] = nil # Original home lost, no last home of key present
+        # @window.cursor_object[:follow_cursor] = true
         # WRRROOOONNGGG!
         # element = 
       end
     elsif element
       # Pick up element, no current object
       # element[:follow_cursor] = true
-      @cursor_object = element
+      @window.cursor_object = element
       hardpoint_element[:item] = nil
         puts "CONFIG SETTING 3 "
         # Not working.. 
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
       ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], nil)
-    elsif @cursor_object
+    elsif @window.cursor_object
       # Placeing something new in inventory
-      hardpoint_element[:item] = @cursor_object
+      hardpoint_element[:item] = @window.cursor_object
       # puts "PUTTING ELEMENT IN: #{hardpoint_element[:item]}"
         # puts "CONFIG SETTING 4 "
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
@@ -375,66 +274,11 @@ class ShipLoadoutSetting < Setting
       ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
       hardpoint_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
-      @cursor_object = nil
+      @window.cursor_object = nil
     end
   end
-
-  def click_inventory id
-    puts "LUANCHER: #{id}"
-    puts "click_inventory: "
-    x, y = id.scan(/matrix_(\d+)_(\d+)/).first
-    x, y = [x.to_i, y.to_i]
-    puts "LCICKED: #{x} and #{y}"
-    matrix_element = @inventory_matrix[x][y]
-    element = matrix_element ? matrix_element[:item] : nil
-
-    # Resave new key when dropping element in.
-
-    if @cursor_object && element
-      puts "@cursor_object[:key]: #{@cursor_object[:key]}"
-      puts "ID: #{id}"
-      puts "== #{@cursor_object[:key] == id}"
-      if @cursor_object[:key] == id
-        # Same Object, Unstick it, put it back
-        # element[:follow_cursor] = false
-        # @inventory_matrix[x][y][:item][:follow_cursor] =
-        matrix_element[:item] = @cursor_object
-        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
-        matrix_element[:item][:key] = id
-        @cursor_object = nil
-      else
-        # Else, drop object, pick up new object
-        # @cursor_object[:follow_cursor] = false
-        # element[:follow_cursor] = true
-        temp_element = element
-        matrix_element[:item] = @cursor_object
-        matrix_element[:item][:key] = id
-        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
-        @cursor_object = temp_element
-        @cursor_object[:key] = nil # Original home lost, no last home of key present
-        # @cursor_object[:follow_cursor] = true
-        # WRRROOOONNGGG!
-        # element = 
-      end
-    elsif element
-      # Pick up element, no current object
-      # element[:follow_cursor] = true
-      @cursor_object = element
-      matrix_element[:item] = nil
-      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
-    elsif @cursor_object
-      # Placeing something new in inventory
-      matrix_element[:item] = @cursor_object
-      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
-      matrix_element[:item][:key] = id
-      # matrix_element[:item][:follow_cursor] = false
-      @cursor_object = nil
-    end
-  end
-
 
   def get_values
-    # puts "GETTING DIFFICULTY: #{@value}"
     if @value
       @value
     end
@@ -459,13 +303,18 @@ class ShipLoadoutSetting < Setting
 
   def update mouse_x, mouse_y, player
     if @active
+      puts "SHIP LOADOUT SETTING - HAD CURSOR OJBECT" if @window.cursor_object
+      # if @window.cursor_object.nil? && @ship_inventory
       @mouse_x, @mouse_y = [mouse_x, mouse_y]
 
       @hover_object = hardpoint_update
 
 
-      hover_object = matrix_update
+      # hover_object = matrix_update
+      hover_object = @ship_inventory.update(mouse_x, mouse_y, player)
+      # puts "GOT OBJECT FROM " if hover_object
 
+      # Was there a point to this line?
       @hover_object = hover_object if @hover_object.nil?
       # puts "UPDATE HERE: #{@hover_object}"
 
@@ -484,7 +333,7 @@ class ShipLoadoutSetting < Setting
       # else
       #   # Do nothing
       # end
-      return @cursor_object
+      return true
     else
       return nil
     end
@@ -515,15 +364,15 @@ class ShipLoadoutSetting < Setting
   end
 
   # deprecated
-  def clicked mx, my
-    raise "Deperected?"
-    puts "SHIP LOADOUT CLICKED"
-    if is_mouse_hovering_next(mx, my)
+  # def clicked mx, my
+  #   raise "Deperected?"
+  #   puts "SHIP LOADOUT CLICKED"
+  #   if is_mouse_hovering_next(mx, my)
 
-    elsif is_mouse_hovering_prev(mx, my)
+  #   elsif is_mouse_hovering_prev(mx, my)
 
-    end
-  end
+  #   end
+  # end
 
   # def is_mouse_hovering_next mx, my
   #   local_width  = @font.text_width('>')
@@ -584,16 +433,17 @@ class ShipLoadoutSetting < Setting
 
   def draw
     if @active
+      @ship_inventory.draw
 
       detail_box_draw
 
-      if @cursor_object
-        @cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
+      if @window.cursor_object
+        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
       end
 
       hardpoint_draw
 
-      matrix_draw
+      # matrix_draw
 
       # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
       @button.draw(-(@button.w / 2), -(@button.h / 2))
@@ -601,8 +451,8 @@ class ShipLoadoutSetting < Setting
       @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 
       @ship.draw
-      @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
-      @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
     end
   end
 

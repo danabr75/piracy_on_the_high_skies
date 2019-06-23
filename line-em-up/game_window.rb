@@ -339,7 +339,9 @@ class GameWindow < Gosu::Window
 
     # START SHIP LOADOUT INIT.
     # @refresh_player_ship = false
+    @cursor_object = nil
     @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @scale})
+    # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu]
     # LUIT.config({window: @window, z: 25})
@@ -525,7 +527,7 @@ class GameWindow < Gosu::Window
 
     # Reset cursor object. # Need to move this inside of ship loadout... or can't, cause of scope?
     # @cursor_object = nil
-    @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
+    # @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
 
 
 

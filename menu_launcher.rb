@@ -14,7 +14,7 @@ require "#{current_directory}/line-em-up/models/gl_background.rb"
 # Dir["#{CURRENT_DIRECTORY}/line-em-up/models/*.rb"].each { |f| require f }
 
 require "#{current_directory}/line-em-up/game_window.rb"
-require "#{current_directory}/line-em-up/loadout_window.rb"
+# require "#{current_directory}/line-em-up/loadout_window.rb"
 
 # @menu = Menu.new(self) #instantiate the menu, passing the Window in the constructor
 
