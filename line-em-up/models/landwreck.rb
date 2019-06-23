@@ -49,7 +49,8 @@ class Landwreck < Building
 
     @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
     @button_id_mapping = {}
-    @button_id_mapping[:object_inventory] = lambda { |window, menu, id| window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable }
+    @button_id_mapping[:object_inventory] = lambda { |window, menu, id| window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable }
+    @is_hovering = false
   end
 
   def set_drops drops
@@ -75,14 +76,15 @@ class Landwreck < Building
 
   # Need to calculate distance to player, only allow click when close, and maybe not use a left-click button to activate?  
   def update mouse_x, mouse_y, player
-    @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
+    @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
     return super(mouse_x, mouse_y, player)
   end
 
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
     @click_area.draw(@x - @image_width_half, @y - @image_height_half) if @drops.any?
+    color = @is_hovering && @drops.any? ? Gosu::Color.argb(0xff_e1ffcd) : Gosu::Color.argb(0xff_ffffff)
     if @item.image
-      @item.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, -@current_angle, 0.5, 0.5, @current_scale, @current_scale)
+      @item.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, -@current_angle, 0.5, 0.5, @current_scale, @current_scale, color)
     end
   end
 

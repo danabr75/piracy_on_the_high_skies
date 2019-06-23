@@ -1,4 +1,4 @@
-
+# UNUSED CURRENTLY
 class Main < Gosu::Window
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"

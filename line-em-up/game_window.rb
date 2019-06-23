@@ -143,6 +143,9 @@ class GameWindow < Gosu::Window
 
     super(@width, @height)
     # @width, @height = [@width.to_f, @height.to_f]
+    puts "TRYING TO SET RESOLUTION HERE: #{@width} and #{@height}"
+    puts "ACTUAL IS: #{self.width} and #{self.height}"
+    puts "Gosu.screen width: #{Gosu.screen_height} and Gosu.screen_height: #{Gosu.screen_height}"
     
 
     @game_pause = false
@@ -549,6 +552,9 @@ class GameWindow < Gosu::Window
     end
 
     if !@block_all_controls
+      # Moving up buildings, so clickable buildings can block the player from attacking.
+      @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player) }
+      # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player) }
 
       if Gosu.button_down?(Gosu::KbEscape) && !menus_active
@@ -683,7 +689,6 @@ class GameWindow < Gosu::Window
 
         
         
-        @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player) }
 
         # if @player.is_alive && @grappling_hook
         #   grap_result = @grappling_hook.update(@player)
@@ -939,7 +944,8 @@ class GameWindow < Gosu::Window
       @font.draw("Momentum: #{@player.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
-      @font.draw("Cursor MAP PIXEL: #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Cursor MAP PIXEL   : #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Cursor SCREEN PIXEL: #{@pointer.x.round(1)} - #{@pointer.y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       if @projectiles.any? && false
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("P GPS: #{@projectiles.last.current_map_tile_x} - #{@projectiles.last.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

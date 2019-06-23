@@ -154,7 +154,7 @@ class ShipLoadoutSetting < Setting
     values = {
       # next:     lambda { |window, menu, id| menu.next_clicked },
       # previous: lambda { |window, menu, id| menu.previous_clicked },
-      back:     lambda { |window, menu, id| window.cursor_object.nil? ? (menu.unloading_object_inventory ;menu.refresh_player_ship = true;  menu.disable;) : nil }
+      back:     lambda { |window, menu, id| window.block_all_controls = true; window.cursor_object.nil? ? (menu.unloading_object_inventory ;menu.refresh_player_ship = true;  menu.disable;) : nil }
     }
   end
 
