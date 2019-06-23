@@ -1,11 +1,17 @@
 require_relative "../lib/global_constants.rb"
 require_relative "../lib/global_variables.rb"
 
-class ShipInventory
+# Needs a CLOSE BUTTON AT THE BOTTOM OF THE INVENTORY PAGE!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+# A grab all button would also be nice.
+# Wjy not show hard points as well.. include this in the ship_loadout_setting!!!!!!!!!!!!!!!!
+# WHEN CLOSED, need to empty the inventory back to the landwreck!!!!!!!!!!!
+# - back to @attached_to 
+
+class ObjectInventory
   include GlobalVariables
   include GlobalConstants
 
-  # attr_accessor :cursor_object
+  attr_accessor :attached_to
 
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
@@ -26,15 +32,21 @@ class ShipInventory
     # @music_volume        = GlobalVariables.music_volume
   end
 
-  def initialize window#, parent_container
+
+
+  def initialize window, name, item_list, attached_to#, parent_container
+    @attached_to = attached_to
+    @name = name
+    puts "WHAT WAS NAME? #{@name}"
     init_global_vars
     @window = window
+    @item_list = ["BulletLauncher", "BulletLauncher"]#item_list
     # @parent_container = parent_container
     # @hardpoint_image_z = ZOrder::Hardpoint # Used to be 50
     @hardpoint_image_z = 50
     @config_file_path = CONFIG_FILE
     @inventory_matrix_max_width = 4
-    @inventory_matrix_max_height = 7
+    @inventory_matrix_max_height = 4
     @inventory_matrix = []
     @inventory_height = nil
     @inventory_width  = nil
@@ -53,6 +65,16 @@ class ShipInventory
     init_matrix
   end
 
+  def get_matrix_items
+    items = []
+    (0..@inventory_matrix_max_height - 1).each do |y|
+      (0..@inventory_matrix_max_width - 1).each do |x|
+        items << @inventory_matrix[x][y] if @inventory_matrix[x][y]
+      end
+    end
+    return items
+  end
+
   def init_matrix
     (0..@inventory_matrix_max_width - 1).each do |i|
       @inventory_matrix[i] = Array.new(@inventory_matrix_max_height)
@@ -62,12 +84,13 @@ class ShipInventory
     @inventory_width  = (@inventory_matrix_max_width  * @cell_width)  + (@inventory_matrix_max_width  * @cell_width_padding)
     # raise "GOT THIS for height: #{max_y_height} - Y was: #{@y}"
     current_y = (@screen_pixel_height / 2) - (@inventory_height / 2)
-    current_x = @next_x + @cell_width_padding
+    current_x = @screen_pixel_width - (@next_x + @cell_width_padding + @cell_width)
+    puts "current_x was: #{current_x}"
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
-        key = "matrix_#{x}_#{y}"
+        key = "oi_matrix_#{x}_#{y}"
         click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
-        klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
+        klass_name = @item_list.shift if @item_list.count > 0
         item = nil
         if klass_name
           klass = eval(klass_name)
@@ -76,10 +99,10 @@ class ShipInventory
         end
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}
-        current_x = current_x + @cell_width + @cell_width_padding
+        current_x = current_x - (@cell_width + @cell_width_padding)
         @button_id_mapping[key] = lambda { |window, menu, id| menu.click_inventory(id) }
       end
-      current_x = @next_x + @cell_width_padding
+      current_x = @screen_pixel_width - (@next_x + @cell_width_padding + @cell_width)
       current_y = current_y + @cell_height + @cell_height_padding
     end
   end
@@ -139,9 +162,13 @@ class ShipInventory
         end
       end
     end
-    text = "Inventory"
-    @font.draw(text, (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@screen_pixel_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    Gosu::draw_rect(@cell_width_padding / 2.0, (@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height, @inventory_width + @cell_width_padding, @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
+    text = @name
+    @font.draw(text, @screen_pixel_width - (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@screen_pixel_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    Gosu::draw_rect(
+      @screen_pixel_width + (@cell_width_padding / 2.0) - @inventory_width - (@cell_width / 2.0),
+      (@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height,
+      @inventory_width + @cell_width_padding,
+      @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
 
     if @window.cursor_object
       @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
@@ -151,7 +178,7 @@ class ShipInventory
   def click_inventory id
     puts "LUANCHER: #{id}"
     puts "click_inventory: "
-    x, y = id.scan(/matrix_(\d+)_(\d+)/).first
+    x, y = id.scan(/oi_matrix_(\d+)_(\d+)/).first
     x, y = [x.to_i, y.to_i]
     puts "LCICKED: #{x} and #{y}"
     matrix_element = @inventory_matrix[x][y]
@@ -231,7 +258,7 @@ class ShipInventory
   #   return found_space
   # end
 
-  # Not used here
+
   # def detail_box_draw
   #   if @hover_object
   #     texts = []

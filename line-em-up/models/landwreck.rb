@@ -2,11 +2,16 @@ require_relative 'building.rb'
 
 class Landwreck < Building
   CLASS_TYPE = :landwreck
-  def initialize current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, options = {}
+
+  attr_accessor :drops
+
+  def initialize current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, drops = [], options = {}
     puts "LANDWRECK SCALE: #{current_scale}"
     @item = item
     @image = @item.class.get_tilable_image(@item.class::ITEM_MEDIA_DIRECTORY)
     @info = @image.gl_tex_info
+
+    @drops = drops
 
     super(current_map_tile_x, current_map_tile_y, options)
 
@@ -35,6 +40,8 @@ class Landwreck < Building
     # @opengl_increment_x = result[:o_w]
     # @opengl_increment_y = result[:o_h]
     @health = 1
+
+    @click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
 
   end
 

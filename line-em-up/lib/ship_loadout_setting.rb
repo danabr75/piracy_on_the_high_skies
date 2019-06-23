@@ -8,6 +8,7 @@ require_relative 'setting.rb'
 require_relative '../models/basic_ship.rb'
 require_relative '../models/launcher.rb'
 require_relative '../models/ship_inventory.rb'
+require_relative '../models/object_inventory.rb'
 
 require 'gosu'
 # require "#{MODEL_DIRECTORY}/basic_ship.rb"
@@ -114,7 +115,20 @@ class ShipLoadoutSetting < Setting
     @font_padding = (4 * @average_scale).to_i
     @font = Gosu::Font.new(@font_height)
     @hover_object = nil
+
+    @object_inventory = nil
   end
+
+  def loading_object_inventory object
+    @object_inventory = ObjectInventory.new(@window, object.class.to_s, object.drops, object)
+  end 
+
+  def unloading_object_inventory
+    if @object_inventory
+      @object_inventory.attached_to.drops = @object_inventory.get_matrix_items
+      @object_inventory = nil
+    end
+  end 
 
   def enable
     @active = true
@@ -128,14 +142,15 @@ class ShipLoadoutSetting < Setting
 
   def self.get_id_button_mapping
     values = {
-      next:     lambda { |window, menu, id| menu.next_clicked },
-      previous: lambda { |window, menu, id| menu.previous_clicked },
-      back:     lambda { |window, menu, id| window.cursor_object.nil? ? (menu.refresh_player_ship = true;  menu.disable;) : nil }
+      # next:     lambda { |window, menu, id| menu.next_clicked },
+      # previous: lambda { |window, menu, id| menu.previous_clicked },
+      back:     lambda { |window, menu, id| window.cursor_object.nil? ? (menu.unloading_object_inventory ;menu.refresh_player_ship = true;  menu.disable;) : nil }
     }
   end
 
   def onClick element_id
     found_button = @ship_inventory.onClick(element_id)
+    found_button = @object_inventory.onClick(element_id) if !found_button && @object_inventory
     super(element_id) if !found_button
   end
 
@@ -312,6 +327,7 @@ class ShipLoadoutSetting < Setting
 
       # hover_object = matrix_update
       hover_object = @ship_inventory.update(mouse_x, mouse_y, player)
+      hover_object = @object_inventory.update(mouse_x, mouse_y, player) if !hover_object && @object_inventory
       # puts "GOT OBJECT FROM " if hover_object
 
       # Was there a point to this line?
@@ -434,6 +450,7 @@ class ShipLoadoutSetting < Setting
   def draw
     if @active
       @ship_inventory.draw
+      @object_inventory.draw if @object_inventory
 
       detail_box_draw
 

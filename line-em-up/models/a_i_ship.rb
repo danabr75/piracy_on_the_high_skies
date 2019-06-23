@@ -15,6 +15,7 @@ class AIShip < ScreenMapFixedObject
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
   attr_reader :current_momentum
+  # attr_accessor :drops
   MAX_HEALTH = 200
   AGRO_TILE_DISTANCE = 3
   PREFERRED_MIN_TILE_DISTANCE = 1
@@ -33,6 +34,8 @@ class AIShip < ScreenMapFixedObject
 
     options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+
+    @drops = [BulletLauncher, BulletLauncher, BulletLauncher]
 
     @score = 0
     @cooldown_wait = 0
@@ -345,7 +348,7 @@ class AIShip < ScreenMapFixedObject
       # movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
     shipwreck = nil
     if !result
-      shipwreck = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle)
+      shipwreck = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle, @drops)
     end
 
 
@@ -368,6 +371,10 @@ class AIShip < ScreenMapFixedObject
     end
     return is_within_preferred_angle
   end
+
+  # def drops
+  #     [BulletLauncher, BulletLauncher, BulletLauncher]
+  # end
 
   def get_preferred_angle_and_rotational_diff angle_preferences, destination_angle
     lowest_angle_diff = nil

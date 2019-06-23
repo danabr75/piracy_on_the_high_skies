@@ -1,6 +1,6 @@
 class Shipwreck < ScreenMapFixedObject
 
-  def initialize current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, ship, momentum, angle, options = {}
+  def initialize current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, ship, momentum, angle, drops, options = {}
     puts "NEW SHIPWREKC: #{[current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, momentum, angle]}"
     @ship = ship
     @ship.turn_off_hardpoints
@@ -14,6 +14,8 @@ class Shipwreck < ScreenMapFixedObject
     # puts "#{@scare_decrement} = #{momentum} * (#{@scale_start} - #{@scale_end})"
     # puts "@scare_decrement: #{@scare_decrement}"
     @current_momentum = momentum
+
+    @drops = drops
 
     options[:no_image] = true
 
@@ -49,7 +51,7 @@ class Shipwreck < ScreenMapFixedObject
       options[:current_map_pixel_x] = @current_map_pixel_x
       options[:current_map_pixel_y] = @current_map_pixel_y
       revised_scale = 1.0 - ((1.0 - @current_scale) / 2.0)
-      building = Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, revised_scale, @angle, options)
+      building = Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, revised_scale, @angle, @drops, options)
       @health = 0
     end
     return {is_alive: is_alive, building: building }
