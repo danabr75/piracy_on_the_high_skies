@@ -119,13 +119,23 @@ class ShipLoadoutSetting < Setting
     @object_inventory = nil
   end
 
-  def loading_object_inventory object
+  def loading_object_inventory object, drops = []
+    # puts "WHAT FUCKING DROPS DID WE GET HERE? #{drops}"
+    # puts "WHAT WAS ON THE OBHECT: #{object.drops}"
     @object_inventory = ObjectInventory.new(@window, object.class.to_s, object.drops, object)
   end 
 
   def unloading_object_inventory
+    # puts "TRYING TO UNLOAD OBJECT INVENTORY"
     if @object_inventory
-      @object_inventory.attached_to.drops = @object_inventory.get_matrix_items
+      # puts 'GET HERE'
+      # puts "IT HAS CURRENTLY: #{@object_inventory.attached_to.drops}"
+      # # puts "WERE GIVING IT:"
+      # # puts @object_inventory.get_matrix_items
+      # puts "@object_inventory.attached_to.class: #{@object_inventory.attached_to.class}"
+      # @object_inventory.attached_to.set_drops(@object_inventory.get_matrix_items)
+      # puts "POST HERE: #{@object_inventory.attached_to.drops}"
+      @object_inventory.unload_inventory
       @object_inventory = nil
     end
   end 

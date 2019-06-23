@@ -35,7 +35,7 @@ class AIShip < ScreenMapFixedObject
     options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
-    @drops = [BulletLauncher, BulletLauncher, BulletLauncher]
+    @drops = ["BulletLauncher", "BulletLauncher", "BulletLauncher"]
 
     @score = 0
     @cooldown_wait = 0

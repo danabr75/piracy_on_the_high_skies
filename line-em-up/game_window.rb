@@ -703,7 +703,10 @@ class GameWindow < Gosu::Window
 
         @shipwrecks.reject! do |ship|
           result = ship.update(nil, nil, @player)
-          @buildings << result[:building] if result[:building]
+          if result[:building]
+            result[:building].set_window(self)
+            @buildings << result[:building]
+          end
           !result[:is_alive]
         end
         # puts "SHIPS HERE: #{@ships.count}"

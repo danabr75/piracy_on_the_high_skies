@@ -108,8 +108,8 @@ class GeneralObject
       @image_size   = @image_width  * @image_height / 2
       @image_radius = (@image_width  + @image_height) / 4
 
-      @image_width_half  = @image_width  / 2
-      @image_height_half = @image_height / 2
+      @image_width_half  = @image_width  / 2.0
+      @image_height_half = @image_height / 2.0
     end
 
     @inited = true

@@ -40,7 +40,7 @@ class ObjectInventory
     puts "WHAT WAS NAME? #{@name}"
     init_global_vars
     @window = window
-    @item_list = ["BulletLauncher", "BulletLauncher"]#item_list
+    @item_list = item_list
     # @parent_container = parent_container
     # @hardpoint_image_z = ZOrder::Hardpoint # Used to be 50
     @hardpoint_image_z = 50
@@ -65,11 +65,17 @@ class ObjectInventory
     init_matrix
   end
 
+  def unload_inventory
+    @attached_to.set_drops(get_matrix_items)
+    @attached_to = nil
+  end
+
   def get_matrix_items
+    puts "HERE: get_matrix_items"
     items = []
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
-        items << @inventory_matrix[x][y] if @inventory_matrix[x][y]
+        items << @inventory_matrix[x][y][:item][:klass].to_s if !@inventory_matrix[x][y].nil? && !@inventory_matrix[x][y][:item].nil?
       end
     end
     return items

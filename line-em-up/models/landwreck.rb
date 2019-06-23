@@ -40,12 +40,41 @@ class Landwreck < Building
     # @opengl_increment_x = result[:o_w]
     # @opengl_increment_y = result[:o_h]
     @health = 1
+    @window = nil
 
-    @click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
+    @image_width  = @image.width  * (@width_scale || @average_scale)
+    @image_height = @image.height * (@height_scale || @average_scale)
+    @image_width_half  = @image_width  / 2.0
+    @image_height_half = @image_height / 2.0
 
+    @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height)
+    @button_id_mapping = {}
+    @button_id_mapping[:object_inventory] = lambda { |window, menu, id| window.ship_loadout_menu.loading_object_inventory(menu, menu.drops); window.ship_loadout_menu.enable }
+  end
+
+  def set_drops drops
+    @drops = drops
+  end
+
+  def set_window window
+    @window = window
+  end
+
+  def onClick element_id
+    # puts "ONCLICK mappuing"
+    # puts @button_id_mapping
+    button_clicked_exists = @button_id_mapping.key?(element_id)
+    if button_clicked_exists
+      puts "BUTTON EXISTS: #{element_id}"
+      @button_id_mapping[element_id].call(@window, self, element_id)
+    else
+      puts "Clicked button that is not mapped: #{element_id}"
+    end
+    return button_clicked_exists
   end
 
   def update mouse_x, mouse_y, player
+    # convert_map_pixel_location_to_screen player
     # if is_on_screen?
     #   # Update from gl_background
     # else
@@ -53,10 +82,12 @@ class Landwreck < Building
     #   # convert_map_pixel_location_to_screen(player)
     #   get_map_pixel_location_from_map_tile_location
     # end
+    @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
     return super(mouse_x, mouse_y, player)
   end
 
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
+    @click_area.draw(@x - @image_width_half, @y - @image_height_half) if @drops.any?
     if @item.image
       @item.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, -@current_angle, 0.5, 0.5, @current_scale, @current_scale)
     end
