@@ -61,7 +61,7 @@ module QuestInterface
 
       },
       "followup-level-quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 31, 31, {id: 'starting_level_quest-ship-2'})", "AIShip.new(nil, nil, 30, 30, {id: 'starting_level_quest-ship-3'})", "AIShip.new(nil, nil, 29, 29, {id: 'starting_level_quest-ship-4'})"],
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 118, 118, {id: 'starting_level_quest-ship-2', special_target_focus_id: 'player'})", "AIShip.new(nil, nil, 118, 119, {id: 'starting_level_quest-ship-3', special_target_focus_id: 'player'})", "AIShip.new(nil, nil, 118, 120, {id: 'starting_level_quest-ship-4', special_target_focus_id: 'player'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [], # earth_quakes?, trigger dialogue
         # "init_effects" =>   [["focus" => {"id" => 'starting_level_quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue

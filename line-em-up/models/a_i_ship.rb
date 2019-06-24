@@ -14,6 +14,7 @@ class AIShip < ScreenMapFixedObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
+  attr_accessor :special_target_focus
   attr_reader :current_momentum
   # attr_accessor :drops
   MAX_HEALTH = 200
@@ -77,7 +78,9 @@ class AIShip < ScreenMapFixedObject
 
     @agro_map_pixel_distance = AGRO_TILE_DISTANCE * @average_tile_size
     @argo_target_map = {}
-
+    @special_target_focus_id = options[:special_target_focus_id] if options[:special_target_focus_id]
+    # @special_target_focus_type = options[:special_target_focus_type] if options[:special_target_focus_type]
+    @special_target_focus = nil
     # stop
   end
 
@@ -221,40 +224,61 @@ class AIShip < ScreenMapFixedObject
     agro_target = nil
     agro_target_distance = nil
 
-    air_targets.each do |target|
-      # Don't fire at self. don't fire at allies. Figure out ally logic
-      next if target.id == self.id
-      # Implement relationships.
-      # next if target.allied
-      # FOR TESTING, to keep them from murdering each other
-      next if target.id != player.id
-      next if target.id == player.id && !player.is_alive
+    if @special_target_focus && !@special_target_focus.is_alive
+      @special_target_focus = nil
+      @special_target_focus_id = nil
+    end
 
-      # check distance if not allied
-      # if tile distance is less than agro distance, then you increase agro against that target
-      # update max_agro
-      # NEED TO ALSO INCREASE AGRO when taking damage from target.. and more so than just being within distance...
-      distance_to_target = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y)
-      within_range = distance_to_target < @agro_map_pixel_distance
-      if within_range
-        @argo_target_map[target.id] = AGRO_MAX
+
+    # # @special_target_focus_id = options[:special_target_focus_id] if options[:special_target_focus_id]
+    # @special_target_focus_type = options[:special_target_focus_type] if options[:special_target_focus_type]
+    # @special_target_focus = nil
+    if @special_target_focus.nil?
+      air_targets.each do |target|
+        # Don't fire at self. don't fire at allies. Figure out ally logic
+        next if target.id == self.id
+        # Implement relationships.
+        # next if target.allied
+        # FOR TESTING, to keep them from murdering each other
+        next if target.id != player.id
+        next if target.id == player.id && !player.is_alive
+
+        if @special_target_focus_id && @special_target_focus_id == target.id
+          @special_target_focus = agro_target = target if @special_target_focus_id == target.id
+          agro_target_distance = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @special_target_focus.current_map_pixel_x, @special_target_focus.current_map_pixel_y)
+        end
+        break if @special_target_focus
+
+
+        # check distance if not allied
+        # if tile distance is less than agro distance, then you increase agro against that target
+        # update max_agro
+        # NEED TO ALSO INCREASE AGRO when taking damage from target.. and more so than just being within distance...
+        distance_to_target = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y)
+        within_range = distance_to_target < @agro_map_pixel_distance
+        if within_range
+          @argo_target_map[target.id] = AGRO_MAX
+        end
+        if @argo_target_map[target.id] && @argo_target_map[target.id] > local_max_agro
+          local_max_agro = @argo_target_map[target.id] 
+          agro_target = target
+          agro_target_distance = distance_to_target
+        end
       end
-      if @argo_target_map[target.id] && @argo_target_map[target.id] > local_max_agro
-        local_max_agro = @argo_target_map[target.id] 
-        agro_target = target
-        agro_target_distance = distance_to_target
-      end
+    else
+      agro_target = @special_target_focus
+      agro_target_distance = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @special_target_focus.current_map_pixel_x, @special_target_focus.current_map_pixel_y)
     end
     # END AGRO SECTION
 
     # START FIRING SECTION
-    if agro_target
-      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+    if agro_target && agro_target_distance < (@screen_pixel_height + @screen_pixel_width) / 1.8
+      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, self).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
       end
-      @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+      @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, self).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
@@ -355,7 +379,12 @@ class AIShip < ScreenMapFixedObject
     return {is_alive: result, projectiles: projectiles, shipwreck: shipwreck}
   end
 
+  def use_steam usage
+    puts "AIT SHIP HERE"
 
+      return true
+
+  end
   def angle_is_within_angle_preferences preferred_angles, destination_angle
     is_within_preferred_angle = false
     # @firing_angle_preferences = [(240..300), (60..120)]

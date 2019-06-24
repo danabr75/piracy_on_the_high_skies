@@ -226,8 +226,10 @@ class GeneralObject
   end
 
   def is_on_screen?
+    y_buffer = (@screen_pixel_height * 1.2 - @screen_pixel_height)
+    x_buffer = (@screen_pixel_width * 1.2 - @screen_pixel_width)
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
-    @y > (0 - get_height) && @y < (@screen_pixel_height + get_height) && @x > (0 - get_width) && @x < (@screen_pixel_width + get_width)
+    @y > -y_buffer && @y < @screen_pixel_height + y_buffer && @x > -x_buffer && @x < @screen_pixel_width + x_buffer
   end
 
 

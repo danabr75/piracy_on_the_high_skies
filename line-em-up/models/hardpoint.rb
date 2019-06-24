@@ -171,6 +171,14 @@ class Hardpoint < GeneralObject
   #   end
   # end
 
+  # def get_steam_usage
+  #   if @item_klass
+  #     return @item_klass::STEAM_POWER_USAGE
+  #   else
+  #     return 0.0
+  #   end
+  # end
+
   # Pointer can be cursor.. or player..
   def attack current_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
     validate_not_nil([current_ship_angle, current_map_pixel_x, current_map_pixel_y], self.class.name, __callee__)

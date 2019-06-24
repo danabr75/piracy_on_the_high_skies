@@ -104,11 +104,12 @@ class Projectile < ScreenMapFixedObject
     end
 
     @init_sound = self.class.get_init_sound
+    @play_init_sound = true
     # @i ||= 1
     # @i += 1
     # @i = -50 if @i > 50
     # @init_sound.play_pan(-5000,@effects_volume, 1, false) if @init_sound
-    @init_sound.play(@effects_volume, 1, false) if @init_sound
+
   end
 
   def self.get_init_sound
@@ -158,7 +159,10 @@ class Projectile < ScreenMapFixedObject
 
     @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
-    return super(mouse_x, mouse_y, player)
+    result = super(mouse_x, mouse_y, player)
+    @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
+    @play_init_sound = false
+    return result
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y

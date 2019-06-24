@@ -24,6 +24,8 @@ class Launcher < GeneralObject
   EXPECTED_IMAGE_PIXEL_WIDTH  = 128
   IMAGE_SCALER = 16.0
 
+  STEAM_POWER_USAGE = 1.0
+
   def initialize(options = {})
     @image = self.class.get_hardpoint_image
     super(options)
@@ -59,6 +61,11 @@ class Launcher < GeneralObject
     )
   end
 
+
+  def get_steam_usage
+    return self.class::STEAM_POWER_USAGE
+  end
+
   def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     validate_not_nil([options], self.class.name, __callee__) 
     angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
@@ -80,11 +87,14 @@ class Launcher < GeneralObject
         @active = true
         # puts "HERE: self.class::ACTIVE_DELAY < @active_for: #{self.class::ACTIVE_DELAY < @active_for} = #{self.class::ACTIVE_DELAY} < #{@active_for}"
         if self.class::ACTIVE_DELAY.nil? || self.class::ACTIVE_DELAY <= @active_for
-          @spinning_up = false
-        # raise "STOP HERE" if self.class::ACTIVE_PROJECTILE_LIMIT != nil
-          projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
-          @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
-          @cooldown_wait = get_cooldown
+          if owner.use_steam(self.class::STEAM_POWER_USAGE)
+            @spinning_up = false
+            # raise "STOP HERE: + #{get_steam_usage}"
+            # puts "#{owner.use_steam(get_steam_usage)} = owner.use_steam(#{get_steam_usage})"
+            projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+            @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
+            @cooldown_wait = get_cooldown
+          end
         else
           @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up_sound && @active_for == 0 #&& @spinning_up == false
           @spinning_up = true
