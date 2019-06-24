@@ -407,10 +407,11 @@ class Player < ScreenFixedObject
   # Figure out why these got switched later, accelerate and brake
   def accelerate
     if @controls_enabled 
-      self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
+      # self.movement(@ship.speed, @angle, false)
 
       if @current_momentum <= @max_momentum
-        @current_momentum += 1.2
+        @current_momentum += @ship.speed
+        @current_momentum = @max_momentum if @current_momentum < -@max_momentum
       end
     end
     return true
@@ -418,9 +419,10 @@ class Player < ScreenFixedObject
   
   def brake
     if @controls_enabled 
-      self.movement( @ship.speed / (@ship.mass.to_f), @angle - 180, false)
+      # self.movement(@ship.speed, @angle - 180, false)
       if @current_momentum >= -@max_momentum
-        @current_momentum -= 0.6
+        @current_momentum -= (@ship.speed / 2.0)
+        @current_momentum = -@max_momentum if @current_momentum < -@max_momentum
       end
     end
     return true
@@ -507,22 +509,30 @@ class Player < ScreenFixedObject
     @ship.update(mouse_x, mouse_y, player)
 
     if @current_momentum > 0.0
-      speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      # speed = @current_momentum / 200
+      # @max_momentum
+      # @current_momentum
+      speed = @ship.speed * (@current_momentum / (@max_momentum)) / 2.0
+      # puts "ACCEL UPDEATE: #{speed} = #{@ship.speed} * (#{@max_momentum} - #{@current_momentum})" 
+      # ACCEL UPDEATE: 114.125 = 1.375 * (84.375 - 1.375)
       # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
+      # ACCEL UPDEATE: 1.2177948300510568 = 1.375 * (84.375 - 74.7283191167694)
+      # CALCED CURRENT MOMENTUM: 74.11942170174387 -= 1.2177948300510568 / 5.0
       x_diff, y_diff, halt = self.movement(speed, @angle)
       if halt
         @current_momentum = 0
       else
-        @current_momentum -= 1
+        @current_momentum -= speed * 2.0
+        # puts "CALCED CURRENT MOMENTUM: #{@current_momentum} -= #{speed} / 5.0"
         @current_momentum = 0 if @current_momentum < 0
       end
     elsif @current_momentum < 0.0
-      speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
+      speed = @ship.speed * (@current_momentum / (@max_momentum)) / 2.0
       x_diff, y_diff, halt = self.movement(-speed, @angle + 180)
       if halt
         @current_momentum = 0
       else
-        @current_momentum += 1
+        @current_momentum += speed * 2.0
         @current_momentum = 0 if @current_momentum > 0
       end
     else

@@ -133,10 +133,12 @@ class PilotableShip < GeneralObject
 
     acceleration_boost = 0.0
     rotation_boost     = 0.0
+    mass_boost         = 1.0
     @engine_hardpoints.each do |engine_klass|
       puts "ENGINEKLASS HERE: #{engine_klass}"
       acceleration_boost += engine_klass::ACCELERATION
       rotation_boost     += engine_klass::ROTATION_BOOST
+      mass_boost         = mass_boost * engine_klass::MASS_BOOST
     end
 
     options.delete(:hardpoint_data)
@@ -149,10 +151,14 @@ class PilotableShip < GeneralObject
 
     @theta = nil
     @rotation_speed = self.class::ROTATION_SPEED + rotation_boost
-    @speed          = (self.class::SPEED * @average_scale) + acceleration_boost
-    puts "HERE: #{@speed} = #{self.class::SPEED} * #{@average_scale}"
-    @mass           = self.class::MASS  * @average_scale
-    puts "SEEPD AND MASS HERE: #{@speed} - #{@mass}" if owner.class == Player
+    @speed          = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
+    puts "@speed          = (self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)" if owner.class == Player
+    puts "#{@speed} = (#{self.class::SPEED} * #{@average_scale}) + (#{acceleration_boost}  * #{@average_scale})" if owner.class == Player
+    # HERE22: 4.125 = 4.125
+    @mass           = (self.class::MASS  + mass_boost) * @average_scale
+    puts "@mass = self.class::MASS  + mass_boost * @average_scale" if owner.class == Player
+    puts "#{@mass} = #{self.class::MASS}  + #{mass_boost} * #{@average_scale}" if owner.class == Player
+    # 843.75 = 30  * 15.0 * 1.875
   end
 
   # right broadside

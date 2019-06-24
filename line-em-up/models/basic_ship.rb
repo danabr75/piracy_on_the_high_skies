@@ -12,7 +12,7 @@ include GLUT
 
 class BasicShip < PilotableShip
   ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
-  SPEED = 7
+  # SPEED = 7
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :rockets, :score, :time_alive
 
@@ -23,8 +23,9 @@ class BasicShip < PilotableShip
 
   # New stuff, older stuff above
   attr_reader :mass, :speed
+  MASS  = 100
   MASS  = 30
-  SPEED = 0.5
+  SPEED = 1.1
   ROTATION_SPEED = 0.5
   HEALTH = 100
   ARMOR = 5

@@ -6,8 +6,9 @@ class BasicEngine < Engine
   PROJECTILE_CLASS   = nil 
   FIRING_GROUP_NUMBER = nil # Passive
 
-  ACCELERATION   = 1.2
+  ACCELERATION   = 1.1
   ROTATION_BOOST = 0.5
+  MASS_BOOST     = 15
 
   def self.get_hardpoint_image
     # raise "OVERRIDE ME"
