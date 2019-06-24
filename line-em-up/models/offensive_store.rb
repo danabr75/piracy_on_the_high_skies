@@ -12,6 +12,7 @@ class OffensiveStore < Building
     offensive_types = Launcher.descendants
     offensive_types_with_rarities = {}
     Launcher.descendants.each do |launcher_klass|
+      next if launcher_klass::ABSTRACT_CLASS
       offensive_types_with_rarities[launcher_klass.to_s] = launcher_klass::RARITY_MAX - launcher_klass::STORE_RARITY
     end
     puts "offensive_types_with_rarities: "

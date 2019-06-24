@@ -111,7 +111,7 @@ class Player < ScreenFixedObject
     @max_momentum = @ship.mass# * 3 # speed here?
     # @ship.speed = 50 #/ (@ship.mass / 2)
     # @ship.speed = 100 #/ (@ship.mass / 2)
-    @rotation_speed = 2 # Get this from ship
+    # @rotation_speed = 2 # Get this from ship
 
     # if @debug
     #   @health = @ship.get_health * 100000
@@ -284,7 +284,7 @@ class Player < ScreenFixedObject
 
   def rotate_counterclockwise
     if @controls_enabled
-      increment = @rotation_speed
+      increment = @ship.rotation_speed
       if @angle + increment >= 360
         @angle = (@angle + increment) - 360
       else
@@ -298,7 +298,7 @@ class Player < ScreenFixedObject
 
   def rotate_clockwise
     if @controls_enabled
-      increment = @rotation_speed
+      increment = @ship.rotation_speed
       if @angle - increment <= 0
         @angle = (@angle - increment) + 360
       else

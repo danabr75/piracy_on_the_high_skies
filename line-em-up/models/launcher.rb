@@ -18,10 +18,16 @@ class Launcher < GeneralObject
   ACTIVE_PROJECTILE_LIMIT = nil
   STORE_RARITY = 1 # 1 is lowest, cap it at 100
   RARITY_MAX   = 100
+  # Send these to GeneralObject as well. Have GeneralObject validate.
+  ABSTRACT_CLASS = false
+  EXPECTED_IMAGE_PIXEL_HEIGHT = 128
+  EXPECTED_IMAGE_PIXEL_WIDTH  = 128
+  IMAGE_SCALER = 16.0
 
   def initialize(options = {})
+    @image = self.class.get_hardpoint_image
     super(options)
-    @image_hardpoint = self.class.get_hardpoint_image
+
     @active = false
     @within_angle = false
     @projectiles = []
@@ -198,7 +204,7 @@ class Launcher < GeneralObject
   # end
 
   def draw angle, x, y, z
-    @image_hardpoint.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
   end
 
   def draw_gl

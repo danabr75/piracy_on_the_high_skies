@@ -5,6 +5,8 @@ class ShipInventory
   include GlobalVariables
   include GlobalConstants
 
+  HARDPOINT_IMAGE_SCALER = 16.0
+
   # attr_accessor :cursor_object
 
   def init_global_vars
@@ -152,7 +154,7 @@ class ShipInventory
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) + @cell_width / 2, element[:y] - (image.height / 2) + @cell_height / 2, @hardpoint_image_z, @width_scale, @height_scale)
+          image.draw(element[:x] - (image.width / 2) / HARDPOINT_IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / HARDPOINT_IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @width_scale / HARDPOINT_IMAGE_SCALER, @height_scale / HARDPOINT_IMAGE_SCALER)
         end
       end
     end

@@ -19,6 +19,7 @@ class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
+  HARDPOINT_IMAGE_SCALER = 16.0
 
   # def self.get_weapon_options
   #   ::Launcher.descendants
@@ -207,12 +208,12 @@ class ShipLoadoutSetting < Setting
         if image
           # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
           image.draw(
-            value[:x] - (image.width  / 2),
-            value[:y] - (image.height / 2),
+            value[:x] - (image.width  / 2.0) / HARDPOINT_IMAGE_SCALER,
+            value[:y] - (image.height / 2.0) / HARDPOINT_IMAGE_SCALER,
             # value[:x] - (image.width  / 2)  + @cell_width  / 2,
             # value[:y] - (image.height / 2)  + @cell_height / 2,
             @hardpoint_image_z,
-            @width_scale, @height_scale
+            @width_scale / HARDPOINT_IMAGE_SCALER, @height_scale / HARDPOINT_IMAGE_SCALER
           )
         end
       end
@@ -233,6 +234,8 @@ class ShipLoadoutSetting < Setting
         color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
       elsif hp.slot_type == :offensive
         color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
+      elsif hp.slot_type == :engine
+        color, hover_color = [Gosu::Color.argb(0xff_2e63bf), Gosu::Color.argb(0xff_7fbbff)]
       end
       click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
       @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
@@ -521,7 +524,7 @@ class ShipLoadoutSetting < Setting
       detail_box_draw
 
       if @window.cursor_object
-        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
+        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale / HARDPOINT_IMAGE_SCALER, @height_scale / HARDPOINT_IMAGE_SCALER)
       end
 
       hardpoint_draw

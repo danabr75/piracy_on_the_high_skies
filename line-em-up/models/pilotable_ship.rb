@@ -12,13 +12,15 @@ include GLUT
 class PilotableShip < GeneralObject
 
   ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
-  SPEED = 7
+  SPEED = 1
+  ROTATION_SPEED = 1
   MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   attr_accessor :hardpoints
+  attr_reader :rotation_speed
   MAX_HEALTH = 200
   INIT_HEALTH = 200
 
@@ -112,12 +114,14 @@ class PilotableShip < GeneralObject
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
     # Update hardpoints location
+    @engine_hardpoints = []
     @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
     self.class::HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass_string = options[:hardpoint_data] ? options[:hardpoint_data][index.to_s] : nil
       item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       raise "bad slot type" if location[:slot_type].nil?
       raise "bad anlge"     if location[:angle_offset].nil?
+      @engine_hardpoints << item_klass if location[:slot_type] == :engine && !item_klass.nil?
       options[:block_initial_angle] = true if disable_hardpoint_angles
       # raise "STOP RIGHT HERE" if disable_hardpoint_angles
       hp = Hardpoint.new(
@@ -126,6 +130,15 @@ class PilotableShip < GeneralObject
       )
       @hardpoints[index] = hp
     end
+
+    acceleration_boost = 0.0
+    rotation_boost     = 0.0
+    @engine_hardpoints.each do |engine_klass|
+      puts "ENGINEKLASS HERE: #{engine_klass}"
+      acceleration_boost += engine_klass::ACCELERATION
+      rotation_boost     += engine_klass::ROTATION_BOOST
+    end
+
     options.delete(:hardpoint_data)
 
 
@@ -135,8 +148,11 @@ class PilotableShip < GeneralObject
     end
 
     @theta = nil
-    @speed = self.class::SPEED * @average_scale
-    @mass  = self.class::MASS  * @average_scale
+    @rotation_speed = self.class::ROTATION_SPEED + rotation_boost
+    @speed          = (self.class::SPEED * @average_scale) + acceleration_boost
+    puts "HERE: #{@speed} = #{self.class::SPEED} * #{@average_scale}"
+    @mass           = self.class::MASS  * @average_scale
+    puts "SEEPD AND MASS HERE: #{@speed} - #{@mass}" if owner.class == Player
   end
 
   # right broadside
@@ -330,9 +346,12 @@ class PilotableShip < GeneralObject
   #   return @y
   # end
 
+  NON_ATTACK_HARDPOINT_SLOTS = [:engine]
+
   def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
     results = []
     @hardpoints.each do |hp|
+      next if NON_ATTACK_HARDPOINT_SLOTS.include?(hp.slot_type)
       # puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
       results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group && hp.item
     end
@@ -344,6 +363,7 @@ class PilotableShip < GeneralObject
   def deactivate_group group_number
     # puts "deactivate_group: #{group_number}"
     @hardpoints.each do |hp|
+      next if NON_ATTACK_HARDPOINT_SLOTS.include?(hp.slot_type)
       hp.stop_attack if hp.group_number == group_number
     end
   end

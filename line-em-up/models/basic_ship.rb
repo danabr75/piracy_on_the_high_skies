@@ -23,8 +23,9 @@ class BasicShip < PilotableShip
 
   # New stuff, older stuff above
   attr_reader :mass, :speed
-  MASS  = 100
-  SPEED = 50
+  MASS  = 30
+  SPEED = 0.5
+  ROTATION_SPEED = 0.5
   HEALTH = 100
   ARMOR = 5
 
@@ -59,7 +60,7 @@ class BasicShip < PilotableShip
     {
       angle_offset: 90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4.0) }
     },
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   # ]
@@ -69,7 +70,7 @@ class BasicShip < PilotableShip
     {
       angle_offset: -90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4 }   
+      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4.0 }   
     },
     # Middle One
     {
@@ -81,7 +82,13 @@ class BasicShip < PilotableShip
     {
       angle_offset: -90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4.0) }
+    },
+    # Top One
+    {
+      angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
+      slot_type: :engine, 
+      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| ((image.height * scale) / 3) }
     }
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]

@@ -11,7 +11,7 @@ class GrapplingHookLauncher < Launcher
 
   def initialize(options = {})
     @hp_reference = options[:hp_reference]
-    @image_hardpoint_empty = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
+    @image_empty = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
     super(options)
   end
 
@@ -22,9 +22,9 @@ class GrapplingHookLauncher < Launcher
 
   def draw angle, x, y, z
     if @cooldown_wait <= 0.0 && (self.class::ACTIVE_PROJECTILE_LIMIT.nil? || @projectiles.count < self.class::ACTIVE_PROJECTILE_LIMIT)
-      @image_hardpoint.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale, @height_scale)
+      @image.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     else
-      @image_hardpoint_empty.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale, @height_scale)
+      @image_empty.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     end
   end
 

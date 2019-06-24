@@ -20,7 +20,9 @@ class GeneralObject
   SCROLLING_SPEED = 4
   MAX_SPEED      = 5
   HEALTH = 0
-  
+  EXPECTED_IMAGE_PIXEL_HEIGHT = nil
+  EXPECTED_IMAGE_PIXEL_WIDTH  = nil
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -124,7 +126,24 @@ class GeneralObject
     # Used for hardpoints, objects relative to other objects
     @x_offset = @x_offset || 0
     @y_offset = @y_offset || 0
+
+
+    validate_image_parameters
   end   
+
+  
+  def validate_image_parameters
+    if @image
+      if !self.class::EXPECTED_IMAGE_PIXEL_HEIGHT.nil? && !self.class::EXPECTED_IMAGE_PIXEL_WIDTH.nil?
+        if self.class::EXPECTED_IMAGE_PIXEL_HEIGHT != @image.height
+          raise "IMAGE HEIGHT DOES NOT MATCH EXPECTED. GOT #{@image.height}. EXPECTED: #{self.class::EXPECTED_IMAGE_PIXEL_HEIGHT}"
+        elsif self.class::EXPECTED_IMAGE_PIXEL_WIDTH != @image.width
+          raise "IMAGE WIDTH DOES NOT MATCH EXPECTED. GOT #{@image.width}. EXPECTED: #{self.class::EXPECTED_IMAGE_PIXEL_WIDTH}"
+        end
+      end
+    end
+  end
+
 
   # def get_x_with_offset
   #   @x + (@x_offset)
