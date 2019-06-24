@@ -121,7 +121,10 @@ class PilotableShip < GeneralObject
       item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       raise "bad slot type" if location[:slot_type].nil?
       raise "bad anlge"     if location[:angle_offset].nil?
-      @engine_hardpoints << item_klass if location[:slot_type] == :engine && !item_klass.nil?
+      @engine_hardpoints << item_klass if [:engine, :generic].include?(location[:slot_type]) && !item_klass.nil? && Engine.descendants.include?(item_klass)
+      puts "ITEM CLASS " if owner.class == Player
+      puts "@engine_hardpoints << item_klass if [:engine, :generic].include?(location[:slot_type]) && !item_klass.nil? && Engine.descendants.include?(item_klass)" if owner.class == Player
+      puts "@engine_hardpoints << #{item_klass} if #{[:engine, :generic].include?(location[:slot_type])} && #{!item_klass.nil?} && #{Engine.descendants.include?(item_klass)}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
       # raise "STOP RIGHT HERE" if disable_hardpoint_angles
       hp = Hardpoint.new(
@@ -133,13 +136,14 @@ class PilotableShip < GeneralObject
 
     acceleration_boost = 0.0
     rotation_boost     = 0.0
-    mass_boost         = 1.0
+    mass_boost         = 0.0
     @engine_hardpoints.each do |engine_klass|
       puts "ENGINEKLASS HERE: #{engine_klass}"
       acceleration_boost += engine_klass::ACCELERATION
       rotation_boost     += engine_klass::ROTATION_BOOST
-      mass_boost         = mass_boost * engine_klass::MASS_BOOST
+      mass_boost         = mass_boost + engine_klass::MASS_BOOST
     end
+    puts "@engine_hardpoints: #{@engine_hardpoints.count}"
 
     options.delete(:hardpoint_data)
 

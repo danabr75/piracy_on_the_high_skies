@@ -273,12 +273,12 @@ class AIShip < ScreenMapFixedObject
 
     # START FIRING SECTION
     if agro_target && agro_target_distance < (@screen_pixel_height + @screen_pixel_width) / 1.8
-      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, self).each do |results|
+      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
       end
-      @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, self).each do |results|
+      @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
