@@ -9,10 +9,13 @@ include OpenGL
 include GLUT
 
 # Not intended to be overridden
+# Is a Hardpoint Container
 class Hardpoint < GeneralObject
   attr_accessor :x, :y, :assigned_weapon_class, :slot_type, :radius, :angle_from_center, :center_x, :center_y
   attr_accessor :group_number, :y_offset, :x_offset, :main_weapon, :image_hardpoint, :image_angle
   attr_accessor :item
+
+  attr_reader :hardpoint_colors
 
   def get_radius
     @image_radius / 5
@@ -27,6 +30,8 @@ class Hardpoint < GeneralObject
     @z = z
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
+
+    @hardpoint_colors = self.class.get_hardpoint_colors(@slot_type)
 
     super(options)
     # puts "GHARDPOINT ID: #{@id}"
@@ -128,6 +133,21 @@ class Hardpoint < GeneralObject
     @current_map_pixel_y = nil
   end
 
+
+  # Hover colors. Default is usually a lighter shade than the hover shade.
+  def self.get_hardpoint_colors(slot_type)
+    color, hover_color = [nil,nil]
+    if slot_type    == :generic
+      color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
+    elsif slot_type == :offensive
+      color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
+    elsif slot_type == :engine
+      color, hover_color = [Gosu::Color.argb(0xff_2e63bf), Gosu::Color.argb(0xff_7fbbff)]
+    elsif slot_type == :steam_core
+      color, hover_color = [Gosu::Color.argb(0xff_d4ce55), Gosu::Color.argb(0xff_fff36b)]
+    end
+    return [color, hover_color]
+  end
 
   # def increment_angle angle_increment
   #   # puts "HUH?  #{angle_increment}"

@@ -9,20 +9,16 @@ class OffensiveStore < Building
   def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
     @window = window
     super(current_map_tile_x, current_map_tile_y, options)
-    offensive_types = Launcher.descendants
+    # offensive_types = Launcher.descendants
     offensive_types_with_rarities = {}
-    Launcher.descendants.each do |launcher_klass|
+    HardpointObjects::HardpointObject.descendants.each do |launcher_klass|
       next if launcher_klass::ABSTRACT_CLASS
       offensive_types_with_rarities[launcher_klass.to_s] = launcher_klass::RARITY_MAX - launcher_klass::STORE_RARITY
     end
-    puts "offensive_types_with_rarities: "
-    puts offensive_types_with_rarities.inspect
     @store_item_count = rand(5) + 3
     (0..@store_item_count).each do |i|
       @drops << random_weighted(offensive_types_with_rarities)
     end
-    puts "OFFENSIVE DROP ON INIT"
-    puts @drops.inspect
     @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
     @button_id_mapping = {}
     # Need to add sell window to ship_loadout_menu\ship_loadout_setting
@@ -40,13 +36,7 @@ class OffensiveStore < Building
   end
 
   def set_drops drops
-    puts "OFFENSIVE STORE SETTING DROPS"
-    puts "DROPS WAS"
-    puts @drops.inspect
-    puts "DROPS NOW"
-    puts drops
     @drops = drops
-    puts 'END'
   end
 
   def add_credits new_credits

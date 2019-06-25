@@ -36,7 +36,7 @@ class AIShip < ScreenMapFixedObject
     options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
-    @drops = ["BulletLauncher", "BulletLauncher", "BulletLauncher"]
+    @drops = ["HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint"]
 
     @score = 0
     @cooldown_wait = 0
@@ -45,7 +45,14 @@ class AIShip < ScreenMapFixedObject
     @angle = 90
 
     # hardpoint_data = Player.get_hardpoint_data('BasicShip')
-    hardpoint_data = {:hardpoint_data=>{"0"=>"BulletLauncher", "3"=>"BulletLauncher", "1"=>"BulletLauncher", "4"=>"BulletLauncher", "5"=>"BulletLauncher", "6"=>"BulletLauncher", "2"=>"BulletLauncher", "7"=>"BulletLauncher", "8"=>"BasicEngine"}}
+    hardpoint_data = {
+      :hardpoint_data=>
+      {
+        "0"=>"HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::BulletHardpoint",
+        "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
+        "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint"
+      }
+    }
     @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, self, hardpoint_data)
     @ship.x = @x
     @ship.y = @y

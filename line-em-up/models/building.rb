@@ -2,6 +2,8 @@ require_relative 'background_fixed_object.rb'
 
 require 'opengl'
 require 'glut'
+require 'glu'
+require 'gosu'
 
 include OpenGL
 include GLUT

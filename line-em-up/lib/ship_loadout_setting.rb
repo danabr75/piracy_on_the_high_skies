@@ -6,7 +6,7 @@
 
 require_relative 'setting.rb'
 require_relative '../models/basic_ship.rb'
-require_relative '../models/launcher.rb'
+# require_relative '../models/launcher.rb'
 require_relative '../models/ship_inventory.rb'
 require_relative '../models/object_inventory.rb'
 
@@ -228,15 +228,7 @@ class ShipLoadoutSetting < Setting
     ship.hardpoints.each_with_index do |hp, index|
       button_key = "hardpoint_#{index}"
 
-      color, hover_color = [nil,nil]
-      if hp.slot_type    == :generic
-        # color, hover_color = [Gosu::Color.argb(0x8aff82), Gosu::Color.argb(0xc3ffba)]
-        color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
-      elsif hp.slot_type == :offensive
-        color, hover_color = [Gosu::Color.argb(0xff_ff3232), Gosu::Color.argb(0xff_ffb5b5)]
-      elsif hp.slot_type == :engine
-        color, hover_color = [Gosu::Color.argb(0xff_2e63bf), Gosu::Color.argb(0xff_7fbbff)]
-      end
+      color, hover_color = hp.hardpoint_colors
       click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
       @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
       if hp.assigned_weapon_class

@@ -1,5 +1,5 @@
 require_relative 'general_object.rb'
-require_relative 'rocket_launcher_pickup.rb'
+# require_relative 'rocket_launcher_pickup.rb'
 require 'gosu'
 
 require 'opengl'
@@ -86,7 +86,7 @@ class PilotableShip < GeneralObject
     @rockets = 50
     # @rockets = 250
     @bombs = 3
-    @secondary_weapon = RocketLauncherPickup::NAME
+    # @secondary_weapon = RocketLauncherPickup::NAME
 
     # @hard_point_items = [RocketLauncherPickup::NAME, 'cannon_launcher', 'cannon_launcher', 'bomb_launcher']
     @rocket_launchers = 0
@@ -115,18 +115,39 @@ class PilotableShip < GeneralObject
 
     # Update hardpoints location
     @engine_hardpoints = []
+    @steam_cores = []
     @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
     self.class::HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass_string = options[:hardpoint_data] ? options[:hardpoint_data][index.to_s] : nil
-      item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
+
+      found_errors = false
+      begin
+        item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
+      rescue NameError, SyntaxError, NoMethodError => e
+        found_errors = true
+        puts "ISSUE: #{e.class}"
+        # puts e.backtrace
+        puts "ISSUE WITH: #{item_klass_string}"
+        puts "RAW DATA: #{options}"
+      end
+      raise "Finishing w/ errors" if found_errors
+
       raise "bad slot type" if location[:slot_type].nil?
       raise "bad anlge"     if location[:angle_offset].nil?
-      @engine_hardpoints << item_klass if [:engine, :generic].include?(location[:slot_type]) && !item_klass.nil? && Engine.descendants.include?(item_klass)
-      puts "ITEM CLASS " if owner.class == Player
-      puts "@engine_hardpoints << item_klass if [:engine, :generic].include?(location[:slot_type]) && !item_klass.nil? && Engine.descendants.include?(item_klass)" if owner.class == Player
-      puts "@engine_hardpoints << #{item_klass} if #{[:engine, :generic].include?(location[:slot_type])} && #{!item_klass.nil?} && #{Engine.descendants.include?(item_klass)}" if owner.class == Player
+      if [:engine, :generic].include?(location[:slot_type]) && !item_klass.nil? && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
+        @engine_hardpoints << item_klass
+      end
+      # ADD BACK IN
+      # if [:steam_core, :generic].include?(location[:slot_type]) && !item_klass.nil? && Engine.descendants.include?(item_klass)
+      #   @steam_cores << item_klass
+      # end
+      # Always point engines toward the rear
+      if (location[:slot_type] == :engine || location[:slot_type] == :generic) && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
+        location[:angle_offset] = 180
+      end
+      # puts "ITEM CLASS " if owner.class == Player
+      puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
-      # raise "STOP RIGHT HERE" if disable_hardpoint_angles
       hp = Hardpoint.new(
         x, y, hardpoint_z, location[:x_offset].call(get_image, @width_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner, options
@@ -138,7 +159,7 @@ class PilotableShip < GeneralObject
     rotation_boost     = 0.0
     mass_boost         = 0.0
     @engine_hardpoints.each do |engine_klass|
-      puts "ENGINEKLASS HERE: #{engine_klass}"
+      # puts "ENGINEKLASS HERE: #{engine_klass}"
       acceleration_boost += engine_klass::ACCELERATION
       rotation_boost     += engine_klass::ROTATION_BOOST
       mass_boost         = mass_boost + engine_klass::MASS_BOOST

@@ -1,5 +1,5 @@
 require_relative 'general_object.rb'
-require_relative 'rocket_launcher_pickup.rb'
+# require_relative 'rocket_launcher_pickup.rb'
 require_relative 'pilotable_ship.rb'
 require 'gosu'
 
@@ -34,12 +34,12 @@ class BasicShip < PilotableShip
   HARDPOINT_LOCATIONS = [
     {
       angle_offset: 0,
-      slot_type: :generic, 
+      slot_type: :offensive, 
       x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
     },
     {
       angle_offset: 0,
-      slot_type: :generic, 
+      slot_type: :offensive, 
       x_offset: lambda { |image, scale| -((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
     },
   # ]
@@ -48,7 +48,7 @@ class BasicShip < PilotableShip
     # Bottom One
     {
       angle_offset: 90,
-      slot_type: :offensive, 
+      slot_type: :generic, 
       x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| (image.height * scale) / 4 }   
     },
     # Middle One
@@ -82,7 +82,7 @@ class BasicShip < PilotableShip
     # Top One
     {
       angle_offset: -90,
-      slot_type: :offensive, 
+      slot_type: :generic, 
       x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4.0) }
     },
     # Top One
@@ -90,6 +90,16 @@ class BasicShip < PilotableShip
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
       x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| ((image.height * scale) / 3) }
+    },
+    {
+      angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
+      slot_type: :engine, 
+      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| ((image.height * scale) / 5.0) }
+    },
+    {
+      angle_offset: 0, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
+      slot_type: :steam_core, 
+      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| 0 }
     }
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]

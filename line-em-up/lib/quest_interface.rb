@@ -152,7 +152,7 @@ module QuestInterface
           else
             quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
           end
-        rescue SyntaxError, NoMethodError => e
+        rescue NameError, SyntaxError, NoMethodError => e
           found_errors = true
           puts e.backtrace
           puts "ISSUE WITH: #{quest_key} on key: #{string_key}"
