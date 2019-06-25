@@ -47,11 +47,11 @@ class BasicShip < PilotableShip
   # ]
   # # LEFT SIDE
   # PORT_HARDPOINT_LOCATIONS = [
-    # Bottom One
+    # Bottom One - CONFIRMED
     {
       angle_offset: 90,
       slot_type: :generic, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| (image.height * scale) / 4 }   
+      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| (image.height * scale) / 5.0 }   
     },
     # Middle One
     {
@@ -69,7 +69,7 @@ class BasicShip < PilotableShip
   # ]
   # # RIGHT SIDE
   # STARBOARD_HARDPOINT_LOCATIONS = [
-    # Bottom One
+    # TOP One - confirmed
     {
       angle_offset: -90,
       slot_type: :offensive, 
@@ -81,22 +81,22 @@ class BasicShip < PilotableShip
       slot_type: :offensive, 
       x_offset: lambda { |image, scale| -((image.width * scale) / 4)}, y_offset: lambda { |image, scale| 0 } 
     },
-    # Top One
+    # bottom One
     {
       angle_offset: -90,
       slot_type: :generic, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 4.0) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 5.0) }
     },
-    # Top One
+
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| ((image.height * scale) / 3) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 10.0)}, y_offset: lambda { |image, scale| ((image.height * scale) / 3.0) }
     },
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| ((image.height * scale) / 5.0) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 10.0)}, y_offset: lambda { |image, scale| ((image.height * scale) / 3.0) }
     },
     {
       angle_offset: 0, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation

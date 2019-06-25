@@ -1,20 +1,15 @@
-require_relative 'engine_hardpoint.rb'
+require_relative 'steam_core_hardpoint.rb'
 
 module HardpointObjects
-  class BasicEngineHardpoint < HardpointObjects::EngineHardpoint
+  class AdvancedSteamCoreHardpoint < HardpointObjects::SteamCoreHardpoint
     ABSTRACT_CLASS = false
-    HARDPOINT_NAME = "basic_engine"
+    HARDPOINT_NAME = "advanced_steam_core"
     PROJECTILE_CLASS   = nil 
     FIRING_GROUP_NUMBER = nil # Passive
 
-    PERMANENT_STEAM_USE       = 50
-    TILES_PER_SECOND_MODIFIER = 1.5
-
-
-    BOOST_SPEED_MODIFIER  = 1.2
-    BOOST_STEAM_USAGE     = 0.4
-    BOOST_MASS_MODIFIER   = 1.1
-
+    STEAM_MAX_CAPACITY  = 150.0
+    # STEAM_MAX_CAPACITY  = 1000000.0
+    STEAM_RATE_INCREASE = 0.3
 
     def self.get_hardpoint_image
       # raise "OVERRIDE ME"
@@ -22,15 +17,15 @@ module HardpointObjects
     end
 
     def self.name
-      "Basic Engine"
+      "Basic Steam Core"
     end
 
     def self.description
-      "It's an Engine, duh."
+      "Generates power for your ship; Your engines and weapons"
     end
 
     def self.value
-      30
+      3000
     end
   end
 end
