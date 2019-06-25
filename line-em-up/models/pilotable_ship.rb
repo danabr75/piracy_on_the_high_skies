@@ -21,8 +21,19 @@ class PilotableShip < GeneralObject
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   attr_accessor :hardpoints
   attr_reader :rotation_speed
-  attr_reader :steam_max_capacity, :steam_rate_increase, :current_steam_capacity
-  attr_reader :mass
+  # attr_reader :steam_max_capacity, :steam_rate_increase, :current_steam_capacity
+  # attr_reader :mass, :boost_speed, :speed, :speed_steam_usage, :boost_speed_steam_usage
+  # attr_reader :boost_mass
+
+  attr_reader :current_steam_capacity, :tiles_per_second
+
+  attr_accessor :current_momentum
+
+    # @speed             = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
+    # @speed_steam_usage = @engine_steam_usage_increment
+    # @boost_speed       = ((self.class::SPEED * @average_scale) + ((acceleration_boost * boost_speed_modifier)  * @average_scale)) / 3.0
+    # @boost_speed_steam_usage = @engine_steam_usage_increment + @boost_steam_usage
+
 
   MAX_HEALTH = 200
   INIT_HEALTH = 200
@@ -159,15 +170,33 @@ class PilotableShip < GeneralObject
       @hardpoints[index] = hp
     end
 
-    acceleration_boost = 0.0
-    rotation_boost     = 0.0
-    mass_boost         = 0.0
+    # acceleration_boost = 0.0
+    # rotation_boost     = 0.0
+    # mass_boost         = 0.0
+    engine_permanent_steam_usage     = 0.0
+    engine_tiles_per_second_modifier = 1.0
+    # engine_steam_usage_increment = 0.0
+    # boost_speed_modifier         = 0.0
+    # boost_steam_usage            = 0.0
+    # boost_mass_modifier          = 1.0
     @engine_hardpoints.each do |engine_klass|
-      # puts "ENGINEKLASS HERE: #{engine_klass}"
-      acceleration_boost += engine_klass::ACCELERATION
-      rotation_boost     += engine_klass::ROTATION_BOOST
-      mass_boost         = mass_boost + engine_klass::MASS_BOOST
+    #   # puts "ENGINEKLASS HERE: #{engine_klass}"
+    #   acceleration_boost += engine_klass::ACCELERATION
+    #   rotation_boost     += engine_klass::ROTATION_BOOST
+    #   mass_boost         += engine_klass::MASS_BOOST
+
+      engine_permanent_steam_usage += engine_klass::PERMANENT_STEAM_USE
+    #   engine_steam_usage_increment += engine_klass::STEAM_USAGE_INCREMENT
+    #   boost_speed_modifier         += engine_klass::BOOST_SPEED_MODIFIER
+    #   boost_steam_usage            += engine_klass::BOOST_STEAM_USAGE
+    #   boost_mass_modifier          = boost_mass_modifier * engine_klass::BOOST_MASS_MODIFIER
+    engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * engine_klass::TILES_PER_SECOND_MODIFIER
     end
+    @engine_permanent_steam_usage     = engine_permanent_steam_usage
+    @engine_tiles_per_second_modifier = engine_tiles_per_second_modifier
+    # @engine_steam_usage_increment = engine_steam_usage_increment
+    # @boost_speed_modifier         = boost_speed_modifier
+    # @boost_steam_usage            = boost_steam_usage
 
 
     steam_max_capacity = 0.0
@@ -178,9 +207,10 @@ class PilotableShip < GeneralObject
       steam_rate_increase   += steam_core_klass::STEAM_RATE_INCREASE
     end
 
-    @steam_max_capacity     = steam_max_capacity
-    @current_steam_capacity = @steam_max_capacity
-    @steam_rate_increase    = steam_rate_increase
+    @steam_original_max_capacity = steam_max_capacity
+    @steam_max_capacity          = steam_max_capacity
+    @current_steam_capacity      = @steam_max_capacity
+    @steam_rate_increase         = steam_rate_increase
 
     puts "@engine_hardpoints: #{@engine_hardpoints.count}"
 
@@ -193,19 +223,51 @@ class PilotableShip < GeneralObject
     end
 
     @theta = nil
-    @rotation_speed = self.class::ROTATION_SPEED + rotation_boost
-    @speed          = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
-    puts "@speed          = (self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)" if owner.class == Player
-    puts "#{@speed} = (#{self.class::SPEED} * #{@average_scale}) + (#{acceleration_boost}  * #{@average_scale})" if owner.class == Player
-    # HERE22: 4.125 = 4.125
-    @mass           = (self.class::MASS  + mass_boost) * @average_scale
-    puts "@mass = self.class::MASS  + mass_boost * @average_scale" if owner.class == Player
-    puts "#{@mass} = #{self.class::MASS}  + #{mass_boost} * #{@average_scale}" if owner.class == Player
-    # 843.75 = 30  * 15.0 * 1.875
+    @rotation_speed    = self.class::ROTATION_SPEED #+ rotation_boost
+
+
+    @mass             = self.class::MASS
+    @half_mass        = self.class::MASS / 2.0
+    @momentum_rate    = self.class::MOMENTUM_RATE
+    @current_momentum = options[:current_momentum] || 0
+    @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @average_scale
+
+    # @speed             = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
+    # puts "SPEED #{@speed}" if owner.class == Player
+    # @speed_steam_usage = @engine_steam_usage_increment
+    # @boost_speed       = ((self.class::SPEED * @average_scale) + ((acceleration_boost * boost_speed_modifier)  * @average_scale)) / 3.0
+    # puts "BOOST SPEED #{@boost_speed}" if owner.class == Player
+    # @boost_speed_steam_usage = @engine_steam_usage_increment + @boost_steam_usage
+
+    # # HERE22: 4.125 = 4.125
+    # @mass           = (self.class::MASS  + mass_boost) * @average_scale
+    # puts "@MASS JERE: #{@mass}   =   (#{self.class::MASS}  + #{mass_boost}) * #{ @average_scale}" if owner.class == Player
+    # @boost_mass = @mass * boost_mass_modifier
+    # puts "@boost_mass JERE: #{@boost_mass}   =#{ @mass} * #{boost_mass_modifier}" if owner.class == Player
+    # puts "MASS #{@mass}" if owner.class == Player
+    # puts "BOOST MASS #{@boost_mass}" if owner.class == Player
+
+    # @current_map_pixel_x = current_map_pixel_x
+    # @current_map_pixel_y = current_map_pixel_y
+    # @current_map_tile_x  = current_map_tile_x
+    # @current_map_tile_y  = current_map_tile_y
+    @block_momentum_increase = false
+    @block_momentum_decrease = false
   end
 
+  def accelerate boost = false
+    if @current_momentum <= @mass && !@block_momentum_increase
+      @current_momentum += @momentum_rate
+      @current_momentum = @mass if @current_momentum > @mass
+    end
+  end
 
-
+  def brake
+    if @current_momentum >= -@half_mass && !@block_momentum_decrease
+      @current_momentum -= @momentum_rate
+      @current_momentum = -@half_mass if @current_momentum < -@half_mass
+    end
+  end
 
   def use_steam usage
     if usage < @current_steam_capacity
@@ -215,26 +277,6 @@ class PilotableShip < GeneralObject
       return false
     end
   end
-
-  # right broadside
-  # def rotate_hardpoints_counterclockwise angle_increment
-  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
-  #     group.each do |hp|
-  #       hp.increment_angle(angle_increment)
-  #     end
-  #   end
-  # end
-
-  # # left broadside
-  # # Key: E
-  # def rotate_hardpoints_clockwise angle_increment
-  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
-  #     group.each do |hp|
-  #       hp.decrement_angle(angle_increment)
-  #     end
-  #   end
-  # end
-
 
   def add_hard_point hard_point
   #   @hard_point_items << hard_point
@@ -346,66 +388,6 @@ class PilotableShip < GeneralObject
   def is_alive
     health > 0
   end
-
-  # def get_speed
-  #   if @left_broadside_mode || @right_broadside_mode
-  #     speed = self.class::SPEED * 0.3
-  #   else
-  #     speed = self.class::SPEED
-  #   end
-  #   (speed * @scale).round
-  # end
-
-  # def move_left
-  #   @turn_left = true
-  #   @x = [@x - get_speed, (get_width/3)].max
-
-  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
-  #     group.each do |hp|
-  #       hp.x = @x + hp.x_offset
-  #     end
-  #   end
-  #   return @x
-  # end
-  
-  # def move_right
-  #   @turn_right = true
-  #   @x = [@x + get_speed, (@screen_pixel_width - (get_width/3))].min
-
-  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
-  #     group.each do |hp|
-  #       hp.x = @x + hp.x_offset
-  #     end
-  #   end
-  #   return @x
-  # end
-  
-  # def accelerate
-  #   # # Top of screen
-  #   # @min_moveable_height = options[:min_moveable_height] || 0
-  #   # # Bottom of the screen
-  #   # @max_movable_height = options[:max_movable_height] || screen_pixel_height
-
-  #   @y = [@y - get_speed, @min_moveable_height + (get_height/2)].max
-
-  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
-  #     group.each do |hp|
-  #       hp.y = @y + hp.y_offset
-  #     end
-  #   end
-  #   return @y
-  # end
-  
-  # def brake
-  #   @y = [@y + get_speed, @max_movable_height - (get_height/2)].min
-
-  #   [@starboard_hard_points, @port_hard_points, @front_hard_points].each do |group|
-  #     group.each do |hp|
-  #       hp.y = @y + hp.y_offset
-  #     end
-  #   end
-  #   return @y
-  # end
 
   NON_ATTACK_HARDPOINT_SLOTS = [:engine]
 
@@ -532,13 +514,36 @@ class PilotableShip < GeneralObject
   
   def update mouse_x, mouse_y, player
 
+    puts "BEFORE MAX CAPACOTY: #{@steam_max_capacity}"
+    capacity_diff = 0
+    if @current_momentum != 0 && @engine_permanent_steam_usage != 0
+      @steam_max_capacity = @steam_original_max_capacity - (@engine_permanent_steam_usage * (@current_momentum.abs / (@mass)))
+      if @steam_max_capacity < 0
+        # capacity_diff = 0 - @steam_max_capacity
+        @steam_max_capacity = 0
+        puts "BLOCKLING INCREATE HERE!!!!"
+        @block_momentum_increase = true if @current_momentum > 0
+        @block_momentum_decrease = true if @current_momentum < 0
+      else
+        @block_momentum_increase = false
+        @block_momentum_decrease = false
+      end
+    end
+    puts "AFTER MAX CAPACITY: #{@steam_max_capacity}"
+    # @steam_max_capacity          = steam_max_capacity #- @engine_permanent_steam_usage
+
     # @steam_max_capacity  = steam_max_capacity
     # @steam_rate_increase = steam_rate_increase
     # @current_steam_capacity
+    puts "STARTED: #{@current_steam_capacity}"
     if @current_steam_capacity < @steam_max_capacity
       @current_steam_capacity += @steam_rate_increase
-      @steam_power = @steam_max_capacity if @current_steam_capacity > @steam_max_capacity
+      # @steam_power = @steam_max_capacity if @current_steam_capacity > @steam_max_capacity - @engine_permanent_steam_usage
     end
+    if @current_steam_capacity > @steam_max_capacity
+      @current_steam_capacity = @steam_max_capacity
+    end
+    puts "ENDED: #{@current_steam_capacity}"
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon

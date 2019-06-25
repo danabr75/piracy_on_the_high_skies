@@ -476,7 +476,7 @@ class GeneralObject
     # puts "MOVEMENT: #{speed}, #{angle}"
     # puts "PLAYER MOVEMENT map size: #{@map_pixel_width} - #{@map_pixel_height}"
     # base = speed# / 100.0
-    base = speed * ((@width_scale + @height_scale) / 2.0)
+    base = speed * @average_scale
     # @width_scale  = width_scale
     # @height_scale = height_scale
     # raise "BASE: #{base}"

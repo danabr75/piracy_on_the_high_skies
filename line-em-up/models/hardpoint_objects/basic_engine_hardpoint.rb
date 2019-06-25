@@ -7,9 +7,14 @@ module HardpointObjects
     PROJECTILE_CLASS   = nil 
     FIRING_GROUP_NUMBER = nil # Passive
 
-    ACCELERATION   = 1.1
-    ROTATION_BOOST = 0.5
-    MASS_BOOST     = 15
+    PERMANENT_STEAM_USE       = 50
+    TILES_PER_SECOND_MODIFIER = 1.25
+
+
+    BOOST_SPEED_MODIFIER  = 1.2
+    BOOST_STEAM_USAGE     = 0.4
+    BOOST_MASS_MODIFIER   = 1.1
+
 
     def self.get_hardpoint_image
       # raise "OVERRIDE ME"

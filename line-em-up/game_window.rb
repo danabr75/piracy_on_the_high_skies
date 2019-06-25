@@ -497,6 +497,10 @@ class GameWindow < Gosu::Window
     if id == Gosu::KB_SPACE
       @player.deactivate_group_1
     end
+
+    if id == Gosu::KB_LEFT_SHIFT
+      @player.disable_boost
+    end 
   end
 
   def get_center_font_ui_y
@@ -566,9 +570,10 @@ class GameWindow < Gosu::Window
       end
 
       if Gosu.button_down?(Gosu::KB_LEFT_SHIFT) && !menus_active
-        if @player.use_steam(0.5)
-          @player.movement(@average_scale / 2, @player.angle)
-        end
+        @player.enable_boost
+        # if @player.use_steam(0.5)
+        #   @player.movement(@average_scale / 2, @player.angle)
+        # end
       end
 
       if Gosu.button_down?(Gosu::KB_M)
@@ -952,7 +957,7 @@ class GameWindow < Gosu::Window
       # @font.draw("GPS: #{@player.current_map_tile_x} - #{@player.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("MAP PIXEL: #{@player.current_map_pixel_x.round(1)} - #{@player.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Angle: #{@player.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Momentum: #{@player.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Momentum: #{@player.ship.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
       # @font.draw("Cursor MAP PIXEL   : #{@pointer.current_map_pixel_x.round(1)} - #{@pointer.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

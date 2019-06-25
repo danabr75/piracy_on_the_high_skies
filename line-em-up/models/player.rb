@@ -113,7 +113,7 @@ class Player < ScreenFixedObject
     # Get details from ship
     # @ship.mass = 100 # Get from ship
     # @ship.mass = 300 # Get from ship
-    @current_momentum = 0
+    # @current_momentum = 0
     # @ship.mass = @ship.mass# * 3 # speed here?
     # @ship.speed = 50 #/ (@ship.mass / 2)
     # @ship.speed = 100 #/ (@ship.mass / 2)
@@ -127,7 +127,16 @@ class Player < ScreenFixedObject
     # @armor = @ship.get_armor
     @can_take_damage  = true
     @controls_enabled = true
+    @boost_active     = false
     # @steam_power  = MAX_STEAM_POWER
+  end
+
+  def enable_boost
+    @boost_active = true
+  end
+
+  def disable_boost
+    @boost_active = false
   end
 
   def disable_controls
@@ -155,7 +164,7 @@ class Player < ScreenFixedObject
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
     # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
-    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, @angle, self, options.merge(hardpoint_data))
+    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum}))
     # @ship.mass = @ship.mass# * 3 # speed here?
   end
 
@@ -426,23 +435,14 @@ class Player < ScreenFixedObject
   # Figure out why these got switched later, accelerate and brake
   def accelerate
     if @controls_enabled 
-      # self.movement(@ship.speed, @angle, false)
-
-      if @current_momentum <= @ship.mass
-        @current_momentum += @ship.speed
-        @current_momentum = @ship.mass if @current_momentum < -@ship.mass
-      end
+      ship.accelerate(@boost_active)
     end
     return true
   end
   
   def brake
     if @controls_enabled 
-      # self.movement(@ship.speed, @angle - 180, false)
-      if @current_momentum >= -@ship.mass
-        @current_momentum -= (@ship.speed / 2.0)
-        @current_momentum = -@ship.mass if @current_momentum < -@ship.mass
-      end
+      ship.brake
     end
     return true
   end
@@ -520,51 +520,26 @@ class Player < ScreenFixedObject
 
 
   def update mouse_x, mouse_y, player
-    # puts "PLAYER ANGLE: #{@angle}"
-    # run_pixel_to_tile_validations
-    # raise "ISSUE" if movement_x.class != Integer || movement_y.class != Integer 
-    # puts "HERE: #{@current_map_pixel_x.class} - #{@current_map_pixel_y.class}"
-    # puts "HERE2: #{[@current_map_pixel_x , @current_map_pixel_y]}"
-    # raise "ISSUE2" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
-    # puts "PLAYER: #{@current_map_pixel_x} - #{@current_map_pixel_y}" if @time_alive % 10 == 0
     @ship.update(mouse_x, mouse_y, player)
-
-    if @current_momentum > 0.0
-      # speed = @current_momentum / 200
-      # @ship.mass
-      # @current_momentum
-      speed = @ship.speed * (@current_momentum / (@ship.mass)) / 2.0
-      # puts "ACCEL UPDEATE: #{speed} = #{@ship.speed} * (#{@ship.mass} - #{@current_momentum})" 
-      # ACCEL UPDEATE: 114.125 = 1.375 * (84.375 - 1.375)
-      # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
-      # ACCEL UPDEATE: 1.2177948300510568 = 1.375 * (84.375 - 74.7283191167694)
-      # CALCED CURRENT MOMENTUM: 74.11942170174387 -= 1.2177948300510568 / 5.0
-      x_diff, y_diff, halt = self.movement(speed, @angle)
+    if @ship.current_momentum > 0.0
+      # if @boost_active
+      #   speed = @ship.boost_speed * (@current_momentum / (@ship.mass)) / 2.0
+      # else
+      speed = @ship.tiles_per_second * (@ship.current_momentum / (@ship.mass))
+      # end
+      ignore1, ignore2, halt = self.movement(speed, @angle)
       if halt
-        @current_momentum = 0
-      else
-        @current_momentum -= speed * 2.0
-        # puts "CALCED CURRENT MOMENTUM: #{@current_momentum} -= #{speed} / 5.0"
-        @current_momentum = 0 if @current_momentum < 0
+        @ship.current_momentum -= @ship.mass / 100.0
+        @ship.current_momentum = 0 if @ship.current_momentum < 0
       end
-    elsif @current_momentum < 0.0
-      speed = @ship.speed * (@current_momentum / (@ship.mass)) / 2.0
-      # speed is negative if current_momentum is minus
-      # speed = speed * -1
-      puts "SPEED HERE: "
-      puts "#{speed} = #{@ship.speed} * (#{@current_momentum } / #{(@ship.mass)}) / #{2.0}"
-      x_diff, y_diff, halt = self.movement(speed, @angle)
+    elsif @ship.current_momentum < 0.0
+      speed = (0.6 * @ship.tiles_per_second) * (@ship.current_momentum / (@ship.mass))
+      ignore1, ignore2, halt = self.movement(speed, @angle)
       if halt
-        @current_momentum = 0
-      else
-        @current_momentum -= speed * 2.0
-        puts "REVESRSE UPDATING MOMEENTED: #{@current_momentum} += #{speed} * 2.0"
-        @current_momentum = 0 if @current_momentum > 0
+        @ship.current_momentum -= @ship.mass / 100.0
+        @ship.current_momentum = 0 if @ship.current_momentum < 0
       end
-    else
-      x_diff, y_diff = [0,0]
     end
-
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
