@@ -21,6 +21,9 @@ class PilotableShip < GeneralObject
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   attr_accessor :hardpoints
   attr_reader :rotation_speed
+  attr_reader :steam_max_capacity, :steam_rate_increase, :current_steam_capacity
+  attr_reader :mass
+
   MAX_HEALTH = 200
   INIT_HEALTH = 200
 
@@ -114,8 +117,8 @@ class PilotableShip < GeneralObject
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
     # Update hardpoints location
-    @engine_hardpoints = []
-    @steam_cores = []
+    @engine_hardpoints     = []
+    @steam_core_hardpoints = []
     @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
     self.class::HARDPOINT_LOCATIONS.each_with_index do |location, index|
       item_klass_string = options[:hardpoint_data] ? options[:hardpoint_data][index.to_s] : nil
@@ -138,9 +141,10 @@ class PilotableShip < GeneralObject
         @engine_hardpoints << item_klass
       end
       # ADD BACK IN
-      # if [:steam_core, :generic].include?(location[:slot_type]) && !item_klass.nil? && Engine.descendants.include?(item_klass)
-      #   @steam_cores << item_klass
-      # end
+      # HardpointObjects::SteamCoreHardpoint
+      if [:steam_core].include?(location[:slot_type]) && !item_klass.nil? && HardpointObjects::SteamCoreHardpoint.descendants.include?(item_klass)
+        @steam_core_hardpoints << item_klass
+      end
       # Always point engines toward the rear
       if (location[:slot_type] == :engine || location[:slot_type] == :generic) && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
         location[:angle_offset] = 180
@@ -164,6 +168,20 @@ class PilotableShip < GeneralObject
       rotation_boost     += engine_klass::ROTATION_BOOST
       mass_boost         = mass_boost + engine_klass::MASS_BOOST
     end
+
+
+    steam_max_capacity = 0.0
+    steam_rate_increase = 0.0
+    @steam_core_hardpoints.each do |steam_core_klass|
+      # puts "ENGINEKLASS HERE: #{engine_klass}"
+      steam_max_capacity    += steam_core_klass::STEAM_MAX_CAPACITY
+      steam_rate_increase   += steam_core_klass::STEAM_RATE_INCREASE
+    end
+
+    @steam_max_capacity     = steam_max_capacity
+    @current_steam_capacity = @steam_max_capacity
+    @steam_rate_increase    = steam_rate_increase
+
     puts "@engine_hardpoints: #{@engine_hardpoints.count}"
 
     options.delete(:hardpoint_data)
@@ -184,6 +202,18 @@ class PilotableShip < GeneralObject
     puts "@mass = self.class::MASS  + mass_boost * @average_scale" if owner.class == Player
     puts "#{@mass} = #{self.class::MASS}  + #{mass_boost} * #{@average_scale}" if owner.class == Player
     # 843.75 = 30  * 15.0 * 1.875
+  end
+
+
+
+
+  def use_steam usage
+    if usage < @current_steam_capacity
+      @current_steam_capacity -= usage
+      return true
+    else
+      return false
+    end
   end
 
   # right broadside
@@ -501,6 +531,15 @@ class PilotableShip < GeneralObject
   end
   
   def update mouse_x, mouse_y, player
+
+    # @steam_max_capacity  = steam_max_capacity
+    # @steam_rate_increase = steam_rate_increase
+    # @current_steam_capacity
+    if @current_steam_capacity < @steam_max_capacity
+      @current_steam_capacity += @steam_rate_increase
+      @steam_power = @steam_max_capacity if @current_steam_capacity > @steam_max_capacity
+    end
+
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
     if !@hide_hardpoints

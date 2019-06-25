@@ -148,6 +148,10 @@ class AIShip < ScreenMapFixedObject
     end
   end
 
+  def use_steam usage
+    return @ship.use_steam(usage)
+  end
+
   def update_momentum
     if @current_momentum > 0.0
       speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
