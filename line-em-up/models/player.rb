@@ -440,6 +440,7 @@ class Player < ScreenFixedObject
     return true
   end
   
+  # Bake should not be a reverse. Brake should bring us to 0. Reverse should take us backwards.
   def brake
     if @controls_enabled 
       ship.brake

@@ -230,7 +230,12 @@ class PilotableShip < GeneralObject
     @half_mass        = self.class::MASS / 2.0
     @momentum_rate    = self.class::MOMENTUM_RATE
     @current_momentum = options[:current_momentum] || 0
-    @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @average_scale
+
+    if @engine_hardpoints.count > 0
+      @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @average_scale
+    else
+      @tiles_per_second = (self.class::TILES_PER_SECOND / 2.0) * @average_scale
+    end
 
     # @speed             = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
     # puts "SPEED #{@speed}" if owner.class == Player
