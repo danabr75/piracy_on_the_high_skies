@@ -71,6 +71,7 @@ Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
 
 # RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768]]
 # WIDTH, HEIGHT = 1080, 720
+require_relative 'models/graphics/smoke.rb'
 
 class GameWindow < Gosu::Window
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
@@ -87,6 +88,9 @@ class GameWindow < Gosu::Window
     @config_path = self.class::CONFIG_FILE
     @window = self
     @open_gl_executer = ExecuteOpenGl.new
+
+    @smoke = Graphics::Smoke.new
+
     # GET difficulty from config file.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     @difficulty = options[:difficulty]
     @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
@@ -543,6 +547,9 @@ class GameWindow < Gosu::Window
 
 
     @pointer.update(self.mouse_x, self.mouse_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
+
+    @smoke.update(self.mouse_x, self.mouse_y, @player)
+
     if @start_fullscreen
       @start_fullscreen = false
       GameWindow.fullscreen(self)
@@ -898,6 +905,7 @@ class GameWindow < Gosu::Window
 
     @open_gl_executer.draw(@gl_background, @projectiles + @destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
+    @smoke.draw
     @menu.draw
     @ship_loadout_menu.draw
     # @button.draw
