@@ -255,7 +255,7 @@ class Hardpoint < GeneralObject
 
       # Hardpoints angle_from_center IS USED TO CALCULATE POS X,Y, not to find firing angle.
       attack_projectile = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, destination_angle, start_point, end_point, nil, nil, @owner, options)
-      @drawable_items_near_self << @item
+      # @drawable_items_near_self << @item
     end
 
     if attack_projectile
@@ -270,14 +270,14 @@ class Hardpoint < GeneralObject
 
 
   def update_current_map_pixel_coords ship_angle, ship_map_pixel_x, ship_map_pixel_y
-      angle_correction = 5
-      step = (Math::PI/180 * (360 -  @angle_from_center + ship_angle + 90 + angle_correction)) + 90.0 + 45.0# - 180
-      # step = step.round(5)
-      # puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
-      @current_map_pixel_x = Math.cos(step) * @radius + ship_map_pixel_x
-      # Adjustment - due to X offset issue
-      # projectile_x = current_map_pixel_x + (current_map_pixel_x - projectile_x)
-      @current_map_pixel_y = Math.sin(step) * @radius + ship_map_pixel_y
+    angle_correction = 5
+    step = (Math::PI/180 * (360 -  @angle_from_center + ship_angle + 90 + angle_correction)) + 90.0 + 45.0# - 180
+    # step = step.round(5)
+    # puts "INGOING: #{current_map_pixel_x.round(2)} - #{current_map_pixel_y.round(2)}"
+    @current_map_pixel_x = Math.cos(step) * @radius + ship_map_pixel_x
+    # Adjustment - due to X offset issue
+    # projectile_x = current_map_pixel_x + (current_map_pixel_x - projectile_x)
+    @current_map_pixel_y = Math.sin(step) * @radius + ship_map_pixel_y
   end
 
   def get_x
@@ -293,6 +293,7 @@ class Hardpoint < GeneralObject
   # end
 
   def draw center_x, center_y, ship_current_angle, viewable_pixel_offset_x, viewable_pixel_offset_y
+    @drawable_items_near_self.each { |di| di.draw(center_x, center_y, ship_current_angle) }
     drawing_correction  = 6
     step = (Math::PI/180 * (360 - ship_current_angle + @angle_from_center + 90 + drawing_correction)) + 90.0 + 45.0# - 180
     # step = step.round(5)
@@ -304,11 +305,12 @@ class Hardpoint < GeneralObject
   end
 
   def draw_gl
-    @drawable_items_near_self.reject! { |item| item.draw_gl }
+  #   @drawable_items_near_self. { |item| item.draw_gl }
   end
 
 
   def update mouse_x, mouse_y, player
+    @drawable_items_near_self.reject! { |item| item.update(mouse_x, mouse_y, player) }
     # puts "IS PLAYER HERE? #{[@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y]}"
     update_current_map_pixel_coords(@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y)
     # Center should stay the same

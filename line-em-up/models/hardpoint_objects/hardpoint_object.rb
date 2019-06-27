@@ -218,23 +218,23 @@ module HardpointObjects
       @image.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     end
 
-    def draw_gl
-      # if @inited
-      #   z = ZOrder::Projectile
-      #   new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
-      #   new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
-      #   new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
+    # def draw_gl
+    #   # if @inited
+    #   #   z = ZOrder::Projectile
+    #   #   new_width1, new_height1, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
+    #   #   new_width2, new_height2, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x, @y + @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
+    #   #   new_width3, new_height3, increment_x, increment_y = LaserBeam.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width         , @screen_pixel_height)
 
-      #   glEnable(GL_BLEND)
-      #   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
+    #   #   glEnable(GL_BLEND)
+    #   #   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
 
-      #   glBegin(GL_TRIANGLES)
-      #     glColor4f(0, 1, 0, 0.2)
-      #     glVertex3f(new_width1, new_height1, 0.0)
-      #     glVertex3f(new_width2, new_height2, 0.0)
-      #     glVertex3f(new_width3, new_height3, 0.0)
-      #   glEnd
-      # end
-    end
+    #   #   glBegin(GL_TRIANGLES)
+    #   #     glColor4f(0, 1, 0, 0.2)
+    #   #     glVertex3f(new_width1, new_height1, 0.0)
+    #   #     glVertex3f(new_width2, new_height2, 0.0)
+    #   #     glVertex3f(new_width3, new_height3, 0.0)
+    #   #   glEnd
+    #   # end
+    # end
   end
 end

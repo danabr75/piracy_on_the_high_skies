@@ -364,6 +364,12 @@ class GeneralObject
     return GeneralObject.nearest_angle(angle, min_angle, max_angle, {with_diff: true})
   end
 
+  def self.angle_diff angle1, angle2, options = {}
+    value = angle2 - angle1
+    value = (value + 180) % 360 - 180
+    return value
+  end
+
 # # new_pos_x = @x / @screen_pixel_width.to_f * (AXIS_X_MAX - AXIS_X_MIN) + AXIS_X_MIN;
 # # new_pos_y = (1 - @y / @screen_pixel_height.to_f) * (AXIS_Y_MAX - AXIS_Y_MIN) + AXIS_Y_MIN;
 #   # This isn't exactly right, objects are drawn farther away from center than they should be.
@@ -570,6 +576,48 @@ class GeneralObject
 
     return [x_diff, y_diff, hit_map_boundary]
   end
+
+
+  def self.movement current_map_pixel_x, current_map_pixel_y, speed, angle, width_scale, height_scale#, allow_over_edge_of_map = false
+    raise " NO SCALE PRESENT FOR MOVEMENT" if width_scale.nil?         || height_scale.nil?
+    raise " NO LOCATION PRESENT"           if current_map_pixel_x.nil? || current_map_pixel_y.nil?
+    map_edge = 50
+
+    step = (Math::PI/180 * (angle + 90))# - 180
+    new_x = Math.cos(step) * (speed * width_scale )  + @current_map_pixel_x
+    new_y = Math.sin(step) * (speed * height_scale) + @current_map_pixel_y
+
+    x_diff = current_map_pixel_x - new_x
+    y_diff = current_map_pixel_y - new_y
+
+    # hit_map_boundary = false
+    # if !allow_over_edge_of_map
+    #   if (current_map_pixel_y - y_diff) > map_pixel_height
+    #     y_diff = y_diff - ((current_map_pixel_y + y_diff) - current_map_pixel_y)
+    #     hit_map_boundary = true
+    #   elsif current_map_pixel_y - y_diff < 0
+    #     y_diff = y_diff + (current_map_pixel_y + y_diff)
+    #     hit_map_boundary = true
+    #   end
+
+    #   if @current_map_pixel_x - x_diff > @map_pixel_width
+    #     # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_pixel_width}"
+    #     x_diff = x_diff - ((@current_map_pixel_x + x_diff) - @current_map_pixel_x)
+    #     # @current_momentum = 0
+    #     hit_map_boundary = true
+    #   elsif @current_map_pixel_x - x_diff < 0
+    #     x_diff = x_diff + (@current_map_pixel_x + x_diff)
+    #     # @current_momentum = 0
+    #     hit_map_boundary = true
+    #   end
+    # end
+    current_map_pixel_y += y_diff
+    current_map_pixel_x += x_diff
+
+    # return [x_diff, y_diff, hit_map_boundary]
+    return [current_map_pixel_x, current_map_pixel_y]
+  end
+
 
   # Need to adjust this method. Should go from X,Y to map_pixel_x and map_pixel_y
   # X and Y are no longer used to calculate collisions

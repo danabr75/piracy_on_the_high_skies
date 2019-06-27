@@ -89,7 +89,7 @@ class GameWindow < Gosu::Window
     @window = self
     @open_gl_executer = ExecuteOpenGl.new
 
-    @smoke = Graphics::Smoke.new
+    # @smoke = Graphics::Smoke.new
 
     # GET difficulty from config file.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     @difficulty = options[:difficulty]
@@ -548,7 +548,7 @@ class GameWindow < Gosu::Window
 
     @pointer.update(self.mouse_x, self.mouse_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
 
-    @smoke.update(self.mouse_x, self.mouse_y, @player)
+    # @smoke.update(self.mouse_x, self.mouse_y, @player)
 
     if @start_fullscreen
       @start_fullscreen = false
@@ -905,7 +905,7 @@ class GameWindow < Gosu::Window
 
     @open_gl_executer.draw(@gl_background, @projectiles + @destructable_projectiles, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
-    @smoke.draw
+    # @smoke.draw
     @menu.draw
     @ship_loadout_menu.draw
     # @button.draw
