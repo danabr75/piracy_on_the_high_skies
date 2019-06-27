@@ -1,4 +1,5 @@
 require_relative 'general_object.rb'
+require_relative 'graphics/angled_smoke.rb'
 require 'gosu'
 
 require 'opengl'
@@ -293,15 +294,20 @@ class Hardpoint < GeneralObject
   # end
 
   def draw center_x, center_y, ship_current_angle, viewable_pixel_offset_x, viewable_pixel_offset_y
-    @drawable_items_near_self.each { |di| di.draw(center_x, center_y, ship_current_angle) }
     drawing_correction  = 6
     step = (Math::PI/180 * (360 - ship_current_angle + @angle_from_center + 90 + drawing_correction)) + 90.0 + 45.0# - 180
     # step = step.round(5)
     @x = Math.cos(step) * @radius + center_x
     @y = Math.sin(step) * @radius + center_y
 
-    @item.draw(-ship_current_angle + @angle_offset, @x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z) if @item
-    @image_hardpoint_empty.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -ship_current_angle + @angle_offset, 0.5, 0.5, @width_scale, @height_scale) if !@item
+    new_x = @x + viewable_pixel_offset_x
+    new_y = @y - viewable_pixel_offset_y
+    new_angle = -ship_current_angle + @angle_offset
+
+    @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
+
+    @item.draw(new_angle, new_x, new_y, @z) if @item
+    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @width_scale, @height_scale) if !@item
   end
 
   def draw_gl
@@ -310,7 +316,7 @@ class Hardpoint < GeneralObject
 
 
   def update mouse_x, mouse_y, player
-    @drawable_items_near_self.reject! { |item| item.update(mouse_x, mouse_y, player) }
+    @drawable_items_near_self.reject! { |di| !di.update(mouse_x, mouse_y, player) }
     # puts "IS PLAYER HERE? #{[@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y]}"
     update_current_map_pixel_coords(@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y)
     # Center should stay the same
@@ -324,6 +330,17 @@ class Hardpoint < GeneralObject
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     # @time_alive += 1 if self.is_alive
+    puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
+    if @slot_type == :engine && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
+      # speed = @owner.current_momentum / 100.0
+      speed = 0.001
+      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, speed, @owner.angle - 90, @owner.angle + 90, @width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
+      puts "ADDING TO @drawable_items_near_self EHERE!!!"
+    end
+    if @slot_type == :engine && @owner.current_momentum.nil?
+      puts "OWNER IS NIL? "
+      puts @owner.class
+    end
   end
 
 end

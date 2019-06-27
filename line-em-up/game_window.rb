@@ -71,7 +71,7 @@ Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
 
 # RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768]]
 # WIDTH, HEIGHT = 1080, 720
-require_relative 'models/graphics/smoke.rb'
+# require_relative 'models/graphics/smoke.rb'
 
 class GameWindow < Gosu::Window
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]

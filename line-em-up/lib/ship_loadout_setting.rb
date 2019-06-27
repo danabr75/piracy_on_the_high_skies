@@ -19,7 +19,7 @@ class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
-  HARDPOINT_IMAGE_SCALER = 16.0
+  IMAGE_SCALER = 16.0
 
   # def self.get_weapon_options
   #   ::Launcher.descendants
@@ -208,12 +208,12 @@ class ShipLoadoutSetting < Setting
         if image
           # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
           image.draw(
-            value[:x] - (image.width  / 2.0) / HARDPOINT_IMAGE_SCALER,
-            value[:y] - (image.height / 2.0) / HARDPOINT_IMAGE_SCALER,
+            value[:x] - (image.width  / 2.0) / IMAGE_SCALER,
+            value[:y] - (image.height / 2.0) / IMAGE_SCALER,
             # value[:x] - (image.width  / 2)  + @cell_width  / 2,
             # value[:y] - (image.height / 2)  + @cell_height / 2,
             @hardpoint_image_z,
-            @width_scale / HARDPOINT_IMAGE_SCALER, @height_scale / HARDPOINT_IMAGE_SCALER
+            @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
           )
         end
       end
@@ -516,7 +516,7 @@ class ShipLoadoutSetting < Setting
       detail_box_draw
 
       if @window.cursor_object
-        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale / HARDPOINT_IMAGE_SCALER, @height_scale / HARDPOINT_IMAGE_SCALER)
+        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
       end
 
       hardpoint_draw

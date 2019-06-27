@@ -581,11 +581,13 @@ class GeneralObject
   def self.movement current_map_pixel_x, current_map_pixel_y, speed, angle, width_scale, height_scale#, allow_over_edge_of_map = false
     raise " NO SCALE PRESENT FOR MOVEMENT" if width_scale.nil?         || height_scale.nil?
     raise " NO LOCATION PRESENT"           if current_map_pixel_x.nil? || current_map_pixel_y.nil?
+    raise " NO ANGLE PRESENT"              if angle.nil? 
+    raise " NO SPEED PRESENT"              if speed.nil? 
     map_edge = 50
 
     step = (Math::PI/180 * (angle + 90))# - 180
-    new_x = Math.cos(step) * (speed * width_scale )  + @current_map_pixel_x
-    new_y = Math.sin(step) * (speed * height_scale) + @current_map_pixel_y
+    new_x = Math.cos(step) * (speed * width_scale ) + current_map_pixel_x
+    new_y = Math.sin(step) * (speed * height_scale) + current_map_pixel_y
 
     x_diff = current_map_pixel_x - new_x
     y_diff = current_map_pixel_y - new_y

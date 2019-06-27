@@ -19,7 +19,7 @@ class Player < ScreenFixedObject
 
   attr_accessor :bombs, :secondary_weapon, :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self, :broadside_mode
-  attr_reader :current_momentum
+  # attr_reader :current_momentum
 
 
   # ONLY USED FOR DEBUG!
@@ -517,6 +517,11 @@ class Player < ScreenFixedObject
 
   def get_speed
     return @ship.speed
+  end
+
+
+  def current_momentum
+    @ship.current_momentum
   end
 
 

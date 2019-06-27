@@ -10,7 +10,7 @@ require_relative "../lib/global_variables.rb"
 class ObjectInventory
   include GlobalVariables
   include GlobalConstants
-  HARDPOINT_IMAGE_SCALER = 16.0
+  IMAGE_SCALER = 16.0
 
 
   def init_global_vars
@@ -204,7 +204,7 @@ class ObjectInventory
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) / HARDPOINT_IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / HARDPOINT_IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @width_scale / HARDPOINT_IMAGE_SCALER, @height_scale / HARDPOINT_IMAGE_SCALER)
+          image.draw(element[:x] - (image.width / 2) / IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
         end
       end
     end

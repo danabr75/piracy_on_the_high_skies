@@ -555,7 +555,7 @@ class PilotableShip < GeneralObject
     if !@hide_hardpoints
       @hardpoints.each do |hardpoint|
         # puts "UPDATING HARDPOINT HERE: #{self}"
-        hardpoint.update(mouse_x, mouse_y, self)
+        hardpoint.update(mouse_x, mouse_y, player)
       end
     end
 

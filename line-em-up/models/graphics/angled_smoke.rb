@@ -4,6 +4,9 @@ require 'opengl'
 require 'glu'
 require 'glut'
 
+
+require_relative 'angled_particle.rb'
+
 module Graphics
 
   include OpenGL # Gl
@@ -15,7 +18,7 @@ module Graphics
 
     attr_reader :is_alive
 
-    NUMBER_OF_PARTICLES = 20
+    NUMBER_OF_PARTICLES = 1
 
     def self.get_image
       @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/smoke.png")
