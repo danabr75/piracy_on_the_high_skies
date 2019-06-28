@@ -95,7 +95,7 @@ class GLBackground
   # end
 
 
-  def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height
+  def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height, resolution_scale
     @debug = true
     # @debug = false
 
@@ -103,6 +103,7 @@ class GLBackground
     # @y_add_top_tracker = []
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
 
+    @resolution_scale = resolution_scale
     # These are the width and length of each background tile
     @opengl_increment_y = 1 / (VISIBLE_MAP_HEIGHT.to_f / 4.0)
     @opengl_increment_x = 1 / (VISIBLE_MAP_WIDTH.to_f  / 4.0)

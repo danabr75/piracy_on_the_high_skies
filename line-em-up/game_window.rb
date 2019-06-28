@@ -134,16 +134,19 @@ class GameWindow < Gosu::Window
       @height_scale = 1.0
       @average_scale = 1.0
       # @scale = @width / (@height.to_f)
-      @scale = 1.0
+      @resolution_scale = 1.0
     else
       # original_width, original_height = RESOLUTIONS[0]
       @width_scale =  @width / default_width.to_f
       @height_scale = @height / default_height.to_f
       @average_scale = (@width_scale + @height_scale) / 2.0
+
+      puts "AVERAGE SCALE: #{@average_scale}"
       # @scale = (@width_scale + @height_scale) / 2
       # raise "NEW SCALE: #{@width_scale} x #{@height_scale}"
       # @scale = @width / (@height.to_f)
-      @scale = 1.0
+      @resolution_scale = @width.to_f / (@height.to_f)
+      puts "resolution_scale: #{@resolution_scale}"
     end
 
 
@@ -167,7 +170,7 @@ class GameWindow < Gosu::Window
     self.caption = "OpenGL Integration"
     
 
-    @gl_background = GLBackground.new(@width_scale, @height_scale, @width, @height)
+    @gl_background = GLBackground.new(@width_scale, @height_scale, @width, @height, @resolution_scale)
 
 
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
@@ -313,7 +316,7 @@ class GameWindow < Gosu::Window
     # START MENU INIT
     # Can punt to different file
     @window = self
-    @menu = Menu.new(@window, @width / 2, 10 * @scale, ZOrder::UI, @scale)
+    @menu = Menu.new(@window, @width / 2, 10 * @average_scale, ZOrder::UI, @resolution_scale)
     @menu.add_item(
       :resume, "Resume",
       0, 0,
@@ -349,7 +352,7 @@ class GameWindow < Gosu::Window
     # START SHIP LOADOUT INIT.
     # @refresh_player_ship = false
     @cursor_object = nil
-    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @scale})
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @average_scale})
     # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu]
@@ -509,7 +512,7 @@ class GameWindow < Gosu::Window
 
   def get_center_font_ui_y
     return_value = @center_ui_y
-    @center_ui_y += 10 * @scale
+    @center_ui_y += 10 * @average_scale
     return return_value
   end
 
