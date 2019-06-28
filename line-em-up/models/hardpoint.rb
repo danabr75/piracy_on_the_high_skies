@@ -255,7 +255,18 @@ class Hardpoint < GeneralObject
       # projectile_y = Math.sin(step) * @radius + current_map_pixel_y
 
       # Hardpoints angle_from_center IS USED TO CALCULATE POS X,Y, not to find firing angle.
+
       attack_projectile = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, destination_angle, start_point, end_point, nil, nil, @owner, options)
+      if attack_projectile
+        @drawable_items_near_self << Graphics::AngledSmoke.new(
+          @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
+          @height_scale, @screen_pixel_width, @screen_pixel_height,
+          {
+            green: 35, blue: 13, decay_rate_multiplier: 10.0, shift_blue: true, shift_green: true,
+            scale_multiplier: 0.25
+          }
+        )
+      end
       # @drawable_items_near_self << @item
     end
 
@@ -331,16 +342,15 @@ class Hardpoint < GeneralObject
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     # @time_alive += 1 if self.is_alive
     puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
-    if @slot_type == :engine && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
+    if @slot_type == :engine && @item && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
-      speed = 0.001
-      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, speed, @owner.angle - 90, @owner.angle + 90, @width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
+      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
       puts "ADDING TO @drawable_items_near_self EHERE!!!"
     end
-    if @slot_type == :engine && @owner.current_momentum.nil?
-      puts "OWNER IS NIL? "
-      puts @owner.class
-    end
+    # if @slot_type == :engine && @owner.current_momentum.nil?
+    #   puts "OWNER IS NIL? "
+    #   puts @owner.class
+    # end
   end
 
 end

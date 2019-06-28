@@ -435,18 +435,27 @@ class Player < ScreenFixedObject
   # Figure out why these got switched later, accelerate and brake
   def accelerate
     if @controls_enabled 
-      ship.accelerate(@boost_active)
+      @ship.accelerate(@boost_active)
     end
     return true
   end
   
   # Bake should not be a reverse. Brake should bring us to 0. Reverse should take us backwards.
   def brake
-    if @controls_enabled 
-      ship.brake
+    if @controls_enabled
+      @ship.brake
     end
     return true
   end
+
+  # Bake should not be a reverse. Brake should bring us to 0. Reverse should take us backwards.
+  def reverse
+    if @controls_enabled 
+      @ship.reverse
+    end
+    return true
+  end
+
 
   def attack_group_1 pointer
     attack_results = {}
@@ -527,6 +536,10 @@ class Player < ScreenFixedObject
 
   def update mouse_x, mouse_y, player
     @ship.update(mouse_x, mouse_y, player)
+    if !@controls_enabled
+      @ship.brake
+    end
+
     if @ship.current_momentum > 0.0
       # if @boost_active
       #   speed = @ship.boost_speed * (@current_momentum / (@ship.mass)) / 2.0

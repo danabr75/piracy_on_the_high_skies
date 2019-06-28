@@ -366,10 +366,13 @@ class GeneralObject
 
   def self.angle_diff angle1, angle2, options = {}
     value = angle2 - angle1
-    value = (value + 180) % 360 - 180
+    puts "value = angle2 - angle1"
+    puts "#{value} = #{angle2} - #{angle1}"
+    value = (value + 180.0) % 360.0 - 180.0
     return value
   end
 
+  # 0 = GeneralObject.angle_diff(-96.59999999999935, 263.40000000000066)
 # # new_pos_x = @x / @screen_pixel_width.to_f * (AXIS_X_MAX - AXIS_X_MIN) + AXIS_X_MIN;
 # # new_pos_y = (1 - @y / @screen_pixel_height.to_f) * (AXIS_Y_MAX - AXIS_Y_MIN) + AXIS_Y_MIN;
 #   # This isn't exactly right, objects are drawn farther away from center than they should be.

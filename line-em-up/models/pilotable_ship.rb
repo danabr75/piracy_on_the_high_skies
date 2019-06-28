@@ -267,11 +267,26 @@ class PilotableShip < GeneralObject
     end
   end
 
-  def brake
+  def reverse
     if @current_momentum >= -@half_mass && !@block_momentum_decrease
       @current_momentum -= @momentum_rate
       @current_momentum = -@half_mass if @current_momentum < -@half_mass
     end
+  end
+
+  def brake
+    if @current_momentum > 0
+      reverse
+      if @current_momentum < 0
+        @current_momentum = 0
+      end
+    elsif @current_momentum < 0
+      accelerate
+      if @current_momentum > 0
+        @current_momentum = 0
+      end
+    end
+    return true
   end
 
   def use_steam usage
