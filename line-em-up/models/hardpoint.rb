@@ -262,7 +262,7 @@ class Hardpoint < GeneralObject
           @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
           @height_scale, @screen_pixel_width, @screen_pixel_height,
           {
-            green: 35, blue: 13, decay_rate_multiplier: 10.0, shift_blue: true, shift_green: true,
+            green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
             scale_multiplier: 0.25
           }
         )
