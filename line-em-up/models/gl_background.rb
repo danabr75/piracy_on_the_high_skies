@@ -567,8 +567,8 @@ class GLBackground
   OFF_EDGE_MAP_VALUE = {'height' => 2, 'terrain_index' => 3 }
 
   def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, projectiles, viewable_pixel_offset_x, viewable_pixel_offset_y
-    raise "WRONG MAP WIDTH! Expected #{@visible_map_tile_width + @extra_map_tile_width} Got #{@visible_map[0].length}" if @visible_map[0].length != @visible_map_tile_width + @extra_map_tile_width
-    raise "WRONG MAP HEIGHT! Expected #{@visible_map_tile_height + @extra_map_tile_height} Got #{@visible_map.length}" if @visible_map.length != @visible_map_tile_height + @extra_map_tile_height
+    raise "WRONG MAP WIDTH!  Expected #{@visible_map_tile_width  + @extra_map_tile_width } Got #{@visible_map[0].length}" if @visible_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
+    raise "WRONG MAP HEIGHT! Expected #{@visible_map_tile_height + @extra_map_tile_height} Got #{@visible_map.length}"    if @visible_map.length    != @visible_map_tile_height + @extra_map_tile_height
 
     puts "UPDATE --------------------- UPDATE"
     puts "@map_tile_top_row    = #{@map_tile_top_row}"
@@ -626,13 +626,13 @@ class GLBackground
         @map_tile_top_row    -= 1
 
         # if @gps_map_center_y + @gps_tile_offset_y > (@map_tile_height)
-        if @map_tile_bottom_row > (@map_tile_height)
+        if @map_tile_top_row < 0
           puts "ADDING IN EDGE OF MAP"
           @visual_map_of_visible_to_map.pop
-          @visual_map_of_visible_to_map.unshift(Array.new(@visible_map_tile_height + @extra_map_tile_height) { "N/A" })
+          @visual_map_of_visible_to_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { "N/A" })
 
           @visible_map.pop
-          @visible_map.unshift(Array.new(@visible_map_tile_height + @extra_map_tile_height) { OFF_EDGE_MAP_VALUE })
+          @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { OFF_EDGE_MAP_VALUE })
         else
           puts "ADDING NORMALLY"
           @visible_map.pop
@@ -641,7 +641,8 @@ class GLBackground
           new_array = []
           new_debug_array = []
           (0..@visible_map_tile_width + @extra_map_tile_width - 1).each_with_index do |visible_width, index_w|
-            x_index = @map_tile_width - @gps_map_center_x + visible_width - @gps_tile_offset_x
+            # x_index = @map_tile_width - @gps_map_center_x + visible_width - @gps_tile_offset_x
+            x_index = @map_tile_right_row + index_w
             if x_index < @map_tile_width && x_index >= 0
               # Flipping Y Axis when retrieving from map data
               # y_index = (@map_tile_height - ((@gps_map_center_y) + @gps_tile_offset_y))
