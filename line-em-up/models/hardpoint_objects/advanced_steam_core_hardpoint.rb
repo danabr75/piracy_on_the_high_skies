@@ -17,7 +17,7 @@ module HardpointObjects
     end
 
     def self.name
-      "Basic Steam Core"
+      "Advanced Steam Core"
     end
 
     def self.description

@@ -4,6 +4,7 @@ module HardpointObjects
     HARDPOINT_NAME = "minigun_launcher"
     LAUNCHER_MIN_ANGLE = -30
     LAUNCHER_MAX_ANGLE = 30
+    LAUNCHER_ROTATE_SPEED = 1
     PROJECTILE_CLASS = Bullet
     FIRING_GROUP_NUMBER = 2
     COOLDOWN_DELAY = 20

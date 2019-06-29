@@ -637,7 +637,7 @@ class GameWindow < Gosu::Window
           @player.rotate_clockwise
         end
 
-        @player.update(self.mouse_x, self.mouse_y, @player)
+        @player.update(self.mouse_x, self.mouse_y, @player, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
         @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @player.move_right if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)

@@ -534,8 +534,8 @@ class Player < ScreenFixedObject
   end
 
 
-  def update mouse_x, mouse_y, player
-    @ship.update(mouse_x, mouse_y, player)
+  def update mouse_x, mouse_y, player, cursor_map_pixel_x, cursor_map_pixel_y
+    @ship.update(mouse_x, mouse_y, player, cursor_map_pixel_x, cursor_map_pixel_y)
     if !@controls_enabled
       @ship.brake
     end

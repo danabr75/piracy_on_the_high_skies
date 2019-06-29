@@ -241,10 +241,10 @@ class Hardpoint < GeneralObject
       # TECHNICALLY, should factor in hardpoint location, not player location here
       start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
       end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
-      # Reorienting angle to make 0 north
-      destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
+      # # Reorienting angle to make 0 north
+      # destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
 
-      raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
+      # raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
 
 
       # # Calculate New Projectile location, based of ships angle, and the hardpoints angle from center
@@ -259,17 +259,22 @@ class Hardpoint < GeneralObject
 
       # Hardpoints angle_from_center IS USED TO CALCULATE POS X,Y, not to find firing angle.
 
-      attack_projectile = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, destination_angle, start_point, end_point, nil, nil, @owner, options)
-      if attack_projectile
-        @drawable_items_near_self << Graphics::AngledSmoke.new(
-          @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
-          @height_scale, @screen_pixel_width, @screen_pixel_height,
-          {
-            green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
-            scale_multiplier: 0.25
-          }
-        )
+      result = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, start_point, end_point, nil, nil, @owner, options)
+      attack_projectile = result[:projectile]
+      effects = result[:effects]
+      effects.each do |effect|
+        @drawable_items_near_self << effect
       end
+      # if attack_projectile
+      #   @drawable_items_near_self << Graphics::AngledSmoke.new(
+      #     @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
+      #     @height_scale, @screen_pixel_width, @screen_pixel_height,
+      #     {
+      #       green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
+      #       scale_multiplier: 0.25
+      #     }
+      #   )
+      # end
       # @drawable_items_near_self << @item
     end
 
@@ -309,9 +314,9 @@ class Hardpoint < GeneralObject
 
   def draw center_x, center_y, ship_current_angle, viewable_pixel_offset_x, viewable_pixel_offset_y
     drawing_correction  = 6
-    puts "RIGHT HERE: "
-    puts [ship_current_angle, @angle_from_center, drawing_correction]
-    puts [ship_current_angle.class, @angle_from_center.class, drawing_correction.class]
+    # puts "RIGHT HERE: "
+    # puts [ship_current_angle, @angle_from_center, drawing_correction]
+    # puts [ship_current_angle.class, @angle_from_center.class, drawing_correction.class]
     step = (Math::PI/180 * (360 - ship_current_angle + @angle_from_center + 90 + drawing_correction)) + 90.0 + 45.0# - 180
     # step = step.round(5)
     @x = Math.cos(step) * @radius + center_x
@@ -332,7 +337,7 @@ class Hardpoint < GeneralObject
   end
 
 
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player, ship_angle, attackable_location_x, attackable_location_y
     @drawable_items_near_self.reject! { |di| !di.update(mouse_x, mouse_y, player) }
     # puts "IS PLAYER HERE? #{[@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y]}"
     update_current_map_pixel_coords(@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y)
@@ -340,9 +345,14 @@ class Hardpoint < GeneralObject
     # @center_y = player.y
     # @center_x = player.x
 
+    # start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+    # end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
+    # # Reorienting angle to make 0 north
+    # destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
-    @item.update(mouse_x, mouse_y, self) if @item
+    # puts "ITEM HERE: #{@item.class}"
+    @item.update(mouse_x, mouse_y, self, ship_angle -@angle_offset, @current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y) if @item
     # @cooldown_wait -= 1              if @cooldown_wait > 0
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
@@ -351,7 +361,7 @@ class Hardpoint < GeneralObject
     if @slot_type == :engine && @item && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
       @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
-      puts "ADDING TO @drawable_items_near_self EHERE!!!"
+      # puts "ADDING TO @drawable_items_near_self EHERE!!!"
     end
     # if @slot_type == :engine && @owner.current_momentum.nil?
     #   puts "OWNER IS NIL? "

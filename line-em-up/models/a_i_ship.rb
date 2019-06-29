@@ -360,8 +360,10 @@ class AIShip < ScreenMapFixedObject
     # IDK, patrol an area, guard a town, move randomly around the map, visit structures, pick up pickups.
     # START NORMAL PASSIVE BEHAVIOUR
 
+    target_map_x = agro_target ? agro_target.current_map_pixel_x : nil
+    target_map_y = agro_target ? agro_target.current_map_pixel_y : nil
 
-    @ship.update(mouse_x, mouse_y, player)
+    @ship.update(mouse_x, mouse_y, player, target_map_x, target_map_y)
     # puts "AI SHIP UPDATE: #{@id}"
     result = super(mouse_x, mouse_y, player)
 

@@ -471,8 +471,8 @@ class PilotableShip < GeneralObject
     if !@hide_hardpoints
       # puts "AI DRAWING HARDPOINT HERE" if options[:test]
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
-      puts "WHAT IS GOING ON HERE"
-      puts [@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y]
+      # puts "WHAT IS GOING ON HERE"
+      # puts [@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y]
       @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
     end
     # puts "SHIP DRAW: #{@width_scale} - #{@height_scale} - #{scale_offset}"
@@ -537,7 +537,10 @@ class PilotableShip < GeneralObject
     glEnd
   end
   
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player, target_map_pixel_x, target_map_pixel_y
+
+    # hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) 
+
 
     puts "BEFORE MAX CAPACOTY: #{@steam_max_capacity}"
     capacity_diff = 0
@@ -575,7 +578,7 @@ class PilotableShip < GeneralObject
     if !@hide_hardpoints
       @hardpoints.each do |hardpoint|
         # puts "UPDATING HARDPOINT HERE: #{self}"
-        hardpoint.update(mouse_x, mouse_y, player)
+        hardpoint.update(mouse_x, mouse_y, player, @angle, target_map_pixel_x, target_map_pixel_y)
       end
     end
 

@@ -31,6 +31,11 @@ module HardpointObjects
 
     SHOW_HARDPOINT_BASE = false
 
+    LAUNCHER_MIN_ANGLE    = nil
+    LAUNCHER_MAX_ANGLE    = nil
+    LAUNCHER_ROTATE_SPEED = nil
+
+
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
       super(options)
@@ -50,6 +55,9 @@ module HardpointObjects
       if self.class::SHOW_HARDPOINT_BASE
         @image_base = self.class.get_hardpoint_base_image
       end
+
+      @firing_angle_offset = 0
+      @destination_angle   = 0
     end
 
     def self.get_starting_sound
@@ -74,12 +82,14 @@ module HardpointObjects
       return self.class::STEAM_POWER_USAGE
     end
 
-    def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
+    def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
       validate_not_nil([options], self.class.name, __callee__) 
+      # HARDPOINT FIRING ANGLE: -90
+      puts "HARDPOINT FIRING ANGLE: #{hardpoint_firing_angle}"
       angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
       angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
 
-      if is_angle_between_two_angles?(destination_angle, angle_min, angle_max)
+      if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
         @within_angle = true
 
         if !self.class::ACTIVE_DELAY.nil? && @active
@@ -99,7 +109,7 @@ module HardpointObjects
               @spinning_up = false
               # raise "STOP HERE: + #{get_steam_usage}"
               # puts "#{owner.use_steam(get_steam_usage)} = owner.use_steam(#{get_steam_usage})"
-              projectile = init_projectile(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+              projectile = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
               @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
               @cooldown_wait = get_cooldown
             end
@@ -107,12 +117,26 @@ module HardpointObjects
             @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up_sound && @active_for == 0 #&& @spinning_up == false
             @spinning_up = true
           end
-          return projectile
+          effects = []
+          if projectile
+            # effect = Graphics::AngledSmoke.new(
+            #   @current_map_pixel_x, @current_map_pixel_y, 1, @destination_angle, nil, @width_scale,
+            #   @height_scale, @screen_pixel_width, @screen_pixel_height,
+            #   {
+            #     green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
+            #     scale_multiplier: 0.25
+            #   }
+            # )
+            # effects << effect
+          end
+
+          return {projectile: projectile, effects: effects}
         end
       else
         @within_angle = false
         # puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
       end
+      return {projectile: nil, effects: []}
     end
 
     def self.get_hardpoint_media_location
@@ -173,13 +197,34 @@ module HardpointObjects
     end
 
     # This section is somehwat outdated.
-    def update mouse_x = nil, mouse_y = nil, object = nil
+    def update mouse_x = nil, mouse_y = nil, object = nil, ship_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
+      # HARDPOINT UPDATE ANGLE (ship_angle): 0
+      puts "HARDPOINT UPDATE ANGLE (ship_angle): #{ship_angle}"
       # puts "MINIGUN ACTIVE FOR: #{@active_for}"
       # Moving to attack section
       # if !self.class::ACTIVE_DELAY.nil? && @active
       #   @active_for += 1                       if @active_for != self.class::ACTIVE_DELAY
       #   @active_for = self.class::ACTIVE_DELAY if @active_for > self.class::ACTIVE_DELAY
       # end
+      # puts "RIGHT HERE TEST"
+      # puts [@current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y]
+      if self.class::LAUNCHER_MIN_ANGLE && self.class::LAUNCHER_MAX_ANGLE
+        start_point = OpenStruct.new(:x => current_map_pixel_x,   :y => current_map_pixel_y)
+        end_point   = OpenStruct.new(:x => attackable_location_x, :y => attackable_location_y)
+        # Reorienting angle to make 0 north
+        @destination_angle = self.class.angle_1to360(-(self.class.calc_angle(start_point, end_point) - 90))
+        # puts "self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)"
+        # puts "self.class.angle_1to360(#{self.class::LAUNCHER_MIN_ANGLE} + #{ship_angle})"
+        angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)
+        angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + ship_angle)
+
+        if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
+          # if self.class::LAUNCHER_ROTATE_SPEED
+          # @within_angle = true
+          puts "IS WITHIN ANGLE"
+        end
+      end
+
      
       if !self.class::ACTIVE_DELAY.nil? && (!@within_angle || !@active) && @active_for > 0
         if !@active
@@ -229,7 +274,7 @@ module HardpointObjects
     # end
 
     def draw angle, x, y, z, z_base
-      puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
+      # puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
         if @cooldown_wait <= 0.0
           self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle, 0.5, 0.5, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER)

@@ -11,7 +11,7 @@ class MenuItem
         # Can also be a font object!
         # @active_image = @main_image
         @is_button = options[:is_button]
-        puts "MENU ITEM HERE: #{@is_button}"
+        # puts "MENU ITEM HERE: #{@is_button}"
         @y_offset = options[:y_offset] || 0
         # @text = options[:text]
         # @value = options[:value]

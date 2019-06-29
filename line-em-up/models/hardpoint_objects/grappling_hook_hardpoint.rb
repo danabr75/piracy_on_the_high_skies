@@ -3,6 +3,7 @@ module HardpointObjects
     HARDPOINT_NAME = "grappling_hook_launcher"
     LAUNCHER_MIN_ANGLE = -60
     LAUNCHER_MAX_ANGLE = 60
+    LAUNCHER_ROTATE_SPEED = 1
     PROJECTILE_CLASS = GrapplingHook
     FIRING_GROUP_NUMBER = 3
     COOLDOWN_DELAY = 120
