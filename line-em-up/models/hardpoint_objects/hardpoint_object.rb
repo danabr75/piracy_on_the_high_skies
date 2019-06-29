@@ -109,7 +109,11 @@ module HardpointObjects
               @spinning_up = false
               # raise "STOP HERE: + #{get_steam_usage}"
               # puts "#{owner.use_steam(get_steam_usage)} = owner.use_steam(#{get_steam_usage})"
-              projectile = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+              if self.class::LAUNCHER_ROTATE_SPEED
+                projectile = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, hardpoint_firing_angle + @firing_angle_offset, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+              else
+                projectile = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+              end
               @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
               @cooldown_wait = get_cooldown
             end
@@ -196,10 +200,42 @@ module HardpointObjects
       # end
     end
 
+    # def rotate_towards_destination angle_diff
+    #   if angle_diff > 0.0
+    #     rotate_clockwise
+    #   else
+    #     rotate_counterclockwise
+    #   end
+    # end
+    # def rotate_clockwise
+    #   # puts "ROTATING AI"
+    #   increment = @rotation_speed
+    #   if @angle - increment <= 0
+    #     @angle = (@angle - increment) + 360
+    #   else
+    #     @angle -= increment
+    #   end
+    #   @ship.angle = @angle
+    #   # @ship.rotate_hardpoints_clockwise(increment.to_f)
+    #   return 1
+    # end
+    # def rotate_counterclockwise
+    #   # puts "ROTATING COUNTER AI"
+    #   increment = @rotation_speed
+    #   if @angle + increment >= 360
+    #     @angle = (@angle + increment) - 360
+    #   else
+    #     @angle += increment
+    #   end
+    #   @ship.angle = @angle
+    #   # @ship.rotate_hardpoints_counterclockwise(increment.to_f)
+    #   return 1
+    # end
+
     # This section is somehwat outdated.
-    def update mouse_x = nil, mouse_y = nil, object = nil, ship_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
+    def update mouse_x = nil, mouse_y = nil, object = nil, hardpoint_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
       # HARDPOINT UPDATE ANGLE (ship_angle): 0
-      puts "HARDPOINT UPDATE ANGLE (ship_angle): #{ship_angle}"
+      # puts "HARDPOINT UPDATE ANGLE (hardpoint_angle): #{hardpoint_angle}"
       # puts "MINIGUN ACTIVE FOR: #{@active_for}"
       # Moving to attack section
       # if !self.class::ACTIVE_DELAY.nil? && @active
@@ -209,19 +245,41 @@ module HardpointObjects
       # puts "RIGHT HERE TEST"
       # puts [@current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y]
       if self.class::LAUNCHER_MIN_ANGLE && self.class::LAUNCHER_MAX_ANGLE
+        puts "@firing_angle_offset: #{@firing_angle_offset}"
         start_point = OpenStruct.new(:x => current_map_pixel_x,   :y => current_map_pixel_y)
         end_point   = OpenStruct.new(:x => attackable_location_x, :y => attackable_location_y)
         # Reorienting angle to make 0 north
         @destination_angle = self.class.angle_1to360(-(self.class.calc_angle(start_point, end_point) - 90))
         # puts "self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)"
         # puts "self.class.angle_1to360(#{self.class::LAUNCHER_MIN_ANGLE} + #{ship_angle})"
-        angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)
-        angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + ship_angle)
+        angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_angle)
+        angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_angle)
 
         if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
           # if self.class::LAUNCHER_ROTATE_SPEED
           # @within_angle = true
-          puts "IS WITHIN ANGLE"
+          # puts "IS WITHIN ANGLE"
+          current_angle = self.class.angle_1to360(hardpoint_angle + @firing_angle_offset)
+          if @destination_angle != current_angle
+            angle_diff  = GeneralObject.angle_diff(@destination_angle, current_angle)
+
+            if angle_diff > 0.0 && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+              # @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
+              @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
+            elsif angle_diff < 0.0 && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+              @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
+            end
+
+          end
+          # @destination_angle   = 0
+        elsif @firing_angle_offset != 0.0
+          if @firing_angle_offset > 0.0
+            @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
+            @firing_angle_offset = 0.0 if @firing_angle_offset < 0.0
+          elsif @firing_angle_offset < 0.0
+            @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
+            @firing_angle_offset = 0.0 if @firing_angle_offset > 0.0
+          end
         end
       end
 
@@ -277,13 +335,13 @@ module HardpointObjects
       # puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
         if @cooldown_wait <= 0.0
-          self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle, 0.5, 0.5, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER)
+          self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER)
         end
       end
-      @image.draw_rot(x, y, z, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
 
       if self.class::SHOW_HARDPOINT_BASE
-        @image_base.draw_rot(x, y, z_base, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
       end
 
     end

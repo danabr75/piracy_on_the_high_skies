@@ -1,8 +1,10 @@
 module HardpointObjects
   class DumbMissileHardpoint < HardpointObjects::HardpointObject
     # 0 is NORTH, 180 is SOUTH
-    LAUNCHER_MIN_ANGLE = -20
-    LAUNCHER_MAX_ANGLE = 20
+    # LAUNCHER_MIN_ANGLE = -20
+    # LAUNCHER_MAX_ANGLE = 20
+    LAUNCHER_MIN_ANGLE = -40
+    LAUNCHER_MAX_ANGLE = 40
     LAUNCHER_ROTATE_SPEED = 1
     # MISSILE_LAUNCHER_INIT_ANGLE = 0.0
     COOLDOWN_DELAY = 240
