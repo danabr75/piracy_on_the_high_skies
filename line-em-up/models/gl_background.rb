@@ -520,8 +520,8 @@ class GLBackground
       # puts "verify_visible_map"
       y_length = @visual_map_of_visible_to_map.length - 1
       x_length = @visual_map_of_visible_to_map[0].length - 1
-      raise "MAP IS TOO SHORT Y: #{@visual_map_of_visible_to_map.length} != #{@visible_map_tile_height + @extra_map_tile_height}" if @visual_map_of_visible_to_map.length != @visible_map_tile_height + @extra_map_tile_height
-      raise "MAP IS TOO SHORT X: #{@visual_map_of_visible_to_map[0].length} != #{@visible_map_tile_width + @extra_map_tile_width}" if  @visual_map_of_visible_to_map[0].length != @visible_map_tile_width + @extra_map_tile_width
+      raise "MAP IS TOO SHORT Y: #{@visual_map_of_visible_to_map.length} != #{@visible_map_tile_height + @extra_map_tile_height}"  if @visual_map_of_visible_to_map.length    != @visible_map_tile_height + @extra_map_tile_height
+      raise "MAP IS TOO SHORT X: #{@visual_map_of_visible_to_map[0].length} != #{@visible_map_tile_width + @extra_map_tile_width}" if @visual_map_of_visible_to_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
       element = @visual_map_of_visible_to_map[0][0]
       int = 0
       outer_int = 0
@@ -890,7 +890,7 @@ class GLBackground
 
         puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
 
-        if @map_tile_right_row < 0
+        if @map_tile_left_row >= @map_tile_width
           puts "ADDING IN RIGHT EDGE OF MAP"
           @visible_map.each do |row|
             row.shift
