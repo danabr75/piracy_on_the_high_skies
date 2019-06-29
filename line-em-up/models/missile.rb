@@ -20,10 +20,13 @@ class Missile < Projectile
 
   MAX_TILE_TRAVEL = 6
 
-
-  def get_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
+  def self.get_image
+    return Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
   end
+
+  # def get_image
+  #   Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
+  # end
 
   def drops
     [

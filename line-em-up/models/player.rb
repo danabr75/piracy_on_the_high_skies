@@ -410,19 +410,19 @@ class Player < ScreenFixedObject
   # CAP movement w/ Acceleration!!!!!!!!!!!!!!!!!!!
 
   def move_left
-    if @controls_enabled
-      new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
-      self.movement(new_speed, @angle + 90, false)
-    end
-    return true
+    # if @controls_enabled
+    #   new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
+    #   self.movement(new_speed, @angle + 90, false)
+    # end
+    # return true
   end
   
   def move_right
-    if @controls_enabled 
-      new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
-      self.movement(new_speed, @angle - 90, false)
-    end
-    return true
+    # if @controls_enabled 
+    #   new_speed = (@ship.speed  / (@ship.mass.to_f)) * -6
+    #   self.movement(new_speed, @angle - 90, false)
+    # end
+    # return true
   end
   
   # Calculate W movement

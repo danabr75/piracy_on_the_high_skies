@@ -27,6 +27,8 @@ module HardpointObjects
 
     STEAM_POWER_USAGE = 1.0
 
+    SHOW_READY_PROJECTILE = false
+
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
       super(options)
@@ -215,6 +217,12 @@ module HardpointObjects
     # end
 
     def draw angle, x, y, z
+      puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
+      if self.class::SHOW_READY_PROJECTILE
+        if @cooldown_wait <= 0.0
+          self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle, 0.5, 0.5, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER)
+        end
+      end
       @image.draw_rot(x, y, z, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     end
 

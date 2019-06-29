@@ -14,6 +14,9 @@ class Projectile < ScreenMapFixedObject
   MAX_CURSOR_FOLLOW = 5 # Do we need this if we have a max speed?
   ADVANCED_HIT_BOX_DETECTION = false
 
+  IMAGE_SCALER = 2.0
+
+  DRAW_ORDER = ZOrder::Projectile
 
   HEALTH = 1
 
@@ -26,10 +29,12 @@ class Projectile < ScreenMapFixedObject
   # CLASS_TYPEs that are in play right now :ship, :building, :projectile
   HIT_OBJECT_CLASS_FILTER = nil
 
+  def self.get_image
+    return Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
+  end
 
   def get_image
-    puts "override get_image!"
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
+    self.class.get_image
   end
 
   def draw_gl
@@ -179,7 +184,7 @@ class Projectile < ScreenMapFixedObject
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
+      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, DRAW_ORDER, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     end
   end
 

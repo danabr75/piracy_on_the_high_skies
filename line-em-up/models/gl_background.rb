@@ -1312,7 +1312,7 @@ class GLBackground
           end
           # left-top, left-bottom, right-top, right-bottom
 
-          {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
+          # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
 
           # if x_element['terrain_paths_and_weights']
           #   terrains = ['terrain_paths_and_weights']
