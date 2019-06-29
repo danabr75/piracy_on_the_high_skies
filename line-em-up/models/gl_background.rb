@@ -221,7 +221,7 @@ class GLBackground
     @map_left_row   = nil
     @map_right_row  = nil
 
-    @map_name = "desert_v3_small"
+    @map_name = "desert_v4_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
@@ -235,11 +235,12 @@ class GLBackground
     image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_0.png", :tileable => true)
     @images << image
     @infos << image.gl_tex_info
-
-    @terrains.each do |terrain_path|
+    @alt_infos = {}
+    @terrains.each_with_index do |terrain_path, index|
       image = Gosu::Image.new(terrain_path, :tileable => true)
       @images << image
       @infos  << image.gl_tex_info
+      @alt_infos[index.to_s] = image.gl_tex_info
     end
     image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
     @images << image
@@ -1269,17 +1270,15 @@ class GLBackground
           # ORIGINAL DATA TILE OPENGL DATA: [0.25, -2.25, 0.25, 0.25]
 
           
-          info =  @infos[x_element['terrain_index']]
 
 
           if x_element['corner_heights']
             z = x_element['corner_heights']
-            terrains = x_element['terrain_paths_and_weights']
-            puts "TERRAINS HERE: ---"
-            puts terrains.inspect
           else
-            z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
+            z = {'bottom_right' =>  3, 'bottom_left' =>  3, 'top_right' =>  3, 'top_left' =>  3}
           end
+
+
 
           if @debug
             # puts "x_element: #{x_element}"
@@ -1297,7 +1296,6 @@ class GLBackground
 # XELEMENT: {"height"=>0.570810370974101, "terrain_index"=>0, "corner_heights"=>{"top_left"=>0.5, "top_right"=>0.75, "bottom_left"=>0.75, "bottom_right"=>1.25}, "gps_y"=>128, "gps_x"=>128}
 # {"height"=>0.570810370974101, "terrain_index"=>0, "corner_heights"=>{"top_left"=>0.5, "top_right"=>0.75, "bottom_left"=>0.75, "bottom_right"=>1.25}, "gps_y"=>128, "gps_x"=>128}
 
-          glBindTexture(GL_TEXTURE_2D, info.tex_name)
 
           lights = [{pos: [0,0], brightness: 0.4, radius: 0.5}]
           # Too slow.. FPS droppage
@@ -1313,34 +1311,88 @@ class GLBackground
             default_colors = [1, 1, 1, 1]
           end
           # left-top, left-bottom, right-top, right-bottom
+
+          {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
+
+          # if x_element['terrain_paths_and_weights']
+          #   terrains = ['terrain_paths_and_weights']
+          #   puts "TERRAINS HERE: ---"
+          #   puts terrains.inspect
+          #   # info_top_left
+          #   # TERRAINS HERE: ---
+          #   # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
+
+          # else
+          #   # z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
+          # end
           vert_pos1, vert_pos2, vert_pos3, vert_pos4 = [nil,nil,nil,nil]
-          glBegin(GL_TRIANGLE_STRIP)
-            glTexCoord2d(info.left, info.top)
-            vert_pos1 = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
+          vert_pos1 = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
+          vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
+          vert_pos3 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
+          vert_pos4 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
+          if x_element['terrain_paths_and_weights']
+            @alt_infos.each do |index_key, info|
+              glBindTexture(GL_TEXTURE_2D, info.tex_name)
+              # index_to_s = index.to_s # Could be done in the infos field, on init
+              info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
+              info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
+              info_bottom_left_opacity  = x_element['terrain_paths_and_weights']['bottom_left'][index_key]  #|| 0.0
+              info_bottom_right_opacity = x_element['terrain_paths_and_weights']['bottom_right'][index_key] #|| 0.0
+              # Next unless there's at least one in there that's not nil
+              next if info_top_left_opacity.nil? && info_top_right_opacity.nil? && info_bottom_left_opacity.nil? && info_bottom_right_opacity.nil?
+              # next unless [info_top_left_opacity, info_top_right_opacity, info_bottom_left_opacity, info_bottom_right_opacity].any?{ |e| !e.nil? }
+              info_top_left_opacity     ||= 0.0
+              info_top_right_opacity    ||= 0.0
+              info_bottom_left_opacity  ||= 0.0
+              info_bottom_right_opacity ||= 0.0
 
+              glBegin(GL_TRIANGLE_STRIP)
+                glTexCoord2d(info.left, info.top)
+                colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                glColor4d(colors[0], colors[1], colors[2], info_top_left_opacity)
+                glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
 
+                glTexCoord2d(info.left, info.bottom)
+                colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                glColor4d(colors[0], colors[1], colors[2], info_bottom_left_opacity)
+                glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
 
-            glTexCoord2d(info.left, info.bottom)
-            vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
+                glTexCoord2d(info.right, info.top)
+                colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                glColor4d(colors[0], colors[1], colors[2], info_top_right_opacity)
+                glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
 
-            glTexCoord2d(info.right, info.top)
-            vert_pos3 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
+                glTexCoord2d(info.right, info.bottom)
+                colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                glColor4d(colors[0], colors[1], colors[2], info_bottom_right_opacity)
+                glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
+              glEnd
+            end
+          else
+            info =  @infos[x_element['terrain_index']]
+            glBindTexture(GL_TEXTURE_2D, info.tex_name)
+            glBegin(GL_TRIANGLE_STRIP)
+              glTexCoord2d(info.left, info.top)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
 
-            glTexCoord2d(info.right, info.bottom)
-            vert_pos4 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
-            colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-            glColor4d(colors[0], colors[1], colors[2], colors[3])
-            glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
-          glEnd
+              glTexCoord2d(info.left, info.bottom)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
+
+              glTexCoord2d(info.right, info.top)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
+
+              glTexCoord2d(info.right, info.bottom)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
+            glEnd
+          end
 
 
           # Both these buildings and pickups drawing methods work. Building is more attached to the terrain.

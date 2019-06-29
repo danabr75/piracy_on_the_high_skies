@@ -1,5 +1,5 @@
 # In Console: 
-# mg = MapGenerator.new('desert_v3_small')
+# mg = MapGenerator.new('desert_v4_small')
 # mg.generate
 
 class MapGenerator
@@ -33,10 +33,11 @@ class MapGenerator
       width_rows = []
       (0..@map_tile_width - 1).each do |x|
         if x == 0 || x == @map_tile_width - 1 || y == 0 || y == @map_tile_height - 1 
-          height = 1 + rand
+          height = 2 + rand
         else
-          height = rand
+          height = rand + rand
         end
+        height = 0.1 if height < 0.1
         width_rows << {height: height, terrain_index: rand(@terrain_random_gen), corner_heights: {}, terrain_paths_and_weights: {}}
       end
       height_rows << width_rows
