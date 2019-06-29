@@ -15,7 +15,7 @@ class HealthPack < Pickup
     end 
     image_rot = 12 if image_rot == 13
     @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_pack_#{image_rot}.png", :tileable => true)
-    @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Pickups, @width_scale, @height_scale)
+    @image.draw(@x - get_width / 2, @y - get_height / 2, ZOrder::Pickups, @height_scale, @height_scale)
     # super
   end
 

@@ -206,7 +206,7 @@ class ShipLoadoutSetting < Setting
       if item
         image = item[:image]
         if image
-          # puts "TEST: #{[@hardpoint_image_z, @width_scale, @height_scale]}"
+          # puts "TEST: #{[@hardpoint_image_z, @height_scale, @height_scale]}"
           image.draw(
             value[:x] - (image.width  / 2.0) / IMAGE_SCALER,
             value[:y] - (image.height / 2.0) / IMAGE_SCALER,

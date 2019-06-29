@@ -226,7 +226,7 @@ class ObjectInventory
     @collect_credits_button.draw(0, 0) if @allow_credit_collection
 
     # if @window.cursor_object
-    #   @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale, @height_scale)
+    #   @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @height_scale, @height_scale)
     # end
   end
 

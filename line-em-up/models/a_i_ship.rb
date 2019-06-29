@@ -208,12 +208,12 @@ class AIShip < ScreenMapFixedObject
     # question = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
 
     # i2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
-    # i2.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale)
+    # i2.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @height_scale, @height_scale)
     # puts "DRAWING SHIP: #{@id}"
     # @drawable_items_near_self.reject! { |item| item.draw }
     # puts "DRAWING SHIP - #{@x} - #{@y}"
-    # @ship.front_hard_points.first.image_hardpoint.draw_rot(@x, @y, ZOrder::Hardpoint, @angle, 0.5, 0.5, @width_scale, @height_scale)
-    # question.draw(@x, @y, 5000, @width_scale, @height_scale)
+    # @ship.front_hard_points.first.image_hardpoint.draw_rot(@x, @y, ZOrder::Hardpoint, @angle, 0.5, 0.5, @height_scale, @height_scale)
+    # question.draw(@x, @y, 5000, @height_scale, @height_scale)
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
   end
 

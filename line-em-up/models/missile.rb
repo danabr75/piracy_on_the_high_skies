@@ -18,6 +18,9 @@ class Missile < Projectile
   MAX_CURSOR_FOLLOW = 4
   ADVANCED_HIT_BOX_DETECTION = true
 
+  MAX_TILE_TRAVEL = 6
+
+
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
   end

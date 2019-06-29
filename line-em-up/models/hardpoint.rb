@@ -318,7 +318,7 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
     @item.draw(new_angle, new_x, new_y, @z) if @item
-    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @width_scale, @height_scale) if !@item
+    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale, @height_scale) if !@item
   end
 
   def draw_gl
@@ -341,10 +341,10 @@ class Hardpoint < GeneralObject
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     # @time_alive += 1 if self.is_alive
-    puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
+    # puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
     if @slot_type == :engine && @item && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
-      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
+      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
       puts "ADDING TO @drawable_items_near_self EHERE!!!"
     end
     # if @slot_type == :engine && @owner.current_momentum.nil?

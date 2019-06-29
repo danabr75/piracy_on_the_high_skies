@@ -50,7 +50,7 @@ class Building < BackgroundFixedObject
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
-    # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @width_scale, @height_scale)
+    # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @height_scale, @height_scale)
   end
 
   # def convert_screen_to_opengl x, y, w = nil, h = nil

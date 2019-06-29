@@ -91,7 +91,7 @@ class OffensiveStore < Building
     #   end
     # end
     # For testing!!!!!!!!!!!!
-    # @image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, @width_scale, @height_scale)
+    # @image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, @height_scale, @height_scale)
     # @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, 0, 0.5, 0.5, @average_scale / 2.0, @average_scale / 2.0)
     # Super doesn't do anything right now, keeping for consistency
     # super(viewable_pixel_offset_x,  viewable_pixel_offset_y)

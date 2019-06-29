@@ -173,7 +173,7 @@ class GameWindow < Gosu::Window
     self.caption = "OpenGL Integration"
     
 
-    @gl_background = GLBackground.new(@width_scale, @height_scale, @width, @height, @resolution_scale)
+    @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale)
 
 
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
@@ -206,7 +206,7 @@ class GameWindow < Gosu::Window
     # @max_enemies = 0
 
     @ui_y = 0
-    @footer_bar = FooterBar.new(@width, @height, @width_scale, @height_scale)
+    @footer_bar = FooterBar.new(@width, @height, @height_scale, @height_scale)
     reset_font_ui_y
 
     # @boss_active_at_enemies_killed = 500
@@ -237,7 +237,7 @@ class GameWindow < Gosu::Window
 
     @center_target = @player
     
-    @pointer = Cursor.new(@width, @height, @width_scale, @height_scale, @player)
+    @pointer = Cursor.new(@width, @height, @height_scale, @height_scale, @player)
 
     @quest_data = QuestInterface.get_quests(CONFIG_FILE)
 
@@ -355,7 +355,7 @@ class GameWindow < Gosu::Window
     # START SHIP LOADOUT INIT.
     # @refresh_player_ship = false
     @cursor_object = nil
-    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @width_scale, @height_scale, {scale: @average_scale})
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @height_scale, @height_scale, {scale: @average_scale})
     # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu]
@@ -789,7 +789,7 @@ class GameWindow < Gosu::Window
 
         #   # if @player.is_alive && (@player.time_alive % 1000 == 0) # && @enemies.count <= @max_enemies
         #   #     # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
-        #   #     @pickups << RocketLauncherPickup.new(@scale, @width, @height, @width_scale, @height_scale)
+        #   #     @pickups << RocketLauncherPickup.new(@scale, @width, @height, @height_scale, @height_scale)
         #   # end
         #   if @player.is_alive && (@player.time_alive % 1300 == 0) # && @enemies.count <= @max_enemies
         #       # @enemies.push(EnemyPlayer.new(@scale, @width, @height)) if @enemies.count <= @max_enemy_count
@@ -829,7 +829,7 @@ class GameWindow < Gosu::Window
         # if @boss_active && @boss.nil? && @enemies.count == 0 && @boss_killed == false
         #   @boss_active = false
         #   # Activate Boss
-        #   # @boss = Mothership.new(@scale, @width, @height, @width_scale, @height_scale)
+        #   # @boss = Mothership.new(@scale, @width, @height, @height_scale, @height_scale)
         #   # @enemies.push(@boss)
         # end
 

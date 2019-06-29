@@ -14,14 +14,13 @@ class Projectile < ScreenMapFixedObject
   MAX_CURSOR_FOLLOW = 5 # Do we need this if we have a max speed?
   ADVANCED_HIT_BOX_DETECTION = false
 
-  MAX_TILE_TRAVEL = 20
 
   HEALTH = 1
 
   MAX_TIME_ALIVE = 300
 
   # IMPLEMENT THIS
-  MAX_TILE_TRAVEL = 12
+  MAX_TILE_TRAVEL = 4
 
   CLASS_TYPE = :projectile
   # CLASS_TYPEs that are in play right now :ship, :building, :projectile
@@ -47,6 +46,10 @@ class Projectile < ScreenMapFixedObject
     @hit_objects_class_filter = self.class::HIT_OBJECT_CLASS_FILTER
 
     @owner = owner
+
+    @max_distance = self.class::MAX_TILE_TRAVEL * @average_tile_size
+    @start_current_map_pixel_x = @current_map_pixel_x
+    @start_current_map_pixel_y = @current_map_pixel_y
 
     @angle = self.class.angle_1to360(destination_angle)
     # puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
@@ -118,6 +121,9 @@ class Projectile < ScreenMapFixedObject
 
   def update mouse_x, mouse_y, player
 
+
+
+
     # puts "PROJ SPEED: #{@speed}"
     if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
       if @current_image_angle != @end_image_angle
@@ -162,6 +168,11 @@ class Projectile < ScreenMapFixedObject
     result = super(mouse_x, mouse_y, player)
     @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
     @play_init_sound = false
+
+    if @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
+      @health = 0
+    end
+
     return result
   end
 

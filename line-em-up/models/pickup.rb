@@ -8,7 +8,7 @@ class Pickup < BackgroundFixedObject
 
   # Most classes will want to just override this
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
-    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Pickups, @y, 0.5, 0.5, @width_scale, @height_scale)
+    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Pickups, @y, 0.5, 0.5, @height_scale, @height_scale)
   end
 
 

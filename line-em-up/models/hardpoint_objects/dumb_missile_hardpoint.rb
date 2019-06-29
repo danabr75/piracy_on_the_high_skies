@@ -10,7 +10,7 @@ module HardpointObjects
     PROJECTILE_CLASS = Missile
     FIRING_GROUP_NUMBER = 2
     STORE_RARITY = 5 # 1 is lowest
-    STEAM_POWER_USAGE = 10.0
+    STEAM_POWER_USAGE = 30.0
     def self.get_hardpoint_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
     end

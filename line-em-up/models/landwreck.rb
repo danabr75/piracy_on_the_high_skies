@@ -193,7 +193,7 @@ class Landwreck < Building
 
     # # @item.draw(0, 0, @current_scale)
 
-    # # # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @width_scale, @height_scale)
+    # # # @image.draw((@x - get_width / 2) + @x_offset, (@y - get_height / 2) + @y_offset, 1, @height_scale, @height_scale)
 
     # # # result = convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
     # # # puts "RESULT"

@@ -90,9 +90,9 @@ class GeneralObject
     # puts "@tile_pixel_width: #{@tile_pixel_width}"
     if @debug
       validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
-      validate_float_or_int([@width_scale, @height_scale],  self.class.name, __callee__)
+      validate_float_or_int([@height_scale, @height_scale],  self.class.name, __callee__)
       validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
-      validate_not_nil([@width_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+      validate_not_nil([@height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
     end
 
     @id    = options[:id] || SecureRandom.uuid
@@ -173,13 +173,13 @@ class GeneralObject
 
   def draw
     # Will generate error if class name is not listed on ZOrder
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @width_scale, @height_scale) if @image
+    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @height_scale, @height_scale) if @image
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @width_scale, @height_scale) if @image
+    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale, @height_scale) if @image
   end
 
   def get_height

@@ -89,7 +89,7 @@ module Graphics
       @points.each do |p|
         # puts "MOVING ANGLE HERE: #{p[3]}"
         if p[2] > 0.0
-          map_pixel_x, map_pixel_y = GeneralObject.movement(p[0], p[1], p[2], p[3], @width_scale, @height_scale)
+          map_pixel_x, map_pixel_y = GeneralObject.movement(p[0], p[1], p[2], p[3], @height_scale, @height_scale)
           p[0] = map_pixel_x
           p[1] = map_pixel_y
           # p[2] = p[2] #- (0.5 * @average_scale)

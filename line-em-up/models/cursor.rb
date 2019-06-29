@@ -34,7 +34,7 @@ class Cursor < GeneralObject
 
 
   def draw
-    @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @width_scale, @height_scale)
+    @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @height_scale, @height_scale)
   end
 
   def draw_gl

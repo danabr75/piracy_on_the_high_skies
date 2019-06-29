@@ -152,7 +152,7 @@ class FooterBar < GeneralObject
     #   health_image = @health_00
     # end
 
-    # health_image.draw(@health_bar_x, @health_bar_y, get_draw_ordering, @width_scale, @height_scale)
+    # health_image.draw(@health_bar_x, @health_bar_y, get_draw_ordering, @height_scale, @height_scale)
 
 
 
@@ -165,12 +165,12 @@ class FooterBar < GeneralObject
     # # @progress_bar_height = (progress_bar.first.height * @scale)
     # index = player.kill_count * @progress_bar_increments / player.get_kill_count_max
     # current_progress_bar = @progress_bar[index]
-    # current_progress_bar.draw(@progress_bar_x, @progress_bar_y, get_draw_ordering, @width_scale, @height_scale)
+    # current_progress_bar.draw(@progress_bar_x, @progress_bar_y, get_draw_ordering, @height_scale, @height_scale)
 
 
 
 
-    # @bomb_hud.draw(@bomb_hud_x, @bomb_hud_y, get_draw_ordering, @width_scale, @height_scale)
+    # @bomb_hud.draw(@bomb_hud_x, @bomb_hud_y, get_draw_ordering, @height_scale, @height_scale)
     # # @bomb_hud_width_half  = @bomb_hud_width / 2
     # # @bomb_hud_height_half = @bomb_hud_height /2
     # if player.get_secondary_name == 'Bomb'
@@ -178,17 +178,17 @@ class FooterBar < GeneralObject
     # else
     #   bomb_color = @red_color
     # end
-    # @font.draw("#{player.bombs}", @bomb_hud_x + @bomb_hud_width_half - (@font.text_width("#{player.bombs}")), @bomb_hud_y + @bomb_hud_height_half, ZOrder::UI, @width_scale, @height_scale, bomb_color)
+    # @font.draw("#{player.bombs}", @bomb_hud_x + @bomb_hud_width_half - (@font.text_width("#{player.bombs}")), @bomb_hud_y + @bomb_hud_height_half, ZOrder::UI, @height_scale, @height_scale, bomb_color)
     # # local_width  = @font.text_width('>')
     # # local_height = @font.height
-    # @missile_hud.draw(@missile_hud_x, @missile_hud_y, get_draw_ordering, @width_scale, @height_scale)
+    # @missile_hud.draw(@missile_hud_x, @missile_hud_y, get_draw_ordering, @height_scale, @height_scale)
     # # draw(text, x, y, z, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
     # if player.get_secondary_name == 'Rocket'
     #   rocket_color = @current_color
     # else
     #   rocket_color = @red_color
     # end
-    # @font.draw("#{player.rockets}", @missile_hud_x + @missile_hud_width_half - (@font.text_width("#{player.rockets}")), @missile_hud_y - 5 +  @missile_hud_height_half, ZOrder::UI, @width_scale, @height_scale, rocket_color)
+    # @font.draw("#{player.rockets}", @missile_hud_x + @missile_hud_width_half - (@font.text_width("#{player.rockets}")), @missile_hud_y - 5 +  @missile_hud_height_half, ZOrder::UI, @height_scale, @height_scale, rocket_color)
 
   end
 
