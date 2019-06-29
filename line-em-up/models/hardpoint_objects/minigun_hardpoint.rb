@@ -10,6 +10,7 @@ module HardpointObjects
     ACTIVE_DELAY   = 120
     STORE_RARITY = 15 # 1 is lowest
     STEAM_POWER_USAGE = 5.0
+    SHOW_HARDPOINT_BASE = true
 
     # def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
     #   angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)

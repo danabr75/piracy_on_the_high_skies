@@ -5,6 +5,7 @@ module HardpointObjects
     LAUNCHER_MAX_ANGLE = 60
     PROJECTILE_CLASS = Bullet
     FIRING_GROUP_NUMBER = 2
+    SHOW_HARDPOINT_BASE = true
 
     def self.get_hardpoint_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")

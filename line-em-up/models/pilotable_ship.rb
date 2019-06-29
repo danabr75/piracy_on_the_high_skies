@@ -46,7 +46,7 @@ class PilotableShip < GeneralObject
   CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
-  def initialize(x, y, z, hardpoint_z, angle, owner, options = {})
+  def initialize(x, y, z, hardpoint_z, hardpoint_z_base, angle, owner, options = {})
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -62,6 +62,7 @@ class PilotableShip < GeneralObject
     @x = x
     @y = y
     @z = z
+    @z_base = hardpoint_z_base
     # puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     @angle = angle
     media_path = self.class::ITEM_MEDIA_DIRECTORY
@@ -164,7 +165,7 @@ class PilotableShip < GeneralObject
       puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
       hp = Hardpoint.new(
-        x, y, hardpoint_z, location[:x_offset].call(get_image, @height_scale),
+        x, y, hardpoint_z, hardpoint_z_base, location[:x_offset].call(get_image, @height_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner, options
       )
       @hardpoints[index] = hp
@@ -470,6 +471,8 @@ class PilotableShip < GeneralObject
     if !@hide_hardpoints
       # puts "AI DRAWING HARDPOINT HERE" if options[:test]
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
+      puts "WHAT IS GOING ON HERE"
+      puts [@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y]
       @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
     end
     # puts "SHIP DRAW: #{@width_scale} - #{@height_scale} - #{scale_offset}"

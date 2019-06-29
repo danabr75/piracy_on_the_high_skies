@@ -1204,6 +1204,7 @@ class GLBackground
 
     if !@test
       glEnable(GL_TEXTURE_2D)
+
       # Not sure the next 3 methods do anything
       # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
       # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
@@ -1330,9 +1331,12 @@ class GLBackground
           vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
           vert_pos3 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
           vert_pos4 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
+          @infos.each do |info|
+            glBindTexture(GL_TEXTURE_2D, info.tex_name)
+          end
           if x_element['terrain_paths_and_weights']
             @alt_infos.each do |index_key, info|
-              glBindTexture(GL_TEXTURE_2D, info.tex_name)
+              # glBindTexture(GL_TEXTURE_2D, info.tex_name)
               # index_to_s = index.to_s # Could be done in the infos field, on init
               info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
               info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
@@ -1370,7 +1374,7 @@ class GLBackground
             end
           else
             info =  @infos[x_element['terrain_index']]
-            glBindTexture(GL_TEXTURE_2D, info.tex_name)
+            # glBindTexture(GL_TEXTURE_2D, info.tex_name)
             glBegin(GL_TRIANGLE_STRIP)
               glTexCoord2d(info.left, info.top)
               colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors

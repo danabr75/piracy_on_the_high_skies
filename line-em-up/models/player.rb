@@ -103,7 +103,7 @@ class Player < ScreenFixedObject
 
     if ship_klass
       # from_player is for debugging only
-      @ship = ship_klass.new(@x, @y, get_draw_ordering, ZOrder::Hardpoint, @angle, self, options.merge({from_player: true}).merge(hardpoint_data))
+      @ship = ship_klass.new(@x, @y, get_draw_ordering, ZOrder::Hardpoint, ZOrder::HardpointBase, @angle, self, options.merge({from_player: true}).merge(hardpoint_data))
     else
       raise "Not supported. Init your player data!"
       # @ship = BasicShip.new(@x, @y, get_draw_ordering, @angle, options.merge({from_player: true, front_hard_points: front_hard_points, starboard_hard_points: starboard_hard_points, port_hard_points: port_hard_points}))
@@ -164,7 +164,7 @@ class Player < ScreenFixedObject
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
     # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
-    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum}))
+    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, ZOrder::HardpointBase, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum}))
     # @ship.mass = @ship.mass# * 3 # speed here?
   end
 

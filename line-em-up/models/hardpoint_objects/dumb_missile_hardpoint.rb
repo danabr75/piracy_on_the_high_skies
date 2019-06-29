@@ -14,10 +14,12 @@ module HardpointObjects
 
     SHOW_READY_PROJECTILE = true
 
-    def self.get_hardpoint_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
-    end
+    SHOW_HARDPOINT_BASE = true
 
+
+    # def self.get_hardpoint_image
+    #   Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
+    # end
 
     # def draw angle, x, y, z
     #   puts "DUMB MISSILE LAUNCHER DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"

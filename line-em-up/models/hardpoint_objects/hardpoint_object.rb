@@ -29,6 +29,8 @@ module HardpointObjects
 
     SHOW_READY_PROJECTILE = false
 
+    SHOW_HARDPOINT_BASE = false
+
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
       super(options)
@@ -45,6 +47,9 @@ module HardpointObjects
       @spinning_up = false
       @spinning_up_sound = self.class.get_starting_sound
       @cooldown_penalty = 0
+      if self.class::SHOW_HARDPOINT_BASE
+        @image_base = self.class.get_hardpoint_base_image
+      end
     end
 
     def self.get_starting_sound
@@ -114,13 +119,19 @@ module HardpointObjects
       MEDIA_DIRECTORY + "/hardpoints/" + HARDPOINT_NAME
     end
 
-    # Hate to have to use a parameter for this, seems so simple
+    # # Hate to have to use a parameter for this, seems so simple
+    # def self.get_hardpoint_image
+    #   # # puts "RIGHT HERE: #{HARDPOINT_NAME}"
+    #   # using_name = hardpoint_name || HARDPOINT_NAME
+    #   raise "You forgot to override the launcher's 'HARDPOINT_NAME' here - for this class: #{self.name}"
+    #   # # puts "HERE IT IS: #{self.class.name} with #{get_hardpoint_media_location}"
+    #   # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{using_name}/hardpoint.png")
+    # end
     def self.get_hardpoint_image
-      # # puts "RIGHT HERE: #{HARDPOINT_NAME}"
-      # using_name = hardpoint_name || HARDPOINT_NAME
-      raise "You forgot to override the launcher's 'HARDPOINT_NAME' here - for this class: #{self.name}"
-      # # puts "HERE IT IS: #{self.class.name} with #{get_hardpoint_media_location}"
-      # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{using_name}/hardpoint.png")
+      Gosu::Image.new("#{self::MEDIA_DIRECTORY}/hardpoints/#{self::HARDPOINT_NAME}/hardpoint.png")
+    end
+    def self.get_hardpoint_base_image
+      Gosu::Image.new("#{self::MEDIA_DIRECTORY}/hardpoints/#{self::HARDPOINT_NAME}/hardpoint_base.png")
     end
 
     def get_cooldown
@@ -138,11 +149,12 @@ module HardpointObjects
     def self.get_image
       # optional image
       # Gosu::Image.new("#{MEDIA_DIRECTORY}/laser-start-overlay.png")
+      # raise "OVERRIDE ME"
     end
-    # In generalobject
-    # def get_image
-    #   self.class.get_image
-    # end
+
+    def self.get_hardpoint_image_base
+      raise "OVERRIDE ME"
+    end
 
     def get_hardpoint_image
       # default
@@ -216,7 +228,7 @@ module HardpointObjects
     #   return last_active_particle
     # end
 
-    def draw angle, x, y, z
+    def draw angle, x, y, z, z_base
       puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
         if @cooldown_wait <= 0.0
@@ -224,6 +236,11 @@ module HardpointObjects
         end
       end
       @image.draw_rot(x, y, z, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+
+      if self.class::SHOW_HARDPOINT_BASE
+        @image_base.draw_rot(x, y, z_base, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+      end
+
     end
 
     # def draw_gl

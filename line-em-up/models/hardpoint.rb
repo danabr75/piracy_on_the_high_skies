@@ -18,17 +18,20 @@ class Hardpoint < GeneralObject
 
   attr_reader :hardpoint_colors
 
+  IMAGE_SCALER = 16.0
+
   def get_radius
     @image_radius / 5
   end
 
-  def initialize(x, y, z, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, options = {})
+  def initialize(x, y, z, z_base, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # @group_number = group_number
 
     @center_x = x
     @center_y = y
     @z = z
+    @z_base = z_base
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
 
@@ -65,7 +68,7 @@ class Hardpoint < GeneralObject
       @group_number  = @item_klass::FIRING_GROUP_NUMBER
     else
       @group_number  = 1 # by default
-      @image_hardpoint_empty = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")
+      @image_hardpoint_empty = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/hardpoint_empty.png")
     end
 
 
@@ -306,6 +309,9 @@ class Hardpoint < GeneralObject
 
   def draw center_x, center_y, ship_current_angle, viewable_pixel_offset_x, viewable_pixel_offset_y
     drawing_correction  = 6
+    puts "RIGHT HERE: "
+    puts [ship_current_angle, @angle_from_center, drawing_correction]
+    puts [ship_current_angle.class, @angle_from_center.class, drawing_correction.class]
     step = (Math::PI/180 * (360 - ship_current_angle + @angle_from_center + 90 + drawing_correction)) + 90.0 + 45.0# - 180
     # step = step.round(5)
     @x = Math.cos(step) * @radius + center_x
@@ -317,8 +323,8 @@ class Hardpoint < GeneralObject
 
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
-    @item.draw(new_angle, new_x, new_y, @z) if @item
-    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale, @height_scale) if !@item
+    @item.draw(new_angle, new_x, new_y, @z, @z_base) if @item
+    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER) if !@item
   end
 
   def draw_gl

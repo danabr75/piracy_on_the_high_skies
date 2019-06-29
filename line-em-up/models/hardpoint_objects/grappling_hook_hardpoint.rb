@@ -7,6 +7,7 @@ module HardpointObjects
     FIRING_GROUP_NUMBER = 3
     COOLDOWN_DELAY = 120
     ACTIVE_PROJECTILE_LIMIT = 1
+    SHOW_HARDPOINT_BASE = true
 
     def initialize(options = {})
       @hp_reference = options[:hp_reference]
