@@ -215,7 +215,7 @@ module HardpointObjects
     # end
 
     def draw angle, x, y, z
-      @image.draw_rot(x, y, z, angle, 0.5, 0.5, @width_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+      @image.draw_rot(x, y, z, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     end
 
     # def draw_gl

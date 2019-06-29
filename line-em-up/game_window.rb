@@ -141,6 +141,9 @@ class GameWindow < Gosu::Window
       @height_scale = @height / default_height.to_f
       @average_scale = (@width_scale + @height_scale) / 2.0
 
+      puts "WIDTH SCALE: #{@width_scale}"
+      puts "HEIGHT SCALE: #{@height_scale}"
+
       puts "AVERAGE SCALE: #{@average_scale}"
       # @scale = (@width_scale + @height_scale) / 2
       # raise "NEW SCALE: #{@width_scale} x #{@height_scale}"

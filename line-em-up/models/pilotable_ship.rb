@@ -164,7 +164,7 @@ class PilotableShip < GeneralObject
       puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
       hp = Hardpoint.new(
-        x, y, hardpoint_z, location[:x_offset].call(get_image, @width_scale),
+        x, y, hardpoint_z, location[:x_offset].call(get_image, @height_scale),
         location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner, options
       )
       @hardpoints[index] = hp
@@ -472,7 +472,9 @@ class PilotableShip < GeneralObject
       # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
       @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
     end
-    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @width_scale * scale_offset, @height_scale * scale_offset)
+    puts "SHIP DRAW: #{@width_scale} - #{@height_scale} - #{scale_offset}"
+                                                                                                # SHIP DRAW: 2.6666666666666665 - 1.5 - 1
+    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @height_scale * scale_offset, @height_scale * scale_offset)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @width_scale, @height_scale)
   end
 

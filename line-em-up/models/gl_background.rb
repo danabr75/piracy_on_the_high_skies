@@ -343,14 +343,14 @@ class GLBackground
     @map_tile_bottom_row += 1 if is_y_offset_uneven
     @map_tile_right_row  += 1 if is_x_offset_uneven
 
-    puts "OFFSETS HERE: #{is_x_offset_uneven} - #{is_y_offset_uneven}"
+    # puts "OFFSETS HERE: #{is_x_offset_uneven} - #{is_y_offset_uneven}"
 
-    puts "@map_tile_top_row    = #{@map_tile_top_row}"
-    puts "@map_tile_bottom_row = #{@map_tile_bottom_row}"
-    puts "@map_tile_left_row   = #{@map_tile_left_row}"
-    puts "@map_tile_right_row  = #{@map_tile_right_row}"
-    puts "@gps_map_center_x    = #{@gps_map_center_x}"
-    puts "@gps_map_center_y    = #{@gps_map_center_y}"
+    # puts "@map_tile_top_row    = #{@map_tile_top_row}"
+    # puts "@map_tile_bottom_row = #{@map_tile_bottom_row}"
+    # puts "@map_tile_left_row   = #{@map_tile_left_row}"
+    # puts "@map_tile_right_row  = #{@map_tile_right_row}"
+    # puts "@gps_map_center_x    = #{@gps_map_center_x}"
+    # puts "@gps_map_center_y    = #{@gps_map_center_y}"
 
     # OFFSETS HERE: false - false
     # TOP ROW:    119 # CORRECT
@@ -570,14 +570,14 @@ class GLBackground
     raise "WRONG MAP WIDTH!  Expected #{@visible_map_tile_width  + @extra_map_tile_width } Got #{@visible_map[0].length}" if @visible_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
     raise "WRONG MAP HEIGHT! Expected #{@visible_map_tile_height + @extra_map_tile_height} Got #{@visible_map.length}"    if @visible_map.length    != @visible_map_tile_height + @extra_map_tile_height
 
-    puts "UPDATE --------------------- UPDATE"
-    puts "@map_tile_top_row    = #{@map_tile_top_row}"
-    puts "@map_tile_bottom_row = #{@map_tile_bottom_row}"
-    puts "@map_tile_left_row   = #{@map_tile_left_row}"
-    puts "@map_tile_right_row  = #{@map_tile_right_row}"
-    puts "@gps_map_center_x    = #{@gps_map_center_x}"
-    puts "@gps_map_center_y    = #{@gps_map_center_y}"
-    print_visible_map
+    # puts "UPDATE --------------------- UPDATE"
+    # puts "@map_tile_top_row    = #{@map_tile_top_row}"
+    # puts "@map_tile_bottom_row = #{@map_tile_bottom_row}"
+    # puts "@map_tile_left_row   = #{@map_tile_left_row}"
+    # puts "@map_tile_right_row  = #{@map_tile_right_row}"
+    # puts "@gps_map_center_x    = #{@gps_map_center_x}"
+    # puts "@gps_map_center_y    = #{@gps_map_center_y}"
+    # print_visible_map
 
 
 
