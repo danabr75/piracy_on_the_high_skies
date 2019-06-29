@@ -221,7 +221,7 @@ class GLBackground
     @map_left_row   = nil
     @map_right_row  = nil
 
-    @map_name = "desert_v2_small"
+    @map_name = "desert_v3_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
@@ -245,8 +245,8 @@ class GLBackground
     @images << image
     @infos << image.gl_tex_info
 
-    @map_tile_width =  @map["map_width"]
-    @map_tile_height = @map["map_height"]
+    @map_tile_width =  @map["map_tile_width"]
+    @map_tile_height = @map["map_tile_height"]
 
     @map_pixel_width  = (@map_tile_width  * @tile_pixel_width ).to_i
     @map_pixel_height = (@map_tile_height * @tile_pixel_height).to_i
@@ -1095,10 +1095,6 @@ class GLBackground
     opengl_offset_y = offset_result[:o_y]# >= @tile_pixel_height ? 0 : offset_result[:o_y]
     # raise "SHOUD NOT BE NIL" if opengl_offset_x.nil? || opengl_offset_y.nil?
 
-    # puts "OLD OPENGL: #{opengl_offset_y}"
-    # opengl_offset_y = opengl_offset_y * -1
-    # puts "NEW OPENGL: #{opengl_offset_y}"
-
     # puts "OFF_Y: #{@local_map_movement_y / (@tile_pixel_height ) }= #{@local_map_movement_y} / (#{@tile_pixel_height} )" 
     # offs_x = offs_x + 0.1
 
@@ -1275,8 +1271,12 @@ class GLBackground
           
           info =  @infos[x_element['terrain_index']]
 
+
           if x_element['corner_heights']
             z = x_element['corner_heights']
+            terrains = x_element['terrain_paths_and_weights']
+            puts "TERRAINS HERE: ---"
+            puts terrains.inspect
           else
             z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
           end

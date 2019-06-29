@@ -54,9 +54,9 @@ end
 include GlobalVariables
 
 
-@tile_pixel_width  = 450 / GLBackground::VISIBLE_MAP_WIDTH.to_f
+@tile_pixel_width  = 450 / GLBackground::VISIBLE_MAP_TILE_WIDTH.to_f
 
-@tile_pixel_height = 450 / GLBackground::VISIBLE_MAP_HEIGHT.to_f
+@tile_pixel_height = 450 / GLBackground::VISIBLE_MAP_TILE_HEIGHT.to_f
 
 @map_tile_width =  250
 @map_tile_height = 250
