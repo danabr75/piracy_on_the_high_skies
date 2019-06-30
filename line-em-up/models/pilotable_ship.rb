@@ -47,6 +47,9 @@ class PilotableShip < GeneralObject
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
   def initialize(x, y, z, hardpoint_z, hardpoint_z_base, angle, owner, options = {})
+    # puts "SHIP OWNER HERE"
+    # puts owner.inspect
+    # puts owner.class
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -418,6 +421,8 @@ class PilotableShip < GeneralObject
       next if NON_ATTACK_HARDPOINT_SLOTS.include?(hp.slot_type)
       # puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
       results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group && hp.item
+      # puts "HP ATTACK RESULT"
+      # puts results
     end
     # results = results.flatten
     results.reject!{|v| v.nil?}
@@ -538,6 +543,7 @@ class PilotableShip < GeneralObject
   end
   
   def update mouse_x, mouse_y, player, target_map_pixel_x, target_map_pixel_y
+    validate_not_nil([mouse_x, mouse_y, player], self.class.name, __callee__)
 
     # hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) 
 

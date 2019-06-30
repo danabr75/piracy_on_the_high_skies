@@ -11,7 +11,7 @@ module QuestInterface
     return {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
       "starting_level_quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting_level_quest_ship_1'})"],
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [
           [
@@ -28,7 +28,7 @@ module QuestInterface
             {effect_type: "dialogue", "section_id" => 'level_2'}
           ]
         ], # earth_quakes?, trigger dialogue
-        "map_name" =>       "desert_v2_small",
+        "map_name" =>       "desert_v4_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
@@ -66,7 +66,7 @@ module QuestInterface
         "init_effects" =>   [], # earth_quakes?, trigger dialogue
         # "init_effects" =>   [["focus" => {"id" => 'starting_level_quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
-        "map_name" =>       "desert_v2_small",
+        "map_name" =>       "desert_v4_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
@@ -318,8 +318,8 @@ module QuestInterface
         if key == "focus"
           puts "CASE 4"
           # {"id"=>"starting_level_quest_ship_1", "time"=>300}
-          puts "PASSING SHIPS:L #{ships}"
-          puts "#{ships.first}"
+          # puts "PASSING SHIPS:L #{ships}"
+          # puts "#{ships.first}"
           raise "Invalid settings for Focus: #{[effect_group['id'], effect_group['target_type'], effect_group['time']]}" if [effect_group['id'], effect_group['target_type'], effect_group['time']].include?(nil)
           effect = Effects::Focus.new(effect_group['id'], effect_group['target_type'], effect_group['time'], ships, buildings, player, options.merge(effect_options))
         elsif key == 'dialogue'

@@ -337,7 +337,8 @@ class Hardpoint < GeneralObject
   end
 
 
-  def update mouse_x, mouse_y, player, ship_angle, attackable_location_x, attackable_location_y
+  def update mouse_x, mouse_y, player, ship_angle, attackable_location_x = nil, attackable_location_y = nil
+    validate_not_nil([mouse_x, mouse_y, player, ship_angle], self.class.name, __callee__)
     @drawable_items_near_self.reject! { |di| !di.update(mouse_x, mouse_y, player) }
     # puts "IS PLAYER HERE? #{[@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y]}"
     update_current_map_pixel_coords(@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y)

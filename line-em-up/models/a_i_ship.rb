@@ -21,6 +21,7 @@ class AIShip < ScreenMapFixedObject
   AGRO_TILE_DISTANCE = 3
   PREFERRED_MIN_TILE_DISTANCE = 1
   PREFERRED_MAX_TILE_DISTANCE = 2
+  FIRING_TILE_DISTANCE        = 10
   # in seconds
   # ANGRO MAX is 10 seconds
   AGRO_MAX = 10 * 60
@@ -48,12 +49,41 @@ class AIShip < ScreenMapFixedObject
     hardpoint_data = {
       :hardpoint_data=>
       {
-        "0"=>"HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::BulletHardpoint",
+        "0" => "HardpointObjects::GrapplingHookHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::GrapplingHookHardpoint",
         "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
-        "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint"
+        "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
+        "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
       }
     }
-    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, @angle, self, hardpoint_data)
+    # hardpoint_data = {
+    #   :hardpoint_data=>
+    #   {
+    #     "0" => "HardpointObjects::GrapplingHookHardpoint", "3"=>"HardpointObjects::GrapplingHookHardpoint", "1"=>"HardpointObjects::GrapplingHookHardpoint",
+    #     "4"=>"HardpointObjects::GrapplingHookHardpoint", "5"=>"HardpointObjects::GrapplingHookHardpoint", "6"=>"HardpointObjects::GrapplingHookHardpoint",
+    #     "2"=>"HardpointObjects::GrapplingHookHardpoint", "7"=>"HardpointObjects::GrapplingHookHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
+    #     "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+    #   }
+    # }
+
+
+    # hardpoint_data = {
+    #   :hardpoint_data =>
+    #   {
+    #     "0": "HardpointObjects::GrapplingHookHardpoint",
+    #     "1": "HardpointObjects::GrapplingHookHardpoint",
+    #     "4": "HardpointObjects::DumbMissileHardpoint",
+    #     "3": "HardpointObjects::DumbMissileHardpoint",
+    #     "5": "HardpointObjects::MinigunHardpoint",
+    #     "2": "HardpointObjects::DumbMissileHardpoint",
+    #     "10": "HardpointObjects::AdvancedSteamCoreHardpoint",
+    #     "7": "HardpointObjects::MinigunHardpoint",
+    #     "6": "HardpointObjects::MinigunHardpoint",
+    #     "8": "HardpointObjects::BasicEngineHardpoint",
+    #     "9": "HardpointObjects::BasicEngineHardpoint"
+    #   }
+    # }
+
+    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, ZOrder::AIHardpointBase, @angle, self, hardpoint_data)
     @ship.x = @x
     @ship.y = @y
     @current_momentum = 0
@@ -82,6 +112,8 @@ class AIShip < ScreenMapFixedObject
     @distance_preference_max = PREFERRED_MAX_TILE_DISTANCE * @average_tile_size
     # Don't want to get boarded also
     @distance_preference_min = PREFERRED_MIN_TILE_DISTANCE * @average_tile_size
+
+    @firing_distance = FIRING_TILE_DISTANCE * @average_tile_size
 
     @agro_map_pixel_distance = AGRO_TILE_DISTANCE * @average_tile_size
     @argo_target_map = {}
@@ -176,27 +208,14 @@ class AIShip < ScreenMapFixedObject
   end
 
   def accelerate
-    garbage1, garbage2, halt = self.movement( @ship.speed / (@ship.mass.to_f), @angle, false)
-    if halt
-      @current_momentum = 0
-    elsif @current_momentum + 1.2 >= @ship.mass.to_f
-      @current_momentum = @ship.mass.to_f
-    else
-      @current_momentum += 1.2
-    end
+    puts "AI ACCELLERATE: #{@ship.current_momentum}"
+    @ship.accelerate
   end
-  
+  def brake
+    @ship.brake
+  end
   def reverse
-    # raise "ISSUE4" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
-    # puts "ACCELERATE: #{movement_x} - #{movement_y}"
-    garbage1, garbage2, halt = self.movement( @ship.speed / (@ship.mass.to_f ), @angle - 180, false)
-    if halt
-      @current_momentum = 0
-    elsif @current_momentum - 0.6 <= -@ship.mass.to_f
-      @current_momentum = -@ship.mass.to_f
-    else
-      @current_momentum -= 0.6
-    end
+    @ship.reverse
   end
 
   def get_draw_ordering
@@ -220,6 +239,29 @@ class AIShip < ScreenMapFixedObject
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player, air_targets = [], ground_targets = []
+    validate_not_nil([mouse_x, mouse_y, player, air_targets, ground_targets], self.class.name, __callee__)
+
+
+    if @ship.current_momentum > 0.0
+      # if @boost_active
+      #   speed = @ship.boost_speed * (@current_momentum / (@ship.mass)) / 2.0
+      # else
+      speed = @ship.tiles_per_second * (@ship.current_momentum / (@ship.mass))
+      # end
+      ignore1, ignore2, halt = self.movement(speed, @angle)
+      if halt
+        @ship.current_momentum -= @ship.mass / 100.0
+        @ship.current_momentum = 0 if @ship.current_momentum < 0
+      end
+    elsif @ship.current_momentum < 0.0
+      speed = (0.6 * @ship.tiles_per_second) * (@ship.current_momentum / (@ship.mass))
+      ignore1, ignore2, halt = self.movement(speed, @angle)
+      if halt
+        @ship.current_momentum -= @ship.mass / 100.0
+        @ship.current_momentum = 0 if @ship.current_momentum < 0
+      end
+    end
+
     # puts "AI SHIP STARTING UPDATE: #{@id}"
     # START AGRO SECTION
     # @current_agro = current_agro - 0.1 if @current_agro > 0.0
@@ -283,13 +325,21 @@ class AIShip < ScreenMapFixedObject
     # END AGRO SECTION
 
     # START FIRING SECTION
-    if agro_target && agro_target_distance < (@screen_pixel_height + @screen_pixel_width) / 1.8
+    if agro_target && agro_target_distance < @firing_distance
       @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
       end
       @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+        results[:projectiles].each do |projectile|
+          projectiles.push(projectile)
+        end
+      end
+      puts "AI: TRYING TO FIRE GRAPPLE "
+      @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+        # puts "GRAPPLE RESAULT:"
+        # puts results
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
         end
@@ -371,7 +421,7 @@ class AIShip < ScreenMapFixedObject
     @ship.y = @y
 
 
-    update_momentum
+    # update_momentum
     # puts "attack_results: "
     # puts attack_results.class.name
     # puts attack_results

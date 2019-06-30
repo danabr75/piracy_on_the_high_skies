@@ -178,7 +178,7 @@ class Projectile < ScreenMapFixedObject
     @play_init_sound = false
 
     if @max_distance && @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
-      puts "TEST ++ = FOUND MAX DISTANCE"
+      # puts "TEST ++ = FOUND MAX DISTANCE"
       @health = 0
     end
 

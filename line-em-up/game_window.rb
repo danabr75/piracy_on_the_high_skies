@@ -747,7 +747,7 @@ class GameWindow < Gosu::Window
         # puts "SHIPS ids: #{@ships.collect{|s| s.id }}"
         @ships.reject! do |ship|
           # puts "CALLING SHIP UPDATE HERE: #{ship.id}"
-          results = ship.update(nil, nil, @player, @ships + [@player], @buildings)
+          results = ship.update(self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
           # puts "RESULTS HERE: #{results}" if results[:projectiles]
           #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
 
