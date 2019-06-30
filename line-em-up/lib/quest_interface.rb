@@ -28,7 +28,7 @@ module QuestInterface
             {effect_type: "dialogue", "section_id" => 'level_2'}
           ]
         ], # earth_quakes?, trigger dialogue
-        "map_name" =>       "desert_v4_small",
+        "map_name" =>       "desert_v7_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
@@ -66,7 +66,7 @@ module QuestInterface
         "init_effects" =>   [], # earth_quakes?, trigger dialogue
         # "init_effects" =>   [["focus" => {"id" => 'starting_level_quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
         "post_effects" =>   [], # earth_quakes?, trigger dialogue
-        "map_name" =>       "desert_v4_small",
+        "map_name" =>       "desert_v7_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false

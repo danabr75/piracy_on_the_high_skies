@@ -242,7 +242,6 @@ class Hardpoint < GeneralObject
       start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
       end_point   = OpenStruct.new(:x => destination_map_pixel_x, :y => destination_map_pixel_y)
       # # Reorienting angle to make 0 north
-      # destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
 
       # raise "DESTINATION ANGLE WAS NOT BETWEEN 0 and 360: #{destination_angle}. from start #{[current_map_pixel_x.round(1), current_map_pixel_y.round(1)]} to end: #{[destination_map_pixel_x.round(1), destination_map_pixel_y.round(1)]}" if destination_angle < 0.0 || destination_angle > 360.0
 
@@ -265,16 +264,17 @@ class Hardpoint < GeneralObject
       effects.each do |effect|
         @drawable_items_near_self << effect
       end
-      # if attack_projectile
-      #   @drawable_items_near_self << Graphics::AngledSmoke.new(
-      #     @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
-      #     @height_scale, @screen_pixel_width, @screen_pixel_height,
-      #     {
-      #       green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
-      #       scale_multiplier: 0.25
-      #     }
-      #   )
-      # end
+      if attack_projectile
+        destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
+        @drawable_items_near_self << Graphics::AngledSmoke.new(
+          @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
+          @height_scale, @screen_pixel_width, @screen_pixel_height,
+          {
+            green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
+            scale_multiplier: 0.25
+          }
+        )
+      end
       # @drawable_items_near_self << @item
     end
 
@@ -359,7 +359,7 @@ class Hardpoint < GeneralObject
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     # @time_alive += 1 if self.is_alive
     # puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
-    if @slot_type == :engine && @item && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
+    if false && @slot_type == :engine && @item && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
       @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
       # puts "ADDING TO @drawable_items_near_self EHERE!!!"

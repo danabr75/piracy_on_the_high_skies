@@ -1,5 +1,5 @@
 # In Console: 
-# mg = MapGenerator.new('desert_v4_small')
+# mg = MapGenerator.new('desert_v7_small')
 # mg.generate
 
 class MapGenerator
@@ -8,15 +8,29 @@ class MapGenerator
 
   attr_accessor :map_tile_height, :map_tile_width, :terrain_image_path, :map_location
 
-  def initialize map_save_name, map_tile_height = 250, map_tile_width = 250, terrain_image_paths = ["#{MEDIA_DIRECTORY}/earth_0.png", "#{MEDIA_DIRECTORY}/earth.png", "#{MEDIA_DIRECTORY}/earth_2.png"], out_of_bounds_terrain_path = "#{MEDIA_DIRECTORY}/earth_3.png"
+  def initialize map_save_name, map_tile_height = 250, map_tile_width = 250, terrain_image_paths = ["#{MEDIA_DIRECTORY}/earth.png"], out_of_bounds_terrain_path = "#{MEDIA_DIRECTORY}/earth_3.png"
     @map_tile_height         = map_tile_height
     @map_tile_width          = map_tile_width
     @map_location = "#{MAP_DIRECTORY}/#{map_save_name}.txt"
     @terrain_image_paths = terrain_image_paths
     @out_of_bounds_terrain_path = out_of_bounds_terrain_path
     @terrain_random_gen = @terrain_image_paths.length
+    @water_path = "#{MEDIA_DIRECTORY}/water.png"
+    @snow_path = "#{MEDIA_DIRECTORY}/snow.png"
+
+    @terrain_image_paths << @water_path
+    @water_index = @terrain_image_paths.count - 1
+
+    @terrain_image_paths << @snow_path
+    @snow_index = @terrain_image_paths.count - 1
+
     # @terrain_image = Gosu::Image.new(terrain_image_path, :tileable => true)
     @map_edge = 10
+
+    @mountain_areas = [
+      {x: 125, y: 130},
+      {x: 120, y: 135}
+    ]
   end
 
   def generate
@@ -35,13 +49,67 @@ class MapGenerator
         if x == 0 || x == @map_tile_width - 1 || y == 0 || y == @map_tile_height - 1 
           height = 2 + rand
         else
-          height = rand + rand
+          height = rand + rand + rand + rand(2) - 1.0
         end
         height = 0.1 if height < 0.1
+        height = 3.0 if height > 3.0
         width_rows << {height: height, terrain_index: rand(@terrain_random_gen), corner_heights: {}, terrain_paths_and_weights: {}}
       end
       height_rows << width_rows
     end
+
+    @mountain_areas.each do |mountain|
+      height_rows[mountain[:y]][mountain[:x]][:terrain_index] = @snow_index
+      height_rows[mountain[:y]][mountain[:x]][:height]        = 3
+
+
+      height_rows[mountain[:y] - 1][mountain[:x] - 1][:terrain_index] = @snow_index
+      height_rows[mountain[:y] - 1][mountain[:x] - 1][:height]        = 2.5
+      height_rows[mountain[:y] + 1][mountain[:x] + 1][:terrain_index] = @snow_index
+      height_rows[mountain[:y] + 1][mountain[:x] + 1][:height]        = 2.5
+      height_rows[mountain[:y] + 1][mountain[:x] - 1][:height]        = 2.5
+      height_rows[mountain[:y] - 1][mountain[:x] + 1][:height]        = 2.5
+    end
+
+
+    water_height = @map_tile_height / 2
+    water_width  = 0
+    while water_width < @map_tile_width
+      height_rows[water_height][water_width][:terrain_index] = @water_index
+      height_rows[water_height][water_width][:height]        = 0.1
+      if water_height == 0
+        # Go EAST OR SOUTH
+        value = rand(2)
+        if value == 0
+          water_width += 1
+        else
+          water_height += 1
+          water_width  += 1
+        end
+      elsif water_height == @map_tile_height
+        # GO EAST or GO NORTH
+        value = rand(2)
+        if value == 0
+          water_width += 1
+        else
+          water_height -= 1
+          water_width  += 1
+        end
+      else
+        # GO EAST NORTH OR SOUTH
+        value = rand(3)
+        if value == 0
+          water_width += 1
+        elsif value == 1
+          water_height -= 1
+          water_width  += 1
+        else
+          water_height += 1
+          water_width  += 1
+        end
+      end
+    end
+
 
     (-1..@map_tile_height - 1).each do |y_index|
       (-1..@map_tile_width - 1).each_with_index do |x_index|
@@ -134,6 +202,8 @@ class MapGenerator
 
       end
     end
+
+    puts "@terrain_image_paths: #{@terrain_image_paths}"
 
     data = {
       terrains: @terrain_image_paths, out_of_bounds_terrain_path: @out_of_bounds_terrain_path,
