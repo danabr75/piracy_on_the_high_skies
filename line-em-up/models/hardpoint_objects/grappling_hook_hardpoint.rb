@@ -9,7 +9,7 @@ module HardpointObjects
     COOLDOWN_DELAY = 120
     ACTIVE_PROJECTILE_LIMIT = 1
     SHOW_HARDPOINT_BASE = true
-
+    STEAM_POWER_USAGE = 20.0
 
     SHOW_READY_PROJECTILE = true
 
@@ -36,13 +36,17 @@ module HardpointObjects
       @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
       if !@active && @projectiles.count == 0
         # return false
-        return super(mouse_x, mouse_y, object, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y)
+      
+        super(mouse_x, mouse_y, object, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y)
+        return true
       else
+        puts "ACTIVE: #{@active} and count #{@projectiles.count}"
         @projectiles.reject! do |hook|
+          puts "TEST ++ = REJECTING HOOKS HERE!!!!!"
           hook.dissengage
         end
 
-        # return true
+        return true
       end
     end
 

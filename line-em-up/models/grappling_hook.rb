@@ -24,6 +24,7 @@ class GrapplingHook < Projectile
   DAMAGE = 0
   AOE = 0
   MAX_TILE_LENGTH = 3.5
+  MAX_TILE_TRAVEL = nil
   BREAKING_POINT_TILE_LENGTH = 15
   HIT_OBJECT_CLASS_FILTER = [:ship]
   # BOARDING_TILE_DISTANCE = 0.5
@@ -178,7 +179,7 @@ class GrapplingHook < Projectile
       i = 0
       while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius)
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
-        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
+        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
         #
         step = (Math::PI/180 * (angle_to_origin + 90))
         new_x = Math.cos(step) * base + new_x
@@ -186,9 +187,9 @@ class GrapplingHook < Projectile
         i += 1
       end
       # A little past the returning object.
-      (0..3).each do |i|
+      (0..1).each do |i|
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
-        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
+        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
         #
         step = (Math::PI/180 * (angle_to_origin + 90))
         new_x = Math.cos(step) * base + new_x

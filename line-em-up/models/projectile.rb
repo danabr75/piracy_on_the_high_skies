@@ -1,4 +1,5 @@
 require_relative 'screen_map_fixed_object.rb'
+# require "#{LIB_DIRECTORY}/z_order.rb"
 
 class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
@@ -52,7 +53,9 @@ class Projectile < ScreenMapFixedObject
 
     @owner = owner
 
-    @max_distance = self.class::MAX_TILE_TRAVEL * @average_tile_size
+    if self.class::MAX_TILE_TRAVEL
+      @max_distance = self.class::MAX_TILE_TRAVEL * @average_tile_size
+    end
     @start_current_map_pixel_x = @current_map_pixel_x
     @start_current_map_pixel_y = @current_map_pixel_y
 
@@ -174,7 +177,8 @@ class Projectile < ScreenMapFixedObject
     @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
     @play_init_sound = false
 
-    if @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
+    if @max_distance && @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
+      puts "TEST ++ = FOUND MAX DISTANCE"
       @health = 0
     end
 

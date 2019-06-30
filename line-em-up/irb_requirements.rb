@@ -26,10 +26,13 @@ CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
 # CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
 
-Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
-# Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
 Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
 Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
+include GlobalVariables
+include GlobalConstants
+
+Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
+# Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
 # Get subfolders
 Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
 # Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
@@ -39,19 +42,19 @@ Dir["#{VENDOR_DIRECTORY}/lib/**/*.rb"].each { |f| require f }
 
 def populate_inventory
   @config_file_path = CONFIG_FILE
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '0'.to_s], 'GrapplingHookLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '0'.to_s], 'DumbMissileLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '0'.to_s], 'DumbMissileLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '1'.to_s], 'MinigunLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '1'.to_s], 'MinigunLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '1'.to_s], 'MinigunLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '2'.to_s], 'BulletLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '2'.to_s], 'BulletLauncher')
-  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '2'.to_s], 'BulletLauncher')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '0'.to_s], 'HardpointObjects::GrapplingHookHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '0'.to_s], 'HardpointObjects::DumbMissileHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '0'.to_s], 'HardpointObjects::DumbMissileHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '1'.to_s], 'HardpointObjects::MinigunHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '1'.to_s], 'HardpointObjects::MinigunHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '1'.to_s], 'HardpointObjects::MinigunHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '0'.to_s, '2'.to_s], 'HardpointObjects::BulletHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '1'.to_s, '2'.to_s], 'HardpointObjects::BulletHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '2'.to_s, '2'.to_s], 'HardpointObjects::BulletHardpoint')
+  ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', '3'.to_s, '0'.to_s], 'HardpointObjects::GrapplingHookHardpoint')
   return true
 end
 
-include GlobalVariables
 
 
 @tile_pixel_width  = 450 / GLBackground::VISIBLE_MAP_TILE_WIDTH.to_f
