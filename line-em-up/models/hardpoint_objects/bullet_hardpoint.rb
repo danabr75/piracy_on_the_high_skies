@@ -3,7 +3,7 @@ module HardpointObjects
     HARDPOINT_NAME = "bullet_launcher"
     LAUNCHER_MIN_ANGLE = -70
     LAUNCHER_MAX_ANGLE = 70
-    LAUNCHER_ROTATE_SPEED = 1
+    LAUNCHER_ROTATE_SPEED = 3
     PROJECTILE_CLASS = Bullet
     FIRING_GROUP_NUMBER = 2
     SHOW_HARDPOINT_BASE = true

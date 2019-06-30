@@ -59,11 +59,16 @@ class GrapplingHook < Projectile
   def detach_hook
     @dissengage = true
   end
-
+  def self.get_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
+  end
   def get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
   end
   def get_chain_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/grappling_hook_launcher/chain.png")
+  end
+  def self.get_chain_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/grappling_hook_launcher/chain.png")
   end
 
