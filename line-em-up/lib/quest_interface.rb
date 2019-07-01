@@ -28,7 +28,7 @@ module QuestInterface
             {effect_type: "dialogue", "section_id" => 'level_2'}
           ]
         ], # earth_quakes?, trigger dialogue
-        "map_name" =>       "desert_v7_small",
+        "map_name" =>       "desert_v4_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false

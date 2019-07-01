@@ -179,6 +179,7 @@ class PilotableShip < GeneralObject
     # mass_boost         = 0.0
     engine_permanent_steam_usage     = 0.0
     engine_tiles_per_second_modifier = 1.0
+    engine_rotation_modifier         = 1.0
     # engine_steam_usage_increment = 0.0
     # boost_speed_modifier         = 0.0
     # boost_steam_usage            = 0.0
@@ -190,14 +191,16 @@ class PilotableShip < GeneralObject
     #   mass_boost         += engine_klass::MASS_BOOST
 
       engine_permanent_steam_usage += engine_klass::PERMANENT_STEAM_USE
+      engine_rotation_modifier     = engine_rotation_modifier * engine_klass::ROTATION_MODIFIER
     #   engine_steam_usage_increment += engine_klass::STEAM_USAGE_INCREMENT
     #   boost_speed_modifier         += engine_klass::BOOST_SPEED_MODIFIER
     #   boost_steam_usage            += engine_klass::BOOST_STEAM_USAGE
     #   boost_mass_modifier          = boost_mass_modifier * engine_klass::BOOST_MASS_MODIFIER
-    engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * engine_klass::TILES_PER_SECOND_MODIFIER
+      engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * engine_klass::TILES_PER_SECOND_MODIFIER
     end
     @engine_permanent_steam_usage     = engine_permanent_steam_usage
     @engine_tiles_per_second_modifier = engine_tiles_per_second_modifier
+    @engine_rotation_modifier         = engine_rotation_modifier
     # @engine_steam_usage_increment = engine_steam_usage_increment
     # @boost_speed_modifier         = boost_speed_modifier
     # @boost_steam_usage            = boost_steam_usage
@@ -227,7 +230,6 @@ class PilotableShip < GeneralObject
     end
 
     @theta = nil
-    @rotation_speed    = self.class::ROTATION_SPEED #+ rotation_boost
 
 
     @mass             = self.class::MASS
@@ -235,11 +237,25 @@ class PilotableShip < GeneralObject
     @momentum_rate    = self.class::MOMENTUM_RATE
     @current_momentum = options[:current_momentum] || 0
 
+    # puts "@engine_tiles_per_second_modifier: #{@engine_tiles_per_second_modifier}"
+    # puts " @engine_hardpoints.count: #{ @engine_hardpoints.count}"
     if @engine_hardpoints.count > 0
-      @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @average_scale
+      @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @height_scale
+      @rotation_speed    = self.class::ROTATION_SPEED * @engine_rotation_modifier #+ rotation_boost
+      # puts "@tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @height_scale"
+      # puts "#{@tiles_per_second} = (#{self.class::TILES_PER_SECOND} * #{@engine_tiles_per_second_modifier}) * #{@height_scale}"
     else
-      @tiles_per_second = (self.class::TILES_PER_SECOND / 2.0) * @average_scale
+      @rotation_speed    = self.class::ROTATION_SPEED #+ rotation_boost
+      @tiles_per_second = (self.class::TILES_PER_SECOND / 10.0) * @height_scale
     end
+    # puts "@tiles_per_second: #{@tiles_per_second}"
+    # @engine_hardpoints: 2
+    # @engine_tiles_per_second_modifier: 2.25
+    #  @engine_hardpoints.count: 2
+    # @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @height_scale
+    # 0.84375 = (0.2 * 2.25) * 1.875
+    # @tiles_per_second: 0.84375
+
 
     # @speed             = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
     # puts "SPEED #{@speed}" if owner.class == Player
@@ -548,14 +564,14 @@ class PilotableShip < GeneralObject
     # hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) 
 
 
-    puts "BEFORE MAX CAPACOTY: #{@steam_max_capacity}"
+    # puts "BEFORE MAX CAPACOTY: #{@steam_max_capacity}"
     capacity_diff = 0
     if @current_momentum != 0 && @engine_permanent_steam_usage != 0
       @steam_max_capacity = @steam_original_max_capacity - (@engine_permanent_steam_usage * (@current_momentum.abs / (@mass)))
       if @steam_max_capacity < 0
         # capacity_diff = 0 - @steam_max_capacity
         @steam_max_capacity = 0
-        puts "BLOCKLING INCREATE HERE!!!!"
+        # puts "BLOCKLING INCREATE HERE!!!!"
         @block_momentum_increase = true if @current_momentum > 0
         @block_momentum_decrease = true if @current_momentum < 0
       else
@@ -563,13 +579,13 @@ class PilotableShip < GeneralObject
         @block_momentum_decrease = false
       end
     end
-    puts "AFTER MAX CAPACITY: #{@steam_max_capacity}"
+    # puts "AFTER MAX CAPACITY: #{@steam_max_capacity}"
     # @steam_max_capacity          = steam_max_capacity #- @engine_permanent_steam_usage
 
     # @steam_max_capacity  = steam_max_capacity
     # @steam_rate_increase = steam_rate_increase
     # @current_steam_capacity
-    puts "STARTED: #{@current_steam_capacity}"
+    # puts "STARTED: #{@current_steam_capacity}"
     if @current_steam_capacity < @steam_max_capacity
       @current_steam_capacity += @steam_rate_increase
       # @steam_power = @steam_max_capacity if @current_steam_capacity > @steam_max_capacity - @engine_permanent_steam_usage
@@ -577,7 +593,7 @@ class PilotableShip < GeneralObject
     if @current_steam_capacity > @steam_max_capacity
       @current_steam_capacity = @steam_max_capacity
     end
-    puts "ENDED: #{@current_steam_capacity}"
+    # puts "ENDED: #{@current_steam_capacity}"
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon

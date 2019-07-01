@@ -1,5 +1,5 @@
 # In Console: 
-# mg = MapGenerator.new('desert_v7_small')
+# mg = MapGenerator.new('desert_v9_small')
 # mg.generate
 
 class MapGenerator
@@ -29,7 +29,13 @@ class MapGenerator
 
     @mountain_areas = [
       {x: 125, y: 130},
-      {x: 120, y: 135}
+      {x: 121, y: 135},
+      {x: 125, y: 125},
+      {x: 125, y: 123},
+      {x: 122, y: 121},
+      {x: 121, y: 119},
+      {x: 120, y: 117},
+      {x: 119, y: 115}
     ]
   end
 
@@ -71,6 +77,45 @@ class MapGenerator
       height_rows[mountain[:y] - 1][mountain[:x] + 1][:height]        = 2.5
     end
 
+
+    snow_height = 0
+    snow_width  = 0
+    while snow_width < @map_tile_width
+      height_rows[snow_height][snow_width][:terrain_index] = @snow_index
+      height_rows[snow_height][snow_width][:height]        = 3
+      if snow_height == 0
+        # Go EAST OR SOUTH
+        value = rand(2)
+        if value == 0
+          snow_width += 1
+        else
+          snow_height += 1
+          snow_width  += 1
+        end
+      elsif snow_height == @map_tile_height
+        # GO EAST or GO NORTH
+        value = rand(2)
+        if value == 0
+          snow_width += 1
+        else
+          snow_height -= 1
+          snow_width  += 1
+        end
+      else
+        # GO EAST NORTH OR SOUTH
+        value = rand(3)
+        if value == 0
+          snow_height += 1
+          snow_width += 1
+        elsif value == 1
+          snow_height -= 1
+          snow_width  += 1
+        else
+          snow_height += 1
+          snow_width  += 1
+        end
+      end
+    end
 
     water_height = @map_tile_height / 2
     water_width  = 0

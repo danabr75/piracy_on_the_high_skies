@@ -33,10 +33,10 @@ class GLBackground
   # CAN SEE EDGE OF BLACK MAP AT PLAYER Y 583
   # 15 tiles should be on screen
   # HAVE TO BE EVEN NUMBERS
-  VISIBLE_MAP_TILE_WIDTH  = 8
-  VISIBLE_MAP_TILE_HEIGHT = 8
+  VISIBLE_MAP_TILE_WIDTH  = 6
+  VISIBLE_MAP_TILE_HEIGHT = 6
   EXTRA_MAP_TILE_HEIGHT   = 4
-  EXTRA_MAP_TILE_WIDTH    = 6
+  EXTRA_MAP_TILE_WIDTH    = 4
   # outside of view padding
   # HAVE TO BE EVEN NUMBERS
   # HAVE TO BE EVEN NUMBERS
@@ -221,7 +221,7 @@ class GLBackground
     @map_left_row   = nil
     @map_right_row  = nil
 
-    @map_name = "desert_v7_small"
+    @map_name = "desert_v9_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
@@ -1005,7 +1005,7 @@ class GLBackground
     # glutSolidSphere(1.0, 20, 16)
 
     
-    glEnable(GL_BLEND)
+    # glEnable(GL_BLEND)
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA)
     glTexParameteri(GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
 
@@ -1204,6 +1204,7 @@ class GLBackground
 
     if !@test
       glEnable(GL_TEXTURE_2D)
+      glEnable(GL_BLEND)
 
       # Not sure the next 3 methods do anything
       # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
@@ -1334,8 +1335,11 @@ class GLBackground
           @alt_infos.each do |index_key, info|
             glBindTexture(GL_TEXTURE_2D, info.tex_name)
           end
+          # glDepthMask(GL_FALSE);
+          # glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
           if x_element['terrain_paths_and_weights']
             # glBegin(GL_QUAD_STRIP)
+              # index_key, info = @alt_infos.first
               @alt_infos.each do |index_key, info|
                 # glBindTexture(GL_TEXTURE_2D, info.tex_name)
                 # index_to_s = index.to_s # Could be done in the infos field, on init

@@ -366,8 +366,8 @@ class GeneralObject
 
   def self.angle_diff angle1, angle2, options = {}
     value = angle2 - angle1
-    puts "value = angle2 - angle1"
-    puts "#{value} = #{angle2} - #{angle1}"
+    # puts "value = angle2 - angle1"
+    # puts "#{value} = #{angle2} - #{angle1}"
     value = (value + 180.0) % 360.0 - 180.0
     return value
   end
