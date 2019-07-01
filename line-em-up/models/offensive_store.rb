@@ -20,6 +20,8 @@ class OffensiveStore < Building
       @drops << random_weighted(offensive_types_with_rarities)
     end
     @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
+    # color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
+    # @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::UI, @image_width, @image_height, color, hover_color)
     @button_id_mapping = {}
     # Need to add sell window to ship_loadout_menu\ship_loadout_setting
     # Also need to cost credits, add credits to player.
@@ -80,8 +82,24 @@ class OffensiveStore < Building
     return super(mouse_x, mouse_y, player)
   end
 
+  def alt_draw x, y
+    # @image.draw(@x, @y, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_ff0000))
+    # @image.draw(x, y, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_ff0000))
+  end
+
+
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
-    # @click_area.draw(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
+    # @image.draw(800, 450, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_e1ffcd))
+
+    # @image.draw(@x, @y, 1, @height_scale, @height_scale)
+    # @image.draw((@x + get_width / 2.0), (@y - get_height  / 2.0), 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_e1ffcd))
+
+    # @image.draw(@x - get_width / 2.0, @y - get_height / 2.0, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_ff0000))
+    # @click_area.draw(@x - get_width / 2.0, @y - get_height  / 2.0) #if @drops.any?
+
+
+
+    # @image.draw((@x - get_width / 4.0), (@y - get_height / 2.0), 1, @height_scale, @height_scale)
     # color = Gosu::Color.argb(0xff_ffffff)
     # if @drops.any?
     #   if @is_hovering && @is_close_enough_to_open

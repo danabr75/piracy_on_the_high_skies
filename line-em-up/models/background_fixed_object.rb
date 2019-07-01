@@ -7,6 +7,12 @@ require_relative "general_object.rb"
 
 class BackgroundFixedObject < GeneralObject
 
+
+  # def x_and_y_update x, y
+  #   @x = x
+  #   @y = y
+  # end
+
   def initialize(current_map_tile_x, current_map_tile_y, options = {})
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -29,9 +35,9 @@ class BackgroundFixedObject < GeneralObject
       @current_map_pixel_y = options[:current_map_pixel_y]
 
       # @x_offset, @y_offset = get_tile_pixel_remainder
-      puts "PIXEL: #{[@current_map_pixel_x, @current_map_pixel_y]}"
-      puts "GPS: #{[@current_map_tile_x, @current_map_tile_y]}"
-      puts "TILE PIXEL: #{[@tile_pixel_width, @tile_pixel_height]}"
+      # puts "PIXEL: #{[@current_map_pixel_x, @current_map_pixel_y]}"
+      # puts "GPS: #{[@current_map_tile_x, @current_map_tile_y]}"
+      # puts "TILE PIXEL: #{[@tile_pixel_width, @tile_pixel_height]}"
 
       # raise "GOT THESE AS OFFSET: #{[@x_offset, @y_offset]}"
 

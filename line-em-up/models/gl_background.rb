@@ -164,9 +164,6 @@ class GLBackground
     @screen_pixel_width_half = @screen_pixel_width / 2
 
     @tile_pixel_width  = @screen_pixel_width  / (@visible_map_tile_width.to_f)
-    # puts "WHAT IS GOING ON HERE:"
-    # puts "@tile_pixel_width  = @screen_pixel_width  / @visible_map_tile_width.to_f"
-    # puts "#{@tile_pixel_width}  = #{@screen_pixel_width}  / #{@visible_map_tile_width.to_f}"
     @tile_pixel_height = @screen_pixel_height / (@visible_map_tile_height.to_f)
 
     # @ratio = @screen_pixel_width.to_f / (@screen_pixel_height.to_f)
@@ -1255,24 +1252,6 @@ class GLBackground
           # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
           # puts "ORIGINAL DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
 
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [-1.25, -2.25, 0.25, 0.25]
-
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [-1.0, -2.25, 0.25, 0.25]
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [-0.75, -2.25, 0.25, 0.25]
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [-0.5, -2.25, 0.25, 0.25]
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [-0.25, -2.25, 0.25, 0.25]
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [0.0, -2.25, 0.25, 0.25]
-          # NEW DATA TILE OPENGL DATA: [-1.0, -1.0, 0.25, 0.25]
-          # ORIGINAL DATA TILE OPENGL DATA: [0.25, -2.25, 0.25, 0.25]
-
-          
-
 
           if x_element['corner_heights']
             z = x_element['corner_heights']
@@ -1410,7 +1389,30 @@ class GLBackground
           # Pickups update the x and y coords, and then the pickup draws itself.
           buildings.each do |building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-            building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+
+            # @local_map_movement_y
+            # @local_map_movement_x
+            # current_map_tile_x
+            # current_map_tile_y
+            # y_index
+            # x_index
+            # @tile_pixel_width 
+            # @tile_pixel_height
+            # screen_pixel_width
+            # screen_pixel_height
+            # puts "BUILDING UPDATE INDEX: #{x_index} - #{y_index}"
+            # puts "BUILDING PIXEL ESTIMATION:"
+            # puts "#{x_index * @tile_pixel_width } - #{y_index * @tile_pixel_height}"
+
+            # building.alt_draw((x_index * @tile_pixel_width) + @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+            # building.alt_draw((x_index * @tile_pixel_width), (y_index * @tile_pixel_height))
+            # building.alt_draw((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+
+            # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+
+
+            
             # if building.kind_of?(Landwreck) || building.kind_of?(OffensiveStore)
             #   # puts "UPDATING BUILDING ALT ALT"
             # end

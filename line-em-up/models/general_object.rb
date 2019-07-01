@@ -627,17 +627,37 @@ class GeneralObject
   # Need to adjust this method. Should go from X,Y to map_pixel_x and map_pixel_y
   # X and Y are no longer used to calculate collisions
   # Keeping this around, but not going to use for the future.
+  # Not getting great results from this. ditching.
   def update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
     # left-top, left-bottom, right-top, right-bottom
-    ox = vert0[0] - (vert0[0] - vert2[0])
-    oy = vert2[1] + (vert2[1] - vert3[1])
+    # ox = vert0[0] - (vert0[0] - vert2[0])
+    # oy = vert2[1] + (vert2[1] - vert3[1])
     # puts "update_from_3D: #{[ox, oy, oz]}"
     # oz = z
-    oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
-    x, y, z = convert3DTo2D((vert0[0] - (vert0[0] - vert2[0]) / 2.0), (vert2[1] - (vert2[1] - vert3[1]) / 2.0), oz2, viewMatrix, projectionMatrix, viewport)
+    # oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
+    # puts "3D UPDATE - (vert0[0] - (vert0[0] - vert2[0]) / 2.0)"
+    # ox = (vert0[0] - (vert0[0] - vert2[0]) / 2.0)
+    # puts "3D UPDATE - #{ox} = (#{vert0[0]} - (#{vert0[0]} - #{vert2[0]}) / 2.0)"
+    # raise 'stop'
+
+    # oy = (vert2[1] - (vert2[1] - vert3[1]) / 2.0)
+    # puts "CONVERTING FROM 3D to 2D"
+    # puts "O: #{ox} - #{oy}"
+    # resolution: X: 1600 Y: 900;
+    # O:  0.001  - 1.2103536635137342
+    # XY: 720.95 - 9.018083518522076
+    ox = vert0[0]
+    oy = vert0[1]
+    puts "O #{ox}, #{oy}, #{oz}"
+    x, y, z = convert3DTo2D(ox, oy, oz, viewMatrix, projectionMatrix, viewport)
+    # x, y, z = convert3DTo2D(0, 0, 0, viewMatrix, projectionMatrix, viewport)
+    # x, y, z = gluProject(0, 0, 0, viewMatrix, projectionMatrix, viewport)
     y = @screen_pixel_height - y
+    puts "XY: #{x} - #{y}"
     @x = x
     @y = y
+    # @x = 800
+    # @y = 450
   end
 
   # Not used
