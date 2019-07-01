@@ -9,8 +9,9 @@ module HardpointObjects
 
     PERMANENT_STEAM_USE       = 50
     TILES_PER_SECOND_MODIFIER = 1.5
+    ROTATION_MODIFIER         = 1.1
 
-
+    # Unimplemented
     BOOST_SPEED_MODIFIER  = 1.2
     BOOST_STEAM_USAGE     = 0.4
     BOOST_MASS_MODIFIER   = 1.1

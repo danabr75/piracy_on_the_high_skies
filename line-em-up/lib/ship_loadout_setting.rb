@@ -94,9 +94,9 @@ class ShipLoadoutSetting < Setting
     # @inventory_matrix = []
     # @inventory_matrix_max_width = 4
     # @inventory_matrix_max_height = 7
-    @cell_width  = 25 * @width_scale
+    @cell_width  = 25 * @height_scale
     @cell_height = 25 * @height_scale
-    @cell_width_padding = 5 * @width_scale
+    @cell_width_padding = 5 * @height_scale
     @cell_height_padding = 5 * @height_scale
     @button_id_mapping = self.class.get_id_button_mapping
 
@@ -111,8 +111,8 @@ class ShipLoadoutSetting < Setting
     @hardpoints_width  = nil
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
     @button = LUIT::Button.new(@window, :back, max_width / 2, 50, ZOrder::UI, "Return to Game", 30, 30)
-    @font_height  = (12 * @average_scale).to_i
-    @font_padding = (4 * @average_scale).to_i
+    @font_height  = (12 * @height_scale).to_i
+    @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
     @hover_object = nil
 
@@ -516,7 +516,7 @@ class ShipLoadoutSetting < Setting
       detail_box_draw
 
       if @window.cursor_object
-        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
+        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
       end
 
       hardpoint_draw

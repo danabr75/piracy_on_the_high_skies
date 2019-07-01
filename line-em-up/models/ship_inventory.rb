@@ -45,14 +45,14 @@ class ShipInventory
     @inventory_height = nil
     @inventory_width  = nil
     @hover_object = nil
-    @cell_width  = 25 * @width_scale
+    @cell_width  = 25 * @height_scale
     @cell_height = 25 * @height_scale
-    @cell_width_padding = 5 * @width_scale
+    @cell_width_padding = 5 * @height_scale
     @cell_height_padding = 5 * @height_scale
-    @next_x = 5 * @average_scale
+    @next_x = 5 * @height_scale
     @button_id_mapping = {}
-    @font_height  = (12 * @average_scale).to_i
-    @font_padding = (4 * @average_scale).to_i
+    @font_height  = (12 * @height_scale).to_i
+    @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
@@ -154,7 +154,7 @@ class ShipInventory
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) / IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
+          image.draw(element[:x] - (image.width / 2) / IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
         end
       end
     end

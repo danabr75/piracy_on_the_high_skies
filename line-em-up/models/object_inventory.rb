@@ -59,14 +59,14 @@ class ObjectInventory
     @inventory_height = nil
     @inventory_width  = nil
     @hover_object = nil
-    @cell_width  = 25 * @width_scale
+    @cell_width  = 25 * @height_scale
     @cell_height = 25 * @height_scale
-    @cell_width_padding = 5 * @width_scale
+    @cell_width_padding = 5 * @height_scale
     @cell_height_padding = 5 * @height_scale
-    @next_x = 5 * @average_scale
+    @next_x = 5 * @height_scale
     @button_id_mapping = {}
-    @font_height  = (12 * @average_scale).to_i
-    @font_padding = (4 * @average_scale).to_i
+    @font_height  = (12 * @height_scale).to_i
+    @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
@@ -83,7 +83,7 @@ class ObjectInventory
     if @allow_credit_collection
       collect_credits_button_x = (@screen_pixel_width + (@cell_width_padding / 2.0) - @inventory_width - (@cell_width / 2.0)) + (@inventory_width + @cell_width_padding) / 2.0
       collect_credits_button_y = ((@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height) + (@inventory_height + @cell_height_padding + @font_height)
-      @collect_credits_button  = LUIT::Button.new(@window, :collect_credits, collect_credits_button_x, collect_credits_button_y, ZOrder::UI, "Collect Credits", (12 * @average_scale).to_i , (12 * @average_scale).to_i)
+      @collect_credits_button  = LUIT::Button.new(@window, :collect_credits, collect_credits_button_x, collect_credits_button_y, ZOrder::UI, "Collect Credits", (12 * @height_scale).to_i , (12 * @height_scale).to_i)
       @button_id_mapping[:collect_credits] = lambda { |window, menu, id| window.ship_loadout_menu.add_to_ship_inventory_credits(menu.credits); menu.subtract_credits(menu.credits) }
     end
 
@@ -204,7 +204,7 @@ class ObjectInventory
         # puts "element[:item]: #{element[:item]}"
         if !element[:item].nil? && element[:item][:follow_cursor] != true
           image = element[:item][:image]
-          image.draw(element[:x] - (image.width / 2) / IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
+          image.draw(element[:x] - (image.width / 2) / IMAGE_SCALER + @cell_width / 2, element[:y] - (image.height / 2) / IMAGE_SCALER + @cell_height / 2, @hardpoint_image_z, @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
         end
       end
     end

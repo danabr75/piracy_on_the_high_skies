@@ -1412,7 +1412,7 @@ class GLBackground
             # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
 
 
-            
+
             # if building.kind_of?(Landwreck) || building.kind_of?(OffensiveStore)
             #   # puts "UPDATING BUILDING ALT ALT"
             # end
@@ -1420,7 +1420,7 @@ class GLBackground
 
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
             if !building.kind_of?(Landwreck) #&& !building.kind_of?(OffensiveStore)
-              building.class.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+              building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
             end
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end

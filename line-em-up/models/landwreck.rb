@@ -107,7 +107,8 @@ class Landwreck < Building
   end
 
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
-    @click_area.draw(@x - @image_width_half, @y - @image_height_half) if @drops.any?
+    # Why is this here?
+    # @click_area.draw(@x - @image_width_half, @y - @image_height_half) if @drops.any?
     color = Gosu::Color.argb(0xff_ffffff)
     if @drops.any?
       if @is_hovering && @is_close_enough_to_open

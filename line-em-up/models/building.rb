@@ -26,7 +26,7 @@ class Building < BackgroundFixedObject
   def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
     @drops = @drops || options[:drops] || []
     super(current_map_tile_x, current_map_tile_y, options)
-    @image = self.class::get_image
+    @image = self.class.get_image
     @info = @image.gl_tex_info
   end
 

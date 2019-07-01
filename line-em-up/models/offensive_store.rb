@@ -119,12 +119,18 @@ class OffensiveStore < Building
     Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)
   end
 
-  def self.tile_draw_gl v1, v2, v3, v4
+  def tile_draw_gl v1, v2, v3, v4
     @image2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)
-    @info = @image2.gl_tex_info
+    info = @image2.gl_tex_info
 
-    info = @info
-    colors = [1, 1, 1, 1]
+    # info = @info
+    if @is_hovering && @is_close_enough_to_open
+      colors = [0.5, 1, 0.5, 1]
+    elsif @is_hovering
+      colors = [1, 0.5, 0.5, 1]
+    else
+      colors = [1, 1, 1, 1]
+    end
     glBindTexture(GL_TEXTURE_2D, info.tex_name)
     glBegin(GL_TRIANGLE_STRIP)
       # bottom left 
