@@ -463,9 +463,9 @@ class Player < ScreenFixedObject
     if @controls_enabled
       attack_results = @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
     end
-    puts "PLAYER attack_results 1"
-    puts attack_results.class
-    puts attack_results
+    # puts "PLAYER attack_results 1"
+    # puts attack_results.class
+    # puts attack_results
 
     # attack_results
     # Array
@@ -484,13 +484,13 @@ class Player < ScreenFixedObject
       # if @player.use_steam(0.5)
       attack_results = @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
     end
-    puts "PLAYER attack_results 2"
-    puts attack_results.class
-    attack_results.each do |attack_result|
-      puts "ITERATION"
-      puts attack_result[:projectiles].count
-      puts attack_result[:destructable_projectiles].count
-    end
+    # puts "PLAYER attack_results 2"
+    # puts attack_results.class
+    # attack_results.each do |attack_result|
+      # puts "ITERATION"
+      # puts attack_result[:projectiles].count
+      # puts attack_result[:destructable_projectiles].count
+    # end
     return attack_results
   end
  
@@ -499,9 +499,9 @@ class Player < ScreenFixedObject
     if @controls_enabled
       attack_results = @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, pointer)
     end
-    puts "PLAYER attack_results 3"
-    puts attack_results.class
-    puts attack_results
+    # puts "PLAYER attack_results 3"
+    # puts attack_results.class
+    # puts attack_results
     return attack_results
   end
 

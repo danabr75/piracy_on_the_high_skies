@@ -249,7 +249,10 @@ class AIShip < ScreenMapFixedObject
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player, air_targets = [], ground_targets = []
     validate_not_nil([mouse_x, mouse_y, player, air_targets, ground_targets], self.class.name, __callee__)
-
+    # return {
+    #   is_alive: true, projectiles: [], shipwreck: nil,
+    #   destructable_projectiles: [], graphical_effects: []
+    # }
 
     if @ship.current_momentum > 0.0
       # if @boost_active

@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     coderay (1.1.2)
+    concurrent-ruby (1.1.5)
     file-tail (1.2.0)
       tins (~> 1.0)
     glu (8.3.0)
@@ -30,6 +31,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  concurrent-ruby
   glu
   glut
   gosu
@@ -39,4 +41,4 @@ DEPENDENCIES
   sourcify
 
 BUNDLED WITH
-   2.0.1
+   2.0.2

@@ -16,7 +16,7 @@ gem 'gosu'
 # gem 'danabr75-opengl'
 gem 'opengl'
 # gem 'ashton', '0.1.6'
-
+gem 'concurrent-ruby'
 # gem 'opengl-bindings'
 # gem 'ashton'
 

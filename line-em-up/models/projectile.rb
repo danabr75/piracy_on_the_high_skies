@@ -272,9 +272,9 @@ class Projectile < ScreenMapFixedObject
               raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
             end
           end
-          puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
-          puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
-          puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
+          # puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
+          # puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
+          # puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
           # HITTING OBJECT RADIUSES - self.class: GrapplingHook
           # 317.96875 : 250.0 + 67.96875
           # HITTING OBJECT RADIUSES - self.class: GrapplingHook

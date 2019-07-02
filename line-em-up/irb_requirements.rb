@@ -5,6 +5,9 @@ require 'gosu'
 require 'opengl'
 require 'glu'
 require 'glut'
+require 'time'
+require 'concurrent'
+
 # require 'ashton'
 include OpenGL
 include GLUT

@@ -74,6 +74,7 @@ Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
 # require_relative 'models/graphics/smoke.rb'
 
 class GameWindow < Gosu::Window
+
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
   DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
@@ -81,6 +82,8 @@ class GameWindow < Gosu::Window
   # CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
   attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
+
+  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects
 
   include GlobalVariables
 
@@ -126,6 +129,7 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
+    @projectile_collision_manager = AsyncThreadManager.new()
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -536,8 +540,6 @@ class GameWindow < Gosu::Window
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
        
-
-
     # if @player.time_alive % 500 == 0
     #   @messages << MessageFlash.new("This is a test - #{@player.time_alive}")
     # end    
@@ -575,6 +577,8 @@ class GameWindow < Gosu::Window
       @graphical_effects.reject! do |effect|
         !effect.update(self.mouse_x, self.mouse_y, @player)
       end
+
+      @projectile_collision_manager.update(self, [@ships, @destructable_projectiles, [@player]])
 
     end
 
@@ -731,23 +735,36 @@ class GameWindow < Gosu::Window
 
         @projectiles.each do |projectile|
           # Excluding buildings.. add back in when can aim bullets at ground.@buildings
-          results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
+
+          @projectile_collision_manager.add(
+            # ProjectileCollisionThread.create_new(self, projectile, [@ships, @destructable_projectiles, [@player]])
+            projectile
+          )
+
+          # results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
+
+          # if results[:graphical_effects].any?
+          #   @graphical_effects = @graphical_effects + results[:graphical_effects]
+          # end
+
           # Should be explosions n such here
-          if results
-            @pickups = @pickups + results[:drops]
-          end
+          # if results
+          #   @pickups = @pickups + results[:drops]
+          # end
         end
 
         @destructable_projectiles.each do |projectile|
           # Excluding buildings.. add back in when can aim bullets at ground.@buildings
           # results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
-          results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
+          result = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
           # Should be explosions n such here
-          if results
-            @pickups = @pickups + results[:drops]
-          end
-          if results[:graphical_effects].any?
-            @graphical_effects = @graphical_effects + results[:graphical_effects]
+          # if results
+          #   @pickups = @pickups + results[:drops]
+          # end
+          # puts "IS THIS A HASH?"
+          # puts results.class
+          result[:graphical_effects].each do |effect|
+            @graphical_effects << effect if effect
           end
         end
         
@@ -767,7 +784,12 @@ class GameWindow < Gosu::Window
         @projectiles.reject! do |projectile|
           result = projectile.update(self.mouse_x, self.mouse_y, @player)
 
-          @graphical_effects = @graphical_effects + results[:graphical_effects]
+          puts "RESULT UPDATE FORM PROJ"
+          puts result.inspect
+          puts result.class
+          result[:graphical_effects].each do |effect|
+            @graphical_effects << effect if effect
+          end
 
           !result[:is_alive]
         end
@@ -776,7 +798,9 @@ class GameWindow < Gosu::Window
           puts "projectile; #{projectile.class.name}"
           result = projectile.update(self.mouse_x, self.mouse_y, @player)
 
-          @graphical_effects = @graphical_effects + results[:graphical_effects]
+          result[:graphical_effects].each do |effect|
+            @graphical_effects << effect if effect
+          end
 
           !result[:is_alive]
         end
