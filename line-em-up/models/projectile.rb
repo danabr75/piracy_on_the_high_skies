@@ -205,7 +205,7 @@ class Projectile < ScreenMapFixedObject
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, DRAW_ORDER, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, DRAW_ORDER, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
     end
   end
 
@@ -274,8 +274,15 @@ class Projectile < ScreenMapFixedObject
           end
           puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
           puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
+          puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
           # HITTING OBJECT RADIUSES - self.class: GrapplingHook
           # 317.96875 : 250.0 + 67.96875
+          # HITTING OBJECT RADIUSES - self.class: GrapplingHook
+          # 77.31770833333333 : 9.348958333333334 + 67.96875
+          
+          # HITTING OBJECT RADIUSES - self.class: GrapplingHook
+          # 105.36458333333334 : 37.395833333333336 + 67.96875
+
           hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
         end
         if hit_object && self.class.get_aoe <= 0
@@ -296,7 +303,7 @@ class Projectile < ScreenMapFixedObject
 
     # Drop projectile explosions
     if hit_object
-      puts "#{self.class.name} HIT OBJECT"
+      # puts "#{self.class.name} HIT OBJECT"
       if self.respond_to?(:drops)
         self.drops.each do |drop|
           drops << drop
@@ -304,9 +311,9 @@ class Projectile < ScreenMapFixedObject
       end
 
       if self.class::POST_DESTRUCTION_EFFECTS
-        puts "AADDING GRAPHICAL EEFFECTS"
+        # puts "AADDING GRAPHICAL EEFFECTS"
         self.get_post_destruction_effects.each do |effect|
-          puts "COUNT 1 herer"
+          # puts "COUNT 1 herer"
           graphical_effects << effect
         end
       end

@@ -341,7 +341,7 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
     @item.draw(new_angle, new_x, new_y, @z, @z_base) if @item
-    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER) if !@item
+    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale, @height_scale) if !@item
   end
 
   def draw_gl

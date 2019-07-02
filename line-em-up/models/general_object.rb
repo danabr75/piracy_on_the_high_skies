@@ -86,6 +86,10 @@ class GeneralObject
   def initialize(options = {})
     init_global_vars
 
+    @height_scale  = @height_scale  / self.class::IMAGE_SCALER
+    @width_scale   = @width_scale   / self.class::IMAGE_SCALER
+    @average_scale = @average_scale / self.class::IMAGE_SCALER
+
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
@@ -120,6 +124,16 @@ class GeneralObject
 
       @image_width_half  = @image_width  / 2.0
       @image_height_half = @image_height / 2.0
+    end
+
+    if self.class::IMAGE_SCALER != 1.0
+      @image_width  = @image_width  / self.class::IMAGE_SCALER
+      @image_height = @image_height / self.class::IMAGE_SCALER
+      @image_size   = @image_size   / self.class::IMAGE_SCALER
+      @image_radius = @image_radius / self.class::IMAGE_SCALER
+
+      @image_width_half  = @image_width_half  / self.class::IMAGE_SCALER
+      @image_height_half = @image_height_half / self.class::IMAGE_SCALER
     end
 
     @inited = true
@@ -185,23 +199,23 @@ class GeneralObject
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER) if @image
+    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale, @height_scale) if @image
   end
 
   def get_height
-    @image_height / self.class::IMAGE_SCALER
+    @image_height #/ self.class::IMAGE_SCALER
   end
 
   def get_width
-    @image_width / self.class::IMAGE_SCALER
+    @image_width #/ self.class::IMAGE_SCALER
   end
 
   def get_size
-    @image_size / self.class::IMAGE_SCALER
+    @image_size #/ self.class::IMAGE_SCALER
   end
 
   def get_radius
-    @image_radius / self.class::IMAGE_SCALER
+    @image_radius #/ self.class::IMAGE_SCALER
   end
 
   def is_alive

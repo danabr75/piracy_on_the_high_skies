@@ -409,10 +409,10 @@ module HardpointObjects
           self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER)
         end
       end
-      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale, @height_scale)
 
       if self.class::SHOW_HARDPOINT_BASE
-        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale, @height_scale)
       end
 
     end

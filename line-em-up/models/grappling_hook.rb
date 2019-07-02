@@ -48,7 +48,7 @@ class GrapplingHook < Projectile
     # @image_width_half  = @image_width_half * 4.0
     # @image_height_half = @image_height_half * 4.0
 
-    # @image_radius = 500
+    # @image_radius = @image_radius * 4.0
 
     @chain_image = get_chain_image
     if @image
@@ -96,7 +96,7 @@ class GrapplingHook < Projectile
     returning_to_object = @hp_reference || @owner
     distance = Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
     if @returning_to_player
-      if distance < returning_to_object.get_radius #* 3.0
+      if distance < returning_to_object.get_radius + self.get_radius #* 3.0
         @dissengage = true
       end
     end
@@ -168,6 +168,7 @@ class GrapplingHook < Projectile
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+    # disable chain
     if @player_reference
       returning_to_object = @hp_reference || @owner
       start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
@@ -188,9 +189,9 @@ class GrapplingHook < Projectile
       # puts "@hp_reference: RIGHT HERE: #{@hp_reference.current_map_pixel_x} - #{@hp_reference.current_map_pixel_y}"
       i = 0
       # puts "returning_to_object.get_radius: #{returning_to_object.get_radius} - #{returning_to_object.class}"
-      while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius )#* 4.0)
+      while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius + self.get_radius)#* 4.0)
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
-        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
         #
         step = (Math::PI/180 * (angle_to_origin + 90))
         new_x = Math.cos(step) * base + new_x
@@ -200,7 +201,7 @@ class GrapplingHook < Projectile
       # A little past the returning object.
       (0..1).each do |i|
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
-        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
+        @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
         #
         step = (Math::PI/180 * (angle_to_origin + 90))
         new_x = Math.cos(step) * base + new_x
