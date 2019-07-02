@@ -35,6 +35,8 @@ module HardpointObjects
     LAUNCHER_MAX_ANGLE    = nil
     LAUNCHER_ROTATE_SPEED = nil
 
+    IS_DESTRUCTABLE_PROJECTILE = false
+
 
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
@@ -95,6 +97,8 @@ module HardpointObjects
       test2 = is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
      # puts "WAS IT BETWEEN ANGLES? #{test2}"
       # if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
+      projectile = nil
+      destructable_projectile = nil
       if test2
        # puts "BETWEEN ANGLES"
         @within_angle = true
@@ -119,11 +123,16 @@ module HardpointObjects
               # raise "STOP HERE: + #{get_steam_usage}"
               # puts "#{owner.use_steam(get_steam_usage)} = owner.use_steam(#{get_steam_usage})"
               if self.class::LAUNCHER_ROTATE_SPEED
-                projectile = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, hardpoint_firing_angle + @firing_angle_offset, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+                item = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, hardpoint_firing_angle + @firing_angle_offset, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
               else
-                projectile = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+                item = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
               end
-              @projectiles << projectile if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
+              if self.class::IS_DESTRUCTABLE_PROJECTILE
+                destructable_projectile = item
+              else
+                projectile = item
+              end
+              @projectiles << item if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
               @cooldown_wait = get_cooldown
             end
           else
@@ -131,7 +140,7 @@ module HardpointObjects
             @spinning_up = true
           end
           effects = []
-          if projectile
+          if projectile || destructable_projectile
             # effect = Graphics::AngledSmoke.new(
             #   @current_map_pixel_x, @current_map_pixel_y, 1, @destination_angle, nil, @width_scale,
             #   @height_scale, @screen_pixel_width, @screen_pixel_height,
@@ -143,13 +152,13 @@ module HardpointObjects
             # effects << effect
           end
 
-          return {projectile: projectile, effects: effects}
+          return {projectile: projectile, destructable_projectile: destructable_projectile, effects: effects, graphical_effects: []}
         end
       else
         @within_angle = false
         # puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
       end
-      return {projectile: nil, effects: []}
+      return {projectile: nil, destructable_projectile: nil, effects: [], graphical_effects: []}
     end
 
     def self.get_hardpoint_media_location
