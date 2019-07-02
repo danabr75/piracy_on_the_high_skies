@@ -39,16 +39,16 @@ class Array
 # [13, 31, 49]
 
   def vector_mult vector_mult
-    puts "SELF"
+   # puts "SELF"
     self.matrix_to_s
     max_length = self.length
-    puts "SELF>LENGTH: #{self.length}"
+   # puts "SELF>LENGTH: #{self.length}"
     new_array = Array.new(max_length) { Array.new(max_length) { nil } }
 
     (0..max_length - 1).each do |c|
       sum = 0
       (0..vector_mult.length - 1).each do |k|
-        puts "C and K here: #{c} x #{k}"
+       # puts "C and K here: #{c} x #{k}"
         sum += self[c][k] * vector_mult[k];
       end
 
@@ -64,7 +64,7 @@ class Array
       i.each do |k|
         output << "#{k}|"
       end
-      puts output
+     # puts output
     end
   end
 

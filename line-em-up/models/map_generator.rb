@@ -248,7 +248,7 @@ class MapGenerator
       end
     end
 
-    puts "@terrain_image_paths: #{@terrain_image_paths}"
+   # puts "@terrain_image_paths: #{@terrain_image_paths}"
 
     data = {
       terrains: @terrain_image_paths, out_of_bounds_terrain_path: @out_of_bounds_terrain_path,

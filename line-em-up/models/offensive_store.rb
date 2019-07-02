@@ -34,7 +34,9 @@ class OffensiveStore < Building
     @is_close_enough_to_open = false
     @max_lootable_pixel_distance = 2 * @average_tile_size
     @image = self.class::get_image
+    @info = @image.gl_tex_info
     @credits = rand(500) + 500
+    @interactible = true
   end
 
   def set_drops drops
@@ -56,10 +58,10 @@ class OffensiveStore < Building
     if @is_close_enough_to_open
       button_clicked_exists = @button_id_mapping.key?(element_id)
       if button_clicked_exists
-        puts "BUTTON EXISTS: #{element_id}"
+       # puts "BUTTON EXISTS: #{element_id}"
         @button_id_mapping[element_id].call(@window, self, element_id)
       else
-        puts "Clicked button that is not mapped: #{element_id}"
+       # puts "Clicked button that is not mapped: #{element_id}"
       end
       return button_clicked_exists
     else
@@ -67,20 +69,20 @@ class OffensiveStore < Building
     end
   end
 
-  def update mouse_x, mouse_y, player
-    @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
-    distance = Gosu.distance(player.x, player.y, @x, @y)
-    if @is_hovering
-      if distance < @max_lootable_pixel_distance
-        @is_close_enough_to_open = true
-      else
-        @is_close_enough_to_open = false
-      end
-    else
-      @is_close_enough_to_open = false
-    end
-    return super(mouse_x, mouse_y, player)
-  end
+  # def update mouse_x, mouse_y, player
+  #   @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
+  #   distance = Gosu.distance(player.x, player.y, @x, @y)
+  #   if @is_hovering
+  #     if distance < @max_lootable_pixel_distance
+  #       @is_close_enough_to_open = true
+  #     else
+  #       @is_close_enough_to_open = false
+  #     end
+  #   else
+  #     @is_close_enough_to_open = false
+  #   end
+  #   return super(mouse_x, mouse_y, player)
+  # end
 
   def alt_draw x, y
     # @image.draw(@x, @y, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_ff0000))
@@ -119,41 +121,41 @@ class OffensiveStore < Building
     Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)
   end
 
-  def tile_draw_gl v1, v2, v3, v4
-    @image2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)
-    info = @image2.gl_tex_info
+  # def tile_draw_gl v1, v2, v3, v4
+  #   @image2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)
+  #   info = @image2.gl_tex_info
 
-    # info = @info
-    if @is_hovering && @is_close_enough_to_open
-      colors = [0.5, 1, 0.5, 1]
-    elsif @is_hovering
-      colors = [1, 0.5, 0.5, 1]
-    else
-      colors = [1, 1, 1, 1]
-    end
-    glBindTexture(GL_TEXTURE_2D, info.tex_name)
-    glBegin(GL_TRIANGLE_STRIP)
-      # bottom left 
-      glTexCoord2d(info.left, info.bottom)
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(v1[0], v1[1], v1[2])
+  #   # info = @info
+  #   if @is_hovering && @is_close_enough_to_open
+  #     colors = [0.5, 1, 0.5, 1]
+  #   elsif @is_hovering
+  #     colors = [1, 0.5, 0.5, 1]
+  #   else
+  #     colors = [1, 1, 1, 1]
+  #   end
+  #   glBindTexture(GL_TEXTURE_2D, info.tex_name)
+  #   glBegin(GL_TRIANGLE_STRIP)
+  #     # bottom left 
+  #     glTexCoord2d(info.left, info.bottom)
+  #     glColor4d(colors[0], colors[1], colors[2], colors[3])
+  #     glVertex3d(v1[0], v1[1], v1[2])
 
-      # Top Left
-      glTexCoord2d(info.left, info.top)
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(v2[0], v2[1], v2[2])
+  #     # Top Left
+  #     glTexCoord2d(info.left, info.top)
+  #     glColor4d(colors[0], colors[1], colors[2], colors[3])
+  #     glVertex3d(v2[0], v2[1], v2[2])
 
-      # bottom Right
-      glTexCoord2d(info.right, info.bottom)
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(v3[0], v3[1], v3[2])
+  #     # bottom Right
+  #     glTexCoord2d(info.right, info.bottom)
+  #     glColor4d(colors[0], colors[1], colors[2], colors[3])
+  #     glVertex3d(v3[0], v3[1], v3[2])
 
-      # top right
-      glTexCoord2d(info.right, info.top)
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(v4[0], v4[1], v4[2])
-    glEnd
-  end
+  #     # top right
+  #     glTexCoord2d(info.right, info.top)
+  #     glColor4d(colors[0], colors[1], colors[2], colors[3])
+  #     glVertex3d(v4[0], v4[1], v4[2])
+  #   glEnd
+  # end
 
   def random_weighted(weighted)
     max    = sum_of_weights(weighted)

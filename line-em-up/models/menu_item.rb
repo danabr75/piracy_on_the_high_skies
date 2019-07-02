@@ -41,7 +41,7 @@ class MenuItem
         #       end
 
         #       @x = @original_x + HOVER_OFFSET
-        #       puts "MENU ITEM NEW X: #{@x}   from : #{@original_x} + #{HOVER_OFFSET}"
+        #      # puts "MENU ITEM NEW X: #{@x}   from : #{@original_x} + #{HOVER_OFFSET}"
         #       @y = @original_y + HOVER_OFFSET
         #   else 
         #       @active_image = @main_image
@@ -83,7 +83,7 @@ class MenuItem
     #   #   @text = return_value
     #   # end
     #   # if @save_callback && @settings_name && @config_file
-    #   #   puts "USING SAVE CALLBACK: #{@config_file} and #{@settings_name} and #{return_value}"
+    #   #  # puts "USING SAVE CALLBACK: #{@config_file} and #{@settings_name} and #{return_value}"
     #   #   @save_callback.call(@config_file, @settings_name.to_s, return_value)
     #   # end
     # end

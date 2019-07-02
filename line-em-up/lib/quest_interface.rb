@@ -11,7 +11,7 @@ module QuestInterface
     return {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
       "starting_level_quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 120, 120, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})"],
+        "init_ships_string" =>     ["AIShip.new(nil, nil, 130, 130, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [
           [
@@ -28,7 +28,7 @@ module QuestInterface
             {effect_type: "dialogue", "section_id" => 'level_2'}
           ]
         ], # earth_quakes?, trigger dialogue
-        "map_name" =>       "desert_v4_small",
+        "map_name" =>       "desert_v9_small",
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
@@ -129,7 +129,7 @@ module QuestInterface
           end
         rescue SyntaxError, NoMethodError => e
           found_errors = false
-          puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
+         # puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
         end
       end
     end
@@ -154,10 +154,10 @@ module QuestInterface
           end
         rescue NameError, SyntaxError, NoMethodError => e
           found_errors = true
-          puts e.backtrace
-          puts "ISSUE WITH: #{quest_key} on key: #{string_key}"
-          puts "RAW DATA: #{quest_data[string_key]}"
-          puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
+         # puts e.backtrace
+         # puts "ISSUE WITH: #{quest_key} on key: #{string_key}"
+         # puts "RAW DATA: #{quest_data[string_key]}"
+         # puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
         end
       end
     end
@@ -171,26 +171,26 @@ module QuestInterface
   # this is necessary for on-map-load inits..
   # What if a player enters an area, the updates creates a ship, the player leaves. Need to have on-load inits.
   def self.init_quests_on_map_load config_path, quest_datas, map_name, ships, buildings, player, messages, effects, window, options
-    puts "INITING QUESTS HERE"
+   # puts "INITING QUESTS HERE"
     local_messages = []
     quest_datas.each do |quest_key, values|
-      puts "INIT QUEST HEY : #{quest_key} and values"
+     # puts "INIT QUEST HEY : #{quest_key} and values"
       # puts values.inspect
       state = values["state"]
-      puts "MAYP NAME: #{map_name} and state: #{state}"
+     # puts "MAYP NAME: #{map_name} and state: #{state}"
       next if values["map_name"] != map_name
       if state == 'active'
         local_messages << "#{quest_key}"
         if values["init_ships"] && values["init_ships"].any?
           values["init_ships"].each do |ship|
-            puts "1loading in ship here for : #{quest_key}"
+           # puts "1loading in ship here for : #{quest_key}"
             ships << ship
           end
         end
-        puts "INIT HERE, WHY NOT INIT"
+       # puts "INIT HERE, WHY NOT INIT"
         if values["init_effects"] && values["init_effects"].any?
-          puts "INIT EFFECTS FOUND - on map load"
-          puts values["init_effects"]
+         # puts "INIT EFFECTS FOUND - on map load"
+         # puts values["init_effects"]
           ships, buildings, messages, effects = initialize_effects(config_path, quest_key, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
         end
         # Load in buildings
@@ -223,10 +223,10 @@ module QuestInterface
           buildings = results[:buildings]
           if results[:activate_quests]
             results[:activate_quests].each do |triggering_quest_key|
-              puts "WHY CAN:T TRIGGER NEW STATUS?? #{triggering_quest_key} - #{triggering_quest_key.class}"
-              puts "IS IT HERE? #{quest_datas[triggering_quest_key]} - and logic? : #{quest_datas[triggering_quest_key]['state'] == 'inactive'}"
+             # puts "WHY CAN:T TRIGGER NEW STATUS?? #{triggering_quest_key} - #{triggering_quest_key.class}"
+             # puts "IS IT HERE? #{quest_datas[triggering_quest_key]} - and logic? : #{quest_datas[triggering_quest_key]['state'] == 'inactive'}"
               quest_datas[triggering_quest_key]['state'] = 'pending_activation' if quest_datas[triggering_quest_key]['state'] == 'inactive'
-              puts "WAS IT SET? #{quest_datas[triggering_quest_key]['state']}"
+             # puts "WAS IT SET? #{quest_datas[triggering_quest_key]['state']}"
             end
           end
 
@@ -259,9 +259,9 @@ module QuestInterface
           end
           # {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
         end
-        puts "WHAT WAS INIT FFECTS? "
-        puts values["init_effects"].class
-        puts values["init_effects"]
+       # puts "WHAT WAS INIT FFECTS? "
+       # puts values["init_effects"].class
+       # puts values["init_effects"]
         ships, buildings, messages, effects = initialize_effects(config_path, quest_key, values["init_effects"], map_name, ships, buildings, player, messages, effects, options)
 
 
@@ -281,14 +281,14 @@ module QuestInterface
 
 
   def self.initialize_effects config_path, quest_key, effects_datas, map_name, ships, buildings, player, messages, effects, options
-    puts "CASE 0"
-    puts "effects_datas"
+   # puts "CASE 0"
+   # puts "effects_datas"
     raise "BAD INPUT HERE, effects_datas not an array" if !effects_datas.is_a?(Array)
-    puts effects_datas
+   # puts effects_datas
     effects_datas.each do |effect_groups|
-      puts "CASE 1"
-      puts "EFFECT DATAS:"
-      puts effect_groups.inspect
+     # puts "CASE 1"
+     # puts "EFFECT DATAS:"
+     # puts effect_groups.inspect
       raise "BAD INPUT HERE, effect_groups not an array" if !effect_groups.is_a?(Array)
       # [
       #   {"effect_type"=>"focus", "id"=>"starting_level_quest_ship_1", "time"=>300, "target_type"=>"ship"},
@@ -296,19 +296,19 @@ module QuestInterface
       # ]
       group = Effects::Group.new(options)
       effect_groups.each do |effect_group|
-        puts effect_group.inspect if !effect_group.is_a?(Hash) 
+       # puts effect_group.inspect if !effect_group.is_a?(Hash) 
         # HERE!!!!!!
         # {"effect_type"=>"focus", "id"=>"starting_level_quest_ship_1", "time"=>300, "target_type"=>"ship"}
         raise "BAD INPUT HERE, effect_group not an array. Found: #{effect_group.class}" if !effect_group.is_a?(Hash) 
         # HERE!!!!!!
-        puts "CASE 2"
+       # puts "CASE 2"
         # effect_group.each do |key, effect_data|
         # effect_group.each do |effect_data|
-        #   puts effect_data.inspect if !effect_data.is_a?(Hash)
+        #  # puts effect_data.inspect if !effect_data.is_a?(Hash)
         #   raise "BAD INPUT HERE, effect_data not an hash. Found: #{effect_data.class}" if !effect_data.is_a?(Hash)
         effect = nil
         key = effect_group['effect_type']
-        puts "CASE 3"
+       # puts "CASE 3"
         # puts "KEY HERE: #{key}"
         # puts effect_data.inspect
         # raise "what is it"
@@ -316,14 +316,14 @@ module QuestInterface
         # puts "WHAT WAS THIS: #{effect_group['options']}"
         # puts effect_group['options'].inspect
         if key == "focus"
-          puts "CASE 4"
+         # puts "CASE 4"
           # {"id"=>"starting_level_quest_ship_1", "time"=>300}
           # puts "PASSING SHIPS:L #{ships}"
           # puts "#{ships.first}"
           raise "Invalid settings for Focus: #{[effect_group['id'], effect_group['target_type'], effect_group['time']]}" if [effect_group['id'], effect_group['target_type'], effect_group['time']].include?(nil)
           effect = Effects::Focus.new(effect_group['id'], effect_group['target_type'], effect_group['time'], ships, buildings, player, options.merge(effect_options))
         elsif key == 'dialogue'
-          puts "CASE 5"
+         # puts "CASE 5"
           # def initialize quest_key, section_key, options = {}
           raise "Invalid settings for Dialogue: #{[effect_group['section_id']]}" if [effect_group['section_id']].include?(nil)
           effect = Effects::Dialogue.new(quest_key, effect_group['section_id'], player, options.merge(effect_options))

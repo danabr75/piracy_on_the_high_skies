@@ -8,7 +8,7 @@ module Effects
     attr_reader :target
     attr_accessor :dialogue_index
     def initialize quest_key, section_key, player, options = {}
-      puts "INIT DIALOGUE HERE: #{quest_key} - #{section_key}"
+     # puts "INIT DIALOGUE HERE: #{quest_key} - #{section_key}"
       super(options)
       @debug = options[:debug]
       @complete = false
@@ -45,7 +45,7 @@ module Effects
       # puts @button_id_mapping
       button_clicked_exists = @button_id_mapping.key?(element_id)
       if button_clicked_exists
-        puts "BUTTON EXISTS: #{element_id}"
+       # puts "BUTTON EXISTS: #{element_id}"
         @button_id_mapping[element_id].call(self, element_id)
       else
         raise "Clicked button that is not mapped: #{element_id}"
@@ -72,8 +72,8 @@ module Effects
       texts = @section_data[@dialogue_index]["text"]
       from  = @section_data[@dialogue_index]["from"]
 
-      puts "TEXTs: "
-      puts texts.inspect
+     # puts "TEXTs: "
+     # puts texts.inspect
 
 
       @font.draw(from, (@screen_pixel_width / 2) - (@font.text_width(from) / 2.0), (@screen_pixel_height) - (@y_offset), ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -85,7 +85,7 @@ module Effects
     end
 
     def draw
-      puts "DIALOGUES DRAW"
+     # puts "DIALOGUES DRAW"
       @next_button.draw(-(@next_button.w / 2), -(@next_button.h))
       dialogue_box_draw
       # draw box of text w/ clickable areas for next. 

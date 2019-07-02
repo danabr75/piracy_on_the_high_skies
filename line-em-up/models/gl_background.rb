@@ -108,7 +108,7 @@ class GLBackground
     @visible_map_tile_height = VISIBLE_MAP_TILE_HEIGHT
     @visible_map_tile_width  = (VISIBLE_MAP_TILE_WIDTH * resolution_scale).ceil
     @visible_map_tile_width -= 1 if @visible_map_tile_width % 2 != 0
-    puts "NEW V WIDTH : #{@visible_map_tile_width}"
+   # puts "NEW V WIDTH : #{@visible_map_tile_width}"
     @extra_map_tile_width    = EXTRA_MAP_TILE_WIDTH
     @extra_map_tile_height   = EXTRA_MAP_TILE_HEIGHT
 
@@ -422,8 +422,8 @@ class GLBackground
     @map_inited = true
     # @only return active objects?
     # Except enemies, cause they can have movement outside of the visible map?
-    puts "RETURING BUILDINGS: #{buildings.count}"
-    puts "RETURING ships: #{ships.count}"
+   # puts "RETURING BUILDINGS: #{buildings.count}"
+   # puts "RETURING ships: #{ships.count}"
     return {ships: ships, pickups: pickups, buildings: buildings}
   end
 
@@ -471,8 +471,8 @@ class GLBackground
     else
       # location - Left GPS edge of map. Should be in Integers
       distance_from_left = (@gps_map_center_x + x_offset) - (tile_x)
-      puts "distance_from_left = tile_x - (@gps_map_center_x + x_offset)"
-      puts "#{distance_from_left} = #{tile_x} - (#{@gps_map_center_x} + #{x_offset})"
+     # puts "distance_from_left = tile_x - (@gps_map_center_x + x_offset)"
+     # puts "#{distance_from_left} = #{tile_x} - (#{@gps_map_center_x} + #{x_offset})"
 
       # bUILDING LOCATION ON TRIGGER : 126 - 125
       # distance_from_left = tile_x - (@gps_map_center_x - x_offset) - 1
@@ -491,15 +491,15 @@ class GLBackground
   # This is confusing.
   def print_visible_map
     if @debug
-      puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
+     # puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
       @visual_map_of_visible_to_map.each do |y_row|
         output = "|"
         y_row.each do |x_row|
           output << x_row
           output << '|'
         end
-        puts output
-        puts "_" * 80
+       # puts output
+       # puts "_" * 80
       end
     end
   end
@@ -608,7 +608,7 @@ class GLBackground
 
     # 1 should be 1 GPS coord unit. No height scale should be on it.
     if @local_map_movement_y >= @tile_pixel_height# / @visible_map_tile_height.to_f# * @height_scale * 1.1
-      puts "ADDING IN ARRAY 1 - SOUTH"
+     # puts "ADDING IN ARRAY 1 - SOUTH"
       tile_movement = true
       if @current_map_pixel_center_y < (@map_pixel_height)
         # puts "CURRENT WAS LESS THAN EXTERNIOR: #{@current_map_pixel_center_y} - #{EXTERIOR_MAP_HEIGHT}"
@@ -625,14 +625,14 @@ class GLBackground
 
         # if @gps_map_center_y + @gps_tile_offset_y > (@map_tile_height)
         if @map_tile_top_row < 0
-          puts "ADDING IN EDGE OF MAP"
+         # puts "ADDING IN EDGE OF MAP"
           @visual_map_of_visible_to_map.pop
           @visual_map_of_visible_to_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { "N/A" })
 
           @visible_map.pop
           @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { OFF_EDGE_MAP_VALUE })
         else
-          puts "ADDING NORMALLY"
+         # puts "ADDING NORMALLY"
           @visible_map.pop
           @visual_map_of_visible_to_map.pop
           # @y_add_top_tracker << (player_y + y_offset)
@@ -688,10 +688,10 @@ class GLBackground
     # Adding to bottom of map
     # Convert on screen movement to map
     if @local_map_movement_y <= -@tile_pixel_height# / @visible_map_tile_height.to_f
-      puts "ADDING IN ARRAY 2 - NORTH - #{@map_tile_top_row}"
+     # puts "ADDING IN ARRAY 2 - NORTH - #{@map_tile_top_row}"
       tile_movement = true
       if @current_map_pixel_center_y > 0
-        puts "PRE gps_map_center_y: #{@gps_map_center_y}"
+       # puts "PRE gps_map_center_y: #{@gps_map_center_y}"
         @gps_map_center_y += 1
         # @map_tile_left_row  
         # @map_tile_right_row 
@@ -700,17 +700,17 @@ class GLBackground
 
         # Have to increment by one, or else duplicating row
         # local_gps_map_center_y = @gps_map_center_y + 1
-        puts "POST gps_map_center_y: #{@gps_map_center_y}"
+       # puts "POST gps_map_center_y: #{@gps_map_center_y}"
 
         # @gps_tile_offset_y = @visible_map_tile_height / 2 + @extra_map_tile_height / 2
         # @gps_tile_offset_x = @visible_map_tile_width/ 2 + @extra_map_tile_width / 2
 
         # Show edge of map 
         # if local_gps_map_center_y - @gps_tile_offset_y <= 0
-        puts "@map_tile_top_row <= 0"
-        puts "#{@map_tile_top_row} <= 0"
+       # puts "@map_tile_top_row <= 0"
+       # puts "#{@map_tile_top_row} <= 0"
         if @map_tile_bottom_row >= @map_tile_height
-          puts "CASE 1"
+         # puts "CASE 1"
           @visible_map.shift
           @visual_map_of_visible_to_map.shift
           @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { OFF_EDGE_MAP_VALUE })
@@ -718,7 +718,7 @@ class GLBackground
           # puts "HERE WHAT WAS IT? visible_map.last.length #{@visible_map.last.length}"
           # puts "HERE WHAT WAS IT? visible_map.last[0].length #{@visible_map.last[0].length}"
         else
-          puts "CASE 2"
+         # puts "CASE 2"
           # puts "ADDING NORMALLY - #{@current_map_pixel_center_y} -#{ @gps_tile_offset_y} > 0"
           @visible_map.shift
           @visual_map_of_visible_to_map.shift
@@ -728,12 +728,12 @@ class GLBackground
           (0..@visible_map_tile_width + @extra_map_tile_width - 1).each_with_index do |visible_width, index_w|
             # x_index = @map_tile_width - @gps_map_center_x + visible_width - @gps_tile_offset_x
             x_index = @map_tile_right_row + index_w
-            puts "X_INDEX: #{x_index}"
+           # puts "X_INDEX: #{x_index}"
             if x_index < @map_tile_width && x_index >= 0
               # y_index = (@map_tile_height - ((local_gps_map_center_y ) - @gps_tile_offset_y))
-              puts "YINDEX CREATED: #{@map_tile_height} - #{@map_tile_top_row}"
+             # puts "YINDEX CREATED: #{@map_tile_height} - #{@map_tile_top_row}"
               y_index = @map_tile_bottom_row
-              puts "Y:INDEX: #{y_index}"
+             # puts "Y:INDEX: #{y_index}"
               new_array << @map_data[y_index][x_index]
               new_debug_array << "#{y_index}, #{x_index}"
             else
@@ -768,17 +768,17 @@ class GLBackground
 
     # Moving to the RIGHT
     # if @local_map_movement_x >= @tile_pixel_width 
-    #   puts "TEST HERE: #{@gps_map_center_x} - #{@map_tile_width}"
+    #  # puts "TEST HERE: #{@gps_map_center_x} - #{@map_tile_width}"
     # end
     if @local_map_movement_x >= @tile_pixel_width && !(@gps_map_center_x >= @map_tile_width - 1)
-      puts "ADDING IN ARRAY 3 - WEST"
-      puts "!(@gps_map_center_x >= @map_tile_width)"
-      puts "!(#{@gps_map_center_x} >= #{@map_tile_width})"
-      puts "#{!(@gps_map_center_x >= @map_tile_width)}"
+     # puts "ADDING IN ARRAY 3 - WEST"
+     # puts "!(@gps_map_center_x >= @map_tile_width)"
+     # puts "!(#{@gps_map_center_x} >= #{@map_tile_width})"
+     # puts "#{!(@gps_map_center_x >= @map_tile_width)}"
       tile_movement = true
       # print_visible_map
       if @current_map_pixel_center_x < (@map_pixel_width)
-        puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
+       # puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
         @gps_map_center_x    += 1
         # @map_tile_left_row  
         # @map_tile_right_row 
@@ -791,12 +791,12 @@ class GLBackground
         # puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
 
         # if @map_tile_right_row > (@map_tile_width)
-        puts "@map_tile_right_row <= 0"
-        puts "#{@map_tile_right_row} <= 0"
+       # puts "@map_tile_right_row <= 0"
+       # puts "#{@map_tile_right_row} <= 0"
         # @map_tile_right_row <= 0
         # -8 <= 0
         if @map_tile_right_row < 0
-          puts "RIGHT EDGE OF MAP"
+         # puts "RIGHT EDGE OF MAP"
 
           @visible_map.each do |row|
             row.pop
@@ -808,9 +808,9 @@ class GLBackground
           end
 
         else
-          puts "NORMAL MAP EDGE:"
-          puts "@map_tile_right_row > (@map_tile_width)"
-          puts "#{@map_tile_right_row} <= #{(@map_tile_width)}"
+         # puts "NORMAL MAP EDGE:"
+         # puts "@map_tile_right_row > (@map_tile_width)"
+         # puts "#{@map_tile_right_row} <= #{(@map_tile_width)}"
           # START
           # ASDDING NORMAL MAP EDGE:
           # @map_tile_right_row > (@map_tile_width)
@@ -831,8 +831,8 @@ class GLBackground
           (0..@visible_map_tile_height + @extra_map_tile_height - 1).each_with_index do |visible_height, index_w|
             # x_index = @map_tile_right_row + index_w
             y_index = @map_tile_top_row + index_w
-            puts "TEST111"
-            puts "#{y_index} = #{@map_tile_bottom_row} + #{index_w}"
+           # puts "TEST111"
+           # puts "#{y_index} = #{@map_tile_bottom_row} + #{index_w}"
             # START
             # TEST111
             # 119 = 130 + 0 .. 130 = 130 + 11
@@ -841,8 +841,8 @@ class GLBackground
             # 119 = 130 + 0 .. 130 = 130 + 11
 
             if y_index < @map_tile_height && y_index >= 0
-              puts "WAS NOT OFF MAP EDGE: y_index < @map_tile_height && y_index >= 0"
-              puts "#{y_index} < #{@map_tile_height} && y_index >= #{0}"
+             # puts "WAS NOT OFF MAP EDGE: y_index < @map_tile_height && y_index >= 0"
+             # puts "#{y_index} < #{@map_tile_height} && y_index >= #{0}"
               # IMPLEMENT!!!
               x_index = @map_tile_right_row
               new_array << @map_data[y_index][x_index]
@@ -876,20 +876,20 @@ class GLBackground
 
     # MOVING TO THE LEFT
     if @local_map_movement_x <= -@tile_pixel_width# * @width_scale * 1.1
-      puts "ADDING IN ARRAY 4 - EAST"
+     # puts "ADDING IN ARRAY 4 - EAST"
       # print_visible_map
       if @current_map_pixel_center_x < (@map_pixel_width)
-        puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
+       # puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
         @gps_map_center_x    -= 1
         @map_tile_left_row   += 1
         @map_tile_right_row  += 1
         # @map_tile_top_row    
         # @map_tile_bottom_row
 
-        puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
+       # puts "POST GPS MAP CENTER X #{@gps_map_center_x}"
 
         if @map_tile_left_row >= @map_tile_width
-          puts "ADDING IN RIGHT EDGE OF MAP"
+         # puts "ADDING IN RIGHT EDGE OF MAP"
           @visible_map.each do |row|
             row.shift
             row.push(OFF_EDGE_MAP_VALUE)
@@ -900,7 +900,7 @@ class GLBackground
           end
 
         else
-          puts "ASDDING NORMAL MAP EDGE:"
+         # puts "ASDDING NORMAL MAP EDGE:"
 
           @visible_map.each do |y_row|
             y_row.shift
@@ -1297,8 +1297,8 @@ class GLBackground
 
           # if x_element['terrain_paths_and_weights']
           #   terrains = ['terrain_paths_and_weights']
-          #   puts "TERRAINS HERE: ---"
-          #   puts terrains.inspect
+          #  # puts "TERRAINS HERE: ---"
+          #  # puts terrains.inspect
           #   # info_top_left
           #   # TERRAINS HERE: ---
           #   # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
@@ -1409,7 +1409,6 @@ class GLBackground
             # building.alt_draw((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
 
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
-            # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
 
 
 
@@ -1421,13 +1420,16 @@ class GLBackground
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
             if !building.kind_of?(Landwreck) #&& !building.kind_of?(OffensiveStore)
               building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+            #   # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+            else
+              # building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+              # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
             end
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 
           pickups.each do |pickup|
             next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
-            pickup.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 
           
@@ -1440,7 +1442,7 @@ class GLBackground
 
           error = glGetError
           if error != 0
-            puts "FOUND ERROR: #{error}"
+           # puts "FOUND ERROR: #{error}"
           end
 
         end
@@ -1449,15 +1451,15 @@ class GLBackground
   end
  
   # def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
-  #   puts "viewMatrix"
+  #  # puts "viewMatrix"
   #   viewMatrix.matrix_to_s
-  #   puts "projectionMatrix"
+  #  # puts "projectionMatrix"
   #   projectionMatrix.matrix_to_s
   #   viewProjectionMatrix = projectionMatrix * viewMatrix;
   #   # //transform world to clipping coordinates
-  #   puts "viewProjectionMatrix"
-  #   puts viewProjectionMatrix.matrix_to_s
-  #   puts "VECTOR HERE: #{[o_x, o_y, o_z]}"
+  #  # puts "viewProjectionMatrix"
+  #  # puts viewProjectionMatrix.matrix_to_s
+  #  # puts "VECTOR HERE: #{[o_x, o_y, o_z]}"
   #   point3D = viewProjectionMatrix.vector_mult([o_x, o_y, o_z, 0.999])
   #   x = ((( point3D[0] + 1 ) / 2.0) * screen_width )
   #   x = x / point3D[3]
@@ -1466,7 +1468,7 @@ class GLBackground
   #   y = ((( 1 - point3D[1] ) / 2.0) * screen_height )
   #   y = y / point3D[3]
   #   # doesn't point3D[2] do anything? Depth?
-  #   puts "RETURNING: #{[x, y]}"
+  #  # puts "RETURNING: #{[x, y]}"
   #   return [x, y];
   # end
 

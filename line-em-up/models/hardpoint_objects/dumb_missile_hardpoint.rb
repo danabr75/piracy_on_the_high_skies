@@ -25,7 +25,7 @@ module HardpointObjects
     # end
 
     # def draw angle, x, y, z
-    #   puts "DUMB MISSILE LAUNCHER DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
+    #  # puts "DUMB MISSILE LAUNCHER DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
     #   super(angle, x, y, z)
     # end
 

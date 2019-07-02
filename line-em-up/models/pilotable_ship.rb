@@ -143,10 +143,10 @@ class PilotableShip < GeneralObject
         item_klass = item_klass_string && item_klass_string != '' ? eval(item_klass_string) : nil
       rescue NameError, SyntaxError, NoMethodError => e
         found_errors = true
-        puts "ISSUE: #{e.class}"
+       # puts "ISSUE: #{e.class}"
         # puts e.backtrace
-        puts "ISSUE WITH: #{item_klass_string}"
-        puts "RAW DATA: #{options}"
+       # puts "ISSUE WITH: #{item_klass_string}"
+       # puts "RAW DATA: #{options}"
       end
       raise "Finishing w/ errors" if found_errors
 
@@ -165,7 +165,7 @@ class PilotableShip < GeneralObject
         location[:angle_offset] = 180
       end
       # puts "ITEM CLASS " if owner.class == Player
-      puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
+     # puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
       hp = Hardpoint.new(
         x, y, hardpoint_z, hardpoint_z_base, location[:x_offset].call(get_image, @height_scale),
@@ -219,7 +219,7 @@ class PilotableShip < GeneralObject
     @current_steam_capacity      = @steam_max_capacity
     @steam_rate_increase         = steam_rate_increase
 
-    puts "@engine_hardpoints: #{@engine_hardpoints.count}"
+   # puts "@engine_hardpoints: #{@engine_hardpoints.count}"
 
     options.delete(:hardpoint_data)
 
@@ -431,14 +431,22 @@ class PilotableShip < GeneralObject
 
   NON_ATTACK_HARDPOINT_SLOTS = [:engine]
 
-  def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group
+  def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group, options = {}
     results = []
     @hardpoints.each do |hp|
       next if NON_ATTACK_HARDPOINT_SLOTS.include?(hp.slot_type)
       # puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
-      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) if hp.group_number == group && hp.item
+      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options) if hp.group_number == group && hp.item
       # puts "HP ATTACK RESULT"
       # puts results
+     # puts "GROUP: #{group}"
+     # puts "results:"
+      if group == 3 && results.any?
+       # puts "GROUP 3 - CAN ATTAC?:"
+        results.each do |result|
+         # puts result[:can_attack]
+        end
+      end
     end
     # results = results.flatten
     results.reject!{|v| v.nil?}
@@ -453,16 +461,16 @@ class PilotableShip < GeneralObject
     end
   end
 
-  def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
-    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 1)
+  def attack_group_1 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 1, options)
   end
 
-  def attack_group_2 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
-    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 2)
+  def attack_group_2 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 2, options)
   end
 
-  def attack_group_3 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer
-    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 3)
+  def attack_group_3 initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, options = {}
+    return attack_group(initial_angle, current_map_pixel_x, current_map_pixel_y, pointer, 3, options)
   end
 
   def deactivate_group_1

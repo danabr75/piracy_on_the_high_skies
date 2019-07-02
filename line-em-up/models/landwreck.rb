@@ -7,12 +7,12 @@ class Landwreck < Building
   attr_reader :credits
 
   def initialize current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, drops = [], options = {}
-    puts "LANDWRECK SCALE: #{current_scale}"
+   # puts "LANDWRECK SCALE: #{current_scale}"
     @item = item
-    @image = @item.class.get_tilable_image(@item.class::ITEM_MEDIA_DIRECTORY)
-    @info = @image.gl_tex_info
 
     super(current_map_tile_x, current_map_tile_y, nil, options.merge({drops: drops}))
+    @image = @item.class.get_tilable_image(@item.class::ITEM_MEDIA_DIRECTORY)
+    @info = @image.gl_tex_info
 
     # if @image
     #   @image_width  = @image.width  * (@width_scale  || @average_scale)
@@ -57,6 +57,12 @@ class Landwreck < Building
     @is_close_enough_to_open = false
     @max_lootable_pixel_distance = 2 * @average_tile_size
     @credits = rand(50) # in the future, grab from AIShip.. or whatever the original owner was
+    @interactible = true
+    # @block_map_pixel_from_tile_update = true
+  end
+
+
+  def tile_draw_gl v1, v2, v3, v4
   end
 
   def add_credits new_credits
@@ -79,10 +85,10 @@ class Landwreck < Building
     if @is_close_enough_to_open
       button_clicked_exists = @button_id_mapping.key?(element_id)
       if button_clicked_exists
-        puts "BUTTON EXISTS: #{element_id}"
+       # puts "BUTTON EXISTS: #{element_id}"
         @button_id_mapping[element_id].call(@window, self, element_id)
       else
-        puts "Clicked button that is not mapped: #{element_id}"
+       # puts "Clicked button that is not mapped: #{element_id}"
       end
       return button_clicked_exists
     else
@@ -92,19 +98,22 @@ class Landwreck < Building
 
   # Need to calculate distance to player, only allow click when close, and maybe not use a left-click button to activate?  
   def update mouse_x, mouse_y, player
-    @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
-    distance = Gosu.distance(player.x, player.y, @x, @y)
-    if @is_hovering
-      if distance < @max_lootable_pixel_distance
-        @is_close_enough_to_open = true
-      else
-        @is_close_enough_to_open = false
-      end
-    else
-      @is_close_enough_to_open = false
-    end
+    @interactible = false if @drops.count == 0 && @credits == 0
     return super(mouse_x, mouse_y, player)
   end
+  #   @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
+  #   distance = Gosu.distance(player.x, player.y, @x, @y)
+  #   if @is_hovering
+  #     if distance < @max_lootable_pixel_distance
+  #       @is_close_enough_to_open = true
+  #     else
+  #       @is_close_enough_to_open = false
+  #     end
+  #   else
+  #     @is_close_enough_to_open = false
+  #   end
+  #   return super(mouse_x, mouse_y, player)
+  # end
 
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
     # Why is this here?

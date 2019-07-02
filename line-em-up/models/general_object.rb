@@ -627,11 +627,12 @@ class GeneralObject
   # Need to adjust this method. Should go from X,Y to map_pixel_x and map_pixel_y
   # X and Y are no longer used to calculate collisions
   # Keeping this around, but not going to use for the future.
-  # Not getting great results from this. ditching.
+  # Not getting great results from this. ditching. - still using for landwrecks.
   def update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
     # left-top, left-bottom, right-top, right-bottom
-    # ox = vert0[0] - (vert0[0] - vert2[0])
-    # oy = vert2[1] + (vert2[1] - vert3[1])
+    ox = vert0[0] - (vert0[0] - vert2[0])
+    oy = vert2[1] + (vert2[1] - vert3[1])
+    oz = [vert0[2], vert1[2], vert2[2], vert3[2]].min
     # puts "update_from_3D: #{[ox, oy, oz]}"
     # oz = z
     # oz2 = (vert0[2] + vert1[2] + vert2[2] + vert3[2]) / 4
@@ -646,14 +647,14 @@ class GeneralObject
     # resolution: X: 1600 Y: 900;
     # O:  0.001  - 1.2103536635137342
     # XY: 720.95 - 9.018083518522076
-    ox = vert0[0]
-    oy = vert0[1]
-    puts "O #{ox}, #{oy}, #{oz}"
+    # ox = vert0[0]
+    # oy = vert0[1]
+    # puts "O #{ox}, #{oy}, #{oz}"
     x, y, z = convert3DTo2D(ox, oy, oz, viewMatrix, projectionMatrix, viewport)
     # x, y, z = convert3DTo2D(0, 0, 0, viewMatrix, projectionMatrix, viewport)
     # x, y, z = gluProject(0, 0, 0, viewMatrix, projectionMatrix, viewport)
     y = @screen_pixel_height - y
-    puts "XY: #{x} - #{y}"
+    # puts "XY: #{x} - #{y}"
     @x = x
     @y = y
     # @x = 800
@@ -704,7 +705,7 @@ class GeneralObject
 
   def validate_not_nil parameters, klass_name, method_name
     parameters.each_with_index do |param, index|
-      puts caller if param.nil?
+     # puts caller if param.nil?
       raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected not Nil. Got Nil" if param.nil?
     end
   end
@@ -713,7 +714,7 @@ class GeneralObject
     class_type = [class_type] unless class_type.class == Array
     parameters.each_with_index do |param, index|
       next if param.nil?
-      puts caller if  !class_type.include?(param.class)
+     # puts caller if  !class_type.include?(param.class)
       raise "Invalid Parameter. For the #{index}th parameter in class and method #{klass_name}##{method_name}. Expected type: #{class_type}. Got #{param.class} w/ value: #{param}" if !class_type.include?(param.class)
     end
   end

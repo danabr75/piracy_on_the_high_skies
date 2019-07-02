@@ -7,7 +7,7 @@ module ConfigSetting
     if setting_value
       if File.readlines(file_location).grep(/#{setting_name}:/).size > 0
         text = File.read(file_location)
-        puts "READ TEXT IN FILE: #{text}"
+       # puts "READ TEXT IN FILE: #{text}"
         File.open(file_location, 'w+'){|f| f << text.sub(/^#{setting_name}: ([^;]*);$/, "#{setting_name}: #{setting_value};") }
       else
         File.open(file_location, 'a') do |f|
@@ -45,16 +45,16 @@ module ConfigSetting
   def self.set_mapped_setting file_location, setting_names, setting_value
     raise "NO FILE LOCATION PATH" if file_location.nil?
     raise "Warning! This won't work if you don't give it at least 2 setting_names.. or else update me! I already tried once" if  setting_names.count < 2
-    puts "set_mapped_setting".upcase
-    puts setting_names
-    puts setting_value
+   # puts "set_mapped_setting".upcase
+   # puts setting_names
+   # puts setting_value
     create_file_if_non_existent(file_location)
     if setting_names.any?
       setting_name = setting_names.shift
       text = (File.readlines(file_location).select { |line| line =~ /^#{setting_name}: ([^;]*);$/ }).first
       if text
-        puts "FOUND TEXT"
-        puts text
+       # puts "FOUND TEXT"
+       # puts text
         text = text.scan(/^#{setting_name}: ([^;]*);$/).first
         text = text.first if text
         data = ::JSON.parse(text)
@@ -64,11 +64,11 @@ module ConfigSetting
         # else
         #   indexer = setting_name
         # end
-        puts "WHAT IS INDEXER?: #{indexer}"
-        puts indexer.inspect
+       # puts "WHAT IS INDEXER?: #{indexer}"
+       # puts indexer.inspect
         while indexer
-          puts "indexing_values: #{indexing_values}"
-          puts "INDEXER - #{indexer}"
+         # puts "indexing_values: #{indexing_values}"
+         # puts "INDEXER - #{indexer}"
           if setting_names.count == 0
             indexing_values[indexer] = setting_value
           else

@@ -35,11 +35,11 @@ module Graphics
       @shift_red   = options[:shift_red]   || false
       @shift_green = options[:shift_green] || false
       @shift_blue  = options[:shift_blue]  || false
-      puts "HERE:15125123123123"
+     # puts "HERE:15125123123123"
 
-      puts @shift_red   #= options[:shift_red]   || false
-      puts @shift_green #= options[:shift_green] || false
-      puts @shift_blue  #= options[:shift_blue]  || false
+     # puts @shift_red   #= options[:shift_red]   || false
+     # puts @shift_green #= options[:shift_green] || false
+     # puts @shift_blue  #= options[:shift_blue]  || false
 
       angle_diff = nil
       if angle_max

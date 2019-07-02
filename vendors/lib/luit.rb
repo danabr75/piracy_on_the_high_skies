@@ -96,11 +96,11 @@ module LUIT
 
   class ClickArea < LUITElement
     def initialize(holder, id, x, y, z, w = 0, h = 0, color = nil, hover_color = nil, options = {})
-      puts "INITING H HERE: #{h}"
+     # puts "INITING H HERE: #{h}"
       h = [1, h].max
-      puts "NEW H IS : #{h}"
+     # puts "NEW H IS : #{h}"
       w = [1, w].max
-      puts "HOVLER COLOR: #{hover_color }"
+     # puts "HOVLER COLOR: #{hover_color }"
       @hide_rect_draw = options[:hide_rect_draw]
       super(holder, id, x, y, z, w, h, color, hover_color)
     end
@@ -139,9 +139,9 @@ module LUIT
       super(holder, id, x, y, z, w, h + 20)
       @typing = false
       @field = Gosu::TextInput.new
-      puts "WINDOW HERE: "
+     # puts "WINDOW HERE: "
       @window = LUIT.window
-      puts @window
+     # puts @window
     end
 
     def text
@@ -225,12 +225,12 @@ module LUIT
   class Button < LUITElement
     #w and h will auto adjust to the text size + 10px padding if its not set (or set lower than acceptable)
     def initialize(holder, id, x, y, z, text, w = 20, h = 50)
-      puts "PARAMS: #{w} - #{h}"
+     # puts "PARAMS: #{w} - #{h}"
       # h = [50, h].max
       inner_h = (h * 2.0 / 3.0).to_i
       @text = text
       @buttonColor = LUIT.uiColor
-      puts "what is h and inner_h: #{h} - #{inner_h}"
+     # puts "what is h and inner_h: #{h} - #{inner_h}"
       @font = Gosu::Font.new(inner_h)
       @textW = @font.text_width(@text)
       w = @textW + inner_h if w < @textW + inner_h
@@ -480,20 +480,20 @@ if __FILE__ == $0
       when Gosu::KbSpace
         @list << LUIT::Button.new(self, 1, 0, 0, "Test", 0, 50)
       when Gosu::KbReturn
-        puts @scanner.field.text
+       # puts @scanner.field.text
         @scanner.field.text = ""
       end
     end
 
     def onScan(text)
-      puts text
+     # puts text
       @scanner.scan
     end
 
     def onClick(id)
-      puts id
+     # puts id
       if id == "text"
-        puts @texter.text
+       # puts @texter.text
       end
     end
 

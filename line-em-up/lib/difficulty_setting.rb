@@ -38,7 +38,7 @@ class DifficultySetting < Setting
 
   # def clicked mx, my
   #   if is_mouse_hovering_next(mx, my)
-  #     puts "NEXT!!"
+  #    # puts "NEXT!!"
   #     index = SELECTION.index(@value)
   #     value = @value
   #     if index == 0
@@ -49,7 +49,7 @@ class DifficultySetting < Setting
   #     ConfigSetting.set_setting(@config_file_path, @name, value)
   #     @value = value
   #   elsif is_mouse_hovering_prev(mx, my)
-  #     puts "PREVV!!!!"
+  #    # puts "PREVV!!!!"
   #     index = SELECTION.index(@value)
   #     value = @value
   #     if index == SELECTION.count - 1

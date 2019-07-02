@@ -1,7 +1,7 @@
 class Shipwreck < ScreenMapFixedObject
 
   def initialize current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, ship, momentum, angle, drops, options = {}
-    puts "NEW SHIPWREKC: #{[current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, momentum, angle]}"
+   # puts "NEW SHIPWREKC: #{[current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, momentum, angle]}"
     @ship = ship
     @ship.turn_off_hardpoints
     @angle = angle

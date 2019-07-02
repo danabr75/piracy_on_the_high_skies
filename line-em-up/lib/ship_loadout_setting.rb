@@ -135,8 +135,8 @@ class ShipLoadoutSetting < Setting
   end
 
   def loading_object_inventory object, drops = [], credits = 0, holding_type = :not_available, options = {}
-    puts "LAODING OJECT INVENTORY #{drops}"
-    puts "WHAT WAS ON THE OBHECT: #{object.drops}"
+   # puts "LAODING OJECT INVENTORY #{drops}"
+   # puts "WHAT WAS ON THE OBHECT: #{object.drops}"
     @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object, holding_type, options)
 
     @buy_rate_from_store  = @object_inventory.buy_rate
@@ -151,9 +151,9 @@ class ShipLoadoutSetting < Setting
   end 
 
   def unloading_object_inventory
-    puts "TRYING TO UNLOAD OBJECT INVENTORY"
+   # puts "TRYING TO UNLOAD OBJECT INVENTORY"
     if @object_inventory
-      puts 'GET HERE'
+     # puts 'GET HERE'
       # puts "IT HAS CURRENTLY: #{@object_inventory.attached_to.drops}"
       # # puts "WERE GIVING IT:"
       # # puts @object_inventory.get_matrix_items
@@ -267,7 +267,7 @@ class ShipLoadoutSetting < Setting
 
   # THIS IS NOT WORKING CORRECTKLY.
   def click_ship_hardpoint id
-    puts "click_ship_hardpoint: #{id}"
+   # puts "click_ship_hardpoint: #{id}"
     # Key is front, right, or left
     # left_hardpoint_0
     # current_object = @window.cursor_object || @ship_inventory.cursor_object
@@ -280,19 +280,19 @@ class ShipLoadoutSetting < Setting
 
     hardpoint_element = @ship_hardpoints[i]
     element = hardpoint_element ? hardpoint_element[:item] : nil
-    puts "@window.cursor_object:"
-    puts @window.cursor_object.inspect
+   # puts "@window.cursor_object:"
+   # puts @window.cursor_object.inspect
 
     if @window.cursor_object && element
-      puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
-      puts "ID: #{id}"
-      puts "== #{@window.cursor_object[:key] == id}"
+     # puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
+     # puts "ID: #{id}"
+     # puts "== #{@window.cursor_object[:key] == id}"
       if @window.cursor_object[:key] == id
         # Same Object, Unstick it, put it back
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         hardpoint_element[:item] = @window.cursor_object
-        puts "CONFIG SETTING 1"
+       # puts "CONFIG SETTING 1"
         ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         hardpoint_element[:item][:key] = id
         @window.cursor_object = nil
@@ -303,7 +303,7 @@ class ShipLoadoutSetting < Setting
         temp_element = element
         hardpoint_element[:item] = @window.cursor_object
         hardpoint_element[:item][:key] = id
-        puts "CONFIG SETTING 2 "
+       # puts "CONFIG SETTING 2 "
         ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         @window.cursor_object = temp_element
         @window.cursor_object[:key] = nil # Original home lost, no last home of key present
@@ -316,7 +316,7 @@ class ShipLoadoutSetting < Setting
       # element[:follow_cursor] = true
       @window.cursor_object = element
       hardpoint_element[:item] = nil
-        puts "CONFIG SETTING 3 "
+       # puts "CONFIG SETTING 3 "
         # Not working.. 
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
       ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], nil)
@@ -428,7 +428,7 @@ class ShipLoadoutSetting < Setting
   # deprecated
   # def clicked mx, my
   #   raise "Deperected?"
-  #   puts "SHIP LOADOUT CLICKED"
+  #  # puts "SHIP LOADOUT CLICKED"
   #   if is_mouse_hovering_next(mx, my)
 
   #   elsif is_mouse_hovering_prev(mx, my)

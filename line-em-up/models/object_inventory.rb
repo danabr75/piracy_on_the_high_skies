@@ -38,14 +38,14 @@ class ObjectInventory
 
   def initialize window, name, item_list, credits, attached_to, holding_type, options = {}
     raise "INVALID PARMS: #{[window, name, item_list, attached_to, holding_type]}" if [window, name, item_list, attached_to, holding_type].include?(nil)
-    puts "NEW OBJECT INVENOTRY HERE: "
-    puts [window, name, item_list, credits, attached_to, holding_type, options]
+   # puts "NEW OBJECT INVENOTRY HERE: "
+   # puts [window, name, item_list, credits, attached_to, holding_type, options]
     @holding_type = holding_type
 
     @attached_to = attached_to
     @name = name
     @credits = credits
-    puts "WHAT WAS NAME? #{@name}"
+   # puts "WHAT WAS NAME? #{@name}"
     init_global_vars
     @window = window
     @item_list = item_list
@@ -99,8 +99,8 @@ class ObjectInventory
   end
 
   def unload_inventory
-    puts "ObjectInventory#unload_inventory"
-    puts get_matrix_items
+   # puts "ObjectInventory#unload_inventory"
+   # puts get_matrix_items
     @attached_to.set_drops(get_matrix_items)
     # any changes to credits have already been made.
     # @attached_to.set_credits(@credits)
@@ -108,7 +108,7 @@ class ObjectInventory
   end
 
   def get_matrix_items
-    puts "HERE: get_matrix_items"
+   # puts "HERE: get_matrix_items"
     items = []
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
@@ -128,7 +128,7 @@ class ObjectInventory
     # raise "GOT THIS for height: #{max_y_height} - Y was: #{@y}"
     current_y = (@screen_pixel_height / 2) - (@inventory_height / 2)
     current_x = @screen_pixel_width - (@next_x + @cell_width_padding + @cell_width)
-    puts "current_x was: #{current_x}"
+   # puts "current_x was: #{current_x}"
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "oi_matrix_#{x}_#{y}"
@@ -155,10 +155,10 @@ class ObjectInventory
     # puts @button_id_mapping
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
-      puts "BUTTON EXISTS: #{element_id}"
+     # puts "BUTTON EXISTS: #{element_id}"
       @button_id_mapping[element_id].call(@window, self, element_id)
     else
-      puts "Clicked button that is not mapped: #{element_id}"
+     # puts "Clicked button that is not mapped: #{element_id}"
     end
     return button_clicked_exists
   end
@@ -192,7 +192,7 @@ class ObjectInventory
         end
         row_value << value
       end
-      puts row_value.join(', ')
+     # puts row_value.join(', ')
     end
   end
 
@@ -235,15 +235,15 @@ class ObjectInventory
     # if @holding_type == :store
     #   window
     # end
-    puts "LUANCHER: #{id}"
-    puts "click_inventory: "
+   # puts "LUANCHER: #{id}"
+   # puts "click_inventory: "
     x, y = id.scan(/oi_matrix_(\d+)_(\d+)/).first
     x, y = [x.to_i, y.to_i]
-    puts "LCICKED: #{x} and #{y}"
+   # puts "LCICKED: #{x} and #{y}"
     matrix_element = @inventory_matrix[x][y]
 
     if !@window.cursor_object.nil? && (@window.cursor_object[:value].nil? || @window.cursor_object[:buy_rate].nil? || @window.cursor_object[:sell_rate].nil?)
-      puts @window.cursor_object
+     # puts @window.cursor_object
       raise "INVALID STATE of window.cursor_object"
     end
 
@@ -253,9 +253,9 @@ class ObjectInventory
     if @window.cursor_object && element && @holding_type == :store
       # Do nothing, not a use case that is supposed to work for the store.
     elsif @window.cursor_object && element
-      puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
-      puts "ID: #{id}"
-      puts "== #{@window.cursor_object[:key] == id}"
+     # puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
+     # puts "ID: #{id}"
+     # puts "== #{@window.cursor_object[:key] == id}"
       if @window.cursor_object[:key] == id
         # Same Object, Unstick it, put it back
         # element[:follow_cursor] = false
@@ -298,8 +298,8 @@ class ObjectInventory
     elsif @window.cursor_object # Selling to store, if store,
       # Placeing something new in inventory
       if @holding_type == :store
-        puts "CURSOR OBJECT"
-        puts @window.cursor_object
+       # puts "CURSOR OBJECT"
+       # puts @window.cursor_object
         element_value = (@window.cursor_object[:value] * @window.cursor_object[:buy_rate]).to_i
         if menu.credits >= element_value # Do nothing if store doesn't have enough mon 
           @window.ship_loadout_menu.add_to_ship_inventory_credits(element_value)
@@ -329,7 +329,7 @@ class ObjectInventory
   #       # puts element.inspect
   #       @inventory_matrix[space[:x]][space[:y]][:item] = element.merge({key: space[:key]})
   #     else
-  #       puts "NO SPACE LEFT"
+  #      # puts "NO SPACE LEFT"
   #     end
   #   end
   # end

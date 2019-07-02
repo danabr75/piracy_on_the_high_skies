@@ -16,7 +16,7 @@ class DumbProjectile < ScreenMapFixedObject
 
 
   def get_image
-    puts "override get_image!"
+   # puts "override get_image!"
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
 
@@ -25,8 +25,8 @@ class DumbProjectile < ScreenMapFixedObject
     options[:relative_object] = object
     @damage_increase = options[:damage_increase] || 1
     # if options[:debug] == true
-    #   puts "NEW DUMB PROJECTILE: X- #{object.x}"
-    #   puts "NEW DUMB PROJECTILE: y- #{object.y}"
+    #  # puts "NEW DUMB PROJECTILE: X- #{object.x}"
+    #  # puts "NEW DUMB PROJECTILE: y- #{object.y}"
     # end
     # raise "WHAT IS GOING ON HERE: #{scale}, #{object.x}, #{object.y}, #{screen_width}, #{screen_height}, #{width_scale}, #{height_scale}, #{location_x}, #{location_y}, #{map_width}, #{map_height},"
    # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, tile_pixel_width, tile_pixel_height, options = {})
@@ -69,7 +69,7 @@ class DumbProjectile < ScreenMapFixedObject
     #       next
     #     end
     #     hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
-    #     puts "HIT OBJECT " if hit_object
+    #    # puts "HIT OBJECT " if hit_object
     #     raise "test" if hit_object
     #     if hit_object
     #       if object.respond_to?(:health) && object.respond_to?(:take_damage)

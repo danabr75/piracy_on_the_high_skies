@@ -4,7 +4,7 @@ module Effects
   class Focus < Effects::Effect
     attr_reader :target
     def initialize id, type, time, ships, buildings, player, options = {}
-      puts "NEW FOCUS HERE: #{time}"
+     # puts "NEW FOCUS HERE: #{time}"
       super(options)
       @debug = options[:debug]
       @time_alive = 0
@@ -28,7 +28,7 @@ module Effects
       # @viewable_pixel_offset_x_bank = 0
       # @viewable_pixel_offset_y_bank = 0
       if type == 'player'
-        puts "TYPE WAS PLAYER HERE: #{type}"
+       # puts "TYPE WAS PLAYER HERE: #{type}"
         @target = player
         # Can put special option to allow death, but for now, this is the default.
         player.enable_invulnerability
@@ -46,7 +46,7 @@ module Effects
       else
         # Make center target an open struct that has tile, pixel data - A location
       end
-      puts "DID NOT FIND TARGET WITH ID AND TYPE: #{id} - #{type}" if @target.nil?
+     # puts "DID NOT FIND TARGET WITH ID AND TYPE: #{id} - #{type}" if @target.nil?
       raise "DID NOT FIND TARGET WITH ID AND TYPE: #{id} - #{type}" if @target.nil? && @debug
 
       # @nullify_view_offset = options
@@ -87,9 +87,9 @@ module Effects
     # BLOCK PLAYER CONTROLLERS and FIRING WHEN MOVING .. speed up movement, fix glitchyness.. lock onto map_pixels, only update offset when locked on, when they move
     # Block enemies from firing as well.
     def update gl_background, ships, buildings, player, offset_target, viewable_pixel_offset_x, viewable_pixel_offset_y
-      puts "EFFECT UPDATE : #{[@moving_to_target, @hovering_over_target, @moving_to_player, @returned_to_player]}"
-      puts "PLAYER LOC: #{player.current_map_pixel_x} - #{player.current_map_pixel_y}"
-      puts "OFFSET: #{viewable_pixel_offset_x} - #{viewable_pixel_offset_y}"
+     # puts "EFFECT UPDATE : #{[@moving_to_target, @hovering_over_target, @moving_to_player, @returned_to_player]}"
+     # puts "PLAYER LOC: #{player.current_map_pixel_x} - #{player.current_map_pixel_y}"
+     # puts "OFFSET: #{viewable_pixel_offset_x} - #{viewable_pixel_offset_y}"
       # speed = @hovering_over_target ? offset_target.get_speed : @speed
       speed = @speed
 
@@ -123,7 +123,7 @@ module Effects
 
 
           angle = GeneralObject.angle_1to360(180.0 - GeneralObject.calc_angle(start_point, end_point) - 90)
-          puts "ANGLE HERE: #{angle}"
+         # puts "ANGLE HERE: #{angle}"
 
           base = speed * @average_scale
 
@@ -152,7 +152,7 @@ module Effects
 
       #     angle = GeneralObject.angle_1to360(GeneralObject.calc_angle(start_point, end_point) - 90)
       #     # if angle == 315.0
-      #     puts "ANGLE2 HERE: #{angle}"
+      #    # puts "ANGLE2 HERE: #{angle}"
 
       #     base = speed * @average_scale
 
@@ -171,7 +171,7 @@ module Effects
         player.enable_controls
        end
 
-      puts "POST  UPDATE : #{[@moving_to_target, @hovering_over_target, @moving_to_player, @returned_to_player]}"
+     # puts "POST  UPDATE : #{[@moving_to_target, @hovering_over_target, @moving_to_player, @returned_to_player]}"
       return [gl_background, ships, buildings, player, offset_target, viewable_pixel_offset_x, viewable_pixel_offset_y]
     end
 

@@ -46,10 +46,19 @@ class AIShip < ScreenMapFixedObject
     @angle = 90
 
     # hardpoint_data = Player.get_hardpoint_data('BasicShip')
+    # hardpoint_data = {
+    #   :hardpoint_data=>
+    #   {
+    #     "0" => "HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::BulletHardpoint",
+    #     "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
+    #     "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
+    #     "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+    #   }
+    # }
     hardpoint_data = {
       :hardpoint_data=>
       {
-        "0" => "HardpointObjects::GrapplingHookHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::GrapplingHookHardpoint",
+        "0" => "HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::GrapplingHookHardpoint",
         "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
         "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
         "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
@@ -208,7 +217,7 @@ class AIShip < ScreenMapFixedObject
   end
 
   def accelerate
-    puts "AI ACCELLERATE: #{@ship.current_momentum}"
+   # puts "AI ACCELLERATE: #{@ship.current_momentum} - current_steam: #{@ship.current_steam_capacity}"
     @ship.accelerate
   end
   def brake
@@ -336,8 +345,8 @@ class AIShip < ScreenMapFixedObject
           projectiles.push(projectile)
         end
       end
-      puts "AI: TRYING TO FIRE GRAPPLE "
-      @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+     # puts "AI: TRYING TO FIRE GRAPPLE "
+      @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, {ai_block_attack_deactivation: true}).each do |results|
         # puts "GRAPPLE RESAULT:"
         # puts results
         results[:projectiles].each do |projectile|
@@ -377,7 +386,7 @@ class AIShip < ScreenMapFixedObject
       elsif agro_target_distance < @distance_preference_min
         need_to_move = true
         # Move away from player
-        puts "IMPLEMENT REVERSE LATER FOR AI"
+       # puts "IMPLEMENT REVERSE LATER FOR AI"
       end
     end
     # END MOVING SECTION
@@ -443,7 +452,7 @@ class AIShip < ScreenMapFixedObject
   end
 
   def use_steam usage
-    puts "AIT SHIP HERE"
+   # puts "AIT SHIP HERE"
 
       return true
 

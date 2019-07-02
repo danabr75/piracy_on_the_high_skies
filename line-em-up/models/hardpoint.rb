@@ -84,9 +84,9 @@ class Hardpoint < GeneralObject
     @angle_from_center = self.class.angle_1to360(calc_angle(start_point, end_point) - 90)
 
     # if @item_klass
-    #   puts "START: #{start_point}"
-    #   puts " END : #{end_point}"
-    #   puts "@angle_from_center: #{@angle_from_center}"
+    #  # puts "START: #{start_point}"
+    #  # puts " END : #{end_point}"
+    #  # puts "@angle_from_center: #{@angle_from_center}"
     #   # START: #<OpenStruct x=450, y=450>
     #   #  END : #<OpenStruct x=462.05357142857144, y=401.25>
     #   # @angle_from_center: 346.1119988390932
@@ -111,7 +111,7 @@ class Hardpoint < GeneralObject
 
     # Increlementing at 0 will adjust the x and y, to make them slightly off.
     # if options[:block_initial_angle]
-    #   puts "block_initial_angle"
+    #  # puts "block_initial_angle"
     #   # The graphical Gosu image drawing system needs the offset minused.
     #   # The angle determining system requires it positive
     #   # This is a mystery
@@ -257,9 +257,13 @@ class Hardpoint < GeneralObject
       # projectile_y = Math.sin(step) * @radius + current_map_pixel_y
 
       # Hardpoints angle_from_center IS USED TO CALCULATE POS X,Y, not to find firing angle.
+     # puts "ITEM ATTACKING ANGLE: #{current_ship_angle - @angle_offset} = #{current_ship_angle} - #{@angle_offset}"
+      # ITEM ATTACKING ANGLE: 249.0 = 249.0 - 0
 
+      options[:owner] = @owner
       result = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, start_point, end_point, nil, nil, @owner, options)
       attack_projectile = result[:projectile]
+     # puts "ATTACK PROJECTILE" if attack_projectile
       effects = result[:effects]
       effects.each do |effect|
         @drawable_items_near_self << effect
@@ -281,10 +285,11 @@ class Hardpoint < GeneralObject
     if attack_projectile
       return {
         projectiles: [attack_projectile],
-        cooldown: @assigned_weapon_class::COOLDOWN_DELAY
+        cooldown: @assigned_weapon_class::COOLDOWN_DELAY,
+        can_attack: can_attack
       }
     else
-      return nil
+      return {projectiles: [], cooldown: 0, can_attack: can_attack}
     end
   end
 
@@ -365,8 +370,8 @@ class Hardpoint < GeneralObject
       # puts "ADDING TO @drawable_items_near_self EHERE!!!"
     end
     # if @slot_type == :engine && @owner.current_momentum.nil?
-    #   puts "OWNER IS NIL? "
-    #   puts @owner.class
+    #  # puts "OWNER IS NIL? "
+    #  # puts @owner.class
     # end
   end
 

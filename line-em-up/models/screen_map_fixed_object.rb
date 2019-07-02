@@ -49,8 +49,8 @@ class ScreenMapFixedObject < GeneralObject
     #   outer_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width
     #                       # 14175.0 = (112.5 * (125)) + 112.5
     #   inner_x_bound = (@tile_pixel_width * (@current_map_tile_x))
-    #   puts "inner_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width"
-    #   puts "#{inner_x_bound} = (#{@tile_pixel_width} * (#{@current_map_tile_x})) + #{@tile_pixel_width}"
+    #  # puts "inner_x_bound = (@tile_pixel_width * (@current_map_tile_x)) + @tile_pixel_width"
+    #  # puts "#{inner_x_bound} = (#{@tile_pixel_width} * (#{@current_map_tile_x})) + #{@tile_pixel_width}"
     #   # inner_x_bound: 14062.5 < 14175.0 (RuntimeError)
     #   # inner_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x)) + @tile_pixel_width
     #   # outer_x_bound = (@tile_pixel_width * (@map_tile_width - @current_map_tile_x))

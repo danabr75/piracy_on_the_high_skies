@@ -4,7 +4,7 @@ module Effects
   class Wait < Effects::Effect
     attr_reader :target
     def initialize time, options = {}
-      puts "NEW WAIT HERE: #{time}"
+     # puts "NEW WAIT HERE: #{time}"
       super(options)
       @debug = options[:debug]
       @time_alive = 0

@@ -12,7 +12,7 @@ include GLUT
 
 class Player < ScreenFixedObject
   CONFIG_FILE = "#{APP_DIRECTORY}/config.txt"
-  puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
+ # puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   # SPEED = 7
   # MAX_ATTACK_SPEED = 3.0
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :rockets, :score, :time_alive
@@ -74,7 +74,7 @@ class Player < ScreenFixedObject
     options[:id]    = 'player'
     super(options)
     update_x_and_y(@screen_pixel_width  / 2, @screen_pixel_height / 2)
-    puts "NEW2 X AND Y: #{@x} - #{@y}"
+   # puts "NEW2 X AND Y: #{@x} - #{@y}"
     # super(@screen_pixel_width  / 2, @screen_pixel_height / 2)
 
     @score = 0

@@ -122,7 +122,7 @@ class GameWindow < Gosu::Window
 
     default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
     # default_width, default_height = default_value.split('x')
-    puts 'FOR TESTING:'
+   # puts 'FOR TESTING:'
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
@@ -141,23 +141,23 @@ class GameWindow < Gosu::Window
       @height_scale = @height / default_height.to_f
       @average_scale = (@width_scale + @height_scale) / 2.0
 
-      puts "WIDTH SCALE: #{@width_scale}"
-      puts "HEIGHT SCALE: #{@height_scale}"
+     # puts "WIDTH SCALE: #{@width_scale}"
+     # puts "HEIGHT SCALE: #{@height_scale}"
 
-      puts "AVERAGE SCALE: #{@average_scale}"
+     # puts "AVERAGE SCALE: #{@average_scale}"
       # @scale = (@width_scale + @height_scale) / 2
       # raise "NEW SCALE: #{@width_scale} x #{@height_scale}"
       # @scale = @width / (@height.to_f)
       @resolution_scale = @width.to_f / (@height.to_f)
-      puts "resolution_scale: #{@resolution_scale}"
+     # puts "resolution_scale: #{@resolution_scale}"
     end
 
 
     super(@width, @height)
     # @width, @height = [@width.to_f, @height.to_f]
-    puts "TRYING TO SET RESOLUTION HERE: #{@width} and #{@height}"
-    puts "ACTUAL IS: #{self.width} and #{self.height}"
-    puts "Gosu.screen width: #{Gosu.screen_height} and Gosu.screen_height: #{Gosu.screen_height}"
+   # puts "TRYING TO SET RESOLUTION HERE: #{@width} and #{@height}"
+   # puts "ACTUAL IS: #{self.width} and #{self.height}"
+   # puts "Gosu.screen width: #{Gosu.screen_height} and Gosu.screen_height: #{Gosu.screen_height}"
     
 
     @game_pause = false
@@ -253,7 +253,7 @@ class GameWindow < Gosu::Window
     viewable_center_target = nil
 
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
-    puts "EFFECTS COUNT ON INIT: #{@effects.count}"
+   # puts "EFFECTS COUNT ON INIT: #{@effects.count}"
 
     # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
 
@@ -287,8 +287,8 @@ class GameWindow < Gosu::Window
     # active_quests_data.each do |quest|
     #   quest.each do |quest_id, quest_hash|
     #     active_quests[quest_id] = {}
-    #     puts "active_quests[quest_id]: #{active_quests[quest_id]}"
-    #     puts "quest_hash: #{quest_hash}"
+    #    # puts "active_quests[quest_id]: #{active_quests[quest_id]}"
+    #    # puts "quest_hash: #{quest_hash}"
     #     active_quests[quest_id][:victory_condition]     = eval(quest_hash[:victory_condition_string]) if quest_hash[:victory_condition_string] && quest_hash[:victory_condition_string] != ''
     #     active_quests[quest_id][:post_victory_triggers] = eval(quest_hash[:post_victory_triggers_string]) if quest_hash[:post_victory_triggers_string] && quest_hash[:post_victory_triggers_string] != ''
     #     active_quests[quest_id][:active_condition]      = eval(quest_hash[:active_condition_string]) if quest_hash[:active_condition_string] && quest_hash[:active_condition_string] != ''
@@ -385,7 +385,7 @@ class GameWindow < Gosu::Window
     if @player.is_alive && !@game_pause && !@menu_open
               # KB_LEFT_CONTROL    = 224,
       if id == Gosu::KB_LEFT_CONTROL && @player.ready_for_special?
-        puts "Gosu::KB_LEFT_CONTROL CLICKED!!"
+       # puts "Gosu::KB_LEFT_CONTROL CLICKED!!"
         # @projectiles += @player.special_attack([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
         @projectiles += @player.special_attack_2
       end

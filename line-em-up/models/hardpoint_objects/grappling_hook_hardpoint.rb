@@ -34,11 +34,9 @@ module HardpointObjects
 
     def update mouse_x = nil, mouse_y = nil, object = nil, hardpoint_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
       @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
-      if !@active && @projectiles.count == 0
+      if @projectiles.count == 0
         # return false
-      
-        super(mouse_x, mouse_y, object, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y)
-        return true
+        return super(mouse_x, mouse_y, object, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y)
       else
         # puts "ACTIVE: #{@active} and count #{@projectiles.count}"
         @projectiles.reject! do |hook|
@@ -51,7 +49,7 @@ module HardpointObjects
     end
 
     # def @active= value
-    #   puts "THIS IUS AN ACTIVE TEST HERE"
+    #  # puts "THIS IUS AN ACTIVE TEST HERE"
     #   super(value)
     # end
 
@@ -67,21 +65,25 @@ module HardpointObjects
       # puts "#{@projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT} && #{!@active} && #{is_angle_between_two_angles?(destination_angle, angle_min, angle_max)}"
       # @projectiles.last.time_alive check is to prevent accidental quick double-clicks
       # puts "GRAP ATTACK HERE: #{@active_for}"
+
+
       if @projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT && !@active && @projectiles.last.time_alive > 15 && is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
         # puts "DETACHING HOOK"
         @cooldown_penalty = self.class::COOLDOWN_DELAY * 2
         @projectiles.each do |hook|
           hook.detach_hook
         end
+       # puts "GRAPPLE NOT ACTIVE"
         return {projectile: nil, effects: []}
       else
+       # puts "GRAPPLE ACTIVE - going SUPER"
         return super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
       end
     end
 
-    def self.name
-      "Grappling Hook Launcher"
-    end
+    # def self.name
+    #   "Grappling Hook Launcher"
+    # end
 
     def self.description
       return [

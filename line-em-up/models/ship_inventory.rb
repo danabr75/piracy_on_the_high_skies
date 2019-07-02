@@ -93,7 +93,7 @@ class ShipInventory
   end
 
   def add_credits new_credits
-    puts "ADDING CREDITS #{@credits.class} w new credits #{new_credits.class} on ShipInventory"
+   # puts "ADDING CREDITS #{@credits.class} w new credits #{new_credits.class} on ShipInventory"
     @credits += new_credits
     ConfigSetting.set_setting(@config_file_path, 'Credits', @credits)
   end
@@ -107,10 +107,10 @@ class ShipInventory
     # puts @button_id_mapping
     button_clicked_exists = @button_id_mapping.key?(element_id)
     if button_clicked_exists
-      puts "BUTTON EXISTS: #{element_id}"
+     # puts "BUTTON EXISTS: #{element_id}"
       @button_id_mapping[element_id].call(@window, self, element_id)
     else
-      puts "Clicked button that is not mapped: #{element_id}"
+     # puts "Clicked button that is not mapped: #{element_id}"
     end
     return button_clicked_exists
   end
@@ -142,7 +142,7 @@ class ShipInventory
         end
         row_value << value
       end
-      puts row_value.join(', ')
+     # puts row_value.join(', ')
     end
   end
 
@@ -168,20 +168,20 @@ class ShipInventory
   end
 
   def click_inventory id
-    puts "LUANCHER: #{id}"
-    puts "click_inventory: "
+   # puts "LUANCHER: #{id}"
+   # puts "click_inventory: "
     x, y = id.scan(/matrix_(\d+)_(\d+)/).first
     x, y = [x.to_i, y.to_i]
-    puts "LCICKED: #{x} and #{y}"
+   # puts "LCICKED: #{x} and #{y}"
     matrix_element = @inventory_matrix[x][y]
     element = matrix_element ? matrix_element[:item] : nil
 
     # Resave new key when dropping element in.
 
     if @window.cursor_object && element
-      puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
-      puts "ID: #{id}"
-      puts "== #{@window.cursor_object[:key] == id}"
+     # puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
+     # puts "ID: #{id}"
+     # puts "== #{@window.cursor_object[:key] == id}"
       if @window.cursor_object[:key] == id
         # Same Object, Unstick it, put it back
         # element[:follow_cursor] = false
@@ -230,7 +230,7 @@ class ShipInventory
   #       # puts element.inspect
   #       @inventory_matrix[space[:x]][space[:y]][:item] = element.merge({key: space[:key]})
   #     else
-  #       puts "NO SPACE LEFT"
+  #      # puts "NO SPACE LEFT"
   #     end
   #   end
   # end

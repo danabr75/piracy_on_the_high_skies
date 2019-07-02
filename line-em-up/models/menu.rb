@@ -74,7 +74,7 @@ class Menu
   end
 
   def onClick element_id
-    puts "MENU ONCLICK"
+   # puts "MENU ONCLICK"
     if @active
       button_clicked_exists = @button_id_mapping.key?(element_id)
       if button_clicked_exists
@@ -82,7 +82,7 @@ class Menu
         # raise "NEED T OBRING LOCAL WINDOW BACK #{self.class} is not menu - what was it? #{self.class.name}" if self.class.name != Menu
         @button_id_mapping[element_id].call(self.window, self, element_id)
       else
-        puts "Clicked button that is not mapped: #{element_id}"
+       # puts "Clicked button that is not mapped: #{element_id}"
       end
     end
   end
