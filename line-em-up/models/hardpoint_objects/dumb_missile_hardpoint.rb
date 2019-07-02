@@ -20,6 +20,8 @@ module HardpointObjects
     SHOW_HARDPOINT_BASE = true
 
 
+    IS_DESTRUCTABLE_PROJECTILE = true
+
     # def self.get_hardpoint_image
     #   Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
     # end

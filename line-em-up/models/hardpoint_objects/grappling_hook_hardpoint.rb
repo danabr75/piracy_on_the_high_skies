@@ -13,6 +13,8 @@ module HardpointObjects
 
     SHOW_READY_PROJECTILE = true
 
+    IS_DESTRUCTABLE_PROJECTILE = true
+
     def initialize(options = {})
       @hp_reference = options[:hp_reference]
       @image_empty = Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoint_empty.png")

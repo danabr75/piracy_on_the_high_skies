@@ -40,6 +40,16 @@ class GrapplingHook < Projectile
   # Might not be necessary to override
   def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options = {})
     super(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options)
+    # @image_radius = @image_radius  * 16.0
+    # @image_width  = @image_width * 4.0
+    # @image_height = @image_height * 4.0
+    # @image_size   = @image_size * 4.0
+    # @image_radius = @image_radius * 4.0
+    # @image_width_half  = @image_width_half * 4.0
+    # @image_height_half = @image_height_half * 4.0
+
+    @image_radius = 500
+
     @chain_image = get_chain_image
     if @image
       @chain_image_width  = @chain_image.width  * (@width_scale)

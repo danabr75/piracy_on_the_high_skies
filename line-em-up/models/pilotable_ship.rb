@@ -441,12 +441,12 @@ class PilotableShip < GeneralObject
       # puts results
      # puts "GROUP: #{group}"
      # puts "results:"
-      if group == 3 && results.any?
-       # puts "GROUP 3 - CAN ATTAC?:"
-        results.each do |result|
-         # puts result[:can_attack]
-        end
-      end
+      # if group == 3 && results.any?
+      #  # puts "GROUP 3 - CAN ATTAC?:"
+      #   results.each do |result|
+      #    # puts result[:can_attack]
+      #   end
+      # end
     end
     # results = results.flatten
     results.reject!{|v| v.nil?}

@@ -248,6 +248,7 @@ class GameWindow < Gosu::Window
 
     @messages = []
     @effects = []
+    @graphical_effects = []
 
     @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
     viewable_center_target = nil
@@ -570,6 +571,11 @@ class GameWindow < Gosu::Window
         @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
         !effect_group.is_active
       end
+
+      @graphical_effects.reject! do |effect|
+        effect.update(self.mouse_x, self.mouse_y, @player)
+      end
+
     end
 
     if !@block_all_controls
@@ -654,18 +660,28 @@ class GameWindow < Gosu::Window
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
             @player.attack_group_3(@pointer).each do |results|
-              projectiles = results[:projectiles]
-              projectiles.each do |projectile|
-                @projectiles.push(projectile)
+              results[:projectiles].each do |projectile|
+                @projectiles.push(projectile) if projectile
+              end
+              results[:destructable_projectiles].each do |projectile|
+                @destructable_projectiles.push(projectile) if projectile
+              end
+              results[:graphical_effects].each do |effect|
+                @graphical_effects.push(effect)
               end
             end
         end
 
         if Gosu.button_down?(Gosu::MS_LEFT)
             @player.attack_group_2(@pointer).each do |results|
-              projectiles = results[:projectiles]
-              projectiles.each do |projectile|
-                @projectiles.push(projectile)
+              results[:projectiles].each do |projectile|
+                @projectiles.push(projectile) if projectile
+              end
+              results[:destructable_projectiles].each do |projectile|
+                @destructable_projectiles.push(projectile) if projectile
+              end
+              results[:graphical_effects].each do |effect|
+                @graphical_effects.push(effect)
               end
             end
         else
@@ -677,10 +693,16 @@ class GameWindow < Gosu::Window
           # Player cooldown no longer used.
           # if @player.cooldown_wait <= 0
             @player.attack_group_1(@pointer).each do |results|
-              projectiles = results[:projectiles]
-              projectiles.each do |projectile|
-                @projectiles.push(projectile)
+              results[:projectiles].each do |projectile|
+                @projectiles.push(projectile) if projectile
               end
+              results[:destructable_projectiles].each do |projectile|
+                @destructable_projectiles.push(projectile) if projectile
+              end
+              results[:graphical_effects].each do |effect|
+                @graphical_effects.push(effect) if projectile
+              end
+
             end
           # end
         else
@@ -694,11 +716,11 @@ class GameWindow < Gosu::Window
         # @enemy_projectiles.each do |projectile|
         #   results = projectile.hit_objects([[@player]])
         #   # @pickups = @pickups + results[:drops]
+        # # end
+        # @destructable_projectiles.each do |projectile|
+        #   results = projectile.hit_objects([[@player]])
+        #   # @pickups = @pickups + results[:drops]
         # end
-        @destructable_projectiles.each do |projectile|
-          results = projectile.hit_objects([[@player]])
-          # @pickups = @pickups + results[:drops]
-        end
 
 
         # @grappling_hook.collect_pickups(@player, @pickups) if @grappling_hook && @grappling_hook.active
@@ -715,7 +737,15 @@ class GameWindow < Gosu::Window
           end
         end
 
-
+        @destructable_projectiles.each do |projectile|
+          # Excluding buildings.. add back in when can aim bullets at ground.@buildings
+          # results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
+          results = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
+          # Should be explosions n such here
+          if results
+            @pickups = @pickups + results[:drops]
+          end
+        end
         
         
 
@@ -754,7 +784,13 @@ class GameWindow < Gosu::Window
           # puts "@enemy_projectiles:"
           # puts @enemy_projectiles
           results[:projectiles].each do |projectile|
-            @projectiles.push(projectile)
+            @projectiles.push(projectile) if projectile
+          end
+          results[:destructable_projectiles].each do |projectile|
+            @destructable_projectiles.push(projectile) if projectile
+          end
+          results[:graphical_effects].each do |effect|
+            @graphical_effects.push(effect)
           end
           @shipwrecks << results[:shipwreck] if results[:shipwreck]
 
@@ -949,6 +985,8 @@ class GameWindow < Gosu::Window
     @effects.each_with_index do |effect, index|
       effect.draw
     end
+    @graphical_effects.each { |effect| effect.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+
     if @debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

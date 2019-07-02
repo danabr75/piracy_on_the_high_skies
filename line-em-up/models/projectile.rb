@@ -218,6 +218,9 @@ class Projectile < ScreenMapFixedObject
       group.each do |object|
         next if object.nil?
         # Don't hit yourself
+        puts "NEXT IF OBJCT ID == ID"
+        puts "#{object.id} - #{@id}"
+        puts 'enxting' if object.id == @id
         next if object.id == @id
         # Don't hit the ship that launched it
         next if object.id == @owner.id
@@ -269,6 +272,7 @@ class Projectile < ScreenMapFixedObject
 
     # Drop projectile explosions
     if hit_object
+      puts "#{self.class.name} HIT OBJECT"
       if self.respond_to?(:drops)
         self.drops.each do |drop|
           drops << drop

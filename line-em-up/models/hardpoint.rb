@@ -218,6 +218,7 @@ class Hardpoint < GeneralObject
 
     # puts "HARDPOINT ATTACK"
     attack_projectile = nil
+    attack_destructable_projectile = nil
     can_attack = false
     if @item.nil?
       # options = {damage_increase: @damage_increase, relative_y_padding: @image_height_half}
@@ -263,6 +264,8 @@ class Hardpoint < GeneralObject
       options[:owner] = @owner
       result = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, start_point, end_point, nil, nil, @owner, options)
       attack_projectile = result[:projectile]
+      attack_destructable_projectile = result[:destructable_projectile]
+      raise "STOP - unsupported case" if attack_projectile && attack_destructable_projectile
      # puts "ATTACK PROJECTILE" if attack_projectile
       effects = result[:effects]
       effects.each do |effect|
@@ -282,14 +285,16 @@ class Hardpoint < GeneralObject
       # @drawable_items_near_self << @item
     end
 
-    if attack_projectile
+    if attack_projectile || attack_destructable_projectile
       return {
         projectiles: [attack_projectile],
+        destructable_projectiles: [attack_destructable_projectile],
         cooldown: @assigned_weapon_class::COOLDOWN_DELAY,
-        can_attack: can_attack
+        can_attack: can_attack,
+        graphical_effects: []
       }
     else
-      return {projectiles: [], cooldown: 0, can_attack: can_attack}
+      return {projectiles: [], destructable_projectiles: [], cooldown: 0, can_attack: can_attack, graphical_effects: []}
     end
   end
 

@@ -22,6 +22,7 @@ class GeneralObject
   HEALTH = 0
   EXPECTED_IMAGE_PIXEL_HEIGHT = nil
   EXPECTED_IMAGE_PIXEL_WIDTH  = nil
+  IMAGE_SCALER = 1.0
 
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
@@ -109,8 +110,8 @@ class GeneralObject
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     if @image
-      @image_width  = @image.width  * (@width_scale || @scale)
-      @image_height = @image.height * (@height_scale || @scale)
+      @image_width  = @image.width  * (@width_scale || @scale) / self.class::IMAGE_SCALER
+      @image_height = @image.height * (@height_scale || @scale) / self.class::IMAGE_SCALER
       @image_size   = @image_width  * @image_height / 2
       @image_radius = (@image_width  + @image_height) / 4
 
