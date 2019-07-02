@@ -113,8 +113,8 @@ class GeneralObject
     @time_alive = 0
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     if @image
-      @image_width  = @image.width  * (@width_scale || @scale) / self.class::IMAGE_SCALER
-      @image_height = @image.height * (@height_scale || @scale) / self.class::IMAGE_SCALER
+      @image_width  = @image.width  * (@width_scale || @scale)# / self.class::IMAGE_SCALER
+      @image_height = @image.height * (@height_scale || @scale)# / self.class::IMAGE_SCALER
       @image_size   = @image_width  * @image_height / 2
       @image_radius = (@image_width  + @image_height) / 4
 
@@ -185,23 +185,23 @@ class GeneralObject
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale, @height_scale) if @image
+    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER) if @image
   end
 
   def get_height
-    @image_height
+    @image_height / self.class::IMAGE_SCALER
   end
 
   def get_width
-    @image_width
+    @image_width / self.class::IMAGE_SCALER
   end
 
   def get_size
-    @image_size
+    @image_size / self.class::IMAGE_SCALER
   end
 
   def get_radius
-    @image_radius
+    @image_radius / self.class::IMAGE_SCALER
   end
 
   def is_alive
