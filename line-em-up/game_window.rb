@@ -573,7 +573,7 @@ class GameWindow < Gosu::Window
       end
 
       @graphical_effects.reject! do |effect|
-        effect.update(self.mouse_x, self.mouse_y, @player)
+        !effect.update(self.mouse_x, self.mouse_y, @player)
       end
 
     end
@@ -660,6 +660,7 @@ class GameWindow < Gosu::Window
         
         if Gosu.button_down?(Gosu::MS_RIGHT)
             @player.attack_group_3(@pointer).each do |results|
+              # puts "RESULTS HERE: #{}"
               results[:projectiles].each do |projectile|
                 @projectiles.push(projectile) if projectile
               end
@@ -667,7 +668,7 @@ class GameWindow < Gosu::Window
                 @destructable_projectiles.push(projectile) if projectile
               end
               results[:graphical_effects].each do |effect|
-                @graphical_effects.push(effect)
+                @graphical_effects.push(effect) if effect
               end
             end
         end
@@ -681,7 +682,7 @@ class GameWindow < Gosu::Window
                 @destructable_projectiles.push(projectile) if projectile
               end
               results[:graphical_effects].each do |effect|
-                @graphical_effects.push(effect)
+                @graphical_effects.push(effect) if effect
               end
             end
         else
@@ -745,6 +746,9 @@ class GameWindow < Gosu::Window
           if results
             @pickups = @pickups + results[:drops]
           end
+          if results[:graphical_effects].any?
+            @graphical_effects = @graphical_effects + results[:graphical_effects]
+          end
         end
         
         
@@ -760,9 +764,22 @@ class GameWindow < Gosu::Window
 
         # The projectiles and enemy projectiles... only allows for two factions.. we need to support multiple...
         # attacks need to be able to handle.. lists of enemies and lists of allies maybe??
-        @projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @projectiles.reject! do |projectile|
+          result = projectile.update(self.mouse_x, self.mouse_y, @player)
+
+          @graphical_effects = @graphical_effects + results[:graphical_effects]
+
+          !result[:is_alive]
+        end
         # @enemy_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
-        @destructable_projectiles.reject! { |projectile| !projectile.update(self.mouse_x, self.mouse_y, @player) }
+        @destructable_projectiles.reject! do |projectile|
+          puts "projectile; #{projectile.class.name}"
+          result = projectile.update(self.mouse_x, self.mouse_y, @player)
+
+          @graphical_effects = @graphical_effects + results[:graphical_effects]
+
+          !result[:is_alive]
+        end
 
 
         @shipwrecks.reject! do |ship|
@@ -1058,6 +1075,7 @@ class GameWindow < Gosu::Window
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
+      @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("SHIPWRECK COUNT: #{@shipwrecks.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # local_count = 0
       # @buildings.each do |b|

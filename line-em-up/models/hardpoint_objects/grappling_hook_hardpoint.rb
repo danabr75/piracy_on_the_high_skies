@@ -76,7 +76,7 @@ module HardpointObjects
           hook.detach_hook
         end
        # puts "GRAPPLE NOT ACTIVE"
-        return {projectile: nil, effects: []}
+        return {projectile: nil, effects: [], destructable_projectile: nil, graphical_effects: []}
       else
        # puts "GRAPPLE ACTIVE - going SUPER"
         return super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)

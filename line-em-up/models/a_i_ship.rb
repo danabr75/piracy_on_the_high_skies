@@ -282,6 +282,8 @@ class AIShip < ScreenMapFixedObject
     end
 
     projectiles = []
+    destructable_projectiles = []
+    graphical_effects = []
     local_max_agro = 0
     agro_target = nil
     agro_target_distance = nil
@@ -337,12 +339,24 @@ class AIShip < ScreenMapFixedObject
     if agro_target && agro_target_distance < @firing_distance
       @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
-          projectiles.push(projectile)
+          projectiles.push(projectile) if projectile
+        end
+        results[:destructable_projectiles].each do |projectile|
+          destructable_projectiles.push(projectile) if projectile
+        end
+        results[:graphical_effects].each do |effect|
+          graphical_effects.push(effect) if effect
         end
       end
       @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
+        end
+        results[:destructable_projectiles].each do |projectile|
+          destructable_projectiles.push(projectile) if projectile
+        end
+        results[:graphical_effects].each do |effect|
+          graphical_effects.push(effect) if effect
         end
       end
      # puts "AI: TRYING TO FIRE GRAPPLE "
@@ -351,6 +365,12 @@ class AIShip < ScreenMapFixedObject
         # puts results
         results[:projectiles].each do |projectile|
           projectiles.push(projectile)
+        end
+        results[:destructable_projectiles].each do |projectile|
+          destructable_projectiles.push(projectile) if projectile
+        end
+        results[:graphical_effects].each do |effect|
+          graphical_effects.push(effect) if effect
         end
       end
     end
@@ -448,7 +468,10 @@ class AIShip < ScreenMapFixedObject
     end
 
 
-    return {is_alive: result, projectiles: projectiles, shipwreck: shipwreck}
+    return {
+      is_alive: result, projectiles: projectiles, shipwreck: shipwreck,
+      destructable_projectiles: destructable_projectiles, graphical_effects: graphical_effects
+    }
   end
 
   def use_steam usage

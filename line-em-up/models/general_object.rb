@@ -54,6 +54,9 @@ class GeneralObject
   attr_reader  :width_scale, :height_scale, :screen_pixel_width, :screen_pixel_height, :map_pixel_width, :map_pixel_height
   attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height, :damage_increase, :average_scale
   attr_reader  :average_tile_size
+
+  attr_reader :owner
+
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
     @tile_pixel_height   = GlobalVariables.tile_pixel_height
@@ -130,6 +133,8 @@ class GeneralObject
 
 
     validate_image_parameters
+
+    @owner = nil
   end   
 
   

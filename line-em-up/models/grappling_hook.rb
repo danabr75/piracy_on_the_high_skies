@@ -95,8 +95,8 @@ class GrapplingHook < Projectile
     @player_reference = player
     returning_to_object = @hp_reference || @owner
     distance = Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
-    if @returning_to_player 
-      if distance < returning_to_object.get_radius
+    if @returning_to_player
+      if distance < returning_to_object.get_radius * 10.0
         @dissengage = true
       end
     end
@@ -164,7 +164,7 @@ class GrapplingHook < Projectile
       @health = 0 if self.class::GRAPPLE_MAX_TIME_ALIVE && @time_alive >= self.class::GRAPPLE_MAX_TIME_ALIVE
     end
 
-    return !@dissengage && keep_alive_if_attached
+    return {is_alive: !@dissengage && keep_alive_if_attached, graphical_effects: []}
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
@@ -187,7 +187,8 @@ class GrapplingHook < Projectile
       new_y = Math.sin(step) * base + @current_map_pixel_y
       # puts "@hp_reference: RIGHT HERE: #{@hp_reference.current_map_pixel_x} - #{@hp_reference.current_map_pixel_y}"
       i = 0
-      while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius)
+      puts "returning_to_object.get_radius: #{returning_to_object.get_radius} - #{returning_to_object.class}"
+      while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius * 10.0)
         x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_reference, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
         @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, ZOrder::Projectile, -@current_image_angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
         #

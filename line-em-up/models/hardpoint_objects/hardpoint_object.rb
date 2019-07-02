@@ -37,6 +37,13 @@ module HardpointObjects
 
     IS_DESTRUCTABLE_PROJECTILE = false
 
+    # POST_DESTRUCTION_EFFECTS = false
+
+    # def get_post_destruction_effects
+    #   raise 'override me'
+    #   return []
+    # end
+
 
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
@@ -99,6 +106,7 @@ module HardpointObjects
       # if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
       projectile = nil
       destructable_projectile = nil
+      graphical_effects = []
       if test2
        # puts "BETWEEN ANGLES"
         @within_angle = true
@@ -132,6 +140,11 @@ module HardpointObjects
               else
                 projectile = item
               end
+              # if self.class::POST_DESTRUCTION_EFFECTS
+              #   self.get_post_destruction_effects.each do |effect|
+              #     graphical_effects << effect
+              #   end
+              # end
               @projectiles << item if !self.class::ACTIVE_PROJECTILE_LIMIT.nil?
               @cooldown_wait = get_cooldown
             end
@@ -152,13 +165,13 @@ module HardpointObjects
             # effects << effect
           end
 
-          return {projectile: projectile, destructable_projectile: destructable_projectile, effects: effects, graphical_effects: []}
+          return {projectile: projectile, destructable_projectile: destructable_projectile, effects: effects, graphical_effects: graphical_effects}
         end
       else
         @within_angle = false
         # puts "ANGLE WAS NOT BETWEEN TWO ANGLES: #{destination_angle} w #{angle_min} and #{angle_max}"
       end
-      return {projectile: nil, destructable_projectile: nil, effects: [], graphical_effects: []}
+      return {projectile: nil, destructable_projectile: nil, effects: [], graphical_effects: graphical_effects}
     end
 
     def self.get_hardpoint_media_location

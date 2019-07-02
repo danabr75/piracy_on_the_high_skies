@@ -30,6 +30,13 @@ class Projectile < ScreenMapFixedObject
   # CLASS_TYPEs that are in play right now :ship, :building, :projectile
   HIT_OBJECT_CLASS_FILTER = nil
 
+
+  POST_DESTRUCTION_EFFECTS = false
+
+  def get_post_destruction_effects
+    raise 'override me!'
+  end
+
   def self.get_image
     return Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -129,7 +136,7 @@ class Projectile < ScreenMapFixedObject
 
   def update mouse_x, mouse_y, player
 
-
+    graphical_effects = []
 
 
     # puts "PROJ SPEED: #{@speed}"
@@ -173,7 +180,7 @@ class Projectile < ScreenMapFixedObject
 
     @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
-    result = super(mouse_x, mouse_y, player)
+    is_alive = super(mouse_x, mouse_y, player)
     @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
     @play_init_sound = false
 
@@ -182,7 +189,17 @@ class Projectile < ScreenMapFixedObject
       @health = 0
     end
 
-    return result
+    if !is_alive
+      if self.class::POST_DESTRUCTION_EFFECTS
+        # puts "AADDING GRAPHICAL EEFFECTS"
+        self.get_post_destruction_effects.each do |effect|
+          # puts "COUNT 1 herer"
+          graphical_effects << effect
+        end
+      end
+    end
+
+    return {is_alive: is_alive, graphical_effects: graphical_effects}
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
@@ -214,16 +231,19 @@ class Projectile < ScreenMapFixedObject
     points = 0
     hit_object = false
     killed = 0
+    graphical_effects = []
     object_groups.each do |group|
       group.each do |object|
         next if object.nil?
         # Don't hit yourself
-        puts "NEXT IF OBJCT ID == ID"
-        puts "#{object.id} - #{@id}"
-        puts 'enxting' if object.id == @id
+        # puts "NEXT IF OBJCT ID == ID"
+        # puts "#{object.id} - #{@id}"
+        # puts 'enxting' if object.id == @id
         next if object.id == @id
         # Don't hit the ship that launched it
         next if object.id == @owner.id
+        # if object has an owner?
+        next if object.owner && object.owner.id == @owner.id
         next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
         break if hit_object
         # don't hit a dead object
@@ -278,11 +298,19 @@ class Projectile < ScreenMapFixedObject
           drops << drop
         end
       end
+
+      if self.class::POST_DESTRUCTION_EFFECTS
+        puts "AADDING GRAPHICAL EEFFECTS"
+        self.get_post_destruction_effects.each do |effect|
+          puts "COUNT 1 herer"
+          graphical_effects << effect
+        end
+      end
     end
 
     @health = 0 if hit_object
     # puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
-    return {drops: drops, point_value: points, killed: killed}
+    return {drops: drops, point_value: points, killed: killed, graphical_effects: graphical_effects}
   end
 
   protected

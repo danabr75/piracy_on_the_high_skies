@@ -20,6 +20,22 @@ class Missile < Projectile
 
   MAX_TILE_TRAVEL = 6
 
+  POST_DESTRUCTION_EFFECTS = true
+
+  def get_post_destruction_effects
+    # raise 'stop here'
+    return [
+      Graphics::Smoke.new(
+        @current_map_pixel_x, @current_map_pixel_y, @width_scale,
+        @height_scale, @screen_pixel_width, @screen_pixel_height,
+        {
+          green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
+          scale_multiplier: 0.25, scale_init_boost: 0.3
+        }
+      )
+    ]
+  end
+
   def self.get_image
     return Gosu::Image.new("#{MEDIA_DIRECTORY}/mini_missile.png")
   end
