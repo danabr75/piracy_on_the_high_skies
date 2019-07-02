@@ -20,7 +20,7 @@ class PilotableShip < GeneralObject
   attr_accessor :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
   attr_accessor :hardpoints
-  attr_reader :rotation_speed
+  # attr_reader :rotation_speed
   # attr_reader :steam_max_capacity, :steam_rate_increase, :current_steam_capacity
   # attr_reader :mass, :boost_speed, :speed, :speed_steam_usage, :boost_speed_steam_usage
   # attr_reader :boost_mass
@@ -278,6 +278,14 @@ class PilotableShip < GeneralObject
     # @current_map_tile_y  = current_map_tile_y
     @block_momentum_increase = false
     @block_momentum_decrease = false
+  end
+
+  def rotation_speed
+    puts "ROTATION SPEED:"
+    puts "#{@rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))} = #{@rotation_speed} * 1 - (#{@current_momentum} / 100.0) / 2"
+    # ROTATION SPEED:
+    # -0.4780000000000078 = 0.45 * 1 - (92.80000000000078 / 100.0)
+    @rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))
   end
 
   def accelerate boost = false

@@ -28,7 +28,7 @@ class BasicShip < PilotableShip
   MOMENTUM_RATE = 0.2
   # NOT LITERALY TPS
   TILES_PER_SECOND = 0.2
-  ROTATION_SPEED = 0.2
+  ROTATION_SPEED = 0.4
   HEALTH = 100
   ARMOR = 5
 

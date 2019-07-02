@@ -11,7 +11,14 @@ module QuestInterface
     return {
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
       "starting_level_quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 130, 130, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})"],
+        "init_ships_string" => [
+            "AIShip.new(nil, nil, 130, 130, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 100, 150, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 30, 100, {id: 'starting_level_quest_ship_3', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 0, 0, {id: 'starting_level_quest_ship_4', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 250, 0, {id: 'starting_level_quest_ship_5', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 0, 250, {id: 'starting_level_quest_ship_6', special_target_focus_id: 'player'})"
+          ],
         "init_buildings_string" => [],
         "init_effects" =>   [
           [
