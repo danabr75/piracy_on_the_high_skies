@@ -12,6 +12,7 @@ module ProjectileUpdateThread
         local_window.graphical_effects << effect
       end
 
+      local_window.projectiles.delete(local_projectile.id) if !local_projectile.is_alive
     end
     return t
   end

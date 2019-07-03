@@ -129,9 +129,9 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncThreadManager.new(ProjectileCollisionThread, 15)
-    @projectile_update_manager    = AsyncThreadManager.new(ProjectileUpdateThread, 15)
-    @ship_update_manager          = AsyncThreadManager.new(ShipUpdateThread, 5)
+    @projectile_collision_manager = AsyncThreadManager.new(ProjectileCollisionThread, 5)
+    @projectile_update_manager    = AsyncThreadManager.new(ProjectileUpdateThread, 5)
+    @ship_update_manager          = AsyncThreadManager.new(ShipUpdateThread, 2)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -192,7 +192,7 @@ class GameWindow < Gosu::Window
     # @grappling_hook = nil
     
     @buildings = Array.new
-    @projectiles = Array.new
+    @projectiles = {}
     # @enemy_projectiles = Array.new
     @destructable_projectiles = Array.new
     @pickups = Array.new
@@ -394,7 +394,7 @@ class GameWindow < Gosu::Window
       if id == Gosu::KB_LEFT_CONTROL && @player.ready_for_special?
        # puts "Gosu::KB_LEFT_CONTROL CLICKED!!"
         # @projectiles += @player.special_attack([@enemies, @buildings, @enemy_destructable_projectiles, [@boss]])
-        @projectiles += @player.special_attack_2
+        # @projectiles += @player.special_attack_2
       end
     end
 
@@ -585,9 +585,10 @@ class GameWindow < Gosu::Window
 
       @ship_update_manager.update(self, self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
 
-      @projectiles.reject! do |projectile|
-        !projectile.is_alive
-      end
+      #projectiles remove themselves
+      # @projectiles.reject! do |projectile|
+      #   !projectile.is_alive
+      # end
 
 
     end
@@ -675,7 +676,7 @@ class GameWindow < Gosu::Window
             @player.attack_group_3(@pointer).each do |results|
               # puts "RESULTS HERE: #{}"
               results[:projectiles].each do |projectile|
-                @projectiles.push(projectile) if projectile
+                @projectiles[projectile.id] = projectile if projectile
               end
               results[:destructable_projectiles].each do |projectile|
                 @destructable_projectiles.push(projectile) if projectile
@@ -689,7 +690,8 @@ class GameWindow < Gosu::Window
         if Gosu.button_down?(Gosu::MS_LEFT)
             @player.attack_group_2(@pointer).each do |results|
               results[:projectiles].each do |projectile|
-                @projectiles.push(projectile) if projectile
+                # @projectiles.push(projectile) if projectile
+                @projectiles[projectile.id] = projectile if projectile
               end
               results[:destructable_projectiles].each do |projectile|
                 @destructable_projectiles.push(projectile) if projectile
@@ -708,7 +710,8 @@ class GameWindow < Gosu::Window
           # if @player.cooldown_wait <= 0
             @player.attack_group_1(@pointer).each do |results|
               results[:projectiles].each do |projectile|
-                @projectiles.push(projectile) if projectile
+                # @projectiles.push(projectile) if projectile
+                @projectiles[projectile.id] = projectile if projectile
               end
               results[:destructable_projectiles].each do |projectile|
                 @destructable_projectiles.push(projectile) if projectile
@@ -742,7 +745,7 @@ class GameWindow < Gosu::Window
 
       if !@game_pause && !menus_active && !@menu_open && !@menu.active
 
-        @projectiles.each do |projectile|
+        @projectiles.each do |key, projectile|
           @projectile_collision_manager.add(projectile)
           @projectile_update_manager.add(projectile)
         end
@@ -859,7 +862,7 @@ class GameWindow < Gosu::Window
     # reactivate
     # @ships.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    # @projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @enemy_projectiles.each { |projectile| projectile.draw() }
     # @destructable_projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @stars.each { |star| star.draw }
@@ -888,10 +891,10 @@ class GameWindow < Gosu::Window
       @font.draw("Ship count: #{@ships.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("enemy_projectiles: #{@enemy_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("destructable_proj: #{@destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("pickups count: #{@pickups.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("destructable_proj: #{@destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("pickups count: #{@pickups.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Object count: #{@ships.count + @projectiles.count + @destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Object count: #{@ships.count + @projectiles.count + @destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Damage Reduction: #{@player.damage_reduction.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

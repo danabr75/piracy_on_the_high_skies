@@ -1306,6 +1306,11 @@ class GLBackground
           # else
           #   # z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
           # end
+
+          error = glGetError
+          if error != 0
+           puts "FOUND ERROR: #{error}"
+          end
           vert_pos1, vert_pos2, vert_pos3, vert_pos4 = [nil,nil,nil,nil]
           vert_pos1 = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
           vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
@@ -1442,7 +1447,7 @@ class GLBackground
 
           error = glGetError
           if error != 0
-           # puts "FOUND ERROR: #{error}"
+           puts "FOUND ERROR: #{error}"
           end
 
         end

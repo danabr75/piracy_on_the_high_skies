@@ -281,8 +281,8 @@ class PilotableShip < GeneralObject
   end
 
   def rotation_speed
-    puts "ROTATION SPEED:"
-    puts "#{@rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))} = #{@rotation_speed} * 1 - (#{@current_momentum} / 100.0) / 2"
+    # puts "ROTATION SPEED:"
+    # puts "#{@rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))} = #{@rotation_speed} * 1 - (#{@current_momentum} / 100.0) / 2"
     # ROTATION SPEED:
     # -0.4780000000000078 = 0.45 * 1 - (92.80000000000078 / 100.0)
     @rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))

@@ -13,7 +13,7 @@ module ShipUpdateThread
       results = local_ship.update(local_mouse_x, local_mouse_y, local_player, local_air_targets, local_land_targets)
 
       results[:projectiles].each do |projectile|
-        local_window.projectiles.push(projectile) if projectile
+        local_window.projectiles[projectile.id] = projectile if projectile
       end
       results[:destructable_projectiles].each do |projectile|
         local_window.destructable_projectiles.push(projectile) if projectile
