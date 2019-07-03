@@ -404,12 +404,15 @@ class GameWindow < Gosu::Window
 
   # required for LUIT objects, passes id of element
   def onClick element_id
-    @menu.onClick(element_id)              if @menu.active
-    @ship_loadout_menu.onClick(element_id) if @ship_loadout_menu.active
-
-    if @effects.any?
-      @effects.each do |effect|
-        effect.onClick(element_id)
+    if @menu.active
+      @menu.onClick(element_id)
+    elsif @ship_loadout_menu.active
+      @ship_loadout_menu.onClick(element_id)
+    else
+      if @effects.any?
+        @effects.each do |effect|
+          effect.onClick(element_id)
+        end
       end
     end
   end
@@ -764,14 +767,27 @@ class GameWindow < Gosu::Window
       end
 
       if !@game_pause && !menus_active && !@menu_open && !@menu.active
-
+        # Can't iterate AND add to the projectiles.. so needs to stay synchronous
         @projectiles.each do |key, projectile|
           @projectile_collision_manager.add(projectile)
           @projectile_update_manager.add(projectile)
         end
+        # Thread.new(@projectiles, @projectile_collision_manager, @projectile_update_manager) do |local_projectiles, manager1, manager2|
+        #   local_projectiles.each do |key, projectile|
+        #     manager1.add(projectile)
+        #     manager2.add(projectile)
+        #   end
+        #   Thread.exit
+        # end
 
-        @ships.each do |ship|
-          @ship_update_manager.add(ship)
+        # @ships.each do |ship|
+        #   @ship_update_manager.add(ship)
+        # end
+        Thread.new(@ships, @ship_update_manager) do |local_ships, manager1|
+          local_ships.each do |ship|
+            manager1.add(ship)
+          end
+          Thread.exit
         end
 
         # @destructable_projectiles.each do |projectile|

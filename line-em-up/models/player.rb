@@ -158,7 +158,7 @@ class Player < ScreenFixedObject
   # end
 
   def health
-    @ship.get_health
+    @ship.health
   end
 
   def refresh_ship options = {}

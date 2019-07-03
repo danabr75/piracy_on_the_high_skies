@@ -371,9 +371,9 @@ class PilotableShip < GeneralObject
   # def get_armor
   #   self.class::ARMOR
   # end
-  def get_health
-    @health
-  end
+  # def get_health
+    # @health
+  # end
 
   # def self.get_right_image path
   #   Gosu::Image.new("#{path}/right.png")
@@ -626,21 +626,21 @@ class PilotableShip < GeneralObject
     # @time_alive += 1 if self.is_alive
   end
 
-  def collect_pickups(pickups)
-    pickups.reject! do |pickup|
-      if Gosu.distance(@x, @y, pickup.x, pickup.y) < ((self.get_radius) + (pickup.get_radius)) * 1.2 && pickup.respond_to?(:collected_by_player)
-        pickup.collected_by_player(self)
-        if pickup.respond_to?(:get_points)
-          self.score += pickup.get_points
-        end
-        # stop that!
-        # @beep.play
-        true
-      else
-        false
-      end
-    end
-  end
+  # def collect_pickups(pickups)
+  #   pickups.reject! do |pickup|
+  #     if Gosu.distance(@x, @y, pickup.x, pickup.y) < ((self.get_radius) + (pickup.get_radius)) * 1.2 && pickup.respond_to?(:collected_by_player)
+  #       pickup.collected_by_player(self)
+  #       if pickup.respond_to?(:get_points)
+  #         self.score += pickup.get_points
+  #       end
+  #       # stop that!
+  #       # @beep.play
+  #       true
+  #     else
+  #       false
+  #     end
+  #   end
+  # end
 
 
 end

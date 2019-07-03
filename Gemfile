@@ -16,14 +16,15 @@ gem 'gosu'
 # gem 'danabr75-opengl'
 gem 'opengl'
 # gem 'ashton', '0.1.6'
-gem 'concurrent-ruby'
+# gem 'concurrent-ruby'
 # gem 'opengl-bindings'
 # gem 'ashton'
 
 # gem 'ruby-opengl'
 # gem 'texplay'
 # gem 'rmagick'
-gem 'ocra'
+# gem 'ocra'
+    # ocra (1.3.10)
 # Gosu does not provide access to the underlying OpenGL APIs. A gem like ruby-opengl is required to use custom OpenGL drawing code.
 # gem "ruby-opengl"
 gem "glu"

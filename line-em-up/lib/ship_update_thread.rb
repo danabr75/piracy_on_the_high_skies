@@ -10,7 +10,8 @@ module ShipUpdateThread
     # self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
     t = Thread.new(ship, window, mouse_x, mouse_y, player, air_targets, land_targets) do
       |local_ship, local_window, local_mouse_x, local_mouse_y, local_player, local_air_targets, local_land_targets|
-      results = local_ship.update(local_mouse_x, local_mouse_y, local_player, local_air_targets, local_land_targets)
+      Thread.exit if local_ship.health == 0
+      results = local_ship.update(local_mouse_x, local_mouse_y, local_player, local_air_targets, local_land_targets, {is_thread: true})
 
       results[:projectiles].each do |projectile|
         local_window.add_projectiles <<  projectile if projectile
