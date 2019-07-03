@@ -365,7 +365,7 @@ class GLBackground
     buildings = []
     ships = []
     pickups = []
-    projectiles = []
+    # projectiles = []
     # puts "@map_objects"
     # puts @map_objects.inspect
 
@@ -564,7 +564,7 @@ class GLBackground
 
   OFF_EDGE_MAP_VALUE = {'height' => 2, 'terrain_index' => 3 }
 
-  def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, projectiles, viewable_pixel_offset_x, viewable_pixel_offset_y
+  def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, viewable_pixel_offset_x, viewable_pixel_offset_y
     raise "WRONG MAP WIDTH!  Expected #{@visible_map_tile_width  + @extra_map_tile_width } Got #{@visible_map[0].length}" if @visible_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
     raise "WRONG MAP HEIGHT! Expected #{@visible_map_tile_height + @extra_map_tile_height} Got #{@visible_map.length}"    if @visible_map.length    != @visible_map_tile_height + @extra_map_tile_height
 
@@ -962,7 +962,7 @@ class GLBackground
     # raise "OFFSET IS OFF @y_bottom_tracker + offset_y != @gps_map_center_y: #{@y_bottom_tracker} + #{offset_y} != #{@gps_map_center_y}" if @y_bottom_tracker  + offset_y != @gps_map_center_y
     # raise "OFFSET IS OFF @x_right_tracker - offset_x != @gps_map_center_x: #{@x_right_tracker} - #{offset_x} != #{@gps_map_center_x}"   if @x_right_tracker   - offset_x != @gps_map_center_x
     # raise "OFFSET IS OFF @x_left_tracker + offset_x != @gps_map_center_x: #{@x_left_tracker} + #{offset_x} != #{@gps_map_center_x}"     if @x_left_tracker    + offset_x != @gps_map_center_x
-    return {pickups: pickups, buildings: buildings, projectiles: projectiles}
+    return {pickups: pickups, buildings: buildings}
   end
 
   
@@ -985,7 +985,7 @@ class GLBackground
   NDC_Y_LENGTH  = 0.1
   
   # player param is soley used for debugging
-  def exec_gl player, player_x, player_y, projectiles, buildings, pickups
+  def exec_gl player, player_x, player_y, buildings, pickups
     player_x, player_y = [player_x.to_i, player_y.to_i]
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)

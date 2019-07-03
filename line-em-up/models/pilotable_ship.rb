@@ -35,8 +35,8 @@ class PilotableShip < GeneralObject
     # @boost_speed_steam_usage = @engine_steam_usage_increment + @boost_steam_usage
 
 
-  MAX_HEALTH = 200
-  INIT_HEALTH = 200
+  # MAX_HEALTH = 200
+  # INIT_HEALTH = 200
 
   # FRONT_HARDPOINT_LOCATIONS = []
   # PORT_HARDPOINT_LOCATIONS = []
@@ -98,7 +98,7 @@ class PilotableShip < GeneralObject
     # if @debug
     #   @health = INIT_HEALTH * 10000
     # else
-      @health = INIT_HEALTH
+      @health = self.class::HEALTH
     # end
     @armor = 0
     @rockets = 50

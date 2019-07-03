@@ -25,7 +25,7 @@ class Player < ScreenFixedObject
   # ONLY USED FOR DEBUG!
   attr_reader :ship
 
-  MAX_HEALTH = 200
+  # MAX_HEALTH = 200
   # MAX_STEAM_POWER = 100
   
   CLASS_TYPE = :ship

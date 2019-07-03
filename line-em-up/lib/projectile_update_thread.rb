@@ -1,10 +1,19 @@
 module ProjectileUpdateThread
 
-  def create_new window, projectile
-    # Thread.new(i) { |j| run(j) }
-    return Thread.new(window, projectile) do |local_window, local_projectile|
+  def self.create_new projectile, args
+    window  = args[0]
+    mouse_x = args[1]
+    mouse_y = args[2]
+    player  = args[3]
+    t = Thread.new(projectile, window, mouse_x, mouse_y, player) do |local_projectile, local_window, local_mouse_x, local_mouse_y, local_player|
+      results = local_projectile.update(local_mouse_x, local_mouse_y, local_player)
+
+      results[:graphical_effects].each do |effect|
+        local_window.graphical_effects << effect
+      end
 
     end
+    return t
   end
 
 end

@@ -58,8 +58,8 @@ class AIShip < ScreenMapFixedObject
     hardpoint_data = {
       :hardpoint_data=>
       {
-        "0" => "HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::GrapplingHookHardpoint",
-        "4"=>"HardpointObjects::DumbMissileHardpoint", "5"=>"HardpointObjects::DumbMissileHardpoint", "6"=>"HardpointObjects::DumbMissileHardpoint",
+        "0" => "HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::BulletHardpoint",
+        "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
         "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
         "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
       }

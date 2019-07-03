@@ -32,7 +32,7 @@ class ExecuteOpenGl
   # include Glu 
   # include Glut
 
-  def draw background, projectiles, player, pointer, buildings, pickups
+  def draw background, player, pointer, buildings, pickups
     # @zoom = -14
     Gosu.gl do
       # init_scene
@@ -48,7 +48,7 @@ class ExecuteOpenGl
       # glMatrixMode(GL_MODELVIEW)  #see lesson 01
       # glLoadIdentity              #see lesson 01
       # glTranslatef(0, 0, -13)   #see lesson 01
-      background.exec_gl(player, player.current_map_pixel_x, player.current_map_pixel_y, projectiles, buildings, pickups)
+      background.exec_gl(player, player.current_map_pixel_x, player.current_map_pixel_y, buildings, pickups)
 
       # glShadeModel(GL_SMOOTH) # selects smooth shading
       # glLoadIdentity              #see lesson 01
@@ -62,29 +62,29 @@ class ExecuteOpenGl
 
 
 
-      projectiles.each_with_index do |projectile, i|
-        glMatrixMode(GL_MODELVIEW)  #see lesson 01
-        glLoadIdentity              #see lesson 01
-        # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
-        glTranslatef(0, 0, -10)   #see lesson 01
-        # glTranslatef(0, 0, -14)   #see lesson 01
-        # puts "PROJECTILE:"
-        # puts projectile
-        projectile.draw_gl
-      end
+      # projectiles.each_with_index do |projectile, i|
+      #   glMatrixMode(GL_MODELVIEW)  #see lesson 01
+      #   glLoadIdentity              #see lesson 01
+      #   # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
+      #   glTranslatef(0, 0, -10)   #see lesson 01
+      #   # glTranslatef(0, 0, -14)   #see lesson 01
+      #   # puts "PROJECTILE:"
+      #   # puts projectile
+      #   projectile.draw_gl
+      # end
 
-      glMatrixMode(GL_MODELVIEW)  #see lesson 01
-      glLoadIdentity              #see lesson 01
-      # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
-      glTranslatef(0, 0, 0)   #see lesson 01
-      pointer.draw_gl
+      # glMatrixMode(GL_MODELVIEW)  #see lesson 01
+      # glLoadIdentity              #see lesson 01
+      # # puts "-projectile.get_draw_ordering - 10: #{-projectile.get_draw_ordering - 10}"
+      # glTranslatef(0, 0, 0)   #see lesson 01
+      # pointer.draw_gl
 
-      player.draw_gl_list.each do |item|
-        glMatrixMode(GL_MODELVIEW)  #see lesson 01
-        glLoadIdentity              #see lesson 01
-        glTranslatef(0, 0, -10)   #see lesson 01
-        item.draw_gl
-      end
+      # player.draw_gl_list.each do |item|
+      #   glMatrixMode(GL_MODELVIEW)  #see lesson 01
+      #   glLoadIdentity              #see lesson 01
+      #   glTranslatef(0, 0, -10)   #see lesson 01
+      #   item.draw_gl
+      # end
 
     end
   end

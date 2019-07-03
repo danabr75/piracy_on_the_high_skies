@@ -13,7 +13,10 @@ module QuestInterface
       "starting_level_quest" => {
         "init_ships_string" => [
             "AIShip.new(nil, nil, 130, 130, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 100, 150, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 130, 110, {id: 'starting_level_quest_ship_9', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 100, 100, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 30, 100, {id: 'starting_level_quest_ship_3', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 0, 0, {id: 'starting_level_quest_ship_4', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 250, 0, {id: 'starting_level_quest_ship_5', special_target_focus_id: 'player'})",
@@ -22,9 +25,9 @@ module QuestInterface
         "init_buildings_string" => [],
         "init_effects" =>   [
           [
-            {effect_type: "focus",    "id" => 'starting_level_quest_ship_1', "time" => 5, target_type: 'ship'},
-            {effect_type: "dialogue", "section_id" => 'level_1'},
-            {effect_type: "focus",    "id" => 'player', "time" => 0, target_type: 'player'},
+            # {effect_type: "focus",    "id" => 'starting_level_quest_ship_1', "time" => 5, target_type: 'ship'},
+            # {effect_type: "dialogue", "section_id" => 'level_1'},
+            # {effect_type: "focus",    "id" => 'player', "time" => 0, target_type: 'player'},
           ]
         ],
         # KEEP THE ABOVE LINE. 

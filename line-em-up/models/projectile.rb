@@ -3,6 +3,7 @@ require_relative 'screen_map_fixed_object.rb'
 
 class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
+  attr_reader :health
   # WARNING THESE CONSTANTS DON'T GET OVERRIDDEN BY SUBCLASSES. NEED GETTER METHODS
   # COOLDOWN_DELAY = 50
   STARTING_SPEED = 0.1
@@ -73,6 +74,8 @@ class Projectile < ScreenMapFixedObject
 
     @health = self.class::HEALTH
 
+    @test_hit_max_distance = false
+
     @refresh_angle_on_updates = options[:refresh_angle_on_updates] || false
 
     @speed = self.class.get_starting_speed
@@ -140,61 +143,64 @@ class Projectile < ScreenMapFixedObject
 
 
     # puts "PROJ SPEED: #{@speed}"
-    if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
-      if @current_image_angle != @end_image_angle
-        @current_image_angle = @current_image_angle + @image_angle_incrementor
-        # if it's negative
-        if @image_angle_incrementor < 0
-          @current_image_angle = @end_image_angle if @current_image_angle < @end_image_angle 
-        # it's positive
-        elsif @image_angle_incrementor > 0
-          @current_image_angle = @end_image_angle if @current_image_angle > @end_image_angle 
+    if is_alive
+      if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
+        if @current_image_angle != @end_image_angle
+          @current_image_angle = @current_image_angle + @image_angle_incrementor
+          # if it's negative
+          if @image_angle_incrementor < 0
+            @current_image_angle = @end_image_angle if @current_image_angle < @end_image_angle 
+          # it's positive
+          elsif @image_angle_incrementor > 0
+            @current_image_angle = @end_image_angle if @current_image_angle > @end_image_angle 
+          end
         end
       end
-    end
 
-    # new_speed = 0
-    if self.class.get_initial_delay && (@time_alive > (@custom_initial_delay || self.class.get_initial_delay))
-      speed_factor = self.class.get_speed_increase_factor
-      if @speed < self.class.get_max_speed
-        if speed_factor && speed_factor > 0.0
-          @speed = @speed + (@time_alive * speed_factor)
-        end
-        speed_increment = self.class.get_speed_increase_increment
-        if speed_increment && speed_increment > 0.0
-          @speed = @speed + speed_increment
+      # new_speed = 0
+      if self.class.get_initial_delay && (@time_alive > (@custom_initial_delay || self.class.get_initial_delay))
+        speed_factor = self.class.get_speed_increase_factor
+        if @speed < self.class.get_max_speed
+          if speed_factor && speed_factor > 0.0
+            @speed = @speed + (@time_alive * speed_factor)
+          end
+          speed_increment = self.class.get_speed_increase_increment
+          if speed_increment && speed_increment > 0.0
+            @speed = @speed + speed_increment
+          end
+
+          @speed = self.class.get_max_speed if @speed > self.class.get_max_speed
         end
 
-        @speed = self.class.get_max_speed if @speed > self.class.get_max_speed
+        # puts "SPEED HERE: #{@speed}"
+        factor_in_scale_speed = @speed * @average_scale
+
+        movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
+      else
+        @speed = self.class.get_max_speed if @speed.nil?
+        factor_in_scale_speed = @speed * @average_scale
+        movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
       end
 
-      # puts "SPEED HERE: #{@speed}"
-      factor_in_scale_speed = @speed * @average_scale
+      @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
-      movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
-    else
-      @speed = self.class.get_max_speed if @speed.nil?
-      factor_in_scale_speed = @speed * @average_scale
-      movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
-    end
+      is_alive = super(mouse_x, mouse_y, player)
+      @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
+      @play_init_sound = false
 
-    @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
+      if @max_distance && @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
+        # puts "TEST ++ = FOUND MAX DISTANCE"
+        @test_hit_max_distance = true
+        @health = 0
+      end
 
-    is_alive = super(mouse_x, mouse_y, player)
-    @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
-    @play_init_sound = false
-
-    if @max_distance && @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
-      # puts "TEST ++ = FOUND MAX DISTANCE"
-      @health = 0
-    end
-
-    if !is_alive
-      if self.class::POST_DESTRUCTION_EFFECTS
-        # puts "AADDING GRAPHICAL EEFFECTS"
-        self.get_post_destruction_effects.each do |effect|
-          # puts "COUNT 1 herer"
-          graphical_effects << effect
+      if !is_alive
+        if self.class::POST_DESTRUCTION_EFFECTS
+          # puts "AADDING GRAPHICAL EEFFECTS"
+          self.get_post_destruction_effects.each do |effect|
+            # puts "COUNT 1 herer"
+            graphical_effects << effect
+          end
         end
       end
     end
@@ -227,69 +233,78 @@ class Projectile < ScreenMapFixedObject
   # require 'benchmark'
 
   def hit_objects(object_groups)
+    # puts "PROJ hit objects"
     drops = []
     points = 0
     hit_object = false
     killed = 0
     graphical_effects = []
-    object_groups.each do |group|
-      group.each do |object|
-        next if object.nil?
-        # Don't hit yourself
-        # puts "NEXT IF OBJCT ID == ID"
-        # puts "#{object.id} - #{@id}"
-        # puts 'enxting' if object.id == @id
-        next if object.id == @id
-        # Don't hit the ship that launched it
-        next if object.id == @owner.id
-        # if object has an owner?
-        next if object.owner && object.owner.id == @owner.id
-        next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
-        break if hit_object
-        # don't hit a dead object
-        if object.health <= 0
-          next
-        end
-        # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
-        # maybe add advanced collision in when support multi-threads
-        if false && self.class.get_advanced_hit_box_detection
-          # Disabling advanced hit detection for now
-          self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
-          other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
-          hit_object = rec_intersection(self_object, other_object)
-        else
-          # puts "HIT OBJECT DETECTION: proj-size: #{(self.get_size / 2)}"
-          # puts "HIT OBJECT DETECTION:  obj-size: #{(self.get_size / 2)}"
-          raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
-          raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
-          raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
-          raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
-          if @debug
-            if self.get_radius.nil?
-              raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
-            end
-            if object.get_radius.nil?
-              raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
-            end
+    if @health > 0
+      object_groups.each do |group|
+        # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
+        puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
+        break if @health == 0
+        group.each do |object|
+          break if @health == 0
+          next if object.nil?
+          # Don't hit yourself
+          # puts "NEXT IF OBJCT ID == ID"
+          # puts "#{object.id} - #{@id}"
+          # puts 'enxting' if object.id == @id
+          next if object.id == @id
+          # Don't hit the ship that launched it
+          next if object.id == @owner.id
+          # if object has an owner?
+          next if object.owner && object.owner.id == @owner.id
+          next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
+          break if hit_object
+          # don't hit a dead object
+          if object.health <= 0
+            next
           end
-          # puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
-          # puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
-          # puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
-          # HITTING OBJECT RADIUSES - self.class: GrapplingHook
-          # 317.96875 : 250.0 + 67.96875
-          # HITTING OBJECT RADIUSES - self.class: GrapplingHook
-          # 77.31770833333333 : 9.348958333333334 + 67.96875
-          
-          # HITTING OBJECT RADIUSES - self.class: GrapplingHook
-          # 105.36458333333334 : 37.395833333333336 + 67.96875
+          # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
+          # maybe add advanced collision in when support multi-threads
+          if false && self.class.get_advanced_hit_box_detection
+            # Disabling advanced hit detection for now
+            self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
+            other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
+            hit_object = rec_intersection(self_object, other_object)
+          else
+            # puts "HIT OBJECT DETECTION: proj-size: #{(self.get_size / 2)}"
+            # puts "HIT OBJECT DETECTION:  obj-size: #{(self.get_size / 2)}"
+            raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
+            raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
+            raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
+            raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
+            if @debug
+              if self.get_radius.nil?
+                raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
+              end
+              if object.get_radius.nil?
+                raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
+              end
+            end
+            # puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
+            # puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
+            # puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
+            # HITTING OBJECT RADIUSES - self.class: GrapplingHook
+            # 317.96875 : 250.0 + 67.96875
+            # HITTING OBJECT RADIUSES - self.class: GrapplingHook
+            # 77.31770833333333 : 9.348958333333334 + 67.96875
+            
+            # HITTING OBJECT RADIUSES - self.class: GrapplingHook
+            # 105.36458333333334 : 37.395833333333336 + 67.96875
 
-          hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
-        end
-        if hit_object && self.class.get_aoe <= 0
-          result = trigger_object_collision(object) 
-          drops = drops + result[:drops] if result[:drops].any?
+            hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
+          end
+          if hit_object && self.class.get_aoe <= 0
+            result = trigger_object_collision(object) 
+            drops = drops + result[:drops] if result[:drops].any?
+          end
         end
       end
+    else
+      # puts "PROJECTILE HAD NO HEALTH: #{@health} - #{@test_hit_max_distance} - #{self.health}"
     end
     if hit_object && self.class.get_aoe > 0
       object_groups.each do |group|
