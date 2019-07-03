@@ -143,7 +143,7 @@ class Projectile < ScreenMapFixedObject
 
 
     # puts "PROJ SPEED: #{@speed}"
-    if is_alive
+    if @health > 0
       if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
         if @current_image_angle != @end_image_angle
           @current_image_angle = @current_image_angle + @image_angle_incrementor
@@ -205,7 +205,7 @@ class Projectile < ScreenMapFixedObject
       end
     end
 
-    return {is_alive: is_alive, graphical_effects: graphical_effects}
+    return {is_alive: @health > 0, graphical_effects: graphical_effects}
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
@@ -232,19 +232,21 @@ class Projectile < ScreenMapFixedObject
 
   # require 'benchmark'
 
-  def hit_objects(object_groups)
+  def hit_objects(object_groups, options)
     # puts "PROJ hit objects"
     drops = []
     points = 0
     hit_object = false
     killed = 0
     graphical_effects = []
+    is_thread = options[:is_thread] || false
     if @health > 0
       object_groups.each do |group|
         # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
         puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
         break if @health == 0
         group.each do |object|
+          Thread.exit if @health == 0 && is_thread
           break if @health == 0
           next if object.nil?
           # Don't hit yourself
@@ -336,7 +338,7 @@ class Projectile < ScreenMapFixedObject
 
     @health = 0 if hit_object
     # puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
-    return {drops: drops, point_value: points, killed: killed, graphical_effects: graphical_effects}
+    return {is_alive: @health > 0, drops: drops, point_value: points, killed: killed, graphical_effects: graphical_effects}
   end
 
   protected

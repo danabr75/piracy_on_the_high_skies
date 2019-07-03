@@ -24,6 +24,7 @@ module ShipUpdateThread
       # results[:shipwreck].each do |shipwreck|
         local_window.shipwrecks.push(results[:shipwreck]) if results[:shipwreck]
       # end
+      Thread.exit
     end
     return t
   end

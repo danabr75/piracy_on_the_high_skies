@@ -548,9 +548,18 @@ class GameWindow < Gosu::Window
       @projectiles[projectile.id] = projectile
       true
     end
+
+    # puts "INIT PROJ COUNT: #{@projectiles.count}"
+    # puts "TRYING TO DELTE: #{@remove_projectile_ids.count}"
     @remove_projectile_ids.reject! do |projectile_id|
+      # puts projectile_id
+      # puts "DELETING ID - #{@remove_projectile_ids.count} - #{@projectiles.has_key?(projectile_id)}"
       @projectiles.delete(projectile_id)
+      # puts "POST-DELETING ID - #{@remove_projectile_ids.count}"
+      true
     end
+    # puts "POST PROJ INIT: #{@projectiles.count}"
+    # puts "DELETE_COUNT: #{@remove_projectile_ids.count}"
 
 
     # if @player.time_alive % 500 == 0

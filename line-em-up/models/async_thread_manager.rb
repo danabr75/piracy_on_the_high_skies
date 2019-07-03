@@ -28,23 +28,27 @@ class AsyncThreadManager
     #   end
     # end
 
-    if @async
-      @threads_active.reject! {|t| !t.alive? }
-    else
-      @threads_active.reject! do |t|
-        t.join
-        true
-      end
-    end
+    # if @async
+    #   @threads_active.reject! {|t| !t.alive? }
+    # else
+    #   @threads_active.reject! do |t|
+    #     t.join
+    #     true
+    #   end
+    # end
 
     # @projectiles_queue.reject! {|p| p.health == 0}
     # puts "THREADS FINISHED HERE: #{index_offset}"
 
     # add new threads into active queue
-    while @threads_active.count < @max_number_of_threads && @holding_queue.count > 0
-      item = @holding_queue.shift
-      next if item.health == 0
-      @threads_active << @thread_type_klass.create_new(item, args)
+    # while @threads_active.count < @max_number_of_threads && @holding_queue.count > 0
+    Thread.new(@holding_queue, @thread_type_klass, args) do |local_holding_queue, local_klass, local_args|
+      while local_holding_queue.count > 0
+        item = local_holding_queue.shift
+        next if item.nil? || item.health == 0
+        # @threads_active << @thread_type_klass.create_new(item, args)
+        local_klass.create_new(item, local_args)
+      end
     end
     # end_time = Time.now
     # puts "ATM - UPDATE TOOK: #{end_time - start_time}"

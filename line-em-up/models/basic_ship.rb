@@ -30,7 +30,7 @@ class BasicShip < PilotableShip
   TILES_PER_SECOND = 0.2
   ROTATION_SPEED = 0.4
   # HEALTH = 100
-  HEALTH = 10000
+  HEALTH = 500
   ARMOR = 5
 
 

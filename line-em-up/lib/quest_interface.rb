@@ -34,8 +34,8 @@ module QuestInterface
         # "init_effects" =>   [], # earth_quakes?, trigger dialogue
         "post_effects" =>   [
           [
-            {effect_type: "wait", "time" => 30},
-            {effect_type: "dialogue", "section_id" => 'level_2'}
+            # {effect_type: "wait", "time" => 30},
+            # {effect_type: "dialogue", "section_id" => 'level_2'}
           ]
         ], # earth_quakes?, trigger dialogue
         "map_name" =>       "desert_v9_small",
