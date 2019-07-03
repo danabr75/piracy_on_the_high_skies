@@ -1,16 +1,17 @@
-require 'concurrent'
+# require 'concurrent'
 
-require 'time'
+# require 'time'
 
 class AsyncThreadManager
 
   Thread.abort_on_exception = true
 
-  def initialize thread_type_klass, max_concurrent_threads = (Concurrent.processor_count * 2)
+  def initialize thread_type_klass, max_concurrent_threads, async = true #= (Concurrent.processor_count * 2)
     @holding_queue = []
     @threads_active = []
     @max_number_of_threads = max_concurrent_threads
     @thread_type_klass = thread_type_klass
+    @async = async
   end
 
   def update *args
@@ -27,7 +28,14 @@ class AsyncThreadManager
     #   end
     # end
 
-    @threads_active.reject! {|t| !t.alive? }
+    if @async
+      @threads_active.reject! {|t| !t.alive? }
+    else
+      @threads_active.reject! do |t|
+        t.join
+        true
+      end
+    end
 
     # @projectiles_queue.reject! {|p| p.health == 0}
     # puts "THREADS FINISHED HERE: #{index_offset}"

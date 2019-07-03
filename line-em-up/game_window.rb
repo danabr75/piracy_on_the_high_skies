@@ -83,7 +83,7 @@ class GameWindow < Gosu::Window
 
   attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
 
-  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks
+  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks, :add_projectiles, :remove_projectile_ids
 
   include GlobalVariables
 
@@ -129,9 +129,9 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncThreadManager.new(ProjectileCollisionThread, 5)
-    @projectile_update_manager    = AsyncThreadManager.new(ProjectileUpdateThread, 5)
-    @ship_update_manager          = AsyncThreadManager.new(ShipUpdateThread, 2)
+    @projectile_collision_manager = AsyncThreadManager.new(ProjectileCollisionThread, 200)
+    @projectile_update_manager    = AsyncThreadManager.new(ProjectileUpdateThread, 200)
+    @ship_update_manager          = AsyncThreadManager.new(ShipUpdateThread, 10)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -193,6 +193,8 @@ class GameWindow < Gosu::Window
     
     @buildings = Array.new
     @projectiles = {}
+    @add_projectiles = []
+    @remove_projectile_ids = []
     # @enemy_projectiles = Array.new
     @destructable_projectiles = Array.new
     @pickups = Array.new
@@ -541,7 +543,16 @@ class GameWindow < Gosu::Window
 
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
-       
+    
+    @add_projectiles.reject! do |projectile|
+      @projectiles[projectile.id] = projectile
+      true
+    end
+    @remove_projectile_ids.reject! do |projectile_id|
+      @projectiles.delete(projectile_id)
+    end
+
+
     # if @player.time_alive % 500 == 0
     #   @messages << MessageFlash.new("This is a test - #{@player.time_alive}")
     # end    
@@ -848,7 +859,7 @@ class GameWindow < Gosu::Window
     # @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 
-    # @player.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) if @player.is_alive && !@ship_loadout_menu.active
+    @player.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) if @player.is_alive && !@ship_loadout_menu.active
     # @grappling_hook.draw(@player) if @player.is_alive && @grappling_hook
     if !menus_active && !@player.is_alive
       @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -860,7 +871,7 @@ class GameWindow < Gosu::Window
     end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     # reactivate
-    # @ships.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @ships.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @enemy_projectiles.each { |projectile| projectile.draw() }
