@@ -2,12 +2,12 @@ require_relative 'general_object.rb'
 # require_relative 'rocket_launcher_pickup.rb'
 require 'gosu'
 
-require 'opengl'
+# require 'opengl'
 require 'glut'
 
 
-include OpenGL
-include GLUT
+# include OpenGL
+# include GLUT
 
 class PilotableShip < GeneralObject
 

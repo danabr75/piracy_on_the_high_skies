@@ -3,12 +3,12 @@ require_relative 'general_object.rb'
 require_relative 'pilotable_ship.rb'
 require 'gosu'
 
-require 'opengl'
+# # require 'opengl'
 require 'glut'
 
 
-include OpenGL
-include GLUT
+# include OpenGL
+# include GLUT
 
 class BasicShip < PilotableShip
   ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"

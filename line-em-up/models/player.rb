@@ -3,12 +3,12 @@ require_relative 'screen_fixed_object.rb'
 require_relative '../lib/config_setting.rb'
 require 'gosu'
 
-require 'opengl'
+# require 'opengl'
 require 'glut'
 
 
-include OpenGL
-include GLUT
+# include OpenGL
+# include GLUT
 
 class Player < ScreenFixedObject
   CONFIG_FILE = "#{APP_DIRECTORY}/config.txt"

@@ -51,7 +51,7 @@ require 'gosu'
 # For WINDOWS - using local lip
 # require_relative 'lib/opengl.rb'
 # FOR Linux\OSX - using opengl gem
-require 'opengl'
+# # require 'opengl'
 
 require_relative "lib/global_constants.rb"
 include GlobalConstants
@@ -874,7 +874,7 @@ class GameWindow < Gosu::Window
     # puts @enemy_projectiles.class
     # puts @enemy_projectiles
 
-    @open_gl_executer.draw(@gl_background, @player, @pointer, @buildings, @pickups)
+    @open_gl_executer.draw(self, @gl_background, @player, @pointer, @buildings, @pickups)
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     # @smoke.draw
     @menu.draw

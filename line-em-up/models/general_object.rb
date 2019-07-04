@@ -649,6 +649,7 @@ class GeneralObject
   # Keeping this around, but not going to use for the future.
   # Not getting great results from this. ditching. - still using for landwrecks.
   def update_from_3D(vert0, vert1, vert2, vert3, oz, viewMatrix, projectionMatrix, viewport)
+    raise 'unsupported - requires glu'
     # left-top, left-bottom, right-top, right-bottom
     ox = vert0[0] - (vert0[0] - vert2[0])
     oy = vert2[1] + (vert2[1] - vert3[1])
@@ -700,7 +701,8 @@ class GeneralObject
   end
 
   def self.convert3DTo2D(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
-    return gluProject(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
+    # requires 'glu' and doesn't work that well
+    # return gluProject(o_x, o_y, o_z, viewMatrix, projectionMatrix, viewport)
   end
 
   def validate_array parameters, klass_name, method_name

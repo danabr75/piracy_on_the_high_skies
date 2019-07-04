@@ -1,7 +1,7 @@
 require 'gosu'
 
-require 'opengl'
-require 'glu'
+# require 'opengl'
+# require 'glu'
 require 'glut'
 
 
@@ -9,9 +9,9 @@ require_relative 'angled_particle.rb'
 
 module Graphics
 
-  include OpenGL # Gl
-  include GLUT   # Glut 
-  include GLU    # Glu
+  # include OpenGL # Gl
+  # include GLUT   # Glut 
+  # include GLU    # Glu
 
 
   class AngledSmoke < Graphics::AngledParticle

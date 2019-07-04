@@ -1,5 +1,5 @@
-require 'opengl'
-require 'glu'
+# require 'opengl'
+# require 'glu'
 require 'glut'
 
 #used to be launcher

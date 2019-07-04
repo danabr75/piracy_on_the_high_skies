@@ -1,15 +1,17 @@
 require_relative 'background_fixed_object.rb'
 
+# require 'glu'
+require 'gosu'
 require 'opengl'
 require 'glut'
-require 'glu'
-require 'gosu'
 
-include OpenGL
-include GLUT
-include GLU # - defined gluProject
+# include OpenGL
+# include GLUT
+# include GLU # - defined gluProject
 
 class Building < BackgroundFixedObject
+  include OpenGL
+  include GLUT
   POINT_VALUE_BASE = 1
   HEALTH = 100
   CLASS_TYPE = :building

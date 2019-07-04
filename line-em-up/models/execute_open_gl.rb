@@ -1,17 +1,18 @@
 require 'gosu'
 
 require 'opengl'
-require 'glu'
 require 'glut'
 
 
 
-include OpenGL
-include GLUT
-# OpenGL.load_lib()
-# GLUT.load_lib()
-
 class ExecuteOpenGl
+  include OpenGL
+  include GLUT
+  OpenGL.load_lib
+  # OpenGL.load_lib()
+  # GLUT.load_lib()
+  def initialize
+  end
   # def self.init_scene
   #   glEnable(GL_TEXTURE_2D)
   #   glShadeModel(GL_SMOOTH)
@@ -32,9 +33,9 @@ class ExecuteOpenGl
   # include Glu 
   # include Glut
 
-  def draw background, player, pointer, buildings, pickups
+  def draw window, background, player, pointer, buildings, pickups
     # @zoom = -14
-    Gosu.gl do
+    window.gl do
       # init_scene
       # glEnable(GL_TEXTURE_2D)
       # glShadeModel(GL_SMOOTH)

@@ -1,7 +1,7 @@
 require_relative 'projectile.rb'
 
-require 'opengl'
-# require 'glu'
+# require 'opengl'
+# # require 'glu'
 # require 'glut'
 
 class Missile < Projectile

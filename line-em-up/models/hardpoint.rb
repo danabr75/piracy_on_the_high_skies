@@ -2,12 +2,12 @@ require_relative 'general_object.rb'
 require_relative 'graphics/angled_smoke.rb'
 require 'gosu'
 
-require 'opengl'
+# require 'opengl'
 require 'glut'
 
 
-include OpenGL
-include GLUT
+# include OpenGL
+# include GLUT
 
 # Not intended to be overridden
 # Is a Hardpoint Container

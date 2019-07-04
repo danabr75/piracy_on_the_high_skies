@@ -2,16 +2,16 @@
 
 require 'rubygems'
 require 'gosu'
-require 'opengl'
-require 'glu'
+# require 'opengl'
+# require 'glu'
 require 'glut'
 require 'time'
 require 'concurrent'
 
 # require 'ashton'
-include OpenGL
-include GLUT
-# include GLU
+# include OpenGL
+# include GLUT
+# # include GLU
 # OpenGL.load_lib()
 # GLUT.load_lib()
 # Ashton::ParticleEmitter
@@ -22,8 +22,8 @@ MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
 VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors/"
 CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
-# include OpenGL
-# include GLUT
+# # include OpenGL
+# # include GLUT
 # OpenGL.load_lib()
 # GLUT.load_lib()
 

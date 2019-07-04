@@ -1,14 +1,14 @@
 require_relative 'projectile.rb'
 require 'gosu'
-# require 'opengl'
-# require 'glu'
+# # require 'opengl'
+# # require 'glu'
 
-require 'opengl'
+# # require 'opengl'
 require 'glut'
 
 
-include OpenGL
-include GLUT
+# include OpenGL
+# include GLUT
 
 # For opengl-bindings
 # OpenGL.load_lib()

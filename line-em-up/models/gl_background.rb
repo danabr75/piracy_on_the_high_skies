@@ -1,10 +1,10 @@
 # Class Needs to be renamed.. 
 
 require 'gosu'
-# # require 'opengl'
-# # require 'glu'
+# # # require 'opengl'
+# # # require 'glu'
 
-# require 'opengl'
+# # require 'opengl'
 # require 'glut'
 
 require 'opengl'
@@ -1199,264 +1199,264 @@ class GLBackground
     # modelview.data(), projection.data(),
     # screen_coords.data(), screen_coords.data() + 1, screen_coords.data() + 2);
 
-    # if !@test
-    #   glEnable(GL_TEXTURE_2D)
-    #   glEnable(GL_BLEND)
+    if !@test
+      glEnable(GL_TEXTURE_2D)
+      glEnable(GL_BLEND)
 
-    #   # Not sure the next 3 methods do anything
-    #   # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
-    #   # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
-    #   # glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE)
-    #   tile_row_y_max = @visible_map.length #@visible_map.length - 1 - (@extra_map_tile_height)
-    #   @visible_map.each_with_index do |y_row, y_index|
-    #     tile_row_x_max = y_row.length # y_row.length - 1 - (@extra_map_tile_width)
-    #     y_row.each_with_index do |x_element, x_index|
-    #       # puts "element - #{x_index} #{y_index} "
+      # Not sure the next 3 methods do anything
+      # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE )
+      # glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE )
+      # glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE)
+      tile_row_y_max = @visible_map.length #@visible_map.length - 1 - (@extra_map_tile_height)
+      @visible_map.each_with_index do |y_row, y_index|
+        tile_row_x_max = y_row.length # y_row.length - 1 - (@extra_map_tile_width)
+        y_row.each_with_index do |x_element, x_index|
+          # puts "element - #{x_index} #{y_index} "
 
-    #       # splits across middle 0  -7..0..7 if visible map is 15
-    #       new_x_index = x_index - (tile_row_x_max / 2.0)
-    #       new_y_index = y_index - (tile_row_y_max / 2.0)
+          # splits across middle 0  -7..0..7 if visible map is 15
+          new_x_index = x_index - (tile_row_x_max / 2.0)
+          new_y_index = y_index - (tile_row_y_max / 2.0)
 
-    #       # Screen coords width and height here.
-    #       screen_x = @tile_pixel_width   * new_x_index
-    #       # puts "screen_x = @tile_pixel_width   * new_x_index"
-    #       # puts "#{screen_x} = #{@tile_pixel_width}   * #{new_x_index}"
-    #       screen_y = @tile_pixel_height  * new_y_index
-    #       # puts "screen_y = @tile_pixel_height  * new_y_index"
-    #       # puts "#{screen_y} = #{@tile_pixel_height}  * #{new_y_index}"
+          # Screen coords width and height here.
+          screen_x = @tile_pixel_width   * new_x_index
+          # puts "screen_x = @tile_pixel_width   * new_x_index"
+          # puts "#{screen_x} = #{@tile_pixel_width}   * #{new_x_index}"
+          screen_y = @tile_pixel_height  * new_y_index
+          # puts "screen_y = @tile_pixel_height  * new_y_index"
+          # puts "#{screen_y} = #{@tile_pixel_height}  * #{new_y_index}"
 
-    #       # result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
-    #       result = GeneralObject.convert_screen_pixels_to_opengl(@screen_pixel_width, @screen_pixel_height, screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
-    #       # puts "X and Y INDEX: #{x_index} - #{y_index}"
-    #       # puts "RESULT HERE: #{result}"
-    #       opengl_coord_x = result[:o_x]
-    #       opengl_coord_y = result[:o_y]
-    #       # opengl_coord_y = opengl_coord_y * -1
-    #       # opengl_coord_x = opengl_coord_x * -1
-    #       opengl_increment_x = result[:o_w]
-    #       opengl_increment_y = result[:o_h]
+          # result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
+          result = GeneralObject.convert_screen_pixels_to_opengl(@screen_pixel_width, @screen_pixel_height, screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
+          # puts "X and Y INDEX: #{x_index} - #{y_index}"
+          # puts "RESULT HERE: #{result}"
+          opengl_coord_x = result[:o_x]
+          opengl_coord_y = result[:o_y]
+          # opengl_coord_y = opengl_coord_y * -1
+          # opengl_coord_x = opengl_coord_x * -1
+          opengl_increment_x = result[:o_w]
+          opengl_increment_y = result[:o_h]
 
-    #       # raise "SHOUD NOT BE NIL" if opengl_coord_x.nil? || opengl_coord_y.nil?
-    #       # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
-    #       # puts "NEW DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
+          # raise "SHOUD NOT BE NIL" if opengl_coord_x.nil? || opengl_coord_y.nil?
+          # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
+          # puts "NEW DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
 
-    #       # result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
-    #       # opengl_coord_x = result[:o_x]
-    #       # opengl_coord_y = result[:o_y]
-    #       # # opengl_coord_y = opengl_coord_y * -1
-    #       # # opengl_coord_x = opengl_coord_x * -1
-    #       # opengl_increment_x = result[:o_w]
-    #       # opengl_increment_y = result[:o_h]
+          # result = convert_screen_to_opengl(screen_x, screen_y, @tile_pixel_width, @tile_pixel_height)
+          # opengl_coord_x = result[:o_x]
+          # opengl_coord_y = result[:o_y]
+          # # opengl_coord_y = opengl_coord_y * -1
+          # # opengl_coord_x = opengl_coord_x * -1
+          # opengl_increment_x = result[:o_w]
+          # opengl_increment_y = result[:o_h]
 
-    #       # raise "SHOUD NOT BE NIL" if opengl_coord_x.nil? || opengl_coord_y.nil?
-    #       # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
-    #       # puts "ORIGINAL DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
-
-
-    #       if x_element['corner_heights']
-    #         z = x_element['corner_heights']
-    #       else
-    #         z = {'bottom_right' =>  3, 'bottom_left' =>  3, 'top_right' =>  3, 'top_left' =>  3}
-    #       end
+          # raise "SHOUD NOT BE NIL" if opengl_coord_x.nil? || opengl_coord_y.nil?
+          # raise "SHOUD NOT BE NIL" if opengl_increment_x.nil? || opengl_increment_y.nil?
+          # puts "ORIGINAL DATA TILE OPENGL DATA: #{[opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y]}"
 
 
-
-    #       if @debug
-    #         # puts "x_element: #{x_element}"
-    #         # puts "CONVERTING OPENGL TO SCREEN"
-    #         # puts "OX: #{opengl_coord_x - opengl_offset_x} = #{opengl_coord_x} - #{opengl_offset_x}"
-    #         # puts "OY: #{opengl_coord_y - opengl_offset_y} = #{opengl_coord_y} - #{opengl_offset_y}"
-    #         # x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
-    #         # puts "@font: x, y = #{x}, #{y}"
-
-    #         # get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
-    #         # result = get2dPoint(x, y , x_element["height"], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), @screen_pixel_width, @screen_pixel_height)
-    #         # @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", result[0], @screen_pixel_height - result[1], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    #       end
+          if x_element['corner_heights']
+            z = x_element['corner_heights']
+          else
+            z = {'bottom_right' =>  3, 'bottom_left' =>  3, 'top_right' =>  3, 'top_left' =>  3}
+          end
 
 
 
-    #       lights = [{pos: [0,0], brightness: 0.4, radius: 0.5}]
-    #       # Too slow.. FPS droppage
-    #       # projectiles.each do |p|
-    #         # Needs to be updated from x y to map x and map y
-    #         # results = convert_screen_to_opengl(p.x, p.y, nil, nil, true)
-    #         # lights << {pos: [(results[:o_x]), (results[:o_y] * -1)], brightness: 0.3, radius: 0.5}
-    #       # end
+          if @debug
+            # puts "x_element: #{x_element}"
+            # puts "CONVERTING OPENGL TO SCREEN"
+            # puts "OX: #{opengl_coord_x - opengl_offset_x} = #{opengl_coord_x} - #{opengl_offset_x}"
+            # puts "OY: #{opengl_coord_y - opengl_offset_y} = #{opengl_coord_y} - #{opengl_offset_y}"
+            # x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
+            # puts "@font: x, y = #{x}, #{y}"
 
-    #       if @enable_dark_mode
-    #         default_colors = [0.3, 0.3, 0.3, 0.3]
-    #       else
-    #         default_colors = [1, 1, 1, 1]
-    #       end
-    #       # left-top, left-bottom, right-top, right-bottom
-
-    #       # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
-
-    #       # if x_element['terrain_paths_and_weights']
-    #       #   terrains = ['terrain_paths_and_weights']
-    #       #  # puts "TERRAINS HERE: ---"
-    #       #  # puts terrains.inspect
-    #       #   # info_top_left
-    #       #   # TERRAINS HERE: ---
-    #       #   # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
-
-    #       # else
-    #       #   # z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
-    #       # end
-
-    #       # error = glGetError
-    #       # if error != 0
-    #       #  puts "FOUND ERROR: #{error}"
-    #       # end
-    #       vert_pos1, vert_pos2, vert_pos3, vert_pos4 = [nil,nil,nil,nil]
-    #       vert_pos1 = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
-    #       vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
-    #       vert_pos3 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
-    #       vert_pos4 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
-    #       @alt_infos.each do |index_key, info|
-    #         glBindTexture(GL_TEXTURE_2D, info.tex_name)
-    #       end
-    #       # glDepthMask(GL_FALSE);
-    #       # glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    #       if x_element['terrain_paths_and_weights']
-    #         # glBegin(GL_QUAD_STRIP)
-    #           # index_key, info = @alt_infos.first
-    #           # @alt_infos.each do |index_key, info|
-    #           index_key, info = @alt_infos.first
-    #             # # glBindTexture(GL_TEXTURE_2D, info.tex_name)
-    #             # # index_to_s = index.to_s # Could be done in the infos field, on init
-    #             # info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
-    #             # info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
-    #             # info_bottom_left_opacity  = x_element['terrain_paths_and_weights']['bottom_left'][index_key]  #|| 0.0
-    #             # info_bottom_right_opacity = x_element['terrain_paths_and_weights']['bottom_right'][index_key] #|| 0.0
-    #             # # Next unless there's at least one in there that's not nil
-    #             # next if info_top_left_opacity.nil? && info_top_right_opacity.nil? && info_bottom_left_opacity.nil? && info_bottom_right_opacity.nil?
-    #             # # next unless [info_top_left_opacity, info_top_right_opacity, info_bottom_left_opacity, info_bottom_right_opacity].any?{ |e| !e.nil? }
-    #             # info_top_left_opacity     ||= 0.0
-    #             # info_top_right_opacity    ||= 0.0
-    #             # info_bottom_left_opacity  ||= 0.0
-    #             # info_bottom_right_opacity ||= 0.0
-
-    #             info_top_left_opacity     = 1
-    #             info_top_right_opacity    = 1
-    #             info_bottom_left_opacity  = 1
-    #             info_bottom_right_opacity = 1
-
-    #             glBegin(GL_TRIANGLE_STRIP)
-    #               glTexCoord2d(info.left, info.top)
-    #               colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #               glColor4d(colors[0], colors[1], colors[2], info_top_left_opacity)
-    #               glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
-
-    #               glTexCoord2d(info.left, info.bottom)
-    #               colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #               glColor4d(colors[0], colors[1], colors[2], info_bottom_left_opacity)
-    #               glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
-
-    #               glTexCoord2d(info.right, info.top)
-    #               colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #               glColor4d(colors[0], colors[1], colors[2], info_top_right_opacity)
-    #               glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
-
-    #               glTexCoord2d(info.right, info.bottom)
-    #               colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #               glColor4d(colors[0], colors[1], colors[2], info_bottom_right_opacity)
-    #               glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
-    #             glEnd
-    #           # end
-    #         # glEnd
-    #       else
-    #         info =  @infos[x_element['terrain_index']]
-    #         # glBindTexture(GL_TEXTURE_2D, info.tex_name)
-    #         glBegin(GL_TRIANGLE_STRIP)
-    #           glTexCoord2d(info.left, info.top)
-    #           colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #           glColor4d(colors[0], colors[1], colors[2], colors[3])
-    #           glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
-
-    #           glTexCoord2d(info.left, info.bottom)
-    #           colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #           glColor4d(colors[0], colors[1], colors[2], colors[3])
-    #           glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
-
-    #           glTexCoord2d(info.right, info.top)
-    #           colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #           glColor4d(colors[0], colors[1], colors[2], colors[3])
-    #           glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
-
-    #           glTexCoord2d(info.right, info.bottom)
-    #           colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
-    #           glColor4d(colors[0], colors[1], colors[2], colors[3])
-    #           glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
-    #         glEnd
-    #       end
-
-
-    #       # Both these buildings and pickups drawing methods work. Building is more attached to the terrain.
-    #       # Building draw the tile here
-    #       # Pickups update the x and y coords, and then the pickup draws itself.
-    #       buildings.each do |building|
-    #         next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
-
-    #         # @local_map_movement_y
-    #         # @local_map_movement_x
-    #         # current_map_tile_x
-    #         # current_map_tile_y
-    #         # y_index
-    #         # x_index
-    #         # @tile_pixel_width 
-    #         # @tile_pixel_height
-    #         # screen_pixel_width
-    #         # screen_pixel_height
-    #         # puts "BUILDING UPDATE INDEX: #{x_index} - #{y_index}"
-    #         # puts "BUILDING PIXEL ESTIMATION:"
-    #         # puts "#{x_index * @tile_pixel_width } - #{y_index * @tile_pixel_height}"
-
-    #         # building.alt_draw((x_index * @tile_pixel_width) + @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
-    #         # building.alt_draw((x_index * @tile_pixel_width), (y_index * @tile_pixel_height))
-    #         # building.alt_draw((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
-
-    #         # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            # get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
+            # result = get2dPoint(x, y , x_element["height"], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), @screen_pixel_width, @screen_pixel_height)
+            # @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", result[0], @screen_pixel_height - result[1], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+          end
 
 
 
-    #         # if building.kind_of?(Landwreck) || building.kind_of?(OffensiveStore)
-    #         #   # puts "UPDATING BUILDING ALT ALT"
-    #         # end
-    #           # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
+          lights = [{pos: [0,0], brightness: 0.4, radius: 0.5}]
+          # Too slow.. FPS droppage
+          # projectiles.each do |p|
+            # Needs to be updated from x y to map x and map y
+            # results = convert_screen_to_opengl(p.x, p.y, nil, nil, true)
+            # lights << {pos: [(results[:o_x]), (results[:o_y] * -1)], brightness: 0.3, radius: 0.5}
+          # end
 
-    #           # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
-    #         if !building.kind_of?(Landwreck) #&& !building.kind_of?(OffensiveStore)
-    #           building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
-    #         #   # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
-    #         else
-    #           # building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
-    #           # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
-    #         end
-    #         # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
-    #       end
+          if @enable_dark_mode
+            default_colors = [0.3, 0.3, 0.3, 0.3]
+          else
+            default_colors = [1, 1, 1, 1]
+          end
+          # left-top, left-bottom, right-top, right-bottom
 
-    #       pickups.each do |pickup|
-    #         next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
-    #       end
+          # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
+
+          # if x_element['terrain_paths_and_weights']
+          #   terrains = ['terrain_paths_and_weights']
+          #  # puts "TERRAINS HERE: ---"
+          #  # puts terrains.inspect
+          #   # info_top_left
+          #   # TERRAINS HERE: ---
+          #   # {"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5, "1"=>0.5}, "bottom_left"=>{"0"=>0.5, "2"=>0.5}, "bottom_right"=>{"0"=>0.25, "1"=>0.25, "2"=>0.5}}
+
+          # else
+          #   # z = {'bottom_right' =>  1, 'bottom_left' =>  1, 'top_right' =>  1, 'top_left' =>  1}
+          # end
+
+          # error = glGetError
+          # if error != 0
+          #  puts "FOUND ERROR: #{error}"
+          # end
+          vert_pos1, vert_pos2, vert_pos3, vert_pos4 = [nil,nil,nil,nil]
+          vert_pos1 = [opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_left']]
+          vert_pos2 = [opengl_coord_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_left']]
+          vert_pos3 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y - opengl_offset_y, z['top_right']]
+          vert_pos4 = [opengl_coord_x + opengl_increment_x - opengl_offset_x, opengl_coord_y + opengl_increment_y - opengl_offset_y, z['bottom_right']]
+          @alt_infos.each do |index_key, info|
+            glBindTexture(GL_TEXTURE_2D, info.tex_name)
+          end
+          # glDepthMask(GL_FALSE);
+          # glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+          if x_element['terrain_paths_and_weights']
+            # glBegin(GL_QUAD_STRIP)
+              # index_key, info = @alt_infos.first
+              # @alt_infos.each do |index_key, info|
+              index_key, info = @alt_infos.first
+                # # glBindTexture(GL_TEXTURE_2D, info.tex_name)
+                # # index_to_s = index.to_s # Could be done in the infos field, on init
+                # info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
+                # info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
+                # info_bottom_left_opacity  = x_element['terrain_paths_and_weights']['bottom_left'][index_key]  #|| 0.0
+                # info_bottom_right_opacity = x_element['terrain_paths_and_weights']['bottom_right'][index_key] #|| 0.0
+                # # Next unless there's at least one in there that's not nil
+                # next if info_top_left_opacity.nil? && info_top_right_opacity.nil? && info_bottom_left_opacity.nil? && info_bottom_right_opacity.nil?
+                # # next unless [info_top_left_opacity, info_top_right_opacity, info_bottom_left_opacity, info_bottom_right_opacity].any?{ |e| !e.nil? }
+                # info_top_left_opacity     ||= 0.0
+                # info_top_right_opacity    ||= 0.0
+                # info_bottom_left_opacity  ||= 0.0
+                # info_bottom_right_opacity ||= 0.0
+
+                info_top_left_opacity     = 1
+                info_top_right_opacity    = 1
+                info_bottom_left_opacity  = 1
+                info_bottom_right_opacity = 1
+
+                glBegin(GL_TRIANGLE_STRIP)
+                  glTexCoord2d(info.left, info.top)
+                  colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                  glColor4d(colors[0], colors[1], colors[2], info_top_left_opacity)
+                  glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
+
+                  glTexCoord2d(info.left, info.bottom)
+                  colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                  glColor4d(colors[0], colors[1], colors[2], info_bottom_left_opacity)
+                  glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
+
+                  glTexCoord2d(info.right, info.top)
+                  colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                  glColor4d(colors[0], colors[1], colors[2], info_top_right_opacity)
+                  glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
+
+                  glTexCoord2d(info.right, info.bottom)
+                  colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+                  glColor4d(colors[0], colors[1], colors[2], info_bottom_right_opacity)
+                  glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
+                glEnd
+              # end
+            # glEnd
+          else
+            info =  @infos[x_element['terrain_index']]
+            # glBindTexture(GL_TEXTURE_2D, info.tex_name)
+            glBegin(GL_TRIANGLE_STRIP)
+              glTexCoord2d(info.left, info.top)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos1[0], vert_pos1[1], vert_pos1[2])
+
+              glTexCoord2d(info.left, info.bottom)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos2[0], vert_pos2[1], vert_pos2[2])
+
+              glTexCoord2d(info.right, info.top)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos3[0], vert_pos3[1], vert_pos3[2])
+
+              glTexCoord2d(info.right, info.bottom)
+              colors = @enable_dark_mode ? apply_lighting(default_colors, vert_pos, lights) : default_colors
+              glColor4d(colors[0], colors[1], colors[2], colors[3])
+              glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
+            glEnd
+          end
+
+
+          # Both these buildings and pickups drawing methods work. Building is more attached to the terrain.
+          # Building draw the tile here
+          # Pickups update the x and y coords, and then the pickup draws itself.
+          buildings.each do |building|
+            next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
+
+            # @local_map_movement_y
+            # @local_map_movement_x
+            # current_map_tile_x
+            # current_map_tile_y
+            # y_index
+            # x_index
+            # @tile_pixel_width 
+            # @tile_pixel_height
+            # screen_pixel_width
+            # screen_pixel_height
+            # puts "BUILDING UPDATE INDEX: #{x_index} - #{y_index}"
+            # puts "BUILDING PIXEL ESTIMATION:"
+            # puts "#{x_index * @tile_pixel_width } - #{y_index * @tile_pixel_height}"
+
+            # building.alt_draw((x_index * @tile_pixel_width) + @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+            # building.alt_draw((x_index * @tile_pixel_width), (y_index * @tile_pixel_height))
+            # building.alt_draw((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+
+            # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+
+
+
+            # if building.kind_of?(Landwreck) || building.kind_of?(OffensiveStore)
+            #   # puts "UPDATING BUILDING ALT ALT"
+            # end
+              # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
+
+              # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
+            if !building.kind_of?(Landwreck) #&& !building.kind_of?(OffensiveStore)
+              building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+            #   # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
+            else
+              # building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
+              # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+            end
+            # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
+          end
+
+          pickups.each do |pickup|
+            next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
+          end
 
           
-    #       if player.current_map_tile_x == x_element['gps_x'] && player.current_map_tile_y == x_element['gps_y']
-    #         # puts "XELEMENT of Current Player: #{x_element}"
-    #         # XELEMENT of Current Player: {"height"=>0.23451606664978608, "terrain_index"=>0,
-    #         #   "corner_heights"=>{"top_left"=>0.0, "top_right"=>0.0, "bottom_left"=>0.0, "bottom_right"=>0.25},
-    #         #   "gps_y"=>122, "gps_x"=>115}
-    #       end
+          if player.current_map_tile_x == x_element['gps_x'] && player.current_map_tile_y == x_element['gps_y']
+            # puts "XELEMENT of Current Player: #{x_element}"
+            # XELEMENT of Current Player: {"height"=>0.23451606664978608, "terrain_index"=>0,
+            #   "corner_heights"=>{"top_left"=>0.0, "top_right"=>0.0, "bottom_left"=>0.0, "bottom_right"=>0.25},
+            #   "gps_y"=>122, "gps_x"=>115}
+          end
 
-    #       # error = glGetError
-    #       # if error != 0
-    #       #  puts "FOUND ERROR: #{error}"
-    #       # end
+          # error = glGetError
+          # if error != 0
+          #  puts "FOUND ERROR: #{error}"
+          # end
 
-    #     end
-    #   end
-    # end
+        end
+      end
+    end
   end
  
   # def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)

@@ -1,14 +1,14 @@
 require 'gosu'
 
-require 'opengl'
-require 'glu'
+# require 'opengl'
+# require 'glu'
 require 'glut'
 
 module Graphics
 
-  include OpenGL # Gl
-  include GLUT   # Glut 
-  include GLU    # Glu
+  # include OpenGL # Gl
+  # include GLUT   # Glut 
+  # include GLU    # Glu
 
   class AngledParticle
 

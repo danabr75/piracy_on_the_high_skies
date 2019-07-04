@@ -1,11 +1,11 @@
 # require 'gosu'
 # require 'glfw'
-# require 'opengl'
+# # require 'opengl'
 
 # OpenGL.load_dll
 # GLFW.load_dll
 
-# include OpenGL
+# # include OpenGL
 # include GLFW
 
 # SHADOW_LENGTH = 20000
