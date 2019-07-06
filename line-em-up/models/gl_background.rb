@@ -22,8 +22,8 @@ class GLBackground
   # MAP_HEIGHT_EDGE = 700
   # MAP_WIDTH_EDGE_RIGHT = 450
   # MAP_WIDTH_EDGE_LEFT  = 80
-  EXTERIOR_MAP_HEIGHT = 200
-  EXTERIOR_MAP_WIDTH  = 200
+  # EXTERIOR_MAP_HEIGHT = 200
+  # EXTERIOR_MAP_WIDTH  = 200
   # POINTS_X = 7
   # outside of view padding
 
@@ -1322,26 +1322,26 @@ class GLBackground
           if x_element['terrain_paths_and_weights']
             # glBegin(GL_QUAD_STRIP)
               # index_key, info = @alt_infos.first
-              # @alt_infos.each do |index_key, info|
-              index_key, info = @alt_infos.first
+              @alt_infos.each do |index_key, info|
+              # index_key, info = @alt_infos.first
                 # # glBindTexture(GL_TEXTURE_2D, info.tex_name)
                 # # index_to_s = index.to_s # Could be done in the infos field, on init
-                # info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
-                # info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
-                # info_bottom_left_opacity  = x_element['terrain_paths_and_weights']['bottom_left'][index_key]  #|| 0.0
-                # info_bottom_right_opacity = x_element['terrain_paths_and_weights']['bottom_right'][index_key] #|| 0.0
+                info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
+                info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
+                info_bottom_left_opacity  = x_element['terrain_paths_and_weights']['bottom_left'][index_key]  #|| 0.0
+                info_bottom_right_opacity = x_element['terrain_paths_and_weights']['bottom_right'][index_key] #|| 0.0
                 # # Next unless there's at least one in there that's not nil
-                # next if info_top_left_opacity.nil? && info_top_right_opacity.nil? && info_bottom_left_opacity.nil? && info_bottom_right_opacity.nil?
+                next if info_top_left_opacity.nil? && info_top_right_opacity.nil? && info_bottom_left_opacity.nil? && info_bottom_right_opacity.nil?
                 # # next unless [info_top_left_opacity, info_top_right_opacity, info_bottom_left_opacity, info_bottom_right_opacity].any?{ |e| !e.nil? }
-                # info_top_left_opacity     ||= 0.0
-                # info_top_right_opacity    ||= 0.0
-                # info_bottom_left_opacity  ||= 0.0
-                # info_bottom_right_opacity ||= 0.0
+                info_top_left_opacity     ||= 0.0
+                info_top_right_opacity    ||= 0.0
+                info_bottom_left_opacity  ||= 0.0
+                info_bottom_right_opacity ||= 0.0
 
-                info_top_left_opacity     = 1
-                info_top_right_opacity    = 1
-                info_bottom_left_opacity  = 1
-                info_bottom_right_opacity = 1
+                # info_top_left_opacity     = 1
+                # info_top_right_opacity    = 1
+                # info_bottom_left_opacity  = 1
+                # info_bottom_right_opacity = 1
 
                 glBegin(GL_TRIANGLE_STRIP)
                   glTexCoord2d(info.left, info.top)
@@ -1364,7 +1364,7 @@ class GLBackground
                   glColor4d(colors[0], colors[1], colors[2], info_bottom_right_opacity)
                   glVertex3d(vert_pos4[0], vert_pos4[1], vert_pos4[2])
                 glEnd
-              # end
+              end
             # glEnd
           else
             info =  @infos[x_element['terrain_index']]
