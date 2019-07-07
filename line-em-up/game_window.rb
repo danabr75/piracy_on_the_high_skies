@@ -142,8 +142,8 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 4)
-    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 4)
+    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
+    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
     # @projectile_update_manager    = AsyncProcessManager.new()
 
     # r, w = IO.pipe
@@ -153,7 +153,7 @@ class GameWindow < Gosu::Window
 
     # end
 
-    # @ship_update_manager = AsyncThreadManager.new(ShipUpdateThread, 10)
+    @ship_update_manager = AsyncProcessManager.new(ShipUpdateThread, 8)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -636,7 +636,7 @@ class GameWindow < Gosu::Window
       @projectile_update_manager.update(self, @projectiles, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # @projectile_update_manager.update
 
-      # @ship_update_manager.update(self, self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
+      @ship_update_manager.update(self, @ships, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships + [@player], @buildings)
 
       #projectiles remove themselves
       # @projectiles.reject! do |projectile|
@@ -859,7 +859,7 @@ class GameWindow < Gosu::Window
 
 
         @shipwrecks.reject! do |ship|
-          result = ship.update(nil, nil, @player)
+          result = ship.update(nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
           if result[:building]
             result[:building].set_window(self)
             @buildings << result[:building]

@@ -252,7 +252,7 @@ class AIShip < ScreenMapFixedObject
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets = [], ground_targets = [], options = {}
-    validate_not_nil([mouse_x, mouse_y, player, air_targets, ground_targets], self.class.name, __callee__)
+    validate_not_nil([mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets, ground_targets], self.class.name, __callee__)
     # return {
     #   is_alive: true, projectiles: [], shipwreck: nil,
     #   destructable_projectiles: [], graphical_effects: []
@@ -311,8 +311,8 @@ class AIShip < ScreenMapFixedObject
         # Implement relationships.
         # next if target.allied
         # FOR TESTING, to keep them from murdering each other
-        next if target.id != player.id
-        next if target.id == player.id && !player.is_alive
+        # next if target.id != player.id
+        # next if target.id == player.id && !player.is_alive
 
         if @special_target_focus_id && @special_target_focus_id == target.id
           @special_target_focus = agro_target = target if @special_target_focus_id == target.id

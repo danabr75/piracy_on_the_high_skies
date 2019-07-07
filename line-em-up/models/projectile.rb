@@ -427,7 +427,7 @@ class Projectile < ScreenMapFixedObject
             # 105.36458333333334 : 37.395833333333336 + 67.96875
 
             hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
-            puts "HIT THIS OBJECT: #{object.id} - #{object.class}" if hit_object
+            # puts "HIT THIS OBJECT: #{object.id} - #{object.class}" if hit_object
           end
           if hit_object && self.class.get_aoe <= 0
             result = trigger_object_collision(object) 
@@ -450,7 +450,7 @@ class Projectile < ScreenMapFixedObject
 
     # Drop projectile explosions
     if hit_object
-      puts "HIT OBJECT"
+      # puts "HIT OBJECT"
       # puts "#{self.class.name} HIT OBJECT"
       if self.respond_to?(:drops)
         self.drops.each do |drop|
