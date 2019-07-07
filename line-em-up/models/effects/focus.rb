@@ -34,11 +34,11 @@ module Effects
         player.enable_invulnerability
         player.disable_controls
       elsif type == 'ship'
-        ships.each do |ship|
+        ships.each do |key, ship|
           # puts "SHIP HERE: #{ship.id}"
           # puts ship.id.inspect
           # puts ship.id.class
-          next if ship.id != id
+          next if key != id
           @target = ship
         end
       elsif type == 'building'

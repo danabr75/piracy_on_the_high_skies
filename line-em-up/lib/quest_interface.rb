@@ -13,8 +13,8 @@ module QuestInterface
       "starting_level_quest" => {
         "init_ships_string" => [
             "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
+            # "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
+            # "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 130, 110, {id: 'starting_level_quest_ship_9', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 125, 125, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 30, 100, {id: 'starting_level_quest_ship_3', special_target_focus_id: 'player'})",
@@ -42,18 +42,19 @@ module QuestInterface
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
-            ships.each do |ship|
+            ships.each do |key, ship|
               found_ship = true if ship.id == 'starting_level_quest_ship_1'
             end
             return !found_ship
           }
         ",
         # special 'activate_quests' key
-        "post_complete_triggers_string" => "
-          lambda { |ships, buildings, player|
-            return {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
-          }
-        ",
+        # "post_complete_triggers_string" => "
+        #   lambda { |ships, buildings, player|
+        #     return {activate_quests: ['followup-level-quest'], ships: ships, buildings: buildings}
+        #   }
+        # ",
+        "post_complete_triggers_string" => nil,
         # Should not change any ships or buildings in play. Including them in parameters to check IDs
         # Can be nil or can return true
         "active_condition_string" => "
@@ -80,8 +81,8 @@ module QuestInterface
         "complete_condition_string" => "
           lambda { |ships, buildings, player|
             found_ship = false
-            ships.each do |ship|
-              found_ship = true if ['starting_level_quest-ship-2', 'starting_level_quest-ship-3', 'starting_level_quest-ship-4'].include?(ship.id)
+            ships.each do |key, ship|
+              found_ship = true if ['starting_level_quest-ship-2', 'starting_level_quest-ship-3', 'starting_level_quest-ship-4'].include?(key)
             end
             return !found_ship
           }
@@ -194,7 +195,7 @@ module QuestInterface
         if values["init_ships"] && values["init_ships"].any?
           values["init_ships"].each do |ship|
            # puts "1loading in ship here for : #{quest_key}"
-            ships << ship
+            ships[ship.id] = ship
           end
         end
        # puts "INIT HERE, WHY NOT INIT"
@@ -220,6 +221,8 @@ module QuestInterface
       state = values["state"]
       next if values["map_name"] != map_name
       next if state == 'complete'
+      # puts 'values["complete_condition"]'
+      # puts values["complete_condition"].inspect
       if state == 'active' && values["complete_condition"] && values["complete_condition"].call(ships, buildings, player)
         updated_quest_keys[quest_key] = 'complete'
         values["state"] = 'complete'
@@ -248,7 +251,7 @@ module QuestInterface
         # In this special case, run init functions, as if the map were just loaded
         if values["init_ships"] && values["init_ships"].any?
           values["init_ships"].each do |ship|
-            ships << ship
+            ships[ship.id] = ship
           end
         end
           # Load in buildings

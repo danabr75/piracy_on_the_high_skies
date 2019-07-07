@@ -59,7 +59,7 @@ class BackgroundFixedObject < GeneralObject
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, options = {}
     @time_alive += 1
     # Might not be necessary for buildings....
-    convert_map_pixel_location_to_screen(player)
+    convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y)
     # no need to update tile or pixel location
     # super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     return options[:persist_even_if_not_alive] ? true : is_alive

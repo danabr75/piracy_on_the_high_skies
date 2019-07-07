@@ -188,10 +188,12 @@ class Building < BackgroundFixedObject
     # Draw nothing here
   end
 
-  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y
     if @interactible
       @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
-      distance = Gosu.distance(player.x, player.y, @x, @y)
+      # puts "BUILDING UPDATE HERE: #{[player_map_pixel_x, player_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"
+      # distance = Gosu.distance(player_map_pixel_x, player_map_pixel_y, @current_map_tile_x, @current_map_tile_y)
+      distance = Gosu.distance(player_x, player_y, @x, @y)
       if @is_hovering
         if distance < @max_lootable_pixel_distance
           @is_close_enough_to_open = true

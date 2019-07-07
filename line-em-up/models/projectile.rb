@@ -374,7 +374,7 @@ class Projectile < ScreenMapFixedObject
         # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
         puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
         break if @health == 0
-        group.each do |object|
+        group.each do |object_id, object|
           Thread.exit if @health == 0 && is_thread
           break if @health == 0
           next if object.nil?
@@ -382,9 +382,9 @@ class Projectile < ScreenMapFixedObject
           # puts "NEXT IF OBJCT ID == ID"
           # puts "#{object.id} - #{@id}"
           # puts 'enxting' if object.id == @id
-          next if object.id == @id
+          next if object_id == @id
           # Don't hit the ship that launched it
-          next if object.id == @owner.id
+          next if object_id == @owner.id
           # if object has an owner?
           next if object.owner && object.owner.id == @owner.id
           next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter

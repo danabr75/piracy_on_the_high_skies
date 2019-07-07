@@ -83,7 +83,10 @@ class GameWindow < Gosu::Window
 
   attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
 
-  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks, :add_projectiles, :remove_projectile_ids
+  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks
+  attr_accessor :add_projectiles, :remove_projectile_ids
+  attr_accessor :add_ships, :remove_ship_ids
+  attr_accessor :add_destructable_projectiles, :remove_destructable_projectiles_ids
 
   include GlobalVariables
 
@@ -143,6 +146,7 @@ class GameWindow < Gosu::Window
     # END TESTING
 
     @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
+    @collision_counter = 0
     @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
     # @projectile_update_manager    = AsyncProcessManager.new()
 
@@ -153,7 +157,7 @@ class GameWindow < Gosu::Window
 
     # end
 
-    @ship_update_manager = AsyncProcessManager.new(ShipUpdateThread, 8)
+    @ship_update_manager = AsyncProcessManager.new(ShipUpdateThread, 8, true)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -215,13 +219,23 @@ class GameWindow < Gosu::Window
     
     @buildings = Array.new
     @projectiles = {}
+
     @add_projectiles = []
     @remove_projectile_ids = []
-    # @enemy_projectiles = Array.new
-    @destructable_projectiles = Array.new
-    @pickups = Array.new
 
-    @ships      = Array.new
+    @add_destructable_projectiles = []
+    @remove_destructable_projectiles_ids = []
+    @destructable_projectiles = {}
+
+    # @enemy_projectiles = Array.new
+    # @pickups = Array.new
+
+    @add_ships = []
+    @ships = {}
+    @remove_ship_ids = []
+
+
+
     @shipwrecks = Array.new
     # @enemies_random_spawn_timer = 100
     # @enemies_random_spawn_timer = 5
@@ -273,7 +287,9 @@ class GameWindow < Gosu::Window
 
     values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
     @buildings = values[:buildings]
-    @ships = values[:ships]
+    values[:ships].each do |ship|
+      @ship[ship.id] = ship
+    end
     @pickups = values[:pickups]
 
     @messages = []
@@ -574,22 +590,34 @@ class GameWindow < Gosu::Window
       true
     end
 
-    # puts "INIT PROJ COUNT: #{@projectiles.count}"
-    # puts "TRYING TO DELTE: #{@remove_projectile_ids.count}"
     @remove_projectile_ids.reject! do |projectile_id|
-      # puts projectile_id
-      # puts "DELETING ID - #{@remove_projectile_ids.count} - #{@projectiles.has_key?(projectile_id)}"
       @projectiles.delete(projectile_id)
-      # puts "POST-DELETING ID - #{@remove_projectile_ids.count}"
       true
     end
-    # puts "POST PROJ INIT: #{@projectiles.count}"
-    # puts "DELETE_COUNT: #{@remove_projectile_ids.count}"
+
+    @add_ships.reject! do |ship|
+      @ships[ship.id] = ship
+      true
+    end
+
+    @remove_ship_ids.reject! do |ship_id|
+      @ships.delete(ship_id)
+      true
+    end
 
 
-    # if @player.time_alive % 500 == 0
-    #   @messages << MessageFlash.new("This is a test - #{@player.time_alive}")
-    # end    
+    @add_destructable_projectiles.reject! do |dp|
+      @destructable_projectiles[dp.id] = dp
+      true
+    end
+
+    @remove_destructable_projectiles_ids.reject! do |dp_id|
+      @destructable_projectiles.delete(dp_id)
+      true
+    end
+
+
+
 
     if @ship_loadout_menu.refresh_player_ship
       @player.refresh_ship
@@ -616,16 +644,23 @@ class GameWindow < Gosu::Window
 
     # puts "HERE UPDATE: [@game_pause, menus_active, @menu_open, @menu.active]"
     if !@game_pause && !menus_active && !@menu_open && !@menu.active
-      # @effects.reject! do |effect_group|
-      #   @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
-      #   !effect_group.is_active
-      # end
+      @effects.reject! do |effect_group|
+        @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
+        !effect_group.is_active
+      end
 
       # @graphical_effects.reject! do |effect|
       #   !effect.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # end
 
-      @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, [@player]])
+      if @collision_counter < 20
+        # puts "SKIPPING COLLISION MANAGER"
+        @collision_counter += 1
+      else
+        # puts "CALLING COLLISION MANAGER"
+        @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ])
+        @collision_counter = 0
+      end
       # @projectile_update_manager.update(self, self.mouse_x, self.mouse_y, @player)
 
       # require 'parallel'
@@ -636,7 +671,7 @@ class GameWindow < Gosu::Window
       @projectile_update_manager.update(self, @projectiles, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # @projectile_update_manager.update
 
-      @ship_update_manager.update(self, @ships, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships + [@player], @buildings)
+      @ship_update_manager.update(self, @ships, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings)
 
       #projectiles remove themselves
       # @projectiles.reject! do |projectile|
@@ -648,7 +683,7 @@ class GameWindow < Gosu::Window
 
     if !@block_all_controls
       # Moving up buildings, so clickable buildings can block the player from attacking.
-      # @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
+      @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y) }
       # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
@@ -860,6 +895,8 @@ class GameWindow < Gosu::Window
 
         @shipwrecks.reject! do |ship|
           result = ship.update(nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
+          # puts "SHIPWREK RESULT"
+          # puts result.inspect
           if result[:building]
             result[:building].set_window(self)
             @buildings << result[:building]
@@ -868,30 +905,30 @@ class GameWindow < Gosu::Window
         end
         # puts "SHIPS HERE: #{@ships.count}"
         # puts "SHIPS ids: #{@ships.collect{|s| s.id }}"
-        @ships.reject! do |ship|
-          # puts "CALLING SHIP UPDATE HERE: #{ship.id}"
-          # results = ship.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships + [@player], @buildings)
-          # puts "RESULTS HERE: #{results}" if results[:projectiles]
-          #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
+        # @ships.reject! do |ship|
+        #   # puts "CALLING SHIP UPDATE HERE: #{ship.id}"
+        #   # results = ship.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships + [@player], @buildings)
+        #   # puts "RESULTS HERE: #{results}" if results[:projectiles]
+        #   #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
 
-          # puts "@enemy_projectiles:"
-          # puts @enemy_projectiles
-          # results[:projectiles].each do |projectile|
-          #   @projectiles.push(projectile) if projectile
-          # end
-          # results[:destructable_projectiles].each do |projectile|
-          #   @destructable_projectiles.push(projectile) if projectile
-          # end
-          # results[:graphical_effects].each do |effect|
-          #   @graphical_effects.push(effect)
-          # end
-          # @shipwrecks << results[:shipwreck] if results[:shipwreck]
+        #   # puts "@enemy_projectiles:"
+        #   # puts @enemy_projectiles
+        #   # results[:projectiles].each do |projectile|
+        #   #   @projectiles.push(projectile) if projectile
+        #   # end
+        #   # results[:destructable_projectiles].each do |projectile|
+        #   #   @destructable_projectiles.push(projectile) if projectile
+        #   # end
+        #   # results[:graphical_effects].each do |effect|
+        #   #   @graphical_effects.push(effect)
+        #   # end
+        #   # @shipwrecks << results[:shipwreck] if results[:shipwreck]
 
-          # @enemy_projectiles = @enemy_projectiles + results[:projectiles]
-          # puts "SHIP ID HERE: #{ship.id} and is alive? : #{results[:is_alive]}"
-          # !results[:is_alive]
-          !ship.is_alive
-        end
+        #   # @enemy_projectiles = @enemy_projectiles + results[:projectiles]
+        #   # puts "SHIP ID HERE: #{ship.id} and is alive? : #{results[:is_alive]}"
+        #   # !results[:is_alive]
+        #   !ship.is_alive
+        # end
 
       end
     end # END if !@block_all_controls
@@ -921,19 +958,16 @@ class GameWindow < Gosu::Window
       @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     end
-    if @boss_killed
-      @font.draw("You won! Your score: #{@player.score}", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    end
+    # if @boss_killed
+    #   @font.draw("You won! Your score: #{@player.score}", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     # reactivate
-    @ships.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    # @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @ships.each { |key, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    # @enemy_projectiles.each { |projectile| projectile.draw() }
-    # @destructable_projectiles.each { |projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    # @stars.each { |star| star.draw }
-    # @pickups.each { |pickup| pickup.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    # @buildings.each { |building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @destructable_projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @buildings.each { |building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

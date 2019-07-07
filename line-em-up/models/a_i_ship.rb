@@ -305,17 +305,17 @@ class AIShip < ScreenMapFixedObject
     # @special_target_focus_type = options[:special_target_focus_type] if options[:special_target_focus_type]
     # @special_target_focus = nil
     if @special_target_focus.nil?
-      air_targets.each do |target|
+      air_targets.each do |target_id, target|
         # Don't fire at self. don't fire at allies. Figure out ally logic
-        next if target.id == self.id
+        next if target_id == self.id
         # Implement relationships.
         # next if target.allied
         # FOR TESTING, to keep them from murdering each other
         # next if target.id != player.id
         # next if target.id == player.id && !player.is_alive
 
-        if @special_target_focus_id && @special_target_focus_id == target.id
-          @special_target_focus = agro_target = target if @special_target_focus_id == target.id
+        if @special_target_focus_id && @special_target_focus_id == target_id
+          @special_target_focus = agro_target = target if @special_target_focus_id == target_id
           agro_target_distance = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @special_target_focus.current_map_pixel_x, @special_target_focus.current_map_pixel_y)
         end
         break if @special_target_focus
@@ -328,10 +328,10 @@ class AIShip < ScreenMapFixedObject
         distance_to_target = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, target.current_map_pixel_x, target.current_map_pixel_y)
         within_range = distance_to_target < @agro_map_pixel_distance
         if within_range
-          @argo_target_map[target.id] = AGRO_MAX
+          @argo_target_map[target_id] = AGRO_MAX
         end
-        if @argo_target_map[target.id] && @argo_target_map[target.id] > local_max_agro
-          local_max_agro = @argo_target_map[target.id] 
+        if @argo_target_map[target_id] && @argo_target_map[target_id] > local_max_agro
+          local_max_agro = @argo_target_map[target_id] 
           agro_target = target
           agro_target_distance = distance_to_target
         end

@@ -368,7 +368,7 @@ class ShipLoadoutSetting < Setting
 
       # hover_object = matrix_update
       if @object_inventory && @object_inventory.holding_type == :store
-        hover_object = @ship_inventory.update(mouse_x,   mouse_y, player)
+        hover_object = @ship_inventory.update(mouse_x,   mouse_y, player_map_pixel_x, player_map_pixel_y)
         hover_object = @object_inventory.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, @ship_inventory.credits) if !hover_object
       else
         hover_object = @ship_inventory.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)

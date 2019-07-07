@@ -240,11 +240,11 @@ class GeneralObject
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
-    if @last_updated_at < @time_alive
+    # if @last_updated_at < @time_alive
       @time_alive += 1
-      @last_updated_at = @time_alive
+      # @last_updated_at = @time_alive
       get_map_tile_location_from_map_pixel_location
-    end
+    # end
     # return is_on_screen?
     return is_alive
   end
