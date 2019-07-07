@@ -74,7 +74,7 @@ class Projectile < ScreenMapFixedObject
 
     @health = self.class::HEALTH
 
-    @test_hit_max_distance = false
+    # @test_hit_max_distance = false
 
     @refresh_angle_on_updates = options[:refresh_angle_on_updates] || false
 
@@ -125,6 +125,7 @@ class Projectile < ScreenMapFixedObject
     end
 
     @init_sound = self.class.get_init_sound
+    @init_sound_path = self.class.get_init_sound_path
     @play_init_sound = true
     # @i ||= 1
     # @i += 1
@@ -136,12 +137,20 @@ class Projectile < ScreenMapFixedObject
   def self.get_init_sound
     return nil
   end
+  def self.get_init_sound_path
+    nil
+  end
 
-  def update mouse_x, mouse_y, player
+  def update_with_args args
+    # mouse_x = args[0]
+    # mouse_y = args[1]
+    # player_map_pixel_x  = args[2]
+    # player_map_pixel_y  = args[3]
+    return update(args[0], args[1], args[2], args[3])
+  end
 
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     graphical_effects = []
-
-
     # puts "PROJ SPEED: #{@speed}"
     if @health > 0
       if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
@@ -173,24 +182,24 @@ class Projectile < ScreenMapFixedObject
         end
 
         # puts "SPEED HERE: #{@speed}"
-        factor_in_scale_speed = @speed * @average_scale
+        factor_in_scale_speed = @speed * @height_scale
 
         movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
       else
         @speed = self.class.get_max_speed if @speed.nil?
-        factor_in_scale_speed = @speed * @average_scale
+        factor_in_scale_speed = @speed * @height_scale
         movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
       end
 
       @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
-      is_alive = super(mouse_x, mouse_y, player)
+      is_alive = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
       @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
       @play_init_sound = false
 
       if @max_distance && @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
         # puts "TEST ++ = FOUND MAX DISTANCE"
-        @test_hit_max_distance = true
+        # @test_hit_max_distance = true
         @health = 0
       end
 
@@ -207,6 +216,126 @@ class Projectile < ScreenMapFixedObject
 
     return {is_alive: @health > 0, graphical_effects: graphical_effects}
   end
+
+  def get_data 
+    return {
+      time_alive: @time_alive,
+      # last_updated_at: @last_updated_at,
+      refresh_angle_on_updates: @refresh_angle_on_updates,
+      end_image_angle: @end_image_angle,
+      custom_initial_delay: @custom_initial_delay,
+      speed: @speed,
+      average_scale: @average_scale,
+      height_scale:  @height_scale,
+      angle: @angle,
+      health: @health,
+      current_map_pixel_x: @current_map_pixel_x,
+      current_map_pixel_y: @current_map_pixel_y,
+      current_image_angle: @current_image_angle,
+      image_angle_incrementor: @image_angle_incrementor,
+      x: @x,
+      y: @y,
+      tile_pixel_width: @tile_pixel_width,
+      tile_pixel_height: @tile_pixel_height,
+      max_distance: @max_distance,
+      play_init_sound: @play_init_sound,
+      init_sound_path: @init_sound_path,
+      screen_pixel_width: @screen_pixel_width,
+      screen_pixel_height: @screen_pixel_height,
+      id: @id,
+      klass: self.class
+    }
+  end
+
+  def set_data data
+    @health              += data[:change_health]      if data.key?(:change_health)
+    @current_map_pixel_x += data[:change_map_pixel_x] if data.key?(:change_map_pixel_x)
+    @current_map_pixel_y += data[:change_map_pixel_y] if data.key?(:change_map_pixel_y)
+    @current_image_angle += data[:change_image_angle] if data.key?(:change_image_angle)
+    @speed               += data[:change_speed]       if data.key?(:change_speed)
+    @x                   += data[:change_x]           if data.key?(:change_x)
+    @y                   += data[:change_y]           if data.key?(:change_y)
+    @time_alive          =  data[:time_alive]         if data.key?(:time_alive)
+    @play_init_sound     =  data[:play_init_sound]    if data.key?(:play_init_sound)
+  end
+
+  # return {
+    # sounds: [], graphical_effects: [], is_alive: ...,
+    # change_health: -2,
+    # change_map_pixel_x: ..
+    # change_map_pixel_y: ..
+    # change_image_angle: ..
+    # change_speed: ..
+    # change_x: ..
+    # change_y: ..
+  # }
+  def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
+    results[:graphical_effects] ||= []
+    results[:sounds] ||= []
+    # puts "PROJ SPEED: #{data[:speed]}"
+    if data[:refresh_angle_on_updates] && data[:end_image_angle] && data[:time_alive] > 10
+      if data[:current_image_angle] != data[:end_image_angle]
+        data[:current_image_angle] = data[:current_image_angle] + data[:image_angle_incrementor]
+        # if it's negative
+        if data[:image_angle_incrementor] < 0
+          data[:current_image_angle] = data[:end_image_angle] if data[:current_image_angle] < data[:end_image_angle] 
+        # it's positive
+        elsif data[:image_angle_incrementor] > 0
+          data[:current_image_angle] = data[:end_image_angle] if data[:current_image_angle] > data[:end_image_angle] 
+        end
+      end
+    end
+
+    if get_initial_delay && (data[:time_alive] > (data[:custom_initial_delay] || get_initial_delay))
+      speed_factor = get_speed_increase_factor
+      if data[:speed] < get_max_speed
+        if speed_factor && speed_factor > 0.0
+          data[:speed] = data[:speed] + (data[:time_alive] * speed_factor)
+        end
+        speed_increment = get_speed_increase_increment
+        if speed_increment && speed_increment > 0.0
+          data[:speed] = data[:speed] + speed_increment
+        end
+
+        data[:speed] = get_max_speed if data[:speed] > get_max_speed
+      end
+
+      factor_in_scale_speed = data[:speed] * data[:height_scale]
+      results[:change_map_pixel_x], results[:change_map_pixel_y] = async_movement(data[:current_map_pixel_x], data[:current_map_pixel_y], factor_in_scale_speed, data[:angle], data[:height_scale]) if factor_in_scale_speed != 0
+    else
+      data[:speed] = get_max_speed if data[:speed].nil?
+      factor_in_scale_speed = data[:speed] * data[:height_scale]
+      results[:change_map_pixel_x], results[:change_map_pixel_y] = async_movement(data[:current_map_pixel_x], data[:current_map_pixel_y], factor_in_scale_speed, data[:angle], data[:height_scale]) if factor_in_scale_speed != 0
+    end
+
+    results[:health_change] = 0 - data[:health] if MAX_TIME_ALIVE && data[:time_alive] >= MAX_TIME_ALIVE
+
+    if data[:max_distance] && data[:max_distance] < Gosu.distance(data[:current_map_pixel_x], data[:current_map_pixel_y], data[:start_current_map_pixel_x], data[:start_current_map_pixel_y])
+      results[:health_change] = 0 - data[:health]
+    end
+
+    results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
+
+    if data[:play_init_sound] && data[:init_sound_path] && async_is_on_screen?(data[:x], data[:y], data[:screen_pixel_width], data[:screen_pixel_height])
+      results[:sounds] << data[:init_sound_path]
+      results[:play_init_sound] = false
+    end
+
+
+    if !async_is_alive(data[:health], results[:change_health])
+      if POST_DESTRUCTION_EFFECTS
+        get_post_destruction_effects.each do |effect|
+          results[:graphical_effects] << effect
+        end
+      end
+    end
+
+    return results
+  end
+
+
+
+
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # limiting angle extreme by 2
@@ -298,6 +427,7 @@ class Projectile < ScreenMapFixedObject
             # 105.36458333333334 : 37.395833333333336 + 67.96875
 
             hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
+            puts "HIT THIS OBJECT: #{object.id} - #{object.class}" if hit_object
           end
           if hit_object && self.class.get_aoe <= 0
             result = trigger_object_collision(object) 
@@ -320,6 +450,7 @@ class Projectile < ScreenMapFixedObject
 
     # Drop projectile explosions
     if hit_object
+      puts "HIT OBJECT"
       # puts "#{self.class.name} HIT OBJECT"
       if self.respond_to?(:drops)
         self.drops.each do |drop|
@@ -345,7 +476,7 @@ class Projectile < ScreenMapFixedObject
 
   def trigger_aoe_object_collision object
     value = {drops: []}
-    if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @average_scale
+    if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @height_scale
       if object.respond_to?(:health) && object.respond_to?(:take_damage)
         object.take_damage(self.class.get_damage * @damage_increase)
       end

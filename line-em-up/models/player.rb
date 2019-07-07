@@ -544,8 +544,8 @@ class Player < ScreenFixedObject
   end
 
 
-  def update mouse_x, mouse_y, player, cursor_map_pixel_x, cursor_map_pixel_y
-    @ship.update(mouse_x, mouse_y, player, cursor_map_pixel_x, cursor_map_pixel_y)
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y
+    @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y)
     if !@controls_enabled
       @ship.brake
     end
@@ -571,7 +571,7 @@ class Player < ScreenFixedObject
     end
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
-    # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+    # @main_weapon.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y) if @main_weapon
 
     @cooldown_wait -= 1              if @cooldown_wait > 0
     @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
@@ -605,7 +605,7 @@ class Player < ScreenFixedObject
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER UPDATE: #{@x} - #{@y}"
-    super(mouse_x, mouse_y, player)
+    super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     return true
   end
 

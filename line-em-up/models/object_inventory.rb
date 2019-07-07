@@ -163,7 +163,7 @@ class ObjectInventory
     return button_clicked_exists
   end
 
-  def update mouse_x, mouse_y, player, other_inventory_credit_limit = nil
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, other_inventory_credit_limit = nil
     # puts "SHIP INVENTORY HAS CORSURE OBJECT" if @window.cursor_object
     hover_object = nil
     @mouse_x, @mouse_y = [mouse_x, mouse_y]

@@ -56,12 +56,12 @@ class BackgroundFixedObject < GeneralObject
     # @y_offset_base = relative_object_offset_y || 0
   end
 
-  def update mouse_x, mouse_y, player, options = {}
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, options = {}
     @time_alive += 1
     # Might not be necessary for buildings....
     convert_map_pixel_location_to_screen(player)
     # no need to update tile or pixel location
-    # super(mouse_x, mouse_y, player)
+    # super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     return options[:persist_even_if_not_alive] ? true : is_alive
   end
 end

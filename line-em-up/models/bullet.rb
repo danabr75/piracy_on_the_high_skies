@@ -36,6 +36,10 @@ class Bullet < Projectile
     Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
   end
 
+  def self.get_init_sound_path
+    "#{SOUND_DIRECTORY}/bullet.ogg"
+  end
+
   def drops
     [
       # Add back in once SE has been updated to display on map, not on screen.
@@ -44,11 +48,10 @@ class Bullet < Projectile
   end
 
   
-  def update mouse_x, mouse_y, player
-    # puts "MISSILE: #{@health}"
-    return super(mouse_x, mouse_y, player)
-  end
-
+  # def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+  #   # puts "MISSILE: #{@health}"
+  #   return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+  # end
 
 
 end

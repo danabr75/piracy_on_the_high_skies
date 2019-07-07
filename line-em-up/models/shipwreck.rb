@@ -30,8 +30,8 @@ class Shipwreck < ScreenMapFixedObject
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
   end
 
-  def update mouse_x, mouse_y, player
-    super(mouse_x, mouse_y, player)
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+    super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     building = nil
     @ship.x = @x
     @ship.y = @y

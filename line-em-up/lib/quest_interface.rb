@@ -15,12 +15,12 @@ module QuestInterface
             "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
-            # "AIShip.new(nil, nil, 130, 110, {id: 'starting_level_quest_ship_9', special_target_focus_id: 'player'})",
-            # "AIShip.new(nil, nil, 100, 100, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
-            # "AIShip.new(nil, nil, 30, 100, {id: 'starting_level_quest_ship_3', special_target_focus_id: 'player'})",
-            # "AIShip.new(nil, nil, 0, 0, {id: 'starting_level_quest_ship_4', special_target_focus_id: 'player'})",
-            # "AIShip.new(nil, nil, 250, 0, {id: 'starting_level_quest_ship_5', special_target_focus_id: 'player'})",
-            # "AIShip.new(nil, nil, 0, 250, {id: 'starting_level_quest_ship_6', special_target_focus_id: 'player'})"
+            "AIShip.new(nil, nil, 130, 110, {id: 'starting_level_quest_ship_9', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 125, 125, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 30, 100, {id: 'starting_level_quest_ship_3', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 0, 0, {id: 'starting_level_quest_ship_4', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 250, 0, {id: 'starting_level_quest_ship_5', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 0, 250, {id: 'starting_level_quest_ship_6', special_target_focus_id: 'player'})"
           ],
         "init_buildings_string" => [],
         "init_effects" =>   [

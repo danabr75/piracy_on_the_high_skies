@@ -91,7 +91,7 @@ class GrapplingHook < Projectile
   end
 
   
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     @player_reference = player
     returning_to_object = @hp_reference || @owner
     distance = Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
@@ -136,7 +136,7 @@ class GrapplingHook < Projectile
     if @attached_target 
       keep_alive_if_attached = true
     else
-      keep_alive_if_attached = super(mouse_x, mouse_y, player)
+      keep_alive_if_attached = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     end
 
     # Chain breaking point
@@ -159,7 +159,7 @@ class GrapplingHook < Projectile
       # puts "@hp_reference.item.cooldown_wait: #{@hp_reference.item.cooldown_wait}"
     end
 
-    # return !@dissengage && super(mouse_x, mouse_y, player)
+    # return !@dissengage && super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     if !@attached_target 
       @health = 0 if self.class::GRAPPLE_MAX_TIME_ALIVE && @time_alive >= self.class::GRAPPLE_MAX_TIME_ALIVE
     end

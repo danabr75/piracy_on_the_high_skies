@@ -115,6 +115,7 @@ class GeneralObject
     end
 
     @time_alive = 0
+    @last_updated_at = @time_alive
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     if @image
       @image_width  = @image.width  * (@width_scale || @scale)# / self.class::IMAGE_SCALER
@@ -222,6 +223,10 @@ class GeneralObject
     @health > 0
   end
 
+  def async_is_alive health, health_change
+    (!health_change.nil? && health_change != 0) ? (health + health_change > 0) : (health > 0)
+  end
+
   def take_damage damage
     @health -= damage
   end
@@ -232,13 +237,34 @@ class GeneralObject
   end
 
 
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
-    @time_alive += 1
-    get_map_tile_location_from_map_pixel_location
+    if @last_updated_at < @time_alive
+      @time_alive += 1
+      @last_updated_at = @time_alive
+      get_map_tile_location_from_map_pixel_location
+    end
     # return is_on_screen?
     return is_alive
+  end
+
+  def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
+    # Inherit, add logic, then call this to calculate whether it's still visible.
+    # @time_alive ||= 0 # Temp solution
+    # if @last_updated_at < @time_alive
+    results[:time_alive]      = data[:time_alive] + 1
+    # results[:last_updated_at] = data[:time_alive]
+    change_map_pixel_x, change_map_pixel_y = async_get_map_tile_location_from_map_pixel_location(
+      data[:current_map_pixel_x], data[:current_map_pixel_y], data[:tile_pixel_width], data[:tile_pixel_height]
+    )
+    results[:change_map_pixel_x] = change_map_pixel_x
+    results[:change_map_pixel_y] = change_map_pixel_y
+    # results[:is_alive] = results.key?(:change_health) ? (data[:health] + results[:change_health] > 0) : (data[:health] > 0)
+    results[:is_alive] = async_is_alive(data[:health], results[:change_health])
+    # end
+    # return is_on_screen?
+    return results
   end
 
   def self.get_max_speed
@@ -250,6 +276,13 @@ class GeneralObject
     x_buffer = (@screen_pixel_width * 1.2 - @screen_pixel_width)
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
     @y > -y_buffer && @y < @screen_pixel_height + y_buffer && @x > -x_buffer && @x < @screen_pixel_width + x_buffer
+  end
+
+  def self.async_is_on_screen? x, y, screen_pixel_width, screen_pixel_height
+    y_buffer = (screen_pixel_height * 1.2 - screen_pixel_height)
+    x_buffer = (screen_pixel_width * 1.2 - screen_pixel_width)
+    # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
+    y > -y_buffer && y < screen_pixel_height + y_buffer && x > -x_buffer && x < screen_pixel_width + x_buffer
   end
 
 
@@ -601,46 +634,40 @@ class GeneralObject
   end
 
 
-  def self.movement current_map_pixel_x, current_map_pixel_y, speed, angle, width_scale, height_scale#, allow_over_edge_of_map = false
-    raise " NO SCALE PRESENT FOR MOVEMENT" if width_scale.nil?         || height_scale.nil?
+  def self.movement current_map_pixel_x, current_map_pixel_y, speed, angle, height_scale#, allow_over_edge_of_map = false
+    raise " NO SCALE PRESENT FOR MOVEMENT" if height_scale.nil?
     raise " NO LOCATION PRESENT"           if current_map_pixel_x.nil? || current_map_pixel_y.nil?
     raise " NO ANGLE PRESENT"              if angle.nil? 
     raise " NO SPEED PRESENT"              if speed.nil? 
-    map_edge = 50
 
     step = (Math::PI/180 * (angle + 90))# - 180
-    new_x = Math.cos(step) * (speed * width_scale ) + current_map_pixel_x
+    new_x = Math.cos(step) * (speed * height_scale) + current_map_pixel_x
     new_y = Math.sin(step) * (speed * height_scale) + current_map_pixel_y
 
     x_diff = current_map_pixel_x - new_x
     y_diff = current_map_pixel_y - new_y
 
-    # hit_map_boundary = false
-    # if !allow_over_edge_of_map
-    #   if (current_map_pixel_y - y_diff) > map_pixel_height
-    #     y_diff = y_diff - ((current_map_pixel_y + y_diff) - current_map_pixel_y)
-    #     hit_map_boundary = true
-    #   elsif current_map_pixel_y - y_diff < 0
-    #     y_diff = y_diff + (current_map_pixel_y + y_diff)
-    #     hit_map_boundary = true
-    #   end
-
-    #   if @current_map_pixel_x - x_diff > @map_pixel_width
-    #     # puts "HITTING WALL LIMIT: #{@location_x} - #{x_diff} > #{@map_pixel_width}"
-    #     x_diff = x_diff - ((@current_map_pixel_x + x_diff) - @current_map_pixel_x)
-    #     # @current_momentum = 0
-    #     hit_map_boundary = true
-    #   elsif @current_map_pixel_x - x_diff < 0
-    #     x_diff = x_diff + (@current_map_pixel_x + x_diff)
-    #     # @current_momentum = 0
-    #     hit_map_boundary = true
-    #   end
-    # end
     current_map_pixel_y += y_diff
     current_map_pixel_x += x_diff
 
-    # return [x_diff, y_diff, hit_map_boundary]
     return [current_map_pixel_x, current_map_pixel_y]
+  end
+
+
+  def self.async_movement current_map_pixel_x, current_map_pixel_y, speed, angle, height_scale#, allow_over_edge_of_map = false
+    raise " NO SCALE PRESENT FOR MOVEMENT" if height_scale.nil?
+    raise " NO LOCATION PRESENT"           if current_map_pixel_x.nil? || current_map_pixel_y.nil?
+    raise " NO ANGLE PRESENT"              if angle.nil? 
+    raise " NO SPEED PRESENT"              if speed.nil? 
+
+    step = (Math::PI/180 * (angle + 90))# - 180
+    new_x = Math.cos(step) * (speed * height_scale) + current_map_pixel_x
+    new_y = Math.sin(step) * (speed * height_scale) + current_map_pixel_y
+
+    x_diff = current_map_pixel_x - new_x
+    y_diff = current_map_pixel_y - new_y
+
+    return [x_diff, y_diff]
   end
 
 
@@ -750,6 +777,18 @@ class GeneralObject
     @current_map_tile_y = (@current_map_pixel_y / (@tile_pixel_height)).to_i if @current_map_pixel_y && @tile_pixel_height
   end
 
+  def self.async_get_map_tile_location_from_map_pixel_location current_map_pixel_x, current_map_pixel_y, tile_pixel_width, tile_pixel_height
+    # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
+    # If statement is due to the fact that some objects are created without these variables being initted.
+    # Indexed at 0. on a 250 x 250 tile map, values are 0..249
+    # It is possible to exceed the mapped areas, like projectiles flying off the edge of the map.
+    new_x = (current_map_pixel_x / (tile_pixel_width)).to_i  if current_map_pixel_x && tile_pixel_width
+    new_y = (current_map_pixel_y / (tile_pixel_height)).to_i if current_map_pixel_y && tile_pixel_height
+    change_map_pixel_x = current_map_tile_x - new_x
+    change_map_pixel_y = current_map_tile_y - new_y
+    return [change_map_pixel_x, change_map_pixel_y]
+  end
+
   def get_tile_pixel_remainder
     # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
     # If statement is due to the fact that some objects are created without these variables being initted.
@@ -775,25 +814,27 @@ class GeneralObject
     # GOT PIXEL: [14006.25, 14456.25]
   end
 
-  def self.convert_map_pixel_location_to_screen player, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
-    # puts "HERE: (#{player.current_map_pixel_x} - #{current_map_pixel_x}) + (#{screen_pixel_width} / 2)"
-    x = (player.current_map_pixel_x - current_map_pixel_x) + (screen_pixel_width / 2)
-    # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
+  # aliasing
+  def self.convert_map_pixel_location_to_screen player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
+    return async_convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height)
+  end
 
-    # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
-    # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
-    y = (current_map_pixel_y - player.current_map_pixel_y) + (screen_pixel_height / 2)
+
+  def self.async_convert_map_pixel_location_to_screen player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
+    x = (player_map_pixel_x - current_map_pixel_x) + (screen_pixel_width / 2)
+    y = (current_map_pixel_y - player_map_pixel_y) + (screen_pixel_height / 2)
+    # return {x: x, y: y}
     return [x, y]
   end
 
-  def convert_map_pixel_location_to_screen player
-    @x = (player.current_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
+  def convert_map_pixel_location_to_screen player_map_pixel_x, player_map_pixel_y
+    @x = (player_map_pixel_x - @current_map_pixel_x) + (@screen_pixel_width / 2)
     # puts "X #{@x} GENERATED FOR OBJECT ID: #{@id}"
     # puts "Current map_pixel_x: #{@current_map_pixel_x} = @X: #{@x}"
 
     # puts "@x = @current_map_pixel_x - player.current_map_pixel_x"
     # puts "#{@x} = #{@current_map_pixel_x} - #{player.current_map_pixel_x}"
-    @y = (@current_map_pixel_y - player.current_map_pixel_y) + (@screen_pixel_height / 2)
+    @y = (@current_map_pixel_y - player_map_pixel_y) + (@screen_pixel_height / 2)
     # puts "Y #{@y} GENERATED FOR OBJECT ID: #{@id}"
   end
 

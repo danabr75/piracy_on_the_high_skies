@@ -51,7 +51,7 @@ module Graphics
       @scale_init_boost = options[:scale_init_boost] || 0.0
     end
 
-    def update mouse_x, mouse_y, player
+    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
       @time_alive += 1.0 * @decay_rate
 
 

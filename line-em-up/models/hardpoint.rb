@@ -349,9 +349,9 @@ class Hardpoint < GeneralObject
   end
 
 
-  def update mouse_x, mouse_y, player, ship_angle, attackable_location_x = nil, attackable_location_y = nil
-    validate_not_nil([mouse_x, mouse_y, player, ship_angle], self.class.name, __callee__)
-    @drawable_items_near_self.reject! { |di| !di.update(mouse_x, mouse_y, player) }
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, ship_angle, attackable_location_x = nil, attackable_location_y = nil
+    validate_not_nil([mouse_x, mouse_y, ship_angle], self.class.name, __callee__)
+    @drawable_items_near_self.reject! { |di| !di.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y) }
     # puts "IS PLAYER HERE? #{[@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y]}"
     update_current_map_pixel_coords(@owner.angle, @owner.current_map_pixel_x, @owner.current_map_pixel_y)
     # Center should stay the same
@@ -371,7 +371,7 @@ class Hardpoint < GeneralObject
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     # @time_alive += 1 if self.is_alive
     # puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
-    if false && @slot_type == :engine && @item && @owner.current_momentum > 10 && player.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
+    if false && @slot_type == :engine && @item && @owner.current_momentum > 10 && @owner.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
       @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
       # puts "ADDING TO @drawable_items_near_self EHERE!!!"

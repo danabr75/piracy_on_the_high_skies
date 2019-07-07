@@ -81,7 +81,7 @@ module Graphics
       @time_alive = 0.0
     end
 
-    def update mouse_x, mouse_y, player
+    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
       # puts "PARTICLE UPDATES RIGHT HERE"
       @time_alive += 1.0 * @decay_rate
 
@@ -89,7 +89,7 @@ module Graphics
       @points.each do |p|
         # puts "MOVING ANGLE HERE: #{p[3]}"
         if p[2] > 0.0
-          map_pixel_x, map_pixel_y = GeneralObject.movement(p[0], p[1], p[2], p[3], @height_scale, @height_scale)
+          map_pixel_x, map_pixel_y = GeneralObject.movement(p[0], p[1], p[2], p[3], @height_scale)
           p[0] = map_pixel_x
           p[1] = map_pixel_y
           # p[2] = p[2] #- (0.5 * @average_scale)
@@ -97,7 +97,7 @@ module Graphics
         # puts "GIVING IT: player + #{[map_pixel_x, map_pixel_y, @screen_pixel_width, @screen_pixel_height]}"
         # puts "TEST: #{player.current_map_pixel_x} - #{player.current_map_pixel_y}"
         # puts player.class
-        x, y = GeneralObject.convert_map_pixel_location_to_screen(player, p[0], p[1], @screen_pixel_width, @screen_pixel_height)
+        x, y = GeneralObject.convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y, p[0], p[1], @screen_pixel_width, @screen_pixel_height)
 
         p[4] = x
         p[5] = y

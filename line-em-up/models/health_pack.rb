@@ -19,7 +19,7 @@ class HealthPack < Pickup
     # super
   end
 
-  # def update mouse_x, mouse_y, player
+  # def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
   #   # get_map_pixel_location_from_map_tile_location
   #   return super(mouse_x, mouse_y, player, {persist_even_if_not_alive: true})
   # end

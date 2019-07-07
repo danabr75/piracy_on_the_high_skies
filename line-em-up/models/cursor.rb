@@ -114,12 +114,12 @@ class Cursor < GeneralObject
     return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
-  def update mouse_x, mouse_y, player, viewable_pixel_offset_x, viewable_pixel_offset_y
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, viewable_pixel_offset_x, viewable_pixel_offset_y
     @x = mouse_x
     @y = mouse_y
 
-    @current_map_pixel_x = player.current_map_pixel_x + (mouse_x * -1) +  (@screen_pixel_width  / 2) + viewable_pixel_offset_x
-    @current_map_pixel_y = player.current_map_pixel_y + (mouse_y     ) -  (@screen_pixel_height / 2) + viewable_pixel_offset_y
+    @current_map_pixel_x = player_map_pixel_x + (mouse_x * -1) +  (@screen_pixel_width  / 2) + viewable_pixel_offset_x
+    @current_map_pixel_y = player_map_pixel_y + (mouse_y     ) -  (@screen_pixel_height / 2) + viewable_pixel_offset_y
     # puts "CURSOR X: #{@x}"
     # puts "CURSOR Y: #{@y}"
     new_pos_x, new_pos_y, increment_x, increment_y = convert_x_and_y_to_opengl_coords

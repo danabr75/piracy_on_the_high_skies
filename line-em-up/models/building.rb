@@ -188,7 +188,7 @@ class Building < BackgroundFixedObject
     # Draw nothing here
   end
 
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     if @interactible
       @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
       distance = Gosu.distance(player.x, player.y, @x, @y)
@@ -215,7 +215,7 @@ class Building < BackgroundFixedObject
       get_map_pixel_location_from_map_tile_location
       # end
     end
-    return super(mouse_x, mouse_y, player)
+    return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
   end
 
   # maybe use this in the future...

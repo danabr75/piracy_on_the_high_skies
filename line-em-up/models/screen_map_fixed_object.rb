@@ -68,12 +68,36 @@ class ScreenMapFixedObject < GeneralObject
     # run_pixel_to_tile_validations
   end
 
-  def update mouse_x, mouse_y, player
-    convert_map_pixel_location_to_screen(player)
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+    convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y)
     # Is on map and is alive, essentially
     # puts "SMFO - UPDATE: #{is_on_map?} - #{is_alive} - #{@health}"
-    return(is_on_map? && super(mouse_x, mouse_y, player))
+    return(is_on_map? && super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y))
   end
+
+  def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
+    x, y = async_convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y)
+
+    results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
+    results[:change_x] = data[:x] - x
+    results[:change_y] = data[:y] - y
+
+    return results
+  end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 end

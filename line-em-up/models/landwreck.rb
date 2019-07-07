@@ -97,9 +97,9 @@ class Landwreck < Building
   end
 
   # Need to calculate distance to player, only allow click when close, and maybe not use a left-click button to activate?  
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     @interactible = false if @drops.count == 0 && @credits == 0
-    return super(mouse_x, mouse_y, player)
+    return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
   end
   #   @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) if @drops.any?
   #   distance = Gosu.distance(player.x, player.y, @x, @y)
@@ -112,7 +112,7 @@ class Landwreck < Building
   #   else
   #     @is_close_enough_to_open = false
   #   end
-  #   return super(mouse_x, mouse_y, player)
+  #   return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
   # end
 
   def draw viewable_pixel_offset_x,  viewable_pixel_offset_y

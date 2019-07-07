@@ -52,9 +52,9 @@ class Missile < Projectile
   end
 
   
-  def update mouse_x, mouse_y, player
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     # puts "MISSILE: #{@health}"
-    return super(mouse_x, mouse_y, player)
+    return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
   end
 
 

@@ -574,8 +574,8 @@ class PilotableShip < GeneralObject
     glEnd
   end
   
-  def update mouse_x, mouse_y, player, target_map_pixel_x, target_map_pixel_y
-    validate_not_nil([mouse_x, mouse_y, player], self.class.name, __callee__)
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, target_map_pixel_x, target_map_pixel_y
+    validate_not_nil([mouse_x, mouse_y], self.class.name, __callee__)
 
     # hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) 
 
@@ -612,11 +612,11 @@ class PilotableShip < GeneralObject
     # puts "ENDED: #{@current_steam_capacity}"
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
-    # @main_weapon.update(mouse_x, mouse_y, player) if @main_weapon
+    # @main_weapon.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y) if @main_weapon
     if !@hide_hardpoints
       @hardpoints.each do |hardpoint|
         # puts "UPDATING HARDPOINT HERE: #{self}"
-        hardpoint.update(mouse_x, mouse_y, player, @angle, target_map_pixel_x, target_map_pixel_y)
+        hardpoint.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, @angle, target_map_pixel_x, target_map_pixel_y)
       end
     end
 

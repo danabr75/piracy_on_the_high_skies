@@ -88,6 +88,19 @@ class GameWindow < Gosu::Window
   include GlobalVariables
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
+
+
+    # Thread.new do
+    #   # results = Parallel.map((0..20), in_processes: 7, progress: "Proj Update: ", isolation: false) { |item| rand(255) }
+    #   # results = Parallel.map((0..20), in_processes: 2, isolation: false) { |item| rand(255) }
+    #   results = Parallel.map((0..20000), in_processes: 2) { |item| rand(255) }
+    #   # results = Parallel.map((0..20), in_threads: 4) { |item| rand(255) }
+    #   # Process.waitall
+    #   puts "TEST HERE!!!! RESULTS HERE: #{results.count}"
+    #   Thread.exit
+    # end
+
+
     @config_path = self.class::CONFIG_FILE
     @window = self
     @open_gl_executer = ExecuteOpenGl.new
@@ -129,9 +142,18 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncThreadManager.new(ProjectileCollisionThread, 200)
-    @projectile_update_manager    = AsyncThreadManager.new(ProjectileUpdateThread, 200)
-    @ship_update_manager          = AsyncThreadManager.new(ShipUpdateThread, 10)
+    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 4)
+    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 4)
+    # @projectile_update_manager    = AsyncProcessManager.new()
+
+    # r, w = IO.pipe
+    # @projectile_update_pipe_out, @projectile_update_pipe_in = IO.pipe
+    # @projectile_update_pid = fork do
+    #   AsyncProcessManager.new(@projectile_update_pipe_in, @projectile_update_pipe_out)
+
+    # end
+
+    # @ship_update_manager = AsyncThreadManager.new(ShipUpdateThread, 10)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -576,13 +598,13 @@ class GameWindow < Gosu::Window
 
     # Reset cursor object. # Need to move this inside of ship loadout... or can't, cause of scope?
     # @cursor_object = nil
-    # @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
+    # @cursor_object = @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
 
 
-    @pointer.update(self.mouse_x, self.mouse_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
+    @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
 
-    # @smoke.update(self.mouse_x, self.mouse_y, @player)
+    # @smoke.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
     if @start_fullscreen
       @start_fullscreen = false
@@ -590,7 +612,7 @@ class GameWindow < Gosu::Window
     end
     # reset_center_font_ui_y
     @menu.update
-    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player)
+    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
     # puts "HERE UPDATE: [@game_pause, menus_active, @menu_open, @menu.active]"
     if !@game_pause && !menus_active && !@menu_open && !@menu.active
@@ -600,13 +622,21 @@ class GameWindow < Gosu::Window
       # end
 
       # @graphical_effects.reject! do |effect|
-      #   !effect.update(self.mouse_x, self.mouse_y, @player)
+      #   !effect.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # end
 
-      @projectile_collision_manager.update(self, [@ships, @destructable_projectiles, [@player]])
-      @projectile_update_manager.update(self, self.mouse_x, self.mouse_y, @player)
+      @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, [@player]])
+      # @projectile_update_manager.update(self, self.mouse_x, self.mouse_y, @player)
 
-      @ship_update_manager.update(self, self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
+      # require 'parallel'
+      # results = Parallel.map((0..200), in_processes: 7, progress: "Main Update: ", isolation: false) { |item| rand(255) }
+      # puts "MAIN WINDOW: #{results.count}"
+
+      # @projectile_update_manager.update(@projectiles, ProjectileUpdateProcess, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      @projectile_update_manager.update(self, @projectiles, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      # @projectile_update_manager.update
+
+      # @ship_update_manager.update(self, self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
 
       #projectiles remove themselves
       # @projectiles.reject! do |projectile|
@@ -618,9 +648,9 @@ class GameWindow < Gosu::Window
 
     if !@block_all_controls
       # Moving up buildings, so clickable buildings can block the player from attacking.
-      # @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player) }
+      # @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
       # puts "WINDOW BLOCK CONTROLS HER"
-      @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player) }
+      @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
       if Gosu.button_down?(Gosu::KbEscape) && !menus_active
         @menu.enable
@@ -681,7 +711,7 @@ class GameWindow < Gosu::Window
           @player.rotate_clockwise
         end
 
-        @player.update(self.mouse_x, self.mouse_y, @player, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
+        @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
         @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         @player.move_right if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
@@ -768,10 +798,10 @@ class GameWindow < Gosu::Window
 
       if !@game_pause && !menus_active && !@menu_open && !@menu.active
         # Can't iterate AND add to the projectiles.. so needs to stay synchronous
-        @projectiles.each do |key, projectile|
-          @projectile_collision_manager.add(projectile)
-          @projectile_update_manager.add(projectile)
-        end
+        # @projectiles.each do |key, projectile|
+        #   # @projectile_collision_manager.add(projectile)
+        #   @projectile_update_manager.add(projectile)
+        # end
         # Thread.new(@projectiles, @projectile_collision_manager, @projectile_update_manager) do |local_projectiles, manager1, manager2|
         #   local_projectiles.each do |key, projectile|
         #     manager1.add(projectile)
@@ -783,12 +813,12 @@ class GameWindow < Gosu::Window
         # @ships.each do |ship|
         #   @ship_update_manager.add(ship)
         # end
-        Thread.new(@ships, @ship_update_manager) do |local_ships, manager1|
-          local_ships.each do |ship|
-            manager1.add(ship)
-          end
-          Thread.exit
-        end
+        # Thread.new(@ships, @ship_update_manager) do |local_ships, manager1|
+        #   local_ships.each do |ship|
+        #     manager1.add(ship)
+        #   end
+        #   Thread.exit
+        # end
 
         # @destructable_projectiles.each do |projectile|
         #   result = projectile.hit_objects([@ships, @destructable_projectiles, [@player]])
@@ -804,21 +834,21 @@ class GameWindow < Gosu::Window
         #   @grappling_hook = nil if !grap_result
         # end
 
-        # @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player) }
+        # @pickups.reject! { |pickup| !pickup.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
 
 
         # The projectiles and enemy projectiles... only allows for two factions.. we need to support multiple...
         # attacks need to be able to handle.. lists of enemies and lists of allies maybe??
         # @projectiles.reject! do |projectile|
-        #   result = projectile.update(self.mouse_x, self.mouse_y, @player)
+        #   result = projectile.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
         #   result[:graphical_effects].each do |effect|
         #     @graphical_effects << effect if effect
         #   end
         #   !result[:is_alive]
         # end
         # @destructable_projectiles.reject! do |projectile|
-        #   result = projectile.update(self.mouse_x, self.mouse_y, @player)
+        #   result = projectile.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
         #   result[:graphical_effects].each do |effect|
         #     @graphical_effects << effect if effect
@@ -840,7 +870,7 @@ class GameWindow < Gosu::Window
         # puts "SHIPS ids: #{@ships.collect{|s| s.id }}"
         @ships.reject! do |ship|
           # puts "CALLING SHIP UPDATE HERE: #{ship.id}"
-          # results = ship.update(self.mouse_x, self.mouse_y, @player, @ships + [@player], @buildings)
+          # results = ship.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships + [@player], @buildings)
           # puts "RESULTS HERE: #{results}" if results[:projectiles]
           #RESULTS HERE: {:is_alive=>true, :projectiles=>[{:projectiles=>[#<Bullet:0x00007fa4bf72f180 @tile_pixel_width=112.5, @tile_pixel_height=112.5, @map_pixel_width=28125, @map_pixel_height=28125, @map_tile_width=250, @map_tile_height=250, @width_scale=1.875, @height_scale=1.875, @screen_pixel_width=900, @screen_pixel_height=900, @debug=true, @damage_increase=1, @average_scale=1.7578125, @id="e09ca7e3-563b-4c96-bd63-918c36065a54", @image=#######
 

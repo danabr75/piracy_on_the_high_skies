@@ -251,7 +251,7 @@ class AIShip < ScreenMapFixedObject
 
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
-  def update mouse_x, mouse_y, player, air_targets = [], ground_targets = [], options = {}
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets = [], ground_targets = [], options = {}
     validate_not_nil([mouse_x, mouse_y, player, air_targets, ground_targets], self.class.name, __callee__)
     # return {
     #   is_alive: true, projectiles: [], shipwreck: nil,
@@ -449,9 +449,9 @@ class AIShip < ScreenMapFixedObject
     target_map_x = agro_target ? agro_target.current_map_pixel_x : nil
     target_map_y = agro_target ? agro_target.current_map_pixel_y : nil
 
-    @ship.update(mouse_x, mouse_y, player, target_map_x, target_map_y)
+    @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, target_map_x, target_map_y)
     # puts "AI SHIP UPDATE: #{@id}"
-    result = super(mouse_x, mouse_y, player)
+    result = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
 
     @ship.x = @x
     @ship.y = @y

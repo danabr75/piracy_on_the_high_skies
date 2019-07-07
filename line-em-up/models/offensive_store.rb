@@ -69,7 +69,7 @@ class OffensiveStore < Building
     end
   end
 
-  # def update mouse_x, mouse_y, player
+  # def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
   #   @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
   #   distance = Gosu.distance(player.x, player.y, @x, @y)
   #   if @is_hovering
@@ -81,7 +81,7 @@ class OffensiveStore < Building
   #   else
   #     @is_close_enough_to_open = false
   #   end
-  #   return super(mouse_x, mouse_y, player)
+  #   return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
   # end
 
   def alt_draw x, y

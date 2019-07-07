@@ -8,6 +8,10 @@ source 'https://rubygems.org'
   # sudo apt install pulseaudio
 gem 'gosu'
 
+gem 'ruby-progressbar'
+
+gem 'benchmark-ips'
+
 # gosu >= 0.11.3.1, ~> 0.11
 # Had syntax error, using local version now
 # gem 'luit'
@@ -16,8 +20,9 @@ gem 'gosu'
 # gem 'danabr75-opengl'
 # gem 'opengl'
 gem 'opengl-bindings'
+gem 'parallel'
 # gem 'ashton', '0.1.6'
-# gem 'concurrent-ruby'
+gem 'concurrent-ruby'
 # gem 'opengl-bindings'
 # gem 'ashton'
 
