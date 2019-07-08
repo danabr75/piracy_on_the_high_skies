@@ -514,7 +514,7 @@ class PilotableShip < GeneralObject
     end
     # puts "SHIP DRAW: #{@width_scale} - #{@height_scale} - #{scale_offset}"
                                                                                                 # SHIP DRAW: 2.6666666666666665 - 1.5 - 1
-    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @height_scale * scale_offset, @height_scale * scale_offset)
+    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @height_scale_with_image_scaler * scale_offset, @height_scale_with_image_scaler * scale_offset)
     # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
   end
 

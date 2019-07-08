@@ -86,9 +86,13 @@ class GeneralObject
   def initialize(options = {})
     init_global_vars
 
-    @height_scale  = @height_scale  / self.class::IMAGE_SCALER
-    @width_scale   = @width_scale   / self.class::IMAGE_SCALER
-    @average_scale = @average_scale / self.class::IMAGE_SCALER
+    # @height_scale  = @height_scale
+    # @width_scale   = @width_scale
+    # @average_scale = @average_scale
+
+    @height_scale_with_image_scaler  = @height_scale  / self.class::IMAGE_SCALER
+    @width_scale_with_image_scaler   = @width_scale   / self.class::IMAGE_SCALER
+    @average_scale_with_image_scaler = @average_scale / self.class::IMAGE_SCALER
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -194,13 +198,13 @@ class GeneralObject
 
   def draw
     # Will generate error if class name is not listed on ZOrder
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @height_scale, @height_scale) if @image
+    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale, @height_scale) if @image
+    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
   end
 
   def get_height

@@ -76,9 +76,9 @@ module HardpointObjects
     #   @image.draw_rot(x, y, z, angle, 0.5, 0.5, @height_scale / self.class::IMAGE_SCALER, @height_scale / self.class::IMAGE_SCALER)
     # end
 
-    def self.name
-      "Missile Launcher"
-    end
+    # def self.name
+    #   "Missile Launcher"
+    # end
 
     def self.description
       "This is a standard missile launcher. Fires missiles."

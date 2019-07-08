@@ -341,7 +341,7 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
     @item.draw(new_angle, new_x, new_y, @z, @z_base) if @item
-    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale, @height_scale) if !@item
+    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item
   end
 
   def draw_gl
@@ -373,7 +373,7 @@ class Hardpoint < GeneralObject
     # puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
     if false && @slot_type == :engine && @item && @owner.current_momentum > 10 && @owner.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
-      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height)
+      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @screen_pixel_width, @screen_pixel_height)
       # puts "ADDING TO @drawable_items_near_self EHERE!!!"
     end
     # if @slot_type == :engine && @owner.current_momentum.nil?

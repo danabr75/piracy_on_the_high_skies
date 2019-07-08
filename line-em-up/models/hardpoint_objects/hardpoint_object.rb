@@ -49,6 +49,11 @@ module HardpointObjects
       @image = self.class.get_hardpoint_image
       super(options)
 
+      if self.class::SHOW_READY_PROJECTILE
+        @show_projectile_height_scale = @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER
+        @projectile_image = self.class::PROJECTILE_CLASS.get_image
+      end
+
       @active = false
       @within_angle = false
       @projectiles = []
@@ -406,13 +411,19 @@ module HardpointObjects
       # puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
         if @cooldown_wait <= 0.0
-          self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER, @height_scale / self.class::PROJECTILE_CLASS::IMAGE_SCALER)
+          # puts "SHOWING PROJECTILE HERE: #{self.class.name} - #{@height_scale}"
+          # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale)
+          # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, ZOrder::UI, angle - @firing_angle_offset, 0.5, 0.5, 1, 1)
+          # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, ZOrder::UI, angle - @firing_angle_offset, 0.5, 0.5, 1, 1)
+          @projectile_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale)
         end
+      # else
+        # puts "not showing proj - #{self.class.name}"
       end
-      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale, @height_scale)
+      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
 
       if self.class::SHOW_HARDPOINT_BASE
-        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale, @height_scale)
+        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
       end
 
     end

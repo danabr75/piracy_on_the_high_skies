@@ -17,7 +17,7 @@ module ShipUpdateThread
       window.add_projectiles << projectile if projectile
     end
     results[:destructable_projectiles].each do |projectile|
-      window.destructable_projectiles.push(projectile) if projectile
+      window.add_destructable_projectiles << projectile if projectile
     end
     results[:graphical_effects].each do |effect|
       window.graphical_effects.push(effect) if effect

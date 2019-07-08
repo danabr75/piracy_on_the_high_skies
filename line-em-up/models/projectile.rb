@@ -340,7 +340,7 @@ class Projectile < ScreenMapFixedObject
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, DRAW_ORDER, -@current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
+      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, DRAW_ORDER, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
     end
   end
 

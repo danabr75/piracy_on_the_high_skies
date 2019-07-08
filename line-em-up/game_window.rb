@@ -86,7 +86,7 @@ class GameWindow < Gosu::Window
   attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks
   attr_accessor :add_projectiles, :remove_projectile_ids
   attr_accessor :add_ships, :remove_ship_ids
-  attr_accessor :add_destructable_projectiles, :remove_destructable_projectiles_ids
+  attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
 
   include GlobalVariables
 
@@ -147,8 +147,11 @@ class GameWindow < Gosu::Window
 
     @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
     @collision_counter = 0
+    @destructable_collision_counter = 10
     @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
     # @projectile_update_manager    = AsyncProcessManager.new()
+    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
+    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
 
     # r, w = IO.pipe
     # @projectile_update_pipe_out, @projectile_update_pipe_in = IO.pipe
@@ -224,7 +227,7 @@ class GameWindow < Gosu::Window
     @remove_projectile_ids = []
 
     @add_destructable_projectiles = []
-    @remove_destructable_projectiles_ids = []
+    @remove_destructable_projectile_ids = []
     @destructable_projectiles = {}
 
     # @enemy_projectiles = Array.new
@@ -611,7 +614,7 @@ class GameWindow < Gosu::Window
       true
     end
 
-    @remove_destructable_projectiles_ids.reject! do |dp_id|
+    @remove_destructable_projectile_ids.reject! do |dp_id|
       @destructable_projectiles.delete(dp_id)
       true
     end
@@ -659,8 +662,22 @@ class GameWindow < Gosu::Window
       else
         # puts "CALLING COLLISION MANAGER"
         @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ])
+        # @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
+        # @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
         @collision_counter = 0
       end
+
+      if @destructable_collision_counter < 20
+        # puts "SKIPPING COLLISION MANAGER"
+        @destructable_collision_counter += 1
+      else
+        # puts "CALLING COLLISION MANAGER"
+        # @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ])
+        @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ])
+        # @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
+        @destructable_collision_counter = 0
+      end
+
       # @projectile_update_manager.update(self, self.mouse_x, self.mouse_y, @player)
 
       # require 'parallel'
@@ -668,6 +685,7 @@ class GameWindow < Gosu::Window
       # puts "MAIN WINDOW: #{results.count}"
 
       # @projectile_update_manager.update(@projectiles, ProjectileUpdateProcess, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      @destructable_projectile_update_manager.update(self, @destructable_projectiles, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       @projectile_update_manager.update(self, @projectiles, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # @projectile_update_manager.update
 
@@ -691,12 +709,12 @@ class GameWindow < Gosu::Window
         @menu.enable
       end
 
-      if Gosu.button_down?(Gosu::KB_LEFT_SHIFT) && !menus_active
-        @player.enable_boost
-        # if @player.use_steam(0.5)
-        #   @player.movement(@average_scale / 2, @player.angle)
-        # end
-      end
+      # if Gosu.button_down?(Gosu::KB_LEFT_SHIFT) && !menus_active
+      #   @player.enable_boost
+      #   # if @player.use_steam(0.5)
+      #   #   @player.movement(@average_scale / 2, @player.angle)
+      #   # end
+      # end
 
       if Gosu.button_down?(Gosu::KB_M)
         GameWindow.reset(self, {debug: @debug})
@@ -767,7 +785,8 @@ class GameWindow < Gosu::Window
                 @projectiles[projectile.id] = projectile if projectile
               end
               results[:destructable_projectiles].each do |projectile|
-                @destructable_projectiles.push(projectile) if projectile
+                # @destructable_projectiles.push(projectile) if projectile
+                @destructable_projectiles[projectile.id] = projectile if projectile
               end
               results[:graphical_effects].each do |effect|
                 @graphical_effects.push(effect) if effect
@@ -782,7 +801,8 @@ class GameWindow < Gosu::Window
                 @projectiles[projectile.id] = projectile if projectile
               end
               results[:destructable_projectiles].each do |projectile|
-                @destructable_projectiles.push(projectile) if projectile
+                # @destructable_projectiles.push(projectile) if projectile
+                @destructable_projectiles[projectile.id] = projectile if projectile
               end
               results[:graphical_effects].each do |effect|
                 @graphical_effects.push(effect) if effect
@@ -802,7 +822,8 @@ class GameWindow < Gosu::Window
                 @projectiles[projectile.id] = projectile if projectile
               end
               results[:destructable_projectiles].each do |projectile|
-                @destructable_projectiles.push(projectile) if projectile
+                # @destructable_projectiles.push(projectile) if projectile
+                @destructable_projectiles[projectile.id] = projectile if projectile
               end
               results[:graphical_effects].each do |effect|
                 @graphical_effects.push(effect) if projectile
