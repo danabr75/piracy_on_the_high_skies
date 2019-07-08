@@ -147,7 +147,7 @@ class GameWindow < Gosu::Window
 
     @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
     @collision_counter = 0
-    @destructable_collision_counter = 10
+    @destructable_collision_counter = 2
     @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
     # @projectile_update_manager    = AsyncProcessManager.new()
     @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
@@ -656,7 +656,7 @@ class GameWindow < Gosu::Window
       #   !effect.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # end
 
-      if @collision_counter < 20
+      if @collision_counter < 4
         # puts "SKIPPING COLLISION MANAGER"
         @collision_counter += 1
       else
@@ -667,7 +667,7 @@ class GameWindow < Gosu::Window
         @collision_counter = 0
       end
 
-      if @destructable_collision_counter < 20
+      if @destructable_collision_counter < 4
         # puts "SKIPPING COLLISION MANAGER"
         @destructable_collision_counter += 1
       else

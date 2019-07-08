@@ -13,6 +13,9 @@ module QuestInterface
       "starting_level_quest" => {
         "init_ships_string" => [
             "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 124, 120, {id: 'starting_level_quest_ship_10', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 124, 116, {id: 'starting_level_quest_ship_11', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 124, 114, {id: 'starting_level_quest_ship_12', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
             "AIShip.new(nil, nil, 130, 110, {id: 'starting_level_quest_ship_9', special_target_focus_id: 'player'})",

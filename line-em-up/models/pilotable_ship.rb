@@ -135,7 +135,11 @@ class PilotableShip < GeneralObject
     @engine_hardpoints     = []
     @steam_core_hardpoints = []
     @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
+    # puts "self.class::HARDPOINT_LOCATIONS"
+    # puts self.class::HARDPOINT_LOCATIONS.inspect
     self.class::HARDPOINT_LOCATIONS.each_with_index do |location, index|
+      # puts "LOCATION DATA: #{location.inspect}"
+      location_dup = location.dup
       item_klass_string = options[:hardpoint_data] ? options[:hardpoint_data][index.to_s] : nil
 
       found_errors = false
@@ -150,26 +154,32 @@ class PilotableShip < GeneralObject
       end
       raise "Finishing w/ errors" if found_errors
 
-      raise "bad slot type" if location[:slot_type].nil?
-      raise "bad anlge"     if location[:angle_offset].nil?
-      if [:engine, :generic].include?(location[:slot_type]) && !item_klass.nil? && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
+      raise "bad slot type" if location_dup[:slot_type].nil?
+      raise "bad anlge"     if location_dup[:angle_offset].nil?
+
+
+      # puts "INITING HARDPOINT CLASS: #{item_klass}"
+      # puts "ANGLE OFFSET HERE: #{location_dup[:angle_offset]}"
+
+      if [:engine, :generic].include?(location_dup[:slot_type]) && !item_klass.nil? && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
         @engine_hardpoints << item_klass
       end
       # ADD BACK IN
       # HardpointObjects::SteamCoreHardpoint
-      if [:steam_core].include?(location[:slot_type]) && !item_klass.nil? && HardpointObjects::SteamCoreHardpoint.descendants.include?(item_klass)
+      if [:steam_core].include?(location_dup[:slot_type]) && !item_klass.nil? && HardpointObjects::SteamCoreHardpoint.descendants.include?(item_klass)
         @steam_core_hardpoints << item_klass
       end
       # Always point engines toward the rear
-      if (location[:slot_type] == :engine || location[:slot_type] == :generic) && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
-        location[:angle_offset] = 180
+      if (location_dup[:slot_type] == :engine || location_dup[:slot_type] == :generic) && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
+        # puts "SETTING ENGINE TYPE ANGLE OFFSET"
+        location_dup[:angle_offset] = 180
       end
       # puts "ITEM CLASS " if owner.class == Player
      # puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
       hp = Hardpoint.new(
-        x, y, hardpoint_z, hardpoint_z_base, location[:x_offset].call(get_image, @height_scale),
-        location[:y_offset].call(get_image, @height_scale), item_klass, location[:slot_type], @angle, location[:angle_offset], owner, options
+        x, y, hardpoint_z, hardpoint_z_base, location_dup[:x_offset].call(get_image, @height_scale),
+        location_dup[:y_offset].call(get_image, @height_scale), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, options
       )
       @hardpoints[index] = hp
     end
