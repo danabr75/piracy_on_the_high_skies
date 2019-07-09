@@ -138,7 +138,11 @@ class ObjectInventory
         if klass_name
           klass = eval(klass_name)
           image = klass.get_hardpoint_image
-          item = {key: key, klass: klass, image: image, value: klass.value, from_store: true, buy_rate: @buy_rate, sell_rate: @sell_rate}
+          item = {
+            key: key, klass: klass, image: image, value: klass.value, from_store: true, buy_rate: @buy_rate, sell_rate: @sell_rate,
+            # hardpoint_slot_type: hp.slot_type,
+            hardpoint_item_slot_type: klass::SLOT_TYPE
+          }
         end
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}

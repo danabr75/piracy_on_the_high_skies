@@ -15,6 +15,8 @@ module HardpointObjects
     SHOW_READY_PROJECTILE = true
 
     IS_DESTRUCTABLE_PROJECTILE = true
+    
+    SLOT_TYPE = :offensive
 
     def initialize(options = {})
       @hp_reference = options[:hp_reference]

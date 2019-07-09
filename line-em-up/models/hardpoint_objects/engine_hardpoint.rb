@@ -16,6 +16,7 @@ module HardpointObjects
     BOOST_SPEED_MODIFIER  = nil
     BOOST_STEAM_USAGE     = nil
 
+    SLOT_TYPE = :engine
 
     def self.get_hardpoint_image
       raise "OVERRIDE ME"

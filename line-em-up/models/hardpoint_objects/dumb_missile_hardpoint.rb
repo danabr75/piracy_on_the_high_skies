@@ -21,6 +21,8 @@ module HardpointObjects
 
 
     IS_DESTRUCTABLE_PROJECTILE = true
+    
+    SLOT_TYPE = :offensive
 
     # POST_DESTRUCTION_EFFECTS = true
 

@@ -16,6 +16,7 @@ module HardpointObjects
     BOOST_STEAM_USAGE     = 0.4
     BOOST_MASS_MODIFIER   = 1.1
 
+    SLOT_TYPE = :engine
 
     def self.get_hardpoint_image
       # raise "OVERRIDE ME"

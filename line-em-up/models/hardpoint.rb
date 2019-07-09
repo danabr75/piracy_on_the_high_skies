@@ -153,6 +153,25 @@ class Hardpoint < GeneralObject
     return [color, hover_color]
   end
 
+  def is_valid_slot_type item_slot_type
+    is_acceptable = false
+
+    case @slot_type
+    when :generic
+      is_acceptable = true if [:offensive, :engine].include?(item_slot_type)
+    when :offensive
+      is_acceptable = true if item_slot_type == @slot_type
+    when :engine
+      is_acceptable = true if item_slot_type == @slot_type
+    when :steam_core
+      is_acceptable = true if item_slot_type == @slot_type
+    else
+      raise "invalid slot type"
+    end
+
+    return is_acceptable
+  end
+
   # def increment_angle angle_increment
   #   # puts "HUH?  #{angle_increment}"
   #   if @angle_from_center + angle_increment >= 360.0

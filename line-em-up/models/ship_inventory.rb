@@ -80,7 +80,10 @@ class ShipInventory
         if klass_name
           klass = eval(klass_name)
           image = klass.get_hardpoint_image
-          item = {key: key, klass: klass, image: image, value: klass.value, buy_rate: @buy_rate_from_store, sell_rate: @sell_rate_from_store}
+          item = {
+            key: key, klass: klass, image: image, value: klass.value, buy_rate: @buy_rate_from_store, sell_rate: @sell_rate_from_store,
+            hardpoint_item_slot_type: klass::SLOT_TYPE
+          }
         end
         # @filler_items << {follow_cursor: false, klass: klass, image: image}
         @inventory_matrix[x][y] = {x: current_x, y: current_y, click_area: click_area, key: key, item: item}

@@ -7,6 +7,7 @@ require 'glut'
 module HardpointObjects
   class HardpointObject < GeneralObject
     attr_accessor :x, :y, :active, :projectiles, :image_path, :test, :inited, :cooldown_wait, :cooldown_penalty
+    attr_reader :slot_type
     # DAMAGE = 0.001
     COOLDOWN_DELAY = 45
     ACTIVE_DELAY = nil
@@ -47,6 +48,7 @@ module HardpointObjects
 
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
+      @slot_type = self.class::SLOT_TYPE
       super(options)
 
       if self.class::SHOW_READY_PROJECTILE

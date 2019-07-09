@@ -19,7 +19,7 @@ class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
-  IMAGE_SCALER = 16.0
+  IMAGE_SCALER = 12.0
 
   # def self.get_weapon_options
   #   ::Launcher.descendants
@@ -30,6 +30,9 @@ class ShipLoadoutSetting < Setting
   attr_accessor :mouse_x, :mouse_y
   attr_reader :active
   attr_accessor :refresh_player_ship
+
+  HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints"
+  INVALID_HARDPOINT_IMAGE = HARDPOINT_DIR + "/invalid_hardpoint.png"
 
   # attr_accessor :cursor_object
 
@@ -122,6 +125,8 @@ class ShipLoadoutSetting < Setting
     @sell_rate_from_store = 1.0
     @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     @active = false
+
+    @invalid_hardpoint_image = Gosu::Image.new(INVALID_HARDPOINT_IMAGE)
   end
 
   def add_to_ship_inventory_credits new_credits
@@ -196,6 +201,12 @@ class ShipLoadoutSetting < Setting
 
   def hardpoint_draw
     @ship_hardpoints.each do |value|
+      # puts "SHIP HARDPOINT"
+      # puts value.class
+      # puts value.inspect
+      # puts "123"
+      # puts value
+      # raise 'stop'
       click_area = value[:click_area]
       if click_area
         click_area.draw(0, 0)
@@ -204,16 +215,26 @@ class ShipLoadoutSetting < Setting
       end
       item = value[:item]
       if item
+        # puts "HARDPOINT ITENM"
+        # puts item
         image = item[:image]
         if image
           # puts "TEST: #{[@hardpoint_image_z, @height_scale, @height_scale]}"
           image.draw(
             value[:x] - (image.width  / 2.0) / IMAGE_SCALER,
             value[:y] - (image.height / 2.0) / IMAGE_SCALER,
-            # value[:x] - (image.width  / 2)  + @cell_width  / 2,
-            # value[:y] - (image.height / 2)  + @cell_height / 2,
             @hardpoint_image_z,
-            @width_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
+            @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
+          )
+        end
+        # puts "COMparing; #{value[:hp].slot_type}  -   #{item[:hardpoint_item_slot_type]}"
+        # if value[:hp].slot_type != item[:hardpoint_item_slot_type]
+        if !value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type])
+          @invalid_hardpoint_image.draw(
+            value[:x] - (image.width  / 2.0) / IMAGE_SCALER,
+            value[:y] - (image.height / 2.0) / IMAGE_SCALER,
+            @hardpoint_image_z,
+            @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
           )
         end
       end
@@ -239,7 +260,9 @@ class ShipLoadoutSetting < Setting
         item = {
           image: image, key: button_key, klass: hp.assigned_weapon_class, value: hp.assigned_weapon_class.value,
           sell_rate: @sell_rate_from_store,
-          buy_rate:  @buy_rate_from_store
+          buy_rate:  @buy_rate_from_store,
+          # hardpoint_slot_type: hp.slot_type,
+          hardpoint_item_slot_type: hp.assigned_weapon_class::SLOT_TYPE
         }
 
       else

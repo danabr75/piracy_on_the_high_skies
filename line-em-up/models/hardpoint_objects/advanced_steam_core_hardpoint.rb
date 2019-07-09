@@ -11,6 +11,8 @@ module HardpointObjects
     # STEAM_MAX_CAPACITY  = 1000000.0
     STEAM_RATE_INCREASE = 0.3
 
+    SLOT_TYPE = :steam_core
+
     def self.get_hardpoint_image
       # raise "OVERRIDE ME"
       Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
