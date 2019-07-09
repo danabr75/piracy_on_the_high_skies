@@ -15,7 +15,7 @@ class AIShip < ScreenMapFixedObject
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
   attr_accessor :special_target_focus
-  attr_reader :current_momentum
+  attr_reader :current_momentum, :ship
   # attr_accessor :drops
   MAX_HEALTH = 200
   AGRO_TILE_DISTANCE = 3
@@ -132,6 +132,10 @@ class AIShip < ScreenMapFixedObject
     # stop
   end
 
+  def hit_objects(object_groups, options)
+    return @ship.hit_objects(self, object_groups, options)
+  end
+
   def get_speed
     return @ship.speed
   end
@@ -224,8 +228,8 @@ class AIShip < ScreenMapFixedObject
    # puts "AI ACCELLERATE: #{@ship.current_momentum} - current_steam: #{@ship.current_steam_capacity}"
     @ship.accelerate
   end
-  def brake
-    @ship.brake
+  def brake rate = 1
+    @ship.brake(rate)
   end
   def reverse
     @ship.reverse

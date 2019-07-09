@@ -211,7 +211,7 @@ class Projectile < ScreenMapFixedObject
         end
       end
     end
-    puts "PROJK UPDATE IS ALIVE: #{@health > 0} - #{@health}" if self.class.name == 'GrapplingHook'
+    # puts "PROJK UPDATE IS ALIVE: #{@health > 0} - #{@health}" if self.class.name == 'GrapplingHook'
     return {is_alive: is_alive, graphical_effects: graphical_effects}
   end
 
@@ -369,6 +369,7 @@ class Projectile < ScreenMapFixedObject
         # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
         puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
         break if @health == 0
+        break if hit_object
         group.each do |object_id, object|
           # Thread.exit if @health == 0 && is_thread
           break if @health == 0

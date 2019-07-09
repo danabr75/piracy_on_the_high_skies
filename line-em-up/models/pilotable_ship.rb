@@ -50,6 +50,8 @@ class PilotableShip < GeneralObject
     # puts "SHIP OWNER HERE"
     # puts owner.inspect
     # puts owner.class
+    # puts "NEW OWNER CLASS: #{owner.class.name}"
+    # @owner = owner
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
@@ -290,6 +292,64 @@ class PilotableShip < GeneralObject
     @block_momentum_decrease = false
   end
 
+
+  def hit_objects(owner, object_groups, options)
+    # puts "OWHNER: #{@owner.class}"
+    # return if @owner.nil?
+    hit_object = false
+    # graphical_effects = []
+    is_thread = options[:is_thread] || false
+    collided_object = nil
+    if @health > 0
+      object_groups.each do |group|
+        break if hit_object
+        group.each do |object_id, object|
+          break if hit_object
+          next if owner.id == object.id
+          # puts "OBJECTCLASS: #{object.class.name} against #{owner.class.name}"
+          # puts "OBJECT.CLASS: #{object.class.name} - #{object.current_map_pixel_x} - #{object.current_map_pixel_y}"
+          # puts "#{self.class.name} - #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+          hit_object = Gosu.distance(owner.current_map_pixel_x, owner.current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < (self.get_radius + object.get_radius) / 2.0
+          collided_object = object if hit_object
+          # puts "collided_object.class: #{collided_object.class}" if hit_object
+          # puts "#{owner.id} HIT #{object.id}" if hit_object
+          # puts "#{owner.id.class} HIT #{object.id.class}" if hit_object
+        end
+      end
+    end
+
+
+    if hit_object
+      # puts "HIT OBJECT FROM PILOTABLE SHIP"
+      end_point = OpenStruct.new(:x => owner.current_map_pixel_x,     :y => owner.current_map_pixel_y)
+      start_point   = OpenStruct.new(:x => collided_object.current_map_pixel_x, :y => collided_object.current_map_pixel_y)
+      destination_angle = GeneralObject.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+      # speed1 = @tiles_per_second * (@current_momentum / (@mass))
+      speed1 = @tiles_per_second * (@mass / 100.0)
+      # speed2 = collided_object.ship.tiles_per_second * (collided_object.ship.current_momentum / (collided_object.ship.mass))
+      speed2 = collided_object.ship.tiles_per_second * (collided_object.ship.mass / 100.0)
+      speed = (speed1 + speed2) / 2.0
+      ignore1, ignore2, halt = owner.movement(speed, destination_angle)
+      # @current_momentum = 0
+     
+      owner.brake(30)
+      ignore1, ignore2, halt = collided_object.movement(speed, destination_angle - 180)
+      collided_object.take_damage((@mass / 100) )
+      owner.take_damage((collided_object.ship.mass / 100) )
+      collided_object.brake(30)
+      # collided_object.ship.current_momentum = 0
+      # start_point = OpenStruct.new(:x => @attached_target.current_map_pixel_x,     :y => @attached_target.current_map_pixel_y)
+      # end_point   = OpenStruct.new(:x => returning_to_object.current_map_pixel_x, :y => returning_to_object.current_map_pixel_y)
+      # angle_to_origin = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+      # # Reversing direction
+      # # angle_to_origin = self.class.angle_1to360(angle_to_origin - 180)
+      # @attached_target.movement(@pull_strength, angle_to_origin)
+      # @owner.movement(@pull_strength, angle_to_origin + 180)
+
+    end
+
+  end
+
   def rotation_speed
     # puts "ROTATION SPEED:"
     # puts "#{@rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))} = #{@rotation_speed} * 1 - (#{@current_momentum} / 100.0) / 2"
@@ -298,28 +358,29 @@ class PilotableShip < GeneralObject
     @rotation_speed * (1 - ((@current_momentum / 100.0) / 2.0 ))
   end
 
-  def accelerate boost = false
+  def accelerate rate = 1
     if @current_momentum <= @mass && !@block_momentum_increase
-      @current_momentum += @momentum_rate
+      # puts "case 1 : #{@momentum_rate} - #{rate}"
+      @current_momentum += @momentum_rate * rate
       @current_momentum = @mass if @current_momentum > @mass
     end
   end
 
-  def reverse
+  def reverse rate = 1
     if @current_momentum >= -@half_mass && !@block_momentum_decrease
-      @current_momentum -= @momentum_rate
+      @current_momentum -= @momentum_rate * rate
       @current_momentum = -@half_mass if @current_momentum < -@half_mass
     end
   end
 
-  def brake
+  def brake rate = 1
     if @current_momentum > 0
-      reverse
+      reverse(rate)
       if @current_momentum < 0
         @current_momentum = 0
       end
     elsif @current_momentum < 0
-      accelerate
+      accelerate(rate)
       if @current_momentum > 0
         @current_momentum = 0
       end

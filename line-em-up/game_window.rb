@@ -160,7 +160,8 @@ class GameWindow < Gosu::Window
 
     # end
 
-    @ship_update_manager = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+    @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+    @ship_collision_manager = AsyncProcessManager.new(ShipCollisionThread, 8, true)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -615,7 +616,6 @@ class GameWindow < Gosu::Window
     end
 
     @remove_destructable_projectile_ids.reject! do |dp_id|
-      puts "DELETING DESTUCTABLE ID: #{dp_id}"
       @destructable_projectiles.delete(dp_id)
       true
     end
@@ -691,6 +691,7 @@ class GameWindow < Gosu::Window
       # @projectile_update_manager.update
 
       @ship_update_manager.update(self, @ships, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings)
+      @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
 
       #projectiles remove themselves
       # @projectiles.reject! do |projectile|

@@ -46,7 +46,7 @@ module HardpointObjects
       else
         # puts "ACTIVE: #{@active} and count #{@projectiles.count}"
         @projectiles.reject! do |hook|
-          puts "HP-HOOK.HEALTH: #{hook.health} - TARGET NIL?: #{hook.attached_target.nil?} - and diss: #{hook.dissengage}"
+          # puts "HP-HOOK.HEALTH: #{hook.health} - TARGET NIL?: #{hook.attached_target.nil?} - and diss: #{hook.dissengage}"
           hook.dissengage || (hook.health <= 0 && hook.attached_target.nil?)
         end
 
@@ -72,7 +72,7 @@ module HardpointObjects
       # @projectiles.last.time_alive check is to prevent accidental quick double-clicks
       # puts "GRAP ATTACK HERE: #{@active_for}"
 
-      puts "GRAPPLE ATTACH - has projectiles: #{@projectiles.count}"
+      # puts "GRAPPLE ATTACH - has projectiles: #{@projectiles.count}"
       if @projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT && !@active && @projectiles.last.time_alive > 15 && is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
         # puts "DETACHING HOOK"
         @cooldown_penalty = self.class::COOLDOWN_DELAY * 2
@@ -84,7 +84,7 @@ module HardpointObjects
       else
        # puts "GRAPPLE ACTIVE - going SUPER"
         test = super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
-        puts "GH ATTACKING: #{test}"
+        # puts "GH ATTACKING: #{test}"
         return test
       end
     end

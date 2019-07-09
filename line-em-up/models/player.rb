@@ -22,7 +22,6 @@ class Player < ScreenFixedObject
   # attr_reader :current_momentum
 
 
-  # ONLY USED FOR DEBUG!
   attr_reader :ship
 
   # MAX_HEALTH = 200
@@ -435,15 +434,15 @@ class Player < ScreenFixedObject
   # Figure out why these got switched later, accelerate and brake
   def accelerate
     if @controls_enabled 
-      @ship.accelerate(@boost_active)
+      @ship.accelerate#(@boost_active)
     end
     return true
   end
   
   # Bake should not be a reverse. Brake should bring us to 0. Reverse should take us backwards.
-  def brake
+  def brake rate = 1
     if @controls_enabled
-      @ship.brake
+      @ship.brake(rate)
     end
     return true
   end
@@ -543,6 +542,9 @@ class Player < ScreenFixedObject
     @ship.current_momentum
   end
 
+  def hit_objects(object_groups, options)
+    return @ship.hit_objects(self, object_groups, options)
+  end
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y
     @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y)
