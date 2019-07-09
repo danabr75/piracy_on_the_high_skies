@@ -38,12 +38,15 @@ module HardpointObjects
     def update mouse_x = nil, mouse_y = nil, object = nil, hardpoint_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
       @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
       if @projectiles.count == 0
+        # puts "GH CAN ATTACK HERE."
         # return false
-        return super(mouse_x, mouse_y, object, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y)
+        test = super(mouse_x, mouse_y, object, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y)
+        # puts "GH - ATTACK RESULT: #{test}"
+        return test
       else
         # puts "ACTIVE: #{@active} and count #{@projectiles.count}"
         @projectiles.reject! do |hook|
-          puts "HP-HOOK.HEALTH: #{hook.health} - TARGET NIL?: #{hook.attached_target.nil?}"
+          puts "HP-HOOK.HEALTH: #{hook.health} - TARGET NIL?: #{hook.attached_target.nil?} - and diss: #{hook.dissengage}"
           hook.dissengage || (hook.health <= 0 && hook.attached_target.nil?)
         end
 
@@ -69,7 +72,7 @@ module HardpointObjects
       # @projectiles.last.time_alive check is to prevent accidental quick double-clicks
       # puts "GRAP ATTACK HERE: #{@active_for}"
 
-
+      puts "GRAPPLE ATTACH - has projectiles: #{@projectiles.count}"
       if @projectiles.count >= self.class::ACTIVE_PROJECTILE_LIMIT && !@active && @projectiles.last.time_alive > 15 && is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
         # puts "DETACHING HOOK"
         @cooldown_penalty = self.class::COOLDOWN_DELAY * 2
@@ -80,7 +83,9 @@ module HardpointObjects
         return {projectile: nil, effects: [], destructable_projectile: nil, graphical_effects: []}
       else
        # puts "GRAPPLE ACTIVE - going SUPER"
-        return super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+        test = super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+        puts "GH ATTACKING: #{test}"
+        return test
       end
     end
 

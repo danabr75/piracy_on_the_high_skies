@@ -15,6 +15,7 @@ class AsyncProcessManager
   end
 
   def update window, items, *args
+    Thread.abort_on_exception = true
     Thread.new do
       if @list_is_hash
         Parallel.each(items, in_threads: @processor_count) do |key, item|

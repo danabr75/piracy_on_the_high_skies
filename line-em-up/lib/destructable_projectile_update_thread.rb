@@ -32,9 +32,8 @@ module DestructableProjectileUpdateThread
       puts "results: #{results}" if !results[:is_alive]
       puts "DElETING FROM THREAD1 #{projectile.id}" if !results[:is_alive]
       window.remove_destructable_projectile_ids.push(projectile.id) if !results[:is_alive]
-    end
-    if !projectile.is_alive
-      puts "DElETING FROM THREAD2 #{projectile.id}  - #{self.health}"
+    else
+      puts "DElETING FROM THREAD2 #{projectile.id}  - #{projectile.health}"
       window.remove_destructable_projectile_ids.push(projectile.id)
     end
     puts "DestructableProjectileUpdateThread - END HERE"
