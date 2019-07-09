@@ -129,12 +129,21 @@ class Hardpoint < GeneralObject
     # end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
-    @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self}) if @item_klass
+    @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self, is_invalid: !has_valid_slot_type? }) if @item_klass
+
     # puts "END HARDPOINT #{@id}"
     @owner = owner
     # puts "@ANGLE_FROM_CENTER: #{@angle_from_center}" if @item
     @current_map_pixel_x = nil
     @current_map_pixel_y = nil
+  end
+
+  def disable
+    @item.disable_by_parent if @item
+  end
+
+  def enable
+    @item.enable_by_parent  if @item
   end
 
 
@@ -153,23 +162,35 @@ class Hardpoint < GeneralObject
     return [color, hover_color]
   end
 
-  def is_valid_slot_type item_slot_type
+  def self.is_valid_slot_type hp_slot_type, item_slot_type
     is_acceptable = false
 
-    case @slot_type
+    case hp_slot_type
     when :generic
       is_acceptable = true if [:offensive, :engine].include?(item_slot_type)
     when :offensive
-      is_acceptable = true if item_slot_type == @slot_type
+      is_acceptable = true if item_slot_type == hp_slot_type
     when :engine
-      is_acceptable = true if item_slot_type == @slot_type
+      is_acceptable = true if item_slot_type == hp_slot_type
     when :steam_core
-      is_acceptable = true if item_slot_type == @slot_type
+      is_acceptable = true if item_slot_type == hp_slot_type
     else
       raise "invalid slot type"
     end
 
     return is_acceptable
+  end
+
+  def is_valid_slot_type item_slot_type
+    return self.class.is_valid_slot_type(@slot_type, item_slot_type)
+  end
+
+  def has_valid_slot_type?
+    if @item_klass
+      return self.class.is_valid_slot_type(@slot_type, @item_klass::SLOT_TYPE)
+    else
+      return true
+    end
   end
 
   # def increment_angle angle_increment

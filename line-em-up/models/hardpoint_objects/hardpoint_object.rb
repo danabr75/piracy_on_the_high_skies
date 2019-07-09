@@ -74,6 +74,19 @@ module HardpointObjects
 
       @firing_angle_offset = 0
       @destination_angle   = 0
+      # puts "HO IS VALID: #{options[:is_valid]}"
+      @disabled_by_parent = options[:is_invalid] || false
+      @colors = @disabled_by_parent ? Gosu::Color.argb(0xff_ff0000) : Gosu::Color.argb(0xff_ffffff)
+    end
+
+    def disable_by_parent
+      @disabled_by_parent = true
+      @colors = Gosu::Color.argb(0xff_ff0000)
+    end
+
+    def enable_by_parent
+      @disabled_by_parent = false
+      @colors = Gosu::Color.argb(0xff_ffffff)
     end
 
     def self.get_starting_sound
@@ -285,107 +298,110 @@ module HardpointObjects
       # end
       # puts "RIGHT HERE TEST"
       # puts [@current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y]
-      if attackable_location_x && attackable_location_y
-       # puts "FOUND ATTACKABKE LOCATION X AND Y"
-        if self.class::LAUNCHER_MIN_ANGLE && self.class::LAUNCHER_MAX_ANGLE
-          # puts "@firing_angle_offset: #{@firing_angle_offset}"
-          start_point = OpenStruct.new(:x => current_map_pixel_x,   :y => current_map_pixel_y)
-         # puts "START POINT: #{current_map_pixel_x} - #{current_map_pixel_y}"
-          end_point   = OpenStruct.new(:x => attackable_location_x, :y => attackable_location_y)
-         # puts "TARGET: #{attackable_location_x} - #{attackable_location_y}"
-          # Reorienting angle to make 0 north
-          @destination_angle = self.class.angle_1to360(-(self.class.calc_angle(start_point, end_point) - 90))
-         # puts "DESTINATIONANGLE: #{@destination_angle}"
-          # puts "self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)"
-          # puts "self.class.angle_1to360(#{self.class::LAUNCHER_MIN_ANGLE} + #{ship_angle})"
-          angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_angle)
-         # puts "MIN - #{self.class::LAUNCHER_MIN_ANGLE} - #{hardpoint_angle}"
-          angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_angle)
-         # puts "MAX - #{self.class::LAUNCHER_MAX_ANGLE} - #{hardpoint_angle}"
+      if !@disabled_by_parent
 
-          # puts "@firing_angle_offset: #{@firing_angle_offset}"
-          test = is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
-         # puts "WAS IT BBETWEEN ANGLES: #{test} - input was: #{@destination_angle} - #{angle_min} - #{angle_max}"
-            # DESTINATIONANGLE: 338.1777146603222
-            # MIN - -60 - 180.43599999999506
-            # MAX - 60 - 180.43599999999506
+        if attackable_location_x && attackable_location_y
+         # puts "FOUND ATTACKABKE LOCATION X AND Y"
+          if self.class::LAUNCHER_MIN_ANGLE && self.class::LAUNCHER_MAX_ANGLE
+            # puts "@firing_angle_offset: #{@firing_angle_offset}"
+            start_point = OpenStruct.new(:x => current_map_pixel_x,   :y => current_map_pixel_y)
+           # puts "START POINT: #{current_map_pixel_x} - #{current_map_pixel_y}"
+            end_point   = OpenStruct.new(:x => attackable_location_x, :y => attackable_location_y)
+           # puts "TARGET: #{attackable_location_x} - #{attackable_location_y}"
+            # Reorienting angle to make 0 north
+            @destination_angle = self.class.angle_1to360(-(self.class.calc_angle(start_point, end_point) - 90))
+           # puts "DESTINATIONANGLE: #{@destination_angle}"
+            # puts "self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)"
+            # puts "self.class.angle_1to360(#{self.class::LAUNCHER_MIN_ANGLE} + #{ship_angle})"
+            angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_angle)
+           # puts "MIN - #{self.class::LAUNCHER_MIN_ANGLE} - #{hardpoint_angle}"
+            angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_angle)
+           # puts "MAX - #{self.class::LAUNCHER_MAX_ANGLE} - #{hardpoint_angle}"
 
-            # WAS IT BBETWEEN ANGLES: false
-            # input was: 338.1777146603222 - 120.43599999999506 - 240.43599999999506
+            # puts "@firing_angle_offset: #{@firing_angle_offset}"
+            test = is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
+           # puts "WAS IT BBETWEEN ANGLES: #{test} - input was: #{@destination_angle} - #{angle_min} - #{angle_max}"
+              # DESTINATIONANGLE: 338.1777146603222
+              # MIN - -60 - 180.43599999999506
+              # MAX - 60 - 180.43599999999506
 
-          if test
-            # if self.class::LAUNCHER_ROTATE_SPEED
-            # @within_angle = true
-           # puts "IS WITHIN ANGLE"
-            current_angle = self.class.angle_1to360(hardpoint_angle + @firing_angle_offset)
-            # puts "DESTINATION AND CURRENT ANGLE: #{@destination_angle} - #{current_angle}"
-            if @destination_angle != current_angle
-              angle_diff  = GeneralObject.angle_diff(@destination_angle, current_angle)
-              # puts "ANGLED DIFF: #{angle_diff}"
+              # WAS IT BBETWEEN ANGLES: false
+              # input was: 338.1777146603222 - 120.43599999999506 - 240.43599999999506
 
-              # if angle_diff > 0.0 && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
-              if angle_diff > 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
-                # @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
-                @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
+            if test
+              # if self.class::LAUNCHER_ROTATE_SPEED
+              # @within_angle = true
+             # puts "IS WITHIN ANGLE"
+              current_angle = self.class.angle_1to360(hardpoint_angle + @firing_angle_offset)
+              # puts "DESTINATION AND CURRENT ANGLE: #{@destination_angle} - #{current_angle}"
+              if @destination_angle != current_angle
+                angle_diff  = GeneralObject.angle_diff(@destination_angle, current_angle)
+                # puts "ANGLED DIFF: #{angle_diff}"
 
-                # @firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset < @destination_angle - hardpoint_angle
+                # if angle_diff > 0.0 && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+                if angle_diff > 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+                  # @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
+                  @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
 
-                # puts "CASE 1"
-                # puts "1-@firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle"
-                # puts "2-#{@firing_angle_offset} = #{@destination_angle} - #{hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle} - #{hardpoint_angle}"
-                # puts "3-#{@firing_angle_offset} = #{@destination_angle - hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle - hardpoint_angle}"
-              elsif angle_diff < 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
-                @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
+                  # @firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset < @destination_angle - hardpoint_angle
 
-                # @firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle
+                  # puts "CASE 1"
+                  # puts "1-@firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle"
+                  # puts "2-#{@firing_angle_offset} = #{@destination_angle} - #{hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle} - #{hardpoint_angle}"
+                  # puts "3-#{@firing_angle_offset} = #{@destination_angle - hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle - hardpoint_angle}"
+                elsif angle_diff < 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+                  @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
 
-                # puts "CASE 2"
-                # puts "1-@firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle"
-                # puts "2-#{@firing_angle_offset} = #{@destination_angle} - #{hardpoint_angle} if #{@firing_angle_offset} < #{@destination_angle} - #{hardpoint_angle}"
-                # puts "3-#{@firing_angle_offset} = #{@destination_angle - hardpoint_angle} if #{@firing_angle_offset} < #{@destination_angle - hardpoint_angle}"
+                  # @firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle
+
+                  # puts "CASE 2"
+                  # puts "1-@firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle"
+                  # puts "2-#{@firing_angle_offset} = #{@destination_angle} - #{hardpoint_angle} if #{@firing_angle_offset} < #{@destination_angle} - #{hardpoint_angle}"
+                  # puts "3-#{@firing_angle_offset} = #{@destination_angle - hardpoint_angle} if #{@firing_angle_offset} < #{@destination_angle - hardpoint_angle}"
+                end
               end
-            end
-            # @destination_angle   = 0
-          elsif @firing_angle_offset != 0.0
-           # puts "NOT WITHIN ANGLE  self.class.name: #{self.class.name}"
-           # puts [@destination_angle, angle_min, angle_max]
-           # puts "ADJUSTING ANGLE OFFSET HERE: #{@firing_angle_offset}"
-            if @firing_angle_offset > 0.0
-              @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
-              @firing_angle_offset = 0.0 if @firing_angle_offset < 0.0
-            elsif @firing_angle_offset < 0.0
-              @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
-              @firing_angle_offset = 0.0 if @firing_angle_offset > 0.0
+              # @destination_angle   = 0
+            elsif @firing_angle_offset != 0.0
+             # puts "NOT WITHIN ANGLE  self.class.name: #{self.class.name}"
+             # puts [@destination_angle, angle_min, angle_max]
+             # puts "ADJUSTING ANGLE OFFSET HERE: #{@firing_angle_offset}"
+              if @firing_angle_offset > 0.0
+                @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
+                @firing_angle_offset = 0.0 if @firing_angle_offset < 0.0
+              elsif @firing_angle_offset < 0.0
+                @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
+                @firing_angle_offset = 0.0 if @firing_angle_offset > 0.0
+              end
             end
           end
         end
-      end
 
-     
-      if !self.class::ACTIVE_DELAY.nil? && (!@within_angle || !@active) && @active_for > 0
-        if !@active
-          @active_for -= 5   if @active_for != 0.0
-          @active_for  = 0   if @active_for <  0.0
+       
+        if !self.class::ACTIVE_DELAY.nil? && (!@within_angle || !@active) && @active_for > 0
+          if !@active
+            @active_for -= 5   if @active_for != 0.0
+            @active_for  = 0   if @active_for <  0.0
+          else
+            @active_for -= 0.3 if @active_for != 0.0
+            @active_for  = 0   if @active_for <  0.0
+          end
+        end
+
+        # @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up && @spinning_up_sound 
+        # if @inited && @active
+          # @x = object.x
+          # @y = object.y
+        # end
+        @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
+        if !@active && @projectiles.count == 0
+          return false
         else
-          @active_for -= 0.3 if @active_for != 0.0
-          @active_for  = 0   if @active_for <  0.0
-        end
-      end
+          @projectiles.reject! do |projectile|
+            !projectile.is_alive
+          end
 
-      # @spinning_up_sound.play(@effects_volume, 1, false) if @spinning_up && @spinning_up_sound 
-      # if @inited && @active
-        # @x = object.x
-        # @y = object.y
-      # end
-      @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
-      if !@active && @projectiles.count == 0
-        return false
-      else
-        @projectiles.reject! do |projectile|
-          !projectile.is_alive
+          return true
         end
-
-        return true
       end
     end
 
@@ -417,15 +433,15 @@ module HardpointObjects
           # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale)
           # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, ZOrder::UI, angle - @firing_angle_offset, 0.5, 0.5, 1, 1)
           # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, ZOrder::UI, angle - @firing_angle_offset, 0.5, 0.5, 1, 1)
-          @projectile_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale)
+          @projectile_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale, @colors)
         end
       # else
         # puts "not showing proj - #{self.class.name}"
       end
-      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @colors)
 
       if self.class::SHOW_HARDPOINT_BASE
-        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @colors)
       end
 
     end

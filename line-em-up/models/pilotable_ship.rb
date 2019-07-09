@@ -134,7 +134,7 @@ class PilotableShip < GeneralObject
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
     # Update hardpoints location
-    @engine_hardpoints     = []
+    @engine_hardpoints     = {}
     @steam_core_hardpoints = []
     @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
     # puts "self.class::HARDPOINT_LOCATIONS"
@@ -163,9 +163,13 @@ class PilotableShip < GeneralObject
       # puts "INITING HARDPOINT CLASS: #{item_klass}"
       # puts "ANGLE OFFSET HERE: #{location_dup[:angle_offset]}"
 
-      if [:engine, :generic].include?(location_dup[:slot_type]) && !item_klass.nil? && HardpointObjects::EngineHardpoint.descendants.include?(item_klass)
-        @engine_hardpoints << item_klass
+      if [:engine, :generic].include?(location_dup[:slot_type]) && !item_klass.nil? && item_klass::SLOT_TYPE == :engine
+        @engine_hardpoints[index] = item_klass
       end
+      # puts "@engine_hardpoints.count; #{@engine_hardpoints.count}"
+
+
+
       # ADD BACK IN
       # HardpointObjects::SteamCoreHardpoint
       if [:steam_core].include?(location_dup[:slot_type]) && !item_klass.nil? && HardpointObjects::SteamCoreHardpoint.descendants.include?(item_klass)
@@ -186,30 +190,37 @@ class PilotableShip < GeneralObject
       @hardpoints[index] = hp
     end
 
-    # acceleration_boost = 0.0
-    # rotation_boost     = 0.0
-    # mass_boost         = 0.0
+
+
+    steam_max_capacity = 0.0
+    steam_rate_increase = 0.0
+    @steam_core_hardpoints.each do |steam_core_klass|
+      steam_max_capacity    += steam_core_klass::STEAM_MAX_CAPACITY
+      steam_rate_increase   += steam_core_klass::STEAM_RATE_INCREASE
+    end
+    @steam_original_max_capacity = steam_max_capacity
+    @steam_max_capacity          = steam_max_capacity
+    @steam_rate_increase         = steam_rate_increase
+    @current_steam_capacity      = @steam_max_capacity
+
     engine_permanent_steam_usage     = 0.0
     engine_tiles_per_second_modifier = 1.0
     engine_rotation_modifier         = 1.0
-    # engine_steam_usage_increment = 0.0
-    # boost_speed_modifier         = 0.0
-    # boost_steam_usage            = 0.0
-    # boost_mass_modifier          = 1.0
-    @engine_hardpoints.each do |engine_klass|
-    #   # puts "ENGINEKLASS HERE: #{engine_klass}"
-    #   acceleration_boost += engine_klass::ACCELERATION
-    #   rotation_boost     += engine_klass::ROTATION_BOOST
-    #   mass_boost         += engine_klass::MASS_BOOST
 
-      engine_permanent_steam_usage += engine_klass::PERMANENT_STEAM_USE
-      engine_rotation_modifier     = engine_rotation_modifier * engine_klass::ROTATION_MODIFIER
-    #   engine_steam_usage_increment += engine_klass::STEAM_USAGE_INCREMENT
-    #   boost_speed_modifier         += engine_klass::BOOST_SPEED_MODIFIER
-    #   boost_steam_usage            += engine_klass::BOOST_STEAM_USAGE
-    #   boost_mass_modifier          = boost_mass_modifier * engine_klass::BOOST_MASS_MODIFIER
-      engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * engine_klass::TILES_PER_SECOND_MODIFIER
+    @engine_hardpoints.each do |index, engine_klass|
+      if (@current_steam_capacity - engine_klass::PERMANENT_STEAM_USE) >= 0
+        # puts "COUNTING UP"
+        engine_permanent_steam_usage += engine_klass::PERMANENT_STEAM_USE
+        engine_rotation_modifier     = engine_rotation_modifier * engine_klass::ROTATION_MODIFIER
+        engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * engine_klass::TILES_PER_SECOND_MODIFIER
+        @current_steam_capacity -= engine_klass::PERMANENT_STEAM_USE
+      else
+        # puts "NOT COUNTING ENGINE"
+        @hardpoints[index].disable
+      end
     end
+
+
     @engine_permanent_steam_usage     = engine_permanent_steam_usage
     @engine_tiles_per_second_modifier = engine_tiles_per_second_modifier
     @engine_rotation_modifier         = engine_rotation_modifier
@@ -218,19 +229,6 @@ class PilotableShip < GeneralObject
     # @boost_steam_usage            = boost_steam_usage
 
 
-    steam_max_capacity = 0.0
-    steam_rate_increase = 0.0
-    @steam_core_hardpoints.each do |steam_core_klass|
-      # puts "ENGINEKLASS HERE: #{engine_klass}"
-      steam_max_capacity    += steam_core_klass::STEAM_MAX_CAPACITY
-      steam_rate_increase   += steam_core_klass::STEAM_RATE_INCREASE
-    end
-
-    @steam_original_max_capacity = steam_max_capacity
-    @steam_max_capacity          = steam_max_capacity
-    @current_steam_capacity      = @steam_max_capacity
-    @steam_rate_increase         = steam_rate_increase
-
    # puts "@engine_hardpoints: #{@engine_hardpoints.count}"
 
     options.delete(:hardpoint_data)
@@ -238,7 +236,7 @@ class PilotableShip < GeneralObject
 
 
     @hardpoints.each_with_index do |hp, hp_index|
-      raise "HP WAS NIL HERE: #{hp_index} for group: #{group_index}" if hp.nil?
+      hp.disable if hp.item && !hp.has_valid_slot_type?
     end
 
     @theta = nil
