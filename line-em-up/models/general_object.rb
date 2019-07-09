@@ -154,6 +154,7 @@ class GeneralObject
     validate_image_parameters
 
     @owner = nil
+    @invulnerable = false
   end   
 
   
@@ -232,7 +233,10 @@ class GeneralObject
   end
 
   def take_damage damage
-    @health -= damage
+    if !@invulnerable
+      @health -= damage
+    end
+    return @health
   end
 
 

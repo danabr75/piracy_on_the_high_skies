@@ -36,6 +36,7 @@ class GrapplingHook < Projectile
   # MAX_CURSOR_FOLLOW = 4
   # ADVANCED_HIT_BOX_DETECTION = true
   attr_reader :dissengage
+  attr_reader :attached_target
 
   # Might not be necessary to override
   def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options = {})
@@ -90,8 +91,30 @@ class GrapplingHook < Projectile
     ]
   end
 
-  
+  def is_alive
+    @health > 0 || !@attached_target.nil?
+  end
+
+  def take_damage damage
+    if @attached_target.nil?
+      @health -= damage
+    end
+    if @health < 0
+      @dissengage = true
+    end
+    return @health
+  end
+
+
+  def update_with_args args
+    # return 
+    test = update(args[0], args[1], args[2], args[3])
+    puts "GRAPPLE HOOK UPdATE with args - #{test}"
+    return test
+  end
+
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+    puts "UPDATING GRAPPLING HOOK HERE: #{@attached_target.class} - #{@health}"
     @player_map_pixel_x = player_map_pixel_x
     @player_map_pixel_y = player_map_pixel_y
     returning_to_object = @hp_reference || @owner
@@ -137,7 +160,7 @@ class GrapplingHook < Projectile
     if @attached_target 
       keep_alive_if_attached = true
     else
-      keep_alive_if_attached = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+      keep_alive_if_attached = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)[:is_alive]
     end
 
     # Chain breaking point
@@ -162,9 +185,9 @@ class GrapplingHook < Projectile
 
     # return !@dissengage && super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     if !@attached_target 
-      @health = 0 if self.class::GRAPPLE_MAX_TIME_ALIVE && @time_alive >= self.class::GRAPPLE_MAX_TIME_ALIVE
+      @health = self.take_damage(@health) if self.class::GRAPPLE_MAX_TIME_ALIVE && @time_alive >= self.class::GRAPPLE_MAX_TIME_ALIVE
     end
-
+    puts "RETURNING GRAPPLE HOOK: isalive: #{!@dissengage && keep_alive_if_attached}   which is #{@dissengage} - #{keep_alive_if_attached}"
     return {is_alive: !@dissengage && keep_alive_if_attached, graphical_effects: []}
   end
 
@@ -222,21 +245,12 @@ class GrapplingHook < Projectile
 
 
   def trigger_object_collision(object)
+    puts "GRAPPLE HIT SOMETHING: #{object.class} - self.health: #{@health}"
     @attached_target = object
     @boarding_tile_distance = object.get_radius + @owner.get_radius
     # Sneaky way of skipping collision detection after hitting object
     @hit_objects_class_filter = []
-    value = {drops: []}
-    # if object.respond_to?(:health) && object.respond_to?(:take_damage)
-    #   object.take_damage(self.class.get_damage * @damage_increase)
-    # end
-
-    # if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
-    #   object.drops.each do |drop|
-    #     value[:drops] << drop
-    #   end
-    # end
-    return value
+    # @invulnerable = true
   end
 
 

@@ -6,6 +6,7 @@ module HardpointObjects
     LAUNCHER_ROTATE_SPEED = 3
     PROJECTILE_CLASS = GrapplingHook
     FIRING_GROUP_NUMBER = 3
+    # FIRING_GROUP_NUMBER = 2
     COOLDOWN_DELAY = 120
     ACTIVE_PROJECTILE_LIMIT = 1
     SHOW_HARDPOINT_BASE = true
@@ -42,8 +43,8 @@ module HardpointObjects
       else
         # puts "ACTIVE: #{@active} and count #{@projectiles.count}"
         @projectiles.reject! do |hook|
-          # puts "TEST ++ = REJECTING HOOKS HERE!!!!!"
-          hook.dissengage
+          puts "HP-HOOK.HEALTH: #{hook.health} - TARGET NIL?: #{hook.attached_target.nil?}"
+          hook.dissengage || (hook.health <= 0 && hook.attached_target.nil?)
         end
 
         return true

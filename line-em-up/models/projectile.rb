@@ -152,7 +152,7 @@ class Projectile < ScreenMapFixedObject
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     graphical_effects = []
     # puts "PROJ SPEED: #{@speed}"
-    if @health > 0
+    if self.is_alive
       if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
         if @current_image_angle != @end_image_angle
           @current_image_angle = @current_image_angle + @image_angle_incrementor
@@ -191,16 +191,14 @@ class Projectile < ScreenMapFixedObject
         movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
       end
 
-      @health = 0 if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
+      @health = self.take_damage(@health) if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
       is_alive = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
       @init_sound.play(@effects_volume, 1, false) if @play_init_sound && @init_sound && is_on_screen?
       @play_init_sound = false
 
       if @max_distance && @max_distance < Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, @start_current_map_pixel_x, @start_current_map_pixel_y)
-        # puts "TEST ++ = FOUND MAX DISTANCE"
-        # @test_hit_max_distance = true
-        @health = 0
+        @health = self.take_damage(@health)
       end
 
       if !is_alive
@@ -213,8 +211,8 @@ class Projectile < ScreenMapFixedObject
         end
       end
     end
-
-    return {is_alive: @health > 0, graphical_effects: graphical_effects}
+    puts "PROJK UPDATE IS ALIVE: #{@health > 0} - #{@health}" if self.class.name == 'GrapplingHook'
+    return {is_alive: is_alive, graphical_effects: graphical_effects}
   end
 
   def get_data 
@@ -363,10 +361,7 @@ class Projectile < ScreenMapFixedObject
 
   def hit_objects(object_groups, options)
     # puts "PROJ hit objects"
-    drops = []
-    points = 0
     hit_object = false
-    killed = 0
     graphical_effects = []
     is_thread = options[:is_thread] || false
     if @health > 0
@@ -375,7 +370,7 @@ class Projectile < ScreenMapFixedObject
         puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
         break if @health == 0
         group.each do |object_id, object|
-          Thread.exit if @health == 0 && is_thread
+          # Thread.exit if @health == 0 && is_thread
           break if @health == 0
           next if object.nil?
           # Don't hit yourself
@@ -430,8 +425,10 @@ class Projectile < ScreenMapFixedObject
             # puts "HIT THIS OBJECT: #{object.id} - #{object.class}" if hit_object
           end
           if hit_object && self.class.get_aoe <= 0
-            result = trigger_object_collision(object) 
-            drops = drops + result[:drops] if result[:drops].any?
+            puts "HIT GRAPPLEHOOK HERE" if object.class.name == "GrapplingHook"
+            trigger_object_collision(object) 
+            puts "GRAPPLE HEALTH WAS: #{object.health}" if object.class.name == "GrapplingHook"
+            # drops = drops + result[:drops] if result[:drops].any?
           end
         end
       end
@@ -442,8 +439,8 @@ class Projectile < ScreenMapFixedObject
       object_groups.each do |group|
         group.each do |object|
           next if object.nil?
-          result = trigger_aoe_object_collision(object)
-          drops = drops + result[:drops] if result[:drops].any?
+          trigger_aoe_object_collision(object)
+          # drops = drops + result[:drops] if result[:drops].any?
         end
       end
     end
@@ -452,11 +449,11 @@ class Projectile < ScreenMapFixedObject
     if hit_object
       # puts "HIT OBJECT"
       # puts "#{self.class.name} HIT OBJECT"
-      if self.respond_to?(:drops)
-        self.drops.each do |drop|
-          drops << drop
-        end
-      end
+      # if self.respond_to?(:drops)
+      #   self.drops.each do |drop|
+      #     drops << drop
+      #   end
+      # end
 
       if self.class::POST_DESTRUCTION_EFFECTS
         # puts "AADDING GRAPHICAL EEFFECTS"
@@ -467,42 +464,34 @@ class Projectile < ScreenMapFixedObject
       end
     end
 
-    @health = 0 if hit_object
+    # @health = 0 if hit_object
+    @health = self.take_damage(@health) if hit_object
     # puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
-    return {is_alive: @health > 0, drops: drops, point_value: points, killed: killed, graphical_effects: graphical_effects}
+    # return {is_alive: @health > 0, graphical_effects: graphical_effects}
+    return {graphical_effects: graphical_effects}
   end
 
   protected
 
   def trigger_aoe_object_collision object
-    value = {drops: []}
-    if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @height_scale
-      if object.respond_to?(:health) && object.respond_to?(:take_damage)
-        object.take_damage(self.class.get_damage * @damage_increase)
-      end
+    raise "CURRENTLY UNSUPPORTED"
+    # value = {drops: []}
+    # if Gosu.distance(@x, @y, object.x, object.y) < self.class.get_aoe * @height_scale
+    #   if object.respond_to?(:health) && object.respond_to?(:take_damage)
+    #     object.take_damage(self.class.get_damage * @damage_increase)
+    #   end
 
-      if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
-        object.drops.each do |drop|
-          value[:drops] << drop
-        end
-      end
-    end
+    #   # if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
+    #   #   object.drops.each do |drop|
+    #   #     value[:drops] << drop
+    #   #   end
+    #   # end
+    # end
     return value
   end
 
   def trigger_object_collision(object)
-    value = {drops: []}
-    if object.respond_to?(:health) && object.respond_to?(:take_damage)
-      object.take_damage(self.class.get_damage * @damage_increase)
-    end
-
-    if object.respond_to?(:is_alive) && !object.is_alive && object.respond_to?(:drops)
-      object.drops.each do |drop|
-        value[:drops] << drop
-      end
-    end
-    # puts "RETURNING VALUE: #{value}"
-    return value
+    object.take_damage(self.class.get_damage * @damage_increase)
   end
 
 
