@@ -74,6 +74,7 @@ class Landwreck < Building
 
   def set_drops drops
     @drops = drops
+    @interactible = true if @drops.any? || @credits > 0
   end
   def set_window window
     @window = window

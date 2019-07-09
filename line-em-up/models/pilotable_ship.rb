@@ -592,8 +592,11 @@ class PilotableShip < GeneralObject
 
     # puts "BEFORE MAX CAPACOTY: #{@steam_max_capacity}"
     capacity_diff = 0
-    if @current_momentum != 0 && @engine_permanent_steam_usage != 0
-      @steam_max_capacity = @steam_original_max_capacity - (@engine_permanent_steam_usage * (@current_momentum.abs / (@mass)))
+    # if @current_momentum != 0 && @engine_permanent_steam_usage != 0
+    if @engine_permanent_steam_usage != 0
+      # If we want steam usage to be based on speed
+      # @steam_max_capacity = @steam_original_max_capacity - (@engine_permanent_steam_usage * (@current_momentum.abs / (@mass)))
+      @steam_max_capacity = @steam_original_max_capacity - @engine_permanent_steam_usage
       if @steam_max_capacity < 0
         # capacity_diff = 0 - @steam_max_capacity
         @steam_max_capacity = 0
