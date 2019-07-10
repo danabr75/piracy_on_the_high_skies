@@ -15,6 +15,9 @@ class PilotableShip < GeneralObject
   SPEED = 1
   ROTATION_SPEED = 1
   MAX_ATTACK_SPEED = 3.0
+
+  IMAGE_SCALER = 5.0
+
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
 
   attr_accessor :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
@@ -185,8 +188,8 @@ class PilotableShip < GeneralObject
      # puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
       hp = Hardpoint.new(
-        x, y, hardpoint_z, hardpoint_z_base, location_dup[:x_offset].call(get_image, @height_scale),
-        location_dup[:y_offset].call(get_image, @height_scale), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, options
+        x, y, hardpoint_z, hardpoint_z_base, location_dup[:x_offset].call(get_image, @height_scale_with_image_scaler),
+        location_dup[:y_offset].call(get_image, @height_scale_with_image_scaler), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, options
       )
       @hardpoints[index] = hp
     end
