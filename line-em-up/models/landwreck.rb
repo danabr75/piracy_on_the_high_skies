@@ -41,8 +41,8 @@ class Landwreck < Building
     @health = 1
     @window = nil
 
-    @image_width  = @image.width  * (@width_scale || @average_scale)
-    @image_height = @image.height * (@height_scale || @average_scale)
+    @image_width  = @image.width  * (@width_scale || @average_scale) / (@item.class::IMAGE_SCALER)
+    @image_height = @image.height * (@height_scale || @average_scale) / (@item.class::IMAGE_SCALER)
     @image_width_half  = @image_width  / 2.0
     @image_height_half = @image_height / 2.0
 

@@ -393,24 +393,24 @@ class Projectile < ScreenMapFixedObject
           # maybe add advanced collision in when support multi-threads
           if false && self.class.get_advanced_hit_box_detection
             # Disabling advanced hit detection for now
-            self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
-            other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
-            hit_object = rec_intersection(self_object, other_object)
+            # self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
+            # other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
+            # hit_object = rec_intersection(self_object, other_object)
           else
             # puts "HIT OBJECT DETECTION: proj-size: #{(self.get_size / 2)}"
             # puts "HIT OBJECT DETECTION:  obj-size: #{(self.get_size / 2)}"
-            raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
-            raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
-            raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
-            raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
-            if @debug
-              if self.get_radius.nil?
-                raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
-              end
-              if object.get_radius.nil?
-                raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
-              end
-            end
+            # raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
+            # raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
+            # raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
+            # raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
+            # if @debug
+            #   if self.get_radius.nil?
+            #     raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
+            #   end
+            #   if object.get_radius.nil?
+            #     raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
+            #   end
+            # end
             # puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
             # puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
             # puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
@@ -426,9 +426,9 @@ class Projectile < ScreenMapFixedObject
             # puts "HIT THIS OBJECT: #{object.id} - #{object.class}" if hit_object
           end
           if hit_object && self.class.get_aoe <= 0
-            puts "HIT GRAPPLEHOOK HERE" if object.class.name == "GrapplingHook"
+            # puts "HIT GRAPPLEHOOK HERE" if object.class.name == "GrapplingHook"
             trigger_object_collision(object) 
-            puts "GRAPPLE HEALTH WAS: #{object.health}" if object.class.name == "GrapplingHook"
+            # puts "GRAPPLE HEALTH WAS: #{object.health}" if object.class.name == "GrapplingHook"
             # drops = drops + result[:drops] if result[:drops].any?
           end
         end

@@ -31,6 +31,7 @@ class Player < ScreenFixedObject
 
   # lets not set a timer that will kill us.
   MAX_TIME_ALIVE = nil
+  IMAGE_SCALER = 5.0
 
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -128,6 +129,7 @@ class Player < ScreenFixedObject
     @controls_enabled = true
     @boost_active     = false
     # @steam_power  = MAX_STEAM_POWER
+    # puts "PLAYER @image_radius: #{@image_radius}"
   end
 
   def enable_boost

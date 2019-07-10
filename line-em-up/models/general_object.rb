@@ -157,6 +157,17 @@ class GeneralObject
     @invulnerable = false
   end   
 
+  def is_point_inside_polygon point, points
+    is_inside = true
+    x_values = points.collect{|p| p.x}
+    y_values = points.collect{|p| p.y}
+    # puts "CALING: "
+    # puts "(#{point.x} < #{x_values.min} || #{point.x} > #{x_values.max} || #{point.y} < #{y_values.min} || #{point.y } > #{y_values.max})"
+    if (point.x < x_values.min || point.x > x_values.max || point.y < y_values.min || point.y > y_values.max)
+      is_inside = false
+    end
+    return is_inside
+  end
   
   def validate_image_parameters
     if @image

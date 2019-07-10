@@ -322,7 +322,7 @@ class PilotableShip < GeneralObject
           # puts "#{self.class.name} - #{@current_map_pixel_x} - #{@current_map_pixel_y}"
           hit_object = Gosu.distance(owner.current_map_pixel_x, owner.current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < (self.get_radius + object.get_radius) / 2.0
           collided_object = object if hit_object
-          # puts "collided_object.class: #{collided_object.class}" if hit_object
+          # puts "I, #{self.owner.class}, collided_object.class: #{collided_object.class} - radius where: #{self.get_radius} and #{object.get_radius}" if hit_object
           # puts "#{owner.id} HIT #{object.id}" if hit_object
           # puts "#{owner.id.class} HIT #{object.id.class}" if hit_object
         end
@@ -521,12 +521,12 @@ class PilotableShip < GeneralObject
 
   NON_ATTACK_HARDPOINT_SLOTS = [:engine]
 
-  def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, group, options = {}
+  def attack_group initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer_or_target, group, options = {}
     results = []
     @hardpoints.each do |hp|
       next if NON_ATTACK_HARDPOINT_SLOTS.include?(hp.slot_type)
       # puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
-      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer, options) if hp.group_number == group && hp.item
+      results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer_or_target, options) if hp.group_number == group && hp.item
       # puts "HP ATTACK RESULT"
       # puts results
      # puts "GROUP: #{group}"

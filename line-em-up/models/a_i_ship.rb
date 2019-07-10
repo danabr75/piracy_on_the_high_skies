@@ -28,6 +28,7 @@ class AIShip < ScreenMapFixedObject
   AGRO_DECREMENT = 1
 
   CLASS_TYPE = :ship
+  IMAGE_SCALER = 5.0
 
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
@@ -130,6 +131,10 @@ class AIShip < ScreenMapFixedObject
     # @special_target_focus_type = options[:special_target_focus_type] if options[:special_target_focus_type]
     @special_target_focus = nil
     # stop
+    # puts "AI @image_radius: #{@image_radius}"
+    @can_fire = true
+    @can_fire_counter = 0
+    @cannot_fire_counter = 0
   end
 
   def hit_objects(object_groups, options)
@@ -346,43 +351,126 @@ class AIShip < ScreenMapFixedObject
     end
     # END AGRO SECTION
 
+    # GET ANGLE
+    destination_angle = nil
+    if agro_target
+      start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+      end_point   = OpenStruct.new(:x => agro_target.current_map_pixel_x, :y => agro_target.current_map_pixel_y)
+      destination_angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
+    end
+
+    # heading_towards_target = false
+    # destination_angle
+    # if @angle > destination_angle - 10 && @angle < destination_angle + 10
+    #   heading_towards_target = true
+    # end
+
     # START FIRING SECTION
-    if agro_target && agro_target_distance < @firing_distance
-      @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
-        results[:projectiles].each do |projectile|
-          projectiles.push(projectile) if projectile
-        end
-        results[:destructable_projectiles].each do |projectile|
-          destructable_projectiles.push(projectile) if projectile
-        end
-        results[:graphical_effects].each do |effect|
-          graphical_effects.push(effect) if effect
+    if @can_fire
+      if agro_target && agro_target_distance < @firing_distance && destination_angle
+
+        friendly_in_firing_area = false
+
+        # if @can_fire_counter > 120
+          # @can_fire_counter = 0
+          # step = (Math::PI/180 * (360 -  @angle_from_center + ship_angle + 90)) + 90.0 + 45.0# - 180
+          # point_a_map_pixel_x = Math.cos(step) * @radius + ship_map_pixel_x
+          # point_a_map_pixel_y = Math.sin(step) * @radius + ship_map_pixel_y
+          # case #@angle
+          # when (@angle <= 45.0 || @angle >= 315.0) || (@angle >= 225.0 && @angle <= 315.0)
+          # FIRING SAFETY AREA
+            point_a_x = @current_map_pixel_x + @image_radius / 2
+            point_a_y = @current_map_pixel_y
+
+            point_b_x = @current_map_pixel_x - @image_radius / 2
+            point_b_y = @current_map_pixel_y
+
+            point_c_x = agro_target.current_map_pixel_x + @image_radius / 2
+            point_c_y = agro_target.current_map_pixel_y
+
+            point_d_x = agro_target.current_map_pixel_x - @image_radius / 2
+            point_d_y = agro_target.current_map_pixel_y
+          # when (@angle >= 45.0 && @angle <= 135.0) || (@angle <= 315.0 && @angle >= 225.0)
+          #   point_a_x = @current_map_pixel_x
+          #   point_a_y = @current_map_pixel_y + @image_radius / 2
+
+          #   point_b_x = @current_map_pixel_x
+          #   point_b_y = @current_map_pixel_y - @image_radius / 2
+
+          #   point_c_x = agro_target.current_map_pixel_x
+          #   point_c_y = agro_target.current_map_pixel_y + @image_radius / 2
+
+          #   point_d_x = agro_target.current_map_pixel_x
+          #   point_d_y = agro_target.current_map_pixel_y - @image_radius / 2
+          # else
+          #   raise "invalid ANGLE #{@angle}"
+          # end 
+          point_a = OpenStruct.new(x: point_a_x, y: point_a_y)
+          point_b = OpenStruct.new(x: point_b_x, y: point_b_y)
+          point_c = OpenStruct.new(x: point_c_x, y: point_c_y)
+          point_d = OpenStruct.new(x: point_d_x, y: point_d_y)
+          points = [point_a, point_b, point_c, point_d]
+          air_targets.each do |at_id, at|
+            # replace with friend/foe system.
+            next if at_id == 'player'
+            next if at_id == self.id
+            # assume all other air_targets are friendly
+            friendly_in_firing_area = is_point_inside_polygon(OpenStruct.new(x: at.current_map_pixel_x, y: at.current_map_pixel_y), points)
+            break if friendly_in_firing_area == true
+          end
+          # puts "FOUND FREINDLY IN FIREING AREA " if friendly_in_firing_area
+
+          @can_fire = false if friendly_in_firing_area
+        # else
+        #   @can_fire_counter += 1
+        # end
+
+        if !friendly_in_firing_area
+
+          @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+            results[:projectiles].each do |projectile|
+              projectiles.push(projectile) if projectile
+            end
+            results[:destructable_projectiles].each do |projectile|
+              destructable_projectiles.push(projectile) if projectile
+            end
+            results[:graphical_effects].each do |effect|
+              graphical_effects.push(effect) if effect
+            end
+          end
+          @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
+            results[:projectiles].each do |projectile|
+              projectiles.push(projectile)
+            end
+            results[:destructable_projectiles].each do |projectile|
+              destructable_projectiles.push(projectile) if projectile
+            end
+            results[:graphical_effects].each do |effect|
+              graphical_effects.push(effect) if effect
+            end
+          end
+         # puts "AI: TRYING TO FIRE GRAPPLE "
+          @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, {ai_block_attack_deactivation: true}).each do |results|
+            # puts "GRAPPLE RESAULT:"
+            # puts results
+            results[:projectiles].each do |projectile|
+              projectiles.push(projectile)
+            end
+            results[:destructable_projectiles].each do |projectile|
+              destructable_projectiles.push(projectile) if projectile
+            end
+            results[:graphical_effects].each do |effect|
+              graphical_effects.push(effect) if effect
+            end
+          end
         end
       end
-      @ship.attack_group_2(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
-        results[:projectiles].each do |projectile|
-          projectiles.push(projectile)
-        end
-        results[:destructable_projectiles].each do |projectile|
-          destructable_projectiles.push(projectile) if projectile
-        end
-        results[:graphical_effects].each do |effect|
-          graphical_effects.push(effect) if effect
-        end
-      end
-     # puts "AI: TRYING TO FIRE GRAPPLE "
-      @ship.attack_group_3(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target, {ai_block_attack_deactivation: true}).each do |results|
-        # puts "GRAPPLE RESAULT:"
-        # puts results
-        results[:projectiles].each do |projectile|
-          projectiles.push(projectile)
-        end
-        results[:destructable_projectiles].each do |projectile|
-          destructable_projectiles.push(projectile) if projectile
-        end
-        results[:graphical_effects].each do |effect|
-          graphical_effects.push(effect) if effect
-        end
+    else
+      @cannot_fire_counter += 1
+      if @cannot_fire_counter >= 120
+        @can_fire = true
+        @cannot_fire_counter = 0
+        # @can_fire_counter = 120
       end
     end
     # END FIRING SECTION
@@ -390,12 +478,6 @@ class AIShip < ScreenMapFixedObject
 
 
     # START MOVING SECTION
-    destination_angle = nil
-    if agro_target
-      start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
-      end_point   = OpenStruct.new(:x => agro_target.current_map_pixel_x, :y => agro_target.current_map_pixel_y)
-      destination_angle = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
-    end
 
     need_to_move = false
     if agro_target
