@@ -10,7 +10,7 @@ require_relative "../lib/global_variables.rb"
 class ObjectInventory
   include GlobalVariables
   include GlobalConstants
-  IMAGE_SCALER = 16.0
+  IMAGE_SCALER = 10.0
 
 
   def init_global_vars

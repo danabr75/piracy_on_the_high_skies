@@ -13,6 +13,7 @@ class GeneralObject
   attr_reader :current_map_tile_x,  :current_map_tile_y
   attr_reader :x_offset, :y_offset
   attr_reader :image
+  attr_reader :height_scale_with_image_scaler
 
   # attr_accessor :x_offset_base, :y_offset_base
   LEFT  = 'left'

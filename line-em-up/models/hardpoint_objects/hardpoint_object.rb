@@ -24,7 +24,7 @@ module HardpointObjects
     ABSTRACT_CLASS = false
     EXPECTED_IMAGE_PIXEL_HEIGHT = 128
     EXPECTED_IMAGE_PIXEL_WIDTH  = 128
-    IMAGE_SCALER = 16.0
+    IMAGE_SCALER = 12.0
 
     STEAM_POWER_USAGE = 1.0
 
@@ -37,6 +37,8 @@ module HardpointObjects
     LAUNCHER_ROTATE_SPEED = nil
 
     IS_DESTRUCTABLE_PROJECTILE = false
+
+    ANIMATED_HARDPOINT_IMAGE_LENGTH = 0
 
     # POST_DESTRUCTION_EFFECTS = false
 
@@ -77,6 +79,22 @@ module HardpointObjects
       # puts "HO IS VALID: #{options[:is_valid]}"
       @disabled_by_parent = options[:is_invalid] || false
       @colors = @disabled_by_parent ? Gosu::Color.argb(0xff_ff0000) : Gosu::Color.argb(0xff_ffffff)
+
+      @animated_image_counter = nil
+      @max_animated_image_counter = nil
+      @animation_direction = :positive
+      @images = nil
+      if self.class::ANIMATED_HARDPOINT_IMAGE_LENGTH > 0
+        @max_animated_image_counter = self.class::ANIMATED_HARDPOINT_IMAGE_LENGTH
+        @animated_image_counter = rand(@max_animated_image_counter * 9)
+        @images = []
+        (0..(self.class::ANIMATED_HARDPOINT_IMAGE_LENGTH - 1)).each do |i|
+          @images << Gosu::Image.new("#{self.class::MEDIA_DIRECTORY}/hardpoints/#{self.class::HARDPOINT_NAME}/hardpoint_#{i}.png")
+        end
+      end
+
+      @hp_reference = options[:hp_reference]
+
     end
 
     def disable_by_parent
@@ -144,7 +162,7 @@ module HardpointObjects
           @active = true
           # puts "HERE: self.class::ACTIVE_DELAY < @active_for: #{self.class::ACTIVE_DELAY < @active_for} = #{self.class::ACTIVE_DELAY} < #{@active_for}"
           if self.class::ACTIVE_DELAY.nil? || self.class::ACTIVE_DELAY <= @active_for
-           # puts "TRYING TO ATTACK "
+           # puts "TRYING TO ATTACK - #{owner.class}"
             if owner.use_steam(self.class::STEAM_POWER_USAGE)
              # puts "USED STEAM HERE"
               @spinning_up = false
@@ -300,6 +318,25 @@ module HardpointObjects
       # puts [@current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y]
       if !@disabled_by_parent
 
+        # Factor in owner\ship momentum here.
+        if !@animated_image_counter.nil?
+          if @animated_image_counter >= @max_animated_image_counter * 9
+            @animation_direction = :negative
+            @animated_image_counter = @max_animated_image_counter * 9
+          elsif @animated_image_counter < 0
+            @animation_direction = :positive
+            @animated_image_counter = 0
+          end
+
+          @image = @images[@animated_image_counter / 10]
+          raise "@image was NIL! at index: #{@animated_image_counter}" if @image.nil?
+          momentum = object.owner.ship.current_momentum
+          increment = ((momentum / 100.0) * 5).ceil
+
+          @animated_image_counter += increment if @animation_direction == :positive
+          @animated_image_counter -= increment if @animation_direction == :negative
+        end
+
         if attackable_location_x && attackable_location_y
          # puts "FOUND ATTACKABKE LOCATION X AND Y"
           if self.class::LAUNCHER_MIN_ANGLE && self.class::LAUNCHER_MAX_ANGLE
@@ -429,10 +466,6 @@ module HardpointObjects
       # puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
         if @cooldown_wait <= 0.0
-          # puts "SHOWING PROJECTILE HERE: #{self.class.name} - #{@height_scale}"
-          # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale)
-          # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, ZOrder::UI, angle - @firing_angle_offset, 0.5, 0.5, 1, 1)
-          # self.class::PROJECTILE_CLASS.get_image.draw_rot(x, y, ZOrder::UI, angle - @firing_angle_offset, 0.5, 0.5, 1, 1)
           @projectile_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale, @colors)
         end
       # else
@@ -441,7 +474,7 @@ module HardpointObjects
       @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @colors)
 
       if self.class::SHOW_HARDPOINT_BASE
-        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @colors)
+        @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @hp_reference.height_scale_with_image_scaler, @hp_reference.height_scale_with_image_scaler, @colors)
       end
 
     end

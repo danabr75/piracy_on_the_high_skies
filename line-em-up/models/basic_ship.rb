@@ -88,16 +88,25 @@ class BasicShip < PilotableShip
       slot_type: :generic, 
       x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 5.0) }
     },
-
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 10.0)}, y_offset: lambda { |image, scale| ((image.height * scale) / 3.0) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| ((image.height * scale) / 10.0) }
     },
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 10.0)}, y_offset: lambda { |image, scale| ((image.height * scale) / 3.0) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| ((image.height * scale) / 10.0) }
+    },
+    {
+      angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
+      slot_type: :engine, 
+      x_offset: lambda { |image, scale| -((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| -((image.height * scale) / 10.0) }
+    },
+    {
+      angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
+      slot_type: :engine, 
+      x_offset: lambda { |image, scale| ((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| -((image.height * scale) / 10.0) }
     },
     {
       angle_offset: 0, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation

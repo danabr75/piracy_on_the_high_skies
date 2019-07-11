@@ -19,7 +19,7 @@ class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
-  IMAGE_SCALER = 12.0
+  IMAGE_SCALER = 6.0
 
   # def self.get_weapon_options
   #   ::Launcher.descendants

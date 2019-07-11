@@ -70,7 +70,7 @@ class PilotableShip < GeneralObject
     @x = x
     @y = y
     @z = z
-    @z_base = hardpoint_z_base
+    # @z_base = hardpoint_z_base
     # puts "ShIP THOUGHT THAT THIS WAS CONFIG_FILE: #{self.class::CONFIG_FILE}"
     @angle = angle
     media_path = self.class::ITEM_MEDIA_DIRECTORY
@@ -187,8 +187,16 @@ class PilotableShip < GeneralObject
       # puts "ITEM CLASS " if owner.class == Player
      # puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
       options[:block_initial_angle] = true if disable_hardpoint_angles
+      if location_dup[:slot_type] == :engine
+        h_z  = hardpoint_z_base
+        hb_z = nil
+      else
+        h_z  = hardpoint_z
+        hb_z = hardpoint_z_base
+      end
+      
       hp = Hardpoint.new(
-        x, y, hardpoint_z, hardpoint_z_base, location_dup[:x_offset].call(get_image, @height_scale_with_image_scaler),
+        x, y, h_z, hb_z, location_dup[:x_offset].call(get_image, @height_scale_with_image_scaler),
         location_dup[:y_offset].call(get_image, @height_scale_with_image_scaler), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, options
       )
       @hardpoints[index] = hp

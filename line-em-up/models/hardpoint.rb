@@ -316,7 +316,7 @@ class Hardpoint < GeneralObject
       if attack_projectile
         destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
         @drawable_items_near_self << Graphics::AngledSmoke.new(
-          @current_map_pixel_x, @current_map_pixel_y, 1, destination_angle, nil, @width_scale,
+          @current_map_pixel_x, @current_map_pixel_y, 3, destination_angle, nil, @width_scale,
           @height_scale, @screen_pixel_width, @screen_pixel_height,
           {
             green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
@@ -381,7 +381,7 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
     @item.draw(new_angle, new_x, new_y, @z, @z_base) if @item
-    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item
+    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item && @slot_type != :engine
   end
 
   def draw_gl

@@ -5,7 +5,7 @@ class ShipInventory
   include GlobalVariables
   include GlobalConstants
 
-  IMAGE_SCALER = 16.0
+  IMAGE_SCALER = 10.0
 
   # attr_accessor :cursor_object
 

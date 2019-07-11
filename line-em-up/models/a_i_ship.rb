@@ -56,15 +56,27 @@ class AIShip < ScreenMapFixedObject
     #     "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
     #   }
     # }
+    # hardpoint_data = {
+    #   :hardpoint_data=>
+    #   {
+    #     "0" => "HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::BulletHardpoint",
+    #     "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
+    #     "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
+    #     "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+    #   }
+    # }
+
     hardpoint_data = {
-      :hardpoint_data=>
-      {
-        "0" => "HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "1"=>"HardpointObjects::BulletHardpoint",
-        "4"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::BulletHardpoint", "6"=>"HardpointObjects::BulletHardpoint",
-        "2"=>"HardpointObjects::BulletHardpoint", "7"=>"HardpointObjects::BulletHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint",
-        "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+      :hardpoint_data => {
+        "0" => "HardpointObjects::GrapplingHookHardpoint","1" => "HardpointObjects::BulletHardpoint",
+        "4" => "HardpointObjects::BulletHardpoint","3" => "HardpointObjects::BulletHardpoint",
+        "5" => "HardpointObjects::BulletHardpoint","2" => "HardpointObjects::BulletHardpoint",
+        "7" => "HardpointObjects::BulletHardpoint","6" => "HardpointObjects::BulletHardpoint",
+        "8" => "HardpointObjects::BasicEngineHardpoint","9" => "HardpointObjects::BasicEngineHardpoint",
+        "12" => "HardpointObjects::AdvancedSteamCoreHardpoint"
       }
     }
+
     # hardpoint_data = {
     #   :hardpoint_data=>
     #   {
@@ -568,11 +580,9 @@ class AIShip < ScreenMapFixedObject
   end
 
   def use_steam usage
-   # puts "AIT SHIP HERE"
-
-      return true
-
+    return @ship.use_steam(usage)
   end
+
   def angle_is_within_angle_preferences preferred_angles, destination_angle
     is_within_preferred_angle = false
     # @firing_angle_preferences = [(240..300), (60..120)]
