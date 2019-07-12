@@ -218,20 +218,22 @@ class GLBackground
     @map_left_row   = nil
     @map_right_row  = nil
 
-    @map_name = "desert_v9_small"
+
+    @map_name = "desert_v10_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
 
+
     @terrains = @map["terrains"]
     @images = []
     @infos = []
-    @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth.png", :tileable => true)
-    @info = @image.gl_tex_info
+    # @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth.png", :tileable => true)
+    # @info = @image.gl_tex_info
 
-    image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_0.png", :tileable => true)
-    @images << image
-    @infos << image.gl_tex_info
+    # image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_0.png", :tileable => true)
+    # @images << image
+    # @infos << image.gl_tex_info
     @alt_infos = {}
     @terrains.each_with_index do |terrain_path, index|
       image = Gosu::Image.new(terrain_path, :tileable => true)
@@ -239,9 +241,19 @@ class GLBackground
       @infos  << image.gl_tex_info
       @alt_infos[index.to_s] = image.gl_tex_info
     end
-    image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
+
+    out_of_bounds_path = @map["out_of_bounds_terrain_path"]
+    image = Gosu::Image.new(out_of_bounds_path, :tileable => true)
     @images << image
-    @infos << image.gl_tex_info
+    @infos  << image.gl_tex_info
+    @alt_infos[@alt_infos.count.to_s] = image.gl_tex_info
+    @out_of_bounds_terrain_index = @infos.count - 1
+
+    @off_edge_map_value = {'height' => 3, 'terrain_index' => @out_of_bounds_terrain_index }
+
+    # image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
+    # @images << image
+    # @infos << image.gl_tex_info
 
     @map_tile_width =  @map["map_tile_width"]
     @map_tile_height = @map["map_tile_height"]
@@ -382,7 +394,7 @@ class GLBackground
         if @map_data[y_index] && @map_data[y_index][x_index]
           @visible_map[index_h][index_w] = @map_data[y_index][x_index]
         else
-          @visible_map[index_h][index_w] = OFF_EDGE_MAP_VALUE
+          @visible_map[index_h][index_w] = @off_edge_map_value
         end
 
         @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
@@ -562,7 +574,6 @@ class GLBackground
     end
   end
 
-  OFF_EDGE_MAP_VALUE = {'height' => 2, 'terrain_index' => 3 }
 
   def update center_target_map_pixel_movement_x, center_target_map_pixel_movement_y, buildings, pickups, viewable_pixel_offset_x, viewable_pixel_offset_y
     raise "WRONG MAP WIDTH!  Expected #{@visible_map_tile_width  + @extra_map_tile_width } Got #{@visible_map[0].length}" if @visible_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
@@ -630,7 +641,7 @@ class GLBackground
           @visual_map_of_visible_to_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { "N/A" })
 
           @visible_map.pop
-          @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { OFF_EDGE_MAP_VALUE })
+          @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
         else
          # puts "ADDING NORMALLY"
           @visible_map.pop
@@ -654,7 +665,7 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << OFF_EDGE_MAP_VALUE
+              new_array << @off_edge_map_value
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -713,7 +724,7 @@ class GLBackground
          # puts "CASE 1"
           @visible_map.shift
           @visual_map_of_visible_to_map.shift
-          @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { OFF_EDGE_MAP_VALUE })
+          @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
           @visual_map_of_visible_to_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { "N/A" })
           # puts "HERE WHAT WAS IT? visible_map.last.length #{@visible_map.last.length}"
           # puts "HERE WHAT WAS IT? visible_map.last[0].length #{@visible_map.last[0].length}"
@@ -739,7 +750,7 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << OFF_EDGE_MAP_VALUE
+              new_array << @off_edge_map_value
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -800,7 +811,7 @@ class GLBackground
 
           @visible_map.each do |row|
             row.pop
-            row.unshift(OFF_EDGE_MAP_VALUE)
+            row.unshift(@off_edge_map_value)
           end
           @visual_map_of_visible_to_map.each do |y_row|
             y_row.pop
@@ -850,7 +861,7 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << OFF_EDGE_MAP_VALUE
+              new_array << @off_edge_map_value
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -892,7 +903,7 @@ class GLBackground
          # puts "ADDING IN RIGHT EDGE OF MAP"
           @visible_map.each do |row|
             row.shift
-            row.push(OFF_EDGE_MAP_VALUE)
+            row.push(@off_edge_map_value)
           end
           @visual_map_of_visible_to_map.each do |y_row|
             y_row.shift
@@ -925,7 +936,7 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << OFF_EDGE_MAP_VALUE
+              new_array << @off_edge_map_value
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -1326,7 +1337,13 @@ class GLBackground
               # index_key, info = @alt_infos.first
                 # # glBindTexture(GL_TEXTURE_2D, info.tex_name)
                 # # index_to_s = index.to_s # Could be done in the infos field, on init
+                # puts "INDEX KEYS HERE: #{index_key}"
+                # puts index_key.inspect
                 info_top_left_opacity     = x_element['terrain_paths_and_weights']['top_left'][index_key]     #|| 0.0
+                # puts "X ELEMENT: "
+                # puts x_element.inspect
+
+
                 info_top_right_opacity    = x_element['terrain_paths_and_weights']['top_right'][index_key]    #|| 0.0
                 info_bottom_left_opacity  = x_element['terrain_paths_and_weights']['bottom_left'][index_key]  #|| 0.0
                 info_bottom_right_opacity = x_element['terrain_paths_and_weights']['bottom_right'][index_key] #|| 0.0

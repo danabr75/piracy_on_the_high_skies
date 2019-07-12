@@ -1,5 +1,5 @@
 # In Console: 
-# mg = MapGenerator.new('desert_v9_small')
+# mg = MapGenerator.new('desert_v10_small')
 # mg.generate
 
 class MapGenerator
@@ -248,6 +248,95 @@ class MapGenerator
       end
     end
 
+    # (-1..@map_tile_height - 1).each do |y_index|
+    #   (-1..@map_tile_width - 1).each_with_index do |x_index|
+    #     if y_index == 0
+    #       height_rows[y_index][x_index][:corner_heights][:bottom_right].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:bottom_right][key] = 3
+    #       end
+    #       height_rows[y_index][x_index][:corner_heights][:bottom_left].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:bottom_left][key] = 3
+    #       end
+    #     end
+    #     if y_index == @map_tile_height - 1
+    #       height_rows[y_index][x_index][:corner_heights][:top_right].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:top_right][key] = 3
+    #       end
+    #       height_rows[y_index][x_index][:corner_heights][:top_left].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:top_left][key] = 3
+    #       end
+    #     end
+
+    #     if x_index == 0
+    #       height_rows[y_index][x_index][:corner_heights][:top_right].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:top_right][key] = 3
+    #       end
+    #       height_rows[y_index][x_index][:corner_heights][:bottom_right].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:bottom_right][key] = 3
+    #       end
+    #     end
+    #     if x_index == @map_tile_width - 1
+    #       height_rows[y_index][x_index][:corner_heights][:top_left].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:top_left][key] = 3
+    #       end
+    #       height_rows[y_index][x_index][:corner_heights][:bottom_left].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][:bottom_left][key] = 3
+    #       end
+    #     end
+    #   end
+    # end
+    cont = 1
+    # (-1..@map_tile_height - 1).each do |y_index|
+    #   (-1..@map_tile_width - 1).each_with_index do |x_index|
+    #     if y_index == @map_tile_height - 1
+    #       cont += 1
+    #       height_rows[y_index][x_index][:corner_heights].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][key] = 3
+    #       end
+    #     end
+    #     if y_index == 0
+    #       cont += 1
+    #       height_rows[y_index][x_index][:corner_heights].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][key] = 3
+    #       end
+    #     end
+
+    #     if x_index == @map_tile_width - 1
+    #       cont += 1
+    #       height_rows[y_index][x_index][:corner_heights].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][key] = 3
+    #       end
+    #     end
+    #     if x_index == 0
+    #       cont += 1
+    #       height_rows[y_index][x_index][:corner_heights].each do |key, value|
+    #         height_rows[y_index][x_index][:corner_heights][key] = 3
+    #       end
+    #     end
+    #   end
+    # end
+    (-1..@map_tile_height - 1).each do |y_index|
+      (-1..@map_tile_width - 1).each_with_index do |x_index|
+        if y_index == @map_tile_height - 1
+          height_rows[y_index][x_index][:corner_heights][:bottom_left] = 3
+          height_rows[y_index][x_index][:corner_heights][:bottom_right] = 3
+        end
+        if y_index == 0
+          height_rows[y_index][x_index][:corner_heights][:top_left] = 3
+          height_rows[y_index][x_index][:corner_heights][:top_right] = 3
+        end
+
+        if x_index == @map_tile_width - 1
+          height_rows[y_index][x_index][:corner_heights][:top_right] = 3
+          height_rows[y_index][x_index][:corner_heights][:bottom_right] = 3
+        end
+        if x_index == 0
+          height_rows[y_index][x_index][:corner_heights][:top_left] = 3
+          height_rows[y_index][x_index][:corner_heights][:bottom_left] = 3
+        end
+      end
+    end
+    puts "OUTPUT COUNT: #{cont}"
    # puts "@terrain_image_paths: #{@terrain_image_paths}"
 
     data = {
