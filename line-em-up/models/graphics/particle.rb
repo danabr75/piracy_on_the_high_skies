@@ -22,6 +22,7 @@ module Graphics
     end
 
     def initialize current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {}
+      raise "NO SCALES WERE GIVEN: #{height_scale} - #{width_scale}" if width_scale.nil? || height_scale.nil?
       @points = []
 
       @scale_multiplier = options[:scale_multiplier] || 1.0

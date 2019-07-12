@@ -194,10 +194,15 @@ class PilotableShip < GeneralObject
         h_z  = hardpoint_z
         hb_z = hardpoint_z_base
       end
+      if owner.class == Player
+        z_projectile = ZOrder::PlayerProjectile
+      else
+        z_projectile = ZOrder::AIProjectile
+      end
       
       hp = Hardpoint.new(
         x, y, h_z, hb_z, location_dup[:x_offset].call(get_image, @height_scale_with_image_scaler),
-        location_dup[:y_offset].call(get_image, @height_scale_with_image_scaler), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, options
+        location_dup[:y_offset].call(get_image, @height_scale_with_image_scaler), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, z_projectile, options
       )
       @hardpoints[index] = hp
     end

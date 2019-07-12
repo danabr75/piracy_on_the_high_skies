@@ -76,11 +76,15 @@ class ScreenMapFixedObject < GeneralObject
   end
 
   def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
-    x, y = async_convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y)
+    # player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
+    x, y = async_convert_map_pixel_location_to_screen(
+      # player_map_pixel_x, player_map_pixel_y, data['current_map_tile_x'], data['current_map_tile_y'], data['current_map_pixel_x'], data['current_map_pixel_y'], data['screen_pixel_width'], data['screen_pixel_height']
+      player_map_pixel_x, player_map_pixel_y, data['current_map_pixel_x'], data['current_map_pixel_y'], data['screen_pixel_width'], data['screen_pixel_height']
+    )
 
     results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
-    results[:change_x] = data[:x] - x
-    results[:change_y] = data[:y] - y
+    results['change_x'] = data['x'] - x
+    results['change_y'] = data['y'] - y
 
     return results
   end

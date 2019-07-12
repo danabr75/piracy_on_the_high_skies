@@ -111,7 +111,7 @@ module HardpointObjects
       return nil
     end
 
-    def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
+    def init_projectile hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, z_projectile, options = {}
      # puts "INIT PROJECTILLE HERE"
       validate_not_nil([options], self.class.name, __callee__)
       options[:hp_reference] = @hp_reference if @hp_reference
@@ -121,7 +121,7 @@ module HardpointObjects
         destination_angle, start_point, end_point,
         self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle, self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle, hardpoint_firing_angle,
         current_map_tile_x, current_map_tile_y,
-        owner, options
+        owner, z_projectile, options
       )
     end
 
@@ -130,7 +130,7 @@ module HardpointObjects
       return self.class::STEAM_POWER_USAGE
     end
 
-    def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
+    def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, z_projectile, options = {}
       validate_not_nil([options], self.class.name, __callee__) 
       # HARDPOINT FIRING ANGLE: -90
       # puts "HARDPOINT FIRING ANGLE: #{hardpoint_firing_angle}"
@@ -169,9 +169,9 @@ module HardpointObjects
               # raise "STOP HERE: + #{get_steam_usage}"
               # puts "#{owner.use_steam(get_steam_usage)} = owner.use_steam(#{get_steam_usage})"
               if self.class::LAUNCHER_ROTATE_SPEED
-                item = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, hardpoint_firing_angle + @firing_angle_offset, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+                item = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, hardpoint_firing_angle + @firing_angle_offset, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, z_projectile, options)
               else
-                item = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+                item = init_projectile(hardpoint_firing_angle + @firing_angle_offset, current_map_pixel_x, current_map_pixel_y, @destination_angle, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, z_projectile, options)
               end
               if self.class::IS_DESTRUCTABLE_PROJECTILE
                 destructable_projectile = item
@@ -462,11 +462,11 @@ module HardpointObjects
     #   return last_active_particle
     # end
 
-    def draw angle, x, y, z, z_base
+    def draw angle, x, y, z, z_base, z_projectile
       # puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
         if @cooldown_wait <= 0.0
-          @projectile_image.draw_rot(x, y, self.class::PROJECTILE_CLASS::DRAW_ORDER, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale, @colors)
+          @projectile_image.draw_rot(x, y, z_projectile, angle - @firing_angle_offset, 0.5, 0.5, @show_projectile_height_scale, @show_projectile_height_scale, @colors)
         end
       # else
         # puts "not showing proj - #{self.class.name}"

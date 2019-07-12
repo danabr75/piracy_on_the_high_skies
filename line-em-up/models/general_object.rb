@@ -240,7 +240,7 @@ class GeneralObject
     @health > 0
   end
 
-  def async_is_alive health, health_change
+  def self.async_is_alive health, health_change
     (!health_change.nil? && health_change != 0) ? (health + health_change > 0) : (health > 0)
   end
 
@@ -273,15 +273,16 @@ class GeneralObject
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     # if @last_updated_at < @time_alive
-    results[:time_alive]      = data[:time_alive] + 1
-    # results[:last_updated_at] = data[:time_alive]
-    change_map_pixel_x, change_map_pixel_y = async_get_map_tile_location_from_map_pixel_location(
-      data[:current_map_pixel_x], data[:current_map_pixel_y], data[:tile_pixel_width], data[:tile_pixel_height]
+    results['time_alive']      = data['time_alive'] + 1
+    # results['last_updated_at'] = data['time_alive']
+    change_map_tile_x, change_map_tile_y = async_get_map_tile_location_from_map_pixel_location(
+      # data['current_map_pixel_x'], data['current_map_pixel_y'], data['tile_pixel_width'], data['tile_pixel_height']
+      data['current_map_tile_x'], data['current_map_tile_y'], data['current_map_pixel_x'], data['current_map_pixel_y'], data['tile_pixel_width'], data['tile_pixel_height']
     )
-    results[:change_map_pixel_x] = change_map_pixel_x
-    results[:change_map_pixel_y] = change_map_pixel_y
-    # results[:is_alive] = results.key?(:change_health) ? (data[:health] + results[:change_health] > 0) : (data[:health] > 0)
-    results[:is_alive] = async_is_alive(data[:health], results[:change_health])
+    results['change_map_tile_x'] = change_map_tile_x
+    results['change_map_tile_y'] = change_map_tile_y
+    # results['is_alive'] = results.key?('change_health') ? (data['health'] + results['change_health'] > 0) : (data['health'] > 0)
+    results['is_alive'] = async_is_alive(data['health'], results['change_health'])
     # end
     # return is_on_screen?
     return results
@@ -797,16 +798,16 @@ class GeneralObject
     @current_map_tile_y = (@current_map_pixel_y / (@tile_pixel_height)).to_i if @current_map_pixel_y && @tile_pixel_height
   end
 
-  def self.async_get_map_tile_location_from_map_pixel_location current_map_pixel_x, current_map_pixel_y, tile_pixel_width, tile_pixel_height
+  def self.async_get_map_tile_location_from_map_pixel_location current_map_tile_x, current_map_tile_y, current_map_pixel_x, current_map_pixel_y, tile_pixel_width, tile_pixel_height
     # puts "@current_map_tile: #{@current_map_tile_x} X #{@current_map_tile_y}"
     # If statement is due to the fact that some objects are created without these variables being initted.
     # Indexed at 0. on a 250 x 250 tile map, values are 0..249
     # It is possible to exceed the mapped areas, like projectiles flying off the edge of the map.
     new_x = (current_map_pixel_x / (tile_pixel_width)).to_i  if current_map_pixel_x && tile_pixel_width
     new_y = (current_map_pixel_y / (tile_pixel_height)).to_i if current_map_pixel_y && tile_pixel_height
-    change_map_pixel_x = current_map_tile_x - new_x
-    change_map_pixel_y = current_map_tile_y - new_y
-    return [change_map_pixel_x, change_map_pixel_y]
+    change_map_tile_x = current_map_tile_x - new_x
+    change_map_tile_y = current_map_tile_y - new_y
+    return [change_map_tile_x, change_map_tile_y]
   end
 
   def get_tile_pixel_remainder

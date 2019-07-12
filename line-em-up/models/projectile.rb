@@ -1,5 +1,6 @@
 require_relative 'screen_map_fixed_object.rb'
 # require "#{LIB_DIRECTORY}/z_order.rb"
+require_relative '../lib/z_order.rb'
 
 class Projectile < ScreenMapFixedObject
   attr_accessor :x, :y, :time_alive, :vector_x, :vector_y, :angle, :radian
@@ -17,8 +18,6 @@ class Projectile < ScreenMapFixedObject
   ADVANCED_HIT_BOX_DETECTION = false
 
   IMAGE_SCALER = 2.0
-
-  DRAW_ORDER = ZOrder::Projectile
 
   HEALTH = 1
 
@@ -38,6 +37,10 @@ class Projectile < ScreenMapFixedObject
     raise 'override me!'
   end
 
+  def self.get_post_destruction_effects
+    raise 'override me!'
+  end
+
   def self.get_image
     return Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -50,7 +53,7 @@ class Projectile < ScreenMapFixedObject
   end
 
   # destination_map_pixel_x, destination_map_pixel_y params will become destination_angle
-  def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options = {})
+  def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, z_projectile, options = {})
     # puts "PROJETIL PARALMS"
     # puts "current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options"
     # puts "#{[current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options]}"
@@ -60,6 +63,8 @@ class Projectile < ScreenMapFixedObject
     @hit_objects_class_filter = self.class::HIT_OBJECT_CLASS_FILTER
 
     @owner = owner
+
+    @z = z_projectile
 
     if self.class::MAX_TILE_TRAVEL
       @max_distance = self.class::MAX_TILE_TRAVEL * @average_tile_size
@@ -229,6 +234,8 @@ class Projectile < ScreenMapFixedObject
       health: @health,
       current_map_pixel_x: @current_map_pixel_x,
       current_map_pixel_y: @current_map_pixel_y,
+      current_map_tile_x: @current_map_pixel_x,
+      current_map_tile_y: @current_map_pixel_y,
       current_image_angle: @current_image_angle,
       image_angle_incrementor: @image_angle_incrementor,
       x: @x,
@@ -241,20 +248,32 @@ class Projectile < ScreenMapFixedObject
       screen_pixel_width: @screen_pixel_width,
       screen_pixel_height: @screen_pixel_height,
       id: @id,
-      klass: self.class
+      klass: self.class,
+      initial_delay: self.class::INITIAL_DELAY,
+      speed_increase_factor: self.class::SPEED_INCREASE_FACTOR,
+      max_speed: self.class::MAX_SPEED,
+      max_time_alive: self.class::MAX_TIME_ALIVE,
+      post_destruction_effects: self.class::POST_DESTRUCTION_EFFECTS,
+      start_current_map_pixel_x: @start_current_map_pixel_x,
+      start_current_map_pixel_y: @start_current_map_pixel_y
+
     }
   end
 
   def set_data data
-    @health              += data[:change_health]      if data.key?(:change_health)
-    @current_map_pixel_x += data[:change_map_pixel_x] if data.key?(:change_map_pixel_x)
-    @current_map_pixel_y += data[:change_map_pixel_y] if data.key?(:change_map_pixel_y)
-    @current_image_angle += data[:change_image_angle] if data.key?(:change_image_angle)
-    @speed               += data[:change_speed]       if data.key?(:change_speed)
-    @x                   += data[:change_x]           if data.key?(:change_x)
-    @y                   += data[:change_y]           if data.key?(:change_y)
-    @time_alive          =  data[:time_alive]         if data.key?(:time_alive)
-    @play_init_sound     =  data[:play_init_sound]    if data.key?(:play_init_sound)
+    @health              += data['change_health']      if data.key?('change_health')
+
+    @current_map_pixel_x += data['change_map_pixel_x'] if data.key?('change_map_pixel_x')
+    @current_map_pixel_y += data['change_map_pixel_y'] if data.key?('change_map_pixel_y')
+
+    @current_map_tile_x += data['change_map_tile_x']   if data.key?('change_map_tile_x')
+    @current_map_tile_y += data['change_map_tile_y']   if data.key?('change_map_tile_y')
+    @current_image_angle += data['change_image_angle'] if data.key?('change_image_angle')
+    @speed               += data['change_speed']       if data.key?('change_speed')
+    @x                   += data['change_x']           if data.key?('change_x')
+    @y                   += data['change_y']           if data.key?('change_y')
+    @time_alive          =  data['time_alive']         if data.key?('time_alive')
+    @play_init_sound     =  data['play_init_sound']    if data.key?('play_init_sound')
   end
 
   # return {
@@ -268,62 +287,64 @@ class Projectile < ScreenMapFixedObject
     # change_y: ..
   # }
   def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
-    results[:graphical_effects] ||= []
-    results[:sounds] ||= []
-    # puts "PROJ SPEED: #{data[:speed]}"
-    if data[:refresh_angle_on_updates] && data[:end_image_angle] && data[:time_alive] > 10
-      if data[:current_image_angle] != data[:end_image_angle]
-        data[:current_image_angle] = data[:current_image_angle] + data[:image_angle_incrementor]
+    # raise "ISSIUE HERE: #{data}"
+    results['id'] = data['id']
+    results['graphical_effects'] ||= []
+    results['sounds'] ||= []
+    # puts "PROJ SPEED: #{data['speed']}"
+    if data['refresh_angle_on_updates'] && data['end_image_angle'] && data['time_alive'] > 10
+      if data['current_image_angle'] != data['end_image_angle']
+        data['current_image_angle'] = data['current_image_angle'] + data['image_angle_incrementor']
         # if it's negative
-        if data[:image_angle_incrementor] < 0
-          data[:current_image_angle] = data[:end_image_angle] if data[:current_image_angle] < data[:end_image_angle] 
+        if data['image_angle_incrementor'] < 0
+          data['current_image_angle'] = data['end_image_angle'] if data['current_image_angle'] < data['end_image_angle'] 
         # it's positive
-        elsif data[:image_angle_incrementor] > 0
-          data[:current_image_angle] = data[:end_image_angle] if data[:current_image_angle] > data[:end_image_angle] 
+        elsif data['image_angle_incrementor'] > 0
+          data['current_image_angle'] = data['end_image_angle'] if data['current_image_angle'] > data['end_image_angle'] 
         end
       end
     end
 
-    if get_initial_delay && (data[:time_alive] > (data[:custom_initial_delay] || get_initial_delay))
-      speed_factor = get_speed_increase_factor
-      if data[:speed] < get_max_speed
+    if data['initial_delay'] && (data['time_alive'] > (data['custom_initial_delay'] || data['initial_delay']))
+      speed_factor = data['speed_increase_factor']
+      if data['speed'] < data['max_speed']
         if speed_factor && speed_factor > 0.0
-          data[:speed] = data[:speed] + (data[:time_alive] * speed_factor)
+          data['speed'] = data['speed'] + (data['time_alive'] * speed_factor)
         end
         speed_increment = get_speed_increase_increment
         if speed_increment && speed_increment > 0.0
-          data[:speed] = data[:speed] + speed_increment
+          data['speed'] = data['speed'] + speed_increment
         end
 
-        data[:speed] = get_max_speed if data[:speed] > get_max_speed
+        data['speed'] = data['max_speed'] if data['speed'] > data['max_speed']
       end
 
-      factor_in_scale_speed = data[:speed] * data[:height_scale]
-      results[:change_map_pixel_x], results[:change_map_pixel_y] = async_movement(data[:current_map_pixel_x], data[:current_map_pixel_y], factor_in_scale_speed, data[:angle], data[:height_scale]) if factor_in_scale_speed != 0
+      factor_in_scale_speed = data['speed'] * data['height_scale']
+      results['change_map_pixel_x'], results['change_map_pixel_y'] = async_movement(data['current_map_pixel_x'], data['current_map_pixel_y'], factor_in_scale_speed, data['angle'], data['height_scale']) if factor_in_scale_speed != 0
     else
-      data[:speed] = get_max_speed if data[:speed].nil?
-      factor_in_scale_speed = data[:speed] * data[:height_scale]
-      results[:change_map_pixel_x], results[:change_map_pixel_y] = async_movement(data[:current_map_pixel_x], data[:current_map_pixel_y], factor_in_scale_speed, data[:angle], data[:height_scale]) if factor_in_scale_speed != 0
+      data['speed'] = data['max_speed'] if data['speed'].nil?
+      factor_in_scale_speed = data['speed'] * data['height_scale']
+      results['change_map_pixel_x'], results['change_map_pixel_y'] = async_movement(data['current_map_pixel_x'], data['current_map_pixel_y'], factor_in_scale_speed, data['angle'], data['height_scale']) if factor_in_scale_speed != 0
     end
 
-    results[:health_change] = 0 - data[:health] if MAX_TIME_ALIVE && data[:time_alive] >= MAX_TIME_ALIVE
+    results['health_change'] = 0 - data['health'] if data['max_time_alive'] && data['time_alive'] >= data['max_time_alive']
 
-    if data[:max_distance] && data[:max_distance] < Gosu.distance(data[:current_map_pixel_x], data[:current_map_pixel_y], data[:start_current_map_pixel_x], data[:start_current_map_pixel_y])
-      results[:health_change] = 0 - data[:health]
+    if data['max_distance'] && data['max_distance'] < Gosu.distance(data['current_map_pixel_x'], data['current_map_pixel_y'], data['start_current_map_pixel_x'], data['start_current_map_pixel_y'])
+      results['health_change'] = 0 - data['health']
     end
 
     results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
 
-    if data[:play_init_sound] && data[:init_sound_path] && async_is_on_screen?(data[:x], data[:y], data[:screen_pixel_width], data[:screen_pixel_height])
-      results[:sounds] << data[:init_sound_path]
-      results[:play_init_sound] = false
+    if data['play_init_sound'] && data['init_sound_path'] && async_is_on_screen?(data['x'], data['y'], data['screen_pixel_width'], data['screen_pixel_height'])
+      results['sounds'] << data['init_sound_path']
+      results['play_init_sound'] = false
     end
 
 
-    if !async_is_alive(data[:health], results[:change_health])
-      if POST_DESTRUCTION_EFFECTS
+    if !async_is_alive(data['health'], results['change_health'])
+      if data['post_destruction_effects']
         get_post_destruction_effects.each do |effect|
-          results[:graphical_effects] << effect
+          results['graphical_effects'] << effect
         end
       end
     end
@@ -338,7 +359,7 @@ class Projectile < ScreenMapFixedObject
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # limiting angle extreme by 2
     if is_on_screen?
-      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, DRAW_ORDER, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
     end
   end
 

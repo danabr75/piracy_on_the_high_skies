@@ -4,7 +4,7 @@ module ZOrder
   # I don't understand this
   # The more right, the more on top you are.
   # Left should be under everything
-  Background, Building, LaserParticle, Projectile, BigExplosions, Pickups, AIShip, AIHardpointBase, AIHardpoint, Player, HardpointBase, Hardpoint, MenuBackground, HardPointClickableLocation, Launcher, SmallExplosions, UI, CurserUIBuffer, Cursor = *0..50
+  Background, Building, LaserParticle, BigExplosions, Pickups, AIShip, AIHardpointBase, AIHardpoint, AIProjectile, Player, HardpointBase, Hardpoint, PlayerProjectile, MenuBackground, HardPointClickableLocation, Launcher, SmallExplosions, UI, CurserUIBuffer, Cursor = *0..50
 end
 
 # [2] pry(main)> ZOrder::Ship

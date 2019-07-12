@@ -66,7 +66,7 @@ module HardpointObjects
     #   @active_for = 0
     # end
 
-    def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options = {}
+    def attack hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, z_projectile, options = {}
       angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
       angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
       # puts "GRAPPLING HOOK L ATTACK HERE: #{@active} -test: #{@test}"
@@ -85,7 +85,7 @@ module HardpointObjects
         return {projectile: nil, effects: [], destructable_projectile: nil, graphical_effects: []}
       else
        # puts "GRAPPLE ACTIVE - going SUPER"
-        test = super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, options)
+        test = super(hardpoint_firing_angle, current_map_pixel_x, current_map_pixel_y, start_point, end_point, current_map_tile_x, current_map_tile_y, owner, z_projectile, options)
         # puts "GH ATTACKING: #{test}"
         return test
       end

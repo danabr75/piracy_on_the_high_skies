@@ -24,7 +24,7 @@ class Hardpoint < GeneralObject
     @image_radius / 5
   end
 
-  def initialize(x, y, z, z_base, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, options = {})
+  def initialize(x, y, z, z_base, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, z_projectile, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # @group_number = group_number
 
@@ -32,6 +32,7 @@ class Hardpoint < GeneralObject
     @center_y = y
     @z = z
     @z_base = z_base
+    @z_projectile = z_projectile
     # puts "NEW RADIUS FOR HARDPOINT: #{@radius}"
     @slot_type = slot_type
 
@@ -303,7 +304,7 @@ class Hardpoint < GeneralObject
       # ITEM ATTACKING ANGLE: 249.0 = 249.0 - 0
 
       options[:owner] = @owner
-      result = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, start_point, end_point, nil, nil, @owner, options)
+      result = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, start_point, end_point, nil, nil, @owner, @z_projectile, options)
       attack_projectile = result[:projectile]
       attack_destructable_projectile = result[:destructable_projectile]
       graphical_effects = result[:graphical_effects]
@@ -380,7 +381,7 @@ class Hardpoint < GeneralObject
 
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
-    @item.draw(new_angle, new_x, new_y, @z, @z_base) if @item
+    @item.draw(new_angle, new_x, new_y, @z, @z_base, @z_projectile) if @item
     @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item && @slot_type != :engine
   end
 
