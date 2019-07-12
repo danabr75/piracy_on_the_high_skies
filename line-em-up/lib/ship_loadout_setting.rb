@@ -19,7 +19,7 @@ class ShipLoadoutSetting < Setting
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
-  IMAGE_SCALER = 6.0
+  IMAGE_SCALER = 7.0
 
   # def self.get_weapon_options
   #   ::Launcher.descendants
@@ -221,8 +221,8 @@ class ShipLoadoutSetting < Setting
         if image
           # puts "TEST: #{[@hardpoint_image_z, @height_scale, @height_scale]}"
           image.draw(
-            value[:x] - (image.width  / 2.0) / IMAGE_SCALER,
-            value[:y] - (image.height / 2.0) / IMAGE_SCALER,
+            value[:x] - (image.width  ) / IMAGE_SCALER,
+            value[:y] - (image.height ) / IMAGE_SCALER,
             @hardpoint_image_z,
             @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
           )
@@ -231,8 +231,8 @@ class ShipLoadoutSetting < Setting
         # if value[:hp].slot_type != item[:hardpoint_item_slot_type]
         if !value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type])
           @invalid_hardpoint_image.draw(
-            value[:x] - (image.width  / 2.0) / IMAGE_SCALER,
-            value[:y] - (image.height / 2.0) / IMAGE_SCALER,
+            value[:x] - (image.width ) / IMAGE_SCALER,
+            value[:y] - (image.height) / IMAGE_SCALER,
             @hardpoint_image_z,
             @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
           )

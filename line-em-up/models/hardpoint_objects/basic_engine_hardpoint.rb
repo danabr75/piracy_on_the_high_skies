@@ -7,14 +7,17 @@ module HardpointObjects
     PROJECTILE_CLASS   = nil 
     FIRING_GROUP_NUMBER = nil # Passive
 
-    PERMANENT_STEAM_USE       = 50
-    TILES_PER_SECOND_MODIFIER = 1.5
+    PERMANENT_STEAM_USE       = 25
+    TILES_PER_SECOND_MODIFIER = 1.35
+    # TILES_PER_SECOND_MODIFIER = 12.0
     ROTATION_MODIFIER         = 1.5
 
     # Unimplemented
     BOOST_SPEED_MODIFIER  = 1.2
     BOOST_STEAM_USAGE     = 0.4
     BOOST_MASS_MODIFIER   = 1.1
+
+    SHOW_HARDPOINT_BASE = false
 
     SLOT_TYPE = :engine
 
