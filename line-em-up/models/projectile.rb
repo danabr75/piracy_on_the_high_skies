@@ -189,11 +189,11 @@ class Projectile < ScreenMapFixedObject
         # puts "SPEED HERE: #{@speed}"
         factor_in_scale_speed = @speed * @height_scale
 
-        movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
+        movement(factor_in_scale_speed, @angle, true) if factor_in_scale_speed != 0
       else
         @speed = self.class.get_max_speed if @speed.nil?
         factor_in_scale_speed = @speed * @height_scale
-        movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
+        movement(factor_in_scale_speed, @angle, true) if factor_in_scale_speed != 0
       end
 
       @health = self.take_damage(@health) if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE

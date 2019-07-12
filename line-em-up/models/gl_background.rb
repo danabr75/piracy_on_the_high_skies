@@ -219,7 +219,7 @@ class GLBackground
     @map_right_row  = nil
 
 
-    @map_name = "desert_v10_small"
+    @map_name = "desert_v11_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
@@ -299,6 +299,12 @@ class GLBackground
 
     # @y_add_top_tracker << nil
     # puts @visible_map
+  end
+
+  def get_random_off_map_value
+    # DID NOT REALLY WORK....
+    # return {'height' => 3, 'terrain_index' => @out_of_bounds_terrain_index }
+    return @off_edge_map_value
   end
 
   def recenter_map center_target
@@ -641,7 +647,11 @@ class GLBackground
           @visual_map_of_visible_to_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { "N/A" })
 
           @visible_map.pop
-          @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
+          if @map_tile_top_row == -1
+            @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
+          else
+            @visible_map.unshift(Array.new(@visible_map_tile_width + @extra_map_tile_width) { get_random_off_map_value })
+          end
         else
          # puts "ADDING NORMALLY"
           @visible_map.pop
@@ -665,7 +675,12 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << @off_edge_map_value
+              if x_index == -1 || x_index == @map_tile_width
+                new_array << @off_edge_map_value
+              else
+                new_array << get_random_off_map_value
+              end
+              
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -724,7 +739,14 @@ class GLBackground
          # puts "CASE 1"
           @visible_map.shift
           @visual_map_of_visible_to_map.shift
-          @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
+
+          if @map_tile_bottom_row == @map_tile_height
+            @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
+          else
+            @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { get_random_off_map_value })
+          end
+
+          # @visible_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { @off_edge_map_value })
           @visual_map_of_visible_to_map.push(Array.new(@visible_map_tile_width + @extra_map_tile_width) { "N/A" })
           # puts "HERE WHAT WAS IT? visible_map.last.length #{@visible_map.last.length}"
           # puts "HERE WHAT WAS IT? visible_map.last[0].length #{@visible_map.last[0].length}"
@@ -750,7 +772,11 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << @off_edge_map_value
+              if x_index == @map_tile_width && x_index == -1
+                new_array << @off_edge_map_value
+              else
+                new_array << get_random_off_map_value
+              end
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -811,7 +837,11 @@ class GLBackground
 
           @visible_map.each do |row|
             row.pop
-            row.unshift(@off_edge_map_value)
+            if @map_tile_right_row == -1
+              row.unshift(@off_edge_map_value)
+            else
+              row.unshift(get_random_off_map_value)
+            end
           end
           @visual_map_of_visible_to_map.each do |y_row|
             y_row.pop
@@ -861,7 +891,11 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << @off_edge_map_value
+              if y_index == @map_tile_height && y_index == -1
+                new_array << @off_edge_map_value
+              else
+                new_array << get_random_off_map_value
+              end
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -903,7 +937,11 @@ class GLBackground
          # puts "ADDING IN RIGHT EDGE OF MAP"
           @visible_map.each do |row|
             row.shift
-            row.push(@off_edge_map_value)
+            if @map_tile_left_row == @map_tile_width
+              row.push(@off_edge_map_value)
+            else
+              row.push(get_random_off_map_value)
+            end
           end
           @visual_map_of_visible_to_map.each do |y_row|
             y_row.shift
@@ -936,7 +974,11 @@ class GLBackground
             else
               # puts "ARRAY 1 - X WAS OUT OF BOUNDS - #{clean_gps_map_center_x + x_offset}"
               new_debug_array << "N/A"
-              new_array << @off_edge_map_value
+              if y_index == @map_tile_height && y_index == 0
+                new_array << @off_edge_map_value
+              else
+                new_array << get_random_off_map_value
+              end
             end
             # puts "VISIBLE_MAX 0 X #{index_w} = @map_data[#{( @map_tile_height - @y_top_tracker )}][#{clean_gps_map_center_x + x_offset}]"
           end
@@ -1267,7 +1309,7 @@ class GLBackground
           if x_element['corner_heights']
             z = x_element['corner_heights']
           else
-            z = {'bottom_right' =>  3, 'bottom_left' =>  3, 'top_right' =>  3, 'top_left' =>  3}
+            z = {'bottom_right' =>  x_element['height'], 'bottom_left' =>  x_element['height'], 'top_right' =>  x_element['height'], 'top_left' =>  x_element['height']}
           end
 
 
