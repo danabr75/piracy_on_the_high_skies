@@ -13,7 +13,7 @@ class GeneralObject
   attr_reader :current_map_tile_x,  :current_map_tile_y
   attr_reader :x_offset, :y_offset
   attr_reader :image, :minimap_image
-  attr_reader :mini_map_image_width_half, :mini_map_image_height_half
+  attr_reader :mini_map_image_width_half, :mini_map_image_height_half, :optional_icon_z
   attr_reader :height_scale_with_image_scaler
 
   # attr_accessor :x_offset_base, :y_offset_base
@@ -158,7 +158,16 @@ class GeneralObject
     @owner = nil
     @invulnerable = false
 
-    @minimap_image = get_minimap_image
+    if options[:special_ship_enemy_icon] && options[:special_ship_enemy_icon] == true
+      @optional_icon_z = ZOrder::SpecialMiniMapIcon
+      @minimap_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_special_ship_enemy.png")
+    elsif options[:special_ship_ally_icon] && options[:special_ship_ally_icon] == true
+      @optional_icon_z = ZOrder::SpecialMiniMapIcon
+      @minimap_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_special_ship_ally.png")
+    else
+      @optional_icon_z = nil
+      @minimap_image = get_minimap_image
+    end
     if @minimap_image
       @mini_map_image_width  = @image_width  / ScreenMap::ICON_IMAGE_SCALER
       @mini_map_image_height = @image_height / ScreenMap::ICON_IMAGE_SCALER
@@ -168,7 +177,7 @@ class GeneralObject
   end   
 
   def get_minimap_image
-   nil #Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_building.png") 
+    nil
   end
 
   def is_point_inside_polygon point, points

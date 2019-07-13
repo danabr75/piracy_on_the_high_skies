@@ -50,7 +50,8 @@ class ScreenMap < ScreenFixedObject
     @mini_map_pixel_width  = @map_tile_width  * @cell_width
     @mini_map_pixel_height = @map_tile_height * @cell_height
 
-    @color = Gosu::Color.argb(0xcc_ffffff)
+    @transparent_color = Gosu::Color.argb(0xcc_ffffff)
+    # @solid_color = Gosu::Color.argb(0xff_ffffff)
     @player_tile_x = nil
     @player_tile_y = nil
     @player_x = nil
@@ -63,13 +64,13 @@ class ScreenMap < ScreenFixedObject
   end
 
   def draw
-    @image.draw(@x - @image_width, @y, ZOrder::MiniMap, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @color)
+    @image.draw(@x - @image_width, @y, ZOrder::MiniMap, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @transparent_color)
     if @player_tile_x && @player_tile_y
       # MiniMapIcon
-      @player_image.draw(@player_x, @player_y, ZOrder::PlayerMiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler, @color)
+      @player_image.draw(@player_x, @player_y, ZOrder::PlayerMiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler)
     end
     @icons.each do |icon|
-      icon[:image].draw(icon[:x], icon[:y], ZOrder::MiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler, @color)
+      icon[:image].draw(icon[:x], icon[:y], icon[:optional_z] || ZOrder::MiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler)
     end
   end
 
@@ -91,7 +92,8 @@ class ScreenMap < ScreenFixedObject
           icons << {
             image: image,
             x: convert_tile_x_to_screen_x(b.current_map_tile_x, b.mini_map_image_width_half),
-            y: convert_tile_y_to_screen_y(b.current_map_tile_y, b.mini_map_image_height_half)
+            y: convert_tile_y_to_screen_y(b.current_map_tile_y, b.mini_map_image_height_half),
+            optional_z: b.optional_icon_z
           }
           # puts "ICONS HERE:"
           # puts "Tile #{b.current_map_tile_x} - #{b.current_map_tile_y}"
@@ -108,7 +110,8 @@ class ScreenMap < ScreenFixedObject
           icons << {
             image: image,
             x: convert_tile_x_to_screen_x(ship.current_map_tile_x, ship.mini_map_image_width_half),
-            y: convert_tile_y_to_screen_y(ship.current_map_tile_y, ship.mini_map_image_height_half)
+            y: convert_tile_y_to_screen_y(ship.current_map_tile_y, ship.mini_map_image_height_half),
+            optional_z: ship.optional_icon_z
           }
           # puts "ICONS HERE:"
           # puts "Tile #{b.current_map_tile_x} - #{b.current_map_tile_y}"

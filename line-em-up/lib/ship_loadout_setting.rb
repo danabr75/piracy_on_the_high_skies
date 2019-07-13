@@ -382,7 +382,7 @@ class ShipLoadoutSetting < Setting
         is_hover = click_area.update(0, 0)
         # puts "WAS HARDPOINT HOVER? #{is_hover}"
         # puts "Value item"
-        if value[:item]
+        if value[:item] && value[:hp].is_valid_slot_type(value[:item][:hardpoint_item_slot_type])
           if value[:item][:hardpoint_item_slot_type] == :steam_core
             ship_steam_core_capacity += value[:item][:klass]::STEAM_MAX_CAPACITY
           # elsif value[:item][:hardpoint_item_slot_type] == :engine
