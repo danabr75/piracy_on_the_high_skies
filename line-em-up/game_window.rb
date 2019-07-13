@@ -363,7 +363,7 @@ class GameWindow < Gosu::Window
     # LUIT.config({window: @window, z: 25})
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
 
-    @screen_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
+    @mini_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
   end
 
   def menus_active
@@ -541,7 +541,7 @@ class GameWindow < Gosu::Window
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
     
-    @screen_map.update
+    @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y)
 
     @add_projectiles.reject! do |projectile|
       @projectiles[projectile.id] = projectile
@@ -920,7 +920,7 @@ class GameWindow < Gosu::Window
 
     @open_gl_executer.draw(self, @gl_background, @player, @pointer, @buildings, @pickups)
 
-    @screen_map.draw
+    @mini_map.draw
 
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     # @smoke.draw

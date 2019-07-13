@@ -5,6 +5,8 @@ class ScreenMap < ScreenFixedObject
 
   IMAGE_SCALER = 2.5
 
+  ICON_IMAGE_SCALER = 20
+
   def initialize(map_name, map_tile_width, map_tile_height, options = {})
     super(options)
 
@@ -13,6 +15,21 @@ class ScreenMap < ScreenFixedObject
 
     @image_width  = @image.width  * @height_scale_with_image_scaler
     @image_height = @image.height * @height_scale_with_image_scaler
+
+
+    @image_width  = @image.width  * @height_scale_with_image_scaler
+    @image_height = @image.height * @height_scale_with_image_scaler
+
+    @height_scale_with_icon_image_scaler = @height_scale / self.class::ICON_IMAGE_SCALER
+
+    @player_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_player.png")
+    @player_image_width  = @player_image.width  * @height_scale_with_icon_image_scaler
+    @player_image_height = @player_image.height * @height_scale_with_icon_image_scaler
+
+
+
+    @x_increment = @image_width  / (@map_tile_width.to_f)
+    @y_increment = @image_height / (@map_tile_height.to_f)
 
     @map_tile_width  = map_tile_width
     @map_tile_height = map_tile_height
@@ -33,33 +50,33 @@ class ScreenMap < ScreenFixedObject
     @mini_map_pixel_height = @map_tile_height * @cell_height
 
     @color = Gosu::Color.argb(0xcc_ffffff)
+    @player_tile_x = nil
+    @player_tile_y = nil
+    @player_x = nil
+    @player_y = nil
 
     # @mini_map_image = init_map(background_map_data)
     # puts "MINIMAP LENGTH: #{@mini_map.count}"
   end
 
   def draw
-    @image.draw(@x - @image_width, @y, ZOrder::UI, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @color)
-    # text = 'test'
-    # puts "@height_scale: #{@height_scale}"
-    # @fot.draw(text, @x - (@font.text_width(text) * @height_scale), @y, ZOrder::UI, @height_scale, @height_scale, 0xff_ffff00)
-    # @font.draw(text, @x - 50, @y, ZOrder::UI, @height_scale, @height_scale, 0xff_ffff00)
-    # y_offset = 0
-    # x_offset = @mini_map_pixel_height
-
-    # @mini_map.each do |y_row|
-    #   y_row.each do |x_row|
-    #     # puts "DRAWING HERE"
-    #     Gosu.draw_rect(x_offset, y_offset, 1.0, 1.0, x_row, ZOrder::UI)
-    #     x_offset -= @cell_width
-    #   end
-    #   y_offset += @cell_height
-    #   x_offset = @mini_map_pixel_height
-    # end
-
+    @image.draw(@x - @image_width, @y, ZOrder::MiniMap, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @color)
+    if @player_tile_x && @player_tile_y
+      # MiniMapIcon
+      @player_image.draw(@player_x, @player_y, ZOrder::MiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler, @color)
+    end
   end
 
-  def update
-
+  def update player_tile_x, player_tile_y
+    @player_tile_x = player_tile_x
+    @player_tile_y = player_tile_y
+    @player_x = @x - @x_increment * player_tile_x - (@player_image_width / 2.0)
+    @player_y = @y + @y_increment * player_tile_y - (@player_image_height / 2.0)
   end
+
+
+
+
+
+
 end
