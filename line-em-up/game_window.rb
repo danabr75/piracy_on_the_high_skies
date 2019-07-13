@@ -363,7 +363,7 @@ class GameWindow < Gosu::Window
     # LUIT.config({window: @window, z: 25})
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
 
-    @screen_map = ScreenMap.new(@gl_background.map_data, @gl_background.map_tile_width, @gl_background.map_tile_height)
+    @screen_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
   end
 
   def menus_active

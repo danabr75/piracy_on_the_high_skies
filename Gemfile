@@ -42,6 +42,11 @@ gem "pry"
 gem 'sourcify'
 # gem 'rb2exe'
 
+
+group :test, :development do
+  gem "rmagick"
+end
+
 # Project of the Day screenshot
 # Discover more awesome projects in the Gosu Showcase.
 # hello ruby c++ / ios

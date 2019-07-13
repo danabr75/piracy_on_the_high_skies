@@ -1,6 +1,7 @@
 # In Console: 
-# mg = MapGenerator.new('desert_v12_small')
+# mg = MapGenerator.new('desert_v13_small')
 # mg.generate
+require 'rmagick'
 
 class MapGenerator
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
@@ -11,7 +12,17 @@ class MapGenerator
   def initialize map_save_name, map_tile_height = 250, map_tile_width = 250, terrain_image_paths = ["#{MEDIA_DIRECTORY}/earth.png"], out_of_bounds_terrain_path = "#{MEDIA_DIRECTORY}/earth_3.png"
     @map_tile_height         = map_tile_height
     @map_tile_width          = map_tile_width
-    @map_location = "#{MAP_DIRECTORY}/#{map_save_name}.txt"
+    @map_file_location = "#{MAP_DIRECTORY}/#{map_save_name}.txt"
+    @map_object_location = "#{MAP_DIRECTORY}/#{map_save_name}_map_objects.txt"
+
+    if !File.exist?(@map_object_location)
+      File.open(@map_object_location, 'w') do |f|
+        f << get_init_map_object_data.to_json
+      end
+    end
+
+    @mini_map_file_location = "#{MAP_DIRECTORY}/#{map_save_name}_minimap.png"
+
     @terrain_image_paths = terrain_image_paths
     @out_of_bounds_terrain_path = out_of_bounds_terrain_path
     @terrain_random_gen = @terrain_image_paths.length
@@ -41,7 +52,7 @@ class MapGenerator
 
   def generate
     # create_file_if_non_existent("#{MAP_DIRECTORY}/#{map_save_name}.txt")
-    create_file_if_non_existent(@map_location)
+    create_file_if_non_existent(@map_file_location)
     # File.open(file_location, 'a') do |f|
     #   f << "\n#{setting_name}: #{root_values.to_json};"
     # end
@@ -277,18 +288,84 @@ class MapGenerator
     end
    # puts "@terrain_image_paths: #{@terrain_image_paths}"
 
+
+   # MINI MAP HERE
+    mini_map = []
+    height_rows.each do |y_row|
+      map_y_row = []
+      y_row.each do |x_row|
+        case x_row[:terrain_type]
+        when 'snow'
+          # colors = Gosu::Color.argb(0xff_ffffff)
+          colors = ['100%', '100%', '100%']
+        when 'water'
+          # colors = Gosu::Color.argb(0xff_0066ff)
+          colors = ['0', '0', '100%']
+        when 'dirt'
+          # colors = Gosu::Color.argb(0xff_ffb84d)
+          # rgb(218,165,32)
+          colors = ['90%', '70%', '10%']
+        else
+          # colors = Gosu::Color.argb(0xff_808080)
+          colors = ['50%', '50%', '50%']
+          # nothing
+        end
+        map_y_row << colors
+      end
+      mini_map << map_y_row
+    end
+    mini_map = mini_map.reverse
+
+
+    # y_offset = 0
+    # x_offset = @mini_map_pixel_height
+
+    # @mini_map.each do |y_row|
+    #   y_row.each do |x_row|
+    #     # puts "DRAWING HERE"
+    #     Gosu.draw_rect(x_offset, y_offset, 1.0, 1.0, x_row, ZOrder::UI)
+    #     x_offset -= @cell_width
+    #   end
+    #   y_offset += @cell_height
+    #   x_offset = @mini_map_pixel_height
+    # end
+
+    # width = 100
+    # height = 100
+    # map_tile_height = 250, map_tile_width = 250
+    # mini_map_image = Array.new(map_tile_height) do
+    #   Array.new(map_tile_width) do
+    #     nil
+    #   end
+    # end
+
+    # @mini_map_file_location
+
+    img = Magick::Image.new(map_tile_width, map_tile_height)
+
+    mini_map.each_with_index do |y_row, y_index|
+      y_row.each_with_index do |x_item, x_index|
+        #puts "setting #{row_index}/#{column_index} to #{item}"
+        # img.pixel_color(y_index, x_index, "rgb(#{x_item.join(',')})")
+        img.pixel_color(x_index, y_index, "rgb(#{x_item.join(',')})")
+      end
+    end
+
+    img.write(@mini_map_file_location)
+
+
     data = {
       terrains: @terrain_image_paths, out_of_bounds_terrain_path: @out_of_bounds_terrain_path,
       map_tile_width: @map_tile_width, map_tile_height: @map_tile_height,
       data: height_rows
     }
-    File.open(@map_location, 'w') do |f|
+    File.open(@map_file_location, 'w') do |f|
       f << data.to_json
     end
   end
 
   def read_data
-    data = JSON.parse(File.readlines(@map_location).first)
+    data = JSON.parse(File.readlines(@map_file_location).first)
     return data
   end
 
@@ -301,6 +378,15 @@ class MapGenerator
 
   # def get_surrounding_average_tile_height x_index, y_index
 
+
+  def get_init_map_object_data
+    return {
+      "buildings":{
+      },
+      "ships":{
+      }
+    }
+  end
 
 
   # end

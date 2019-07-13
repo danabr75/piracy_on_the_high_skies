@@ -14,6 +14,7 @@ GEM
     pry (0.12.2)
       coderay (~> 1.1.0)
       method_source (~> 0.9.0)
+    rmagick (4.0.0)
     ruby-progressbar (1.10.1)
     ruby2ruby (2.4.2)
       ruby_parser (~> 3.1)
@@ -39,6 +40,7 @@ DEPENDENCIES
   opengl-bindings
   parallel
   pry
+  rmagick
   ruby-progressbar
   sourcify
 

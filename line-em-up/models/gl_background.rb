@@ -220,9 +220,9 @@ class GLBackground
     @map_right_row  = nil
 
 
-    @map_name = "desert_v12_small"
-    @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
-    @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
+    @map_name = "desert_v13_small"
+    @map = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}.txt").first)
+    @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}//#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
 
 
