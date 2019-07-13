@@ -46,12 +46,13 @@ class GLBackground
   SCROLLING_SPEED = 4
 
   # attr_accessor :player_position_x, :player_position_y
-  attr_accessor :map_tile_width, :map_tile_height
+  attr_reader :map_tile_width, :map_tile_height
   attr_accessor :map_pixel_width, :map_pixel_height
   attr_accessor :tile_pixel_width, :tile_pixel_height
   attr_accessor :current_map_pixel_center_x, :current_map_pixel_center_y
   attr_reader :gps_map_center_x, :gps_map_center_y
   attr_reader :map_name
+  attr_reader :map_data
 
   # tile size is 1 GPS (location_x, location_y)
   # Screen size changes. At 900x900, it should be 900 (screen_pixel_width) / 15 (@visible_map_tile_width) = 60 pixels
@@ -219,7 +220,7 @@ class GLBackground
     @map_right_row  = nil
 
 
-    @map_name = "desert_v11_small"
+    @map_name = "desert_v12_small"
     @map = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("/Users/bendana/projects/line-em-up/line-em-up/maps/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []

@@ -1,5 +1,5 @@
 # In Console: 
-# mg = MapGenerator.new('desert_v11_small')
+# mg = MapGenerator.new('desert_v12_small')
 # mg.generate
 
 class MapGenerator
@@ -55,23 +55,26 @@ class MapGenerator
         if x == 0 || x == @map_tile_width - 1 || y == 0 || y == @map_tile_height - 1 
           height = 2 + rand
         else
-          height = rand + rand + rand + rand(2) - 1.0
+          height = rand + rand + rand + rand + rand
         end
         height = 0.1 if height < 0.1
-        height = 3.0 if height > 3.0
-        width_rows << {height: height, terrain_index: rand(@terrain_random_gen), corner_heights: {}, terrain_paths_and_weights: {}}
+        height = 6.0 if height > 6.0
+        width_rows << {height: height, terrain_type: 'dirt', terrain_index: rand(@terrain_random_gen), corner_heights: {}, terrain_paths_and_weights: {}}
       end
       height_rows << width_rows
     end
 
     @mountain_areas.each do |mountain|
       height_rows[mountain[:y]][mountain[:x]][:terrain_index] = @snow_index
+      height_rows[mountain[:y]][mountain[:x]][:terrain_type]  = 'snow'
       height_rows[mountain[:y]][mountain[:x]][:height]        = 3
 
 
       height_rows[mountain[:y] - 1][mountain[:x] - 1][:terrain_index] = @snow_index
+      height_rows[mountain[:y] - 1][mountain[:x] - 1][:terrain_type]  = 'snow'
       height_rows[mountain[:y] - 1][mountain[:x] - 1][:height]        = 2.5
       height_rows[mountain[:y] + 1][mountain[:x] + 1][:terrain_index] = @snow_index
+      height_rows[mountain[:y] + 1][mountain[:x] + 1][:terrain_type] = 'snow'
       height_rows[mountain[:y] + 1][mountain[:x] + 1][:height]        = 2.5
       height_rows[mountain[:y] + 1][mountain[:x] - 1][:height]        = 2.5
       height_rows[mountain[:y] - 1][mountain[:x] + 1][:height]        = 2.5
@@ -82,6 +85,7 @@ class MapGenerator
     snow_width  = 0
     while snow_width < @map_tile_width
       height_rows[snow_height][snow_width][:terrain_index] = @snow_index
+      height_rows[snow_height][snow_width][:terrain_type] = 'snow'
       height_rows[snow_height][snow_width][:height]        = 3
       if snow_height == 0
         # Go EAST OR SOUTH
@@ -121,6 +125,7 @@ class MapGenerator
     water_width  = 0
     while water_width < @map_tile_width
       height_rows[water_height][water_width][:terrain_index] = @water_index
+      height_rows[water_height][water_width][:terrain_type]  = 'water'
       height_rows[water_height][water_width][:height]        = 0.0001
       if water_height == 0
         # Go EAST OR SOUTH

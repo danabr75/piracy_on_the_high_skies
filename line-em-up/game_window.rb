@@ -304,56 +304,6 @@ class GameWindow < Gosu::Window
     viewable_center_target = nil
 
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
-   # puts "EFFECTS COUNT ON INIT: #{@effects.count}"
-
-    # @quest_data, @ships, @buildings = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player)
-
-    # Loading in ActiveQuests .. start off with kill all enemie ships in the area
-    # every ship killed must be checked against the quests
-    # Move these to right after map init?
-
-    # init_quest = {
-    #   # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
-    #   "starting_level_quest": {
-    #     victory_condition_string:      "lambda { |map_name, ships, buildings, player| ships.count == 0                               }",
-    #     post_victory_triggers_string:  "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
-    #     active_condition_string:       "lambda { |map_name, ships, buildings, player| map_name == active_condition                   }"
-    #   },
-    #   "followup-level-quest": {
-    #     victory_condition_string:      "lambda { |map_name, ships, buildings, player| buildings.count == 0                           }",
-    #     post_victory_triggers_string:  "lambda { |map_name, ships, buildings, player| {trigger_quests: ['followup-level-quest']}     }",
-    #     active_condition_string:       "lambda { |map_name, ships, buildings, player| map_name == active_condition }",
-    #     map_init_string:               "lambda { |map_name, ships, buildings, player|  ships << AIShip.new(nil, nil, x_value.to_i, y_value.to_i) if map_name == 'desert_v2_small'; return {ships: ships, buildings: buildings} }"
-
-    #   }
-    # }
-    # test = AIShip.new(nil, nil, 123, 123, {:id=>"starting_level_quest_ship_1"})
-    # init_quest_data = init_quest_data.to_json
-    # quests = [init_quest]
-    # active_quest_data = ConfigSetting.get_setting(@config_path, 'Quests', quests.to_json)
-    # puts "ACTIVE_QUEST"
-    # puts active_quest_data.inspect
-    # active_quests_data = eval(active_quest_data)
-    # active_quests = {}
-    # active_quests_data.each do |quest|
-    #   quest.each do |quest_id, quest_hash|
-    #     active_quests[quest_id] = {}
-    #    # puts "active_quests[quest_id]: #{active_quests[quest_id]}"
-    #    # puts "quest_hash: #{quest_hash}"
-    #     active_quests[quest_id][:victory_condition]     = eval(quest_hash[:victory_condition_string]) if quest_hash[:victory_condition_string] && quest_hash[:victory_condition_string] != ''
-    #     active_quests[quest_id][:post_victory_triggers] = eval(quest_hash[:post_victory_triggers_string]) if quest_hash[:post_victory_triggers_string] && quest_hash[:post_victory_triggers_string] != ''
-    #     active_quests[quest_id][:active_condition]      = eval(quest_hash[:active_condition_string]) if quest_hash[:active_condition_string] && quest_hash[:active_condition_string] != ''
-    #   end
-    # end
-    # puts "ACTIVE_QUESTV2"
-    # puts active_quests
-    # @active_quests = active_quests
-    # Run these active quests through the update block. If the victory condition is met, need to update the json data. And move it to inactive.
-    # Create quest management interface module... can retrieve, store, etc.
-    # raise "STOP HERE"
-    # Inactive quests are dormant until triggered. Map location.. or death of a special ship.
-    # One triggered, they should be moved into the active_quest_data
-
 
     # @scroll_factor = 1
     # @movement_x = 0
@@ -412,6 +362,8 @@ class GameWindow < Gosu::Window
     @menus = [@ship_loadout_menu, @menu]
     # LUIT.config({window: @window, z: 25})
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
+
+    @screen_map = ScreenMap.new(@gl_background.map_data, @gl_background.map_tile_width, @gl_background.map_tile_height)
   end
 
   def menus_active
@@ -589,6 +541,8 @@ class GameWindow < Gosu::Window
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
     
+    @screen_map.update
+
     @add_projectiles.reject! do |projectile|
       @projectiles[projectile.id] = projectile
       true
@@ -965,6 +919,9 @@ class GameWindow < Gosu::Window
     # puts @enemy_projectiles
 
     @open_gl_executer.draw(self, @gl_background, @player, @pointer, @buildings, @pickups)
+
+    @screen_map.draw
+
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     # @smoke.draw
     @menu.draw

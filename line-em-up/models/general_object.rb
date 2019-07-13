@@ -115,9 +115,9 @@ class GeneralObject
     else
       @image = nil
     end
-    if self.class.name == "Player"
-      raise "DIDN't GET IMAGE from player" if @image.nil?
-    end
+    # if self.class.name == "Player"
+    #   raise "DIDN't GET IMAGE from player" if @image.nil?
+    # end
 
     @time_alive = 0
     @last_updated_at = @time_alive
