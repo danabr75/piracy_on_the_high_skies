@@ -40,6 +40,8 @@ module HardpointObjects
 
     ANIMATED_HARDPOINT_IMAGE_LENGTH = 0
 
+    PERMANENT_STEAM_USE = 0
+
     # POST_DESTRUCTION_EFFECTS = false
 
     # def get_post_destruction_effects

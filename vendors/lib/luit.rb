@@ -242,6 +242,10 @@ module LUIT
       @font.draw_rel(@text, @x + x + @w / 2, @y + y + @h / 2, @z + 1, 0.5, 0.5)
     end
 
+    def update_text(text)
+      @text = text
+    end
+
     def update(x = 0, y = 0)
       x += @x
       y += @y

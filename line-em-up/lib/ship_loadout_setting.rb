@@ -113,7 +113,7 @@ class ShipLoadoutSetting < Setting
     @hardpoints_height = nil
     @hardpoints_width  = nil
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
-    @button = LUIT::Button.new(@window, :back, max_width / 2, 50, ZOrder::UI, "Return to Game", 30, 30)
+    @button = LUIT::Button.new(@window, :back, max_width / 2, 30 * @height_scale, ZOrder::UI, "Return to Game", 30, 30)
     @font_height  = (12 * @height_scale).to_i
     @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
@@ -127,6 +127,14 @@ class ShipLoadoutSetting < Setting
     @active = false
 
     @invalid_hardpoint_image = Gosu::Image.new(INVALID_HARDPOINT_IMAGE)
+
+    @message_stub = "*" * 40
+    @ship_steam_core_capacity = 0
+    @ship_steam_core_usage    = 0
+    @steam_core_capacity_text = "  Steam Core Capacity: "
+    @steam_core_usage_text    = "  Steam Core Usage: "
+    @steam_core_capacity_button = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale, ZOrder::UI, @message_stub, 30, 30)
+    @steam_core_usage_button    = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale + @steam_core_capacity_button.h, ZOrder::UI, @message_stub, 30, 30)
   end
 
   def add_to_ship_inventory_credits new_credits
@@ -251,7 +259,7 @@ class ShipLoadoutSetting < Setting
 
       color, hover_color = hp.hardpoint_colors
       click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
-      @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) }
+      @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) if !window.block_all_controls }
       if hp.assigned_weapon_class
         if @buy_rate_from_store.nil? || @sell_rate_from_store.nil?
           raise "INVALID OBJECT INVENTORY RATES"
@@ -365,6 +373,8 @@ class ShipLoadoutSetting < Setting
 
   def hardpoint_update
     hover_object = nil
+    ship_steam_core_capacity = 0
+    ship_steam_core_usage    = 0
     @ship_hardpoints.each do |value|
       click_area = value[:click_area]
       # puts "CLICK AREA: #{click_area.y}"
@@ -372,11 +382,23 @@ class ShipLoadoutSetting < Setting
         is_hover = click_area.update(0, 0)
         # puts "WAS HARDPOINT HOVER? #{is_hover}"
         # puts "Value item"
-        # puts value[:item]
+        if value[:item]
+          if value[:item][:hardpoint_item_slot_type] == :steam_core
+            ship_steam_core_capacity += value[:item][:klass]::STEAM_MAX_CAPACITY
+          # elsif value[:item][:hardpoint_item_slot_type] == :engine
+          else
+            ship_steam_core_usage += value[:item][:klass]::PERMANENT_STEAM_USE
+          end
+        end
+
+
         hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp] } if is_hover
         # raise "GOT HERE" if is_hover
       end
     end
+    @ship_steam_core_capacity = ship_steam_core_capacity.round
+    @ship_steam_core_usage    = ship_steam_core_usage.round
+
     return hover_object
   end
 
@@ -388,6 +410,8 @@ class ShipLoadoutSetting < Setting
 
       @hover_object = hardpoint_update
 
+      @steam_core_capacity_button.update_text(@steam_core_capacity_text + @ship_steam_core_capacity.to_s)
+      @steam_core_usage_button.update_text(@steam_core_usage_text + @ship_steam_core_usage.to_s)
 
       # hover_object = matrix_update
       if @object_inventory && @object_inventory.holding_type == :store
@@ -408,6 +432,8 @@ class ShipLoadoutSetting < Setting
       # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
       # @button.update
       @button.update(-(@button.w / 2), -(@button.h / 2))
+      @steam_core_capacity_button.update(0,0)
+      @steam_core_usage_button.update(0,0)
 
       # get ship value from player. used to come from update
       # if ship_value != @ship_value
@@ -548,6 +574,8 @@ class ShipLoadoutSetting < Setting
 
       # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
       @button.draw(-(@button.w / 2), -(@button.h / 2))
+      @steam_core_capacity_button.draw(0, 0)
+      @steam_core_usage_button.draw(0, 0)
 
       @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 

@@ -7,9 +7,9 @@ module HardpointObjects
     PROJECTILE_CLASS   = nil 
     FIRING_GROUP_NUMBER = nil # Passive
 
-    PERMANENT_STEAM_USE       = 25
+    PERMANENT_STEAM_USE       = 25.0
     TILES_PER_SECOND_MODIFIER = 1.35
-    # TILES_PER_SECOND_MODIFIER = 12.0
+    # TILES_PER_SECOND_MODIFIER = 4.0
     ROTATION_MODIFIER         = 1.5
 
     # Unimplemented
