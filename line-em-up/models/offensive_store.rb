@@ -40,7 +40,7 @@ class OffensiveStore < Building
   end
 
   def self.get_minimap_image
-    Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_offensive_store.png") 
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_offensive_store.png")
   end
 
   def get_minimap_image

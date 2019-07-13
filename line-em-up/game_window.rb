@@ -199,11 +199,11 @@ class GameWindow < Gosu::Window
     @game_pause = false
     # @menu = nil
     # @can_open_menu = true
-    @can_pause = true
+    # @can_pause = true
     @can_resize = !options[:block_resize].nil? && options[:block_resize] == true ? false : true
     @can_toggle_secondary = true
-    @can_toggle_fullscreen_a = true
-    @can_toggle_fullscreen_b = true
+    # @can_toggle_fullscreen_a = true
+    # @can_toggle_fullscreen_b = true
 
 
     self.caption = "OpenGL Integration"
@@ -324,7 +324,7 @@ class GameWindow < Gosu::Window
     @menu.add_item(
       :resume, "Resume",
       0, 0,
-      lambda {|window, menu, id| menu.disable },
+      lambda {|window, menu, id| window.block_all_controls = true; menu.disable },
       nil,
       {is_button: true}
     )
@@ -332,7 +332,7 @@ class GameWindow < Gosu::Window
       :loadout, "Inventory",
       0, 0,
       # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
-      lambda {|window, menu, id| window.menu.disable; window.ship_loadout_menu.enable },
+      lambda {|window, menu, id| window.block_all_controls = true; window.menu.disable; window.ship_loadout_menu.enable },
       nil,
       {is_button: true}
     )
@@ -362,8 +362,40 @@ class GameWindow < Gosu::Window
     @menus = [@ship_loadout_menu, @menu]
     # LUIT.config({window: @window, z: 25})
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
-
+    @show_minimap = true
     @mini_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
+
+    @key_pressed_map = {}
+  end
+
+  # def key_id_combo_lock_3 id, id2, id3
+  #   ids = [id, id2, id3]
+  #   # return false if ids.include?(nil)
+  #   master_id = ids.reject{|v| v.nil?}.join('-')
+  #   if @key_pressed_map.key?(master_id)
+  #     return false
+  #   else
+  #     @key_pressed_map[master_id] = true
+  #     ids.each do |local_id|
+  #       @key_pressed_map[local_id] = {id: master_id}
+  #     end
+  #     return true
+  #   end
+  # end
+
+  def key_id_lock id
+    if @key_pressed_map.key?(id)
+      return false
+    else
+      @key_pressed_map[id] = true
+      return true
+    end
+  end
+
+  def key_id_release id
+    value = @key_pressed_map.delete(id)
+    # if value.is_a?(Hash)
+    #   @key_pressed_map.delete(value[:id])
   end
 
   def menus_active
@@ -482,9 +514,9 @@ class GameWindow < Gosu::Window
     #   @grappling_hook.deactivate if @grappling_hook
     # end
 
-    if (id == Gosu::KB_P)
-      @can_pause = true
-    end
+    # if (id == Gosu::KB_P)
+    #   @can_pause = true
+    # end
     if (id == Gosu::KB_TAB)
       @can_toggle_secondary = true
     end
@@ -492,17 +524,17 @@ class GameWindow < Gosu::Window
     #   @can_toggle_scroll_factor = true
     # end
 
-    if id == Gosu::KB_RETURN
-      @can_toggle_fullscreen_a = true
-    end
-    if id == Gosu::KB_RIGHT_META
-      @can_toggle_fullscreen_b = true
-    end
+    # if id == Gosu::KB_RETURN
+    #   @can_toggle_fullscreen_a = true
+    # end
+    # if id == Gosu::KB_RIGHT_META
+    #   @can_toggle_fullscreen_b = true
+    # end
     if id == Gosu::KB_MINUS
-      @can_resize = true
+      # @can_resize = true
     end
     if id == Gosu::KB_EQUALS
-      @can_resize = true
+      # @can_resize = true
     end
     if id == Gosu::MS_RIGHT
       @player.deactivate_group_3
@@ -516,7 +548,8 @@ class GameWindow < Gosu::Window
 
     if id == Gosu::KB_LEFT_SHIFT
       @player.disable_boost
-    end 
+    end
+    key_id_release(id)
   end
 
   def get_center_font_ui_y
@@ -541,7 +574,7 @@ class GameWindow < Gosu::Window
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
     
-    @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings)
+    @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
 
     @add_projectiles.reject! do |projectile|
       @projectiles[projectile.id] = projectile
@@ -661,7 +694,7 @@ class GameWindow < Gosu::Window
       # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
-      if Gosu.button_down?(Gosu::KbEscape) && !menus_active
+      if Gosu.button_down?(Gosu::KbEscape) && !menus_active && key_id_lock(Gosu::KbEscape)
         @menu.enable
       end
 
@@ -672,43 +705,43 @@ class GameWindow < Gosu::Window
       #   # end
       # end
 
-      if Gosu.button_down?(Gosu::KB_M)
-        GameWindow.reset(self, {debug: @debug})
+      if Gosu.button_down?(Gosu::KB_M) && key_id_lock(Gosu::KB_M)
+        # GameWindow.reset(self, {debug: @debug})
+        @show_minimap = !@show_minimap
       end
 
-      if Gosu.button_down?(Gosu::KB_RIGHT_META) && Gosu.button_down?(Gosu::KB_RETURN) && @can_toggle_fullscreen_a && @can_toggle_fullscreen_b
-        @can_toggle_fullscreen_a = false
-        @can_toggle_fullscreen_b = false
-        GameWindow.fullscreen(self)
-      end
+      # if Gosu.button_down?(Gosu::KB_RIGHT_META) && Gosu.button_down?(Gosu::KB_RETURN) && @can_toggle_fullscreen_a && @can_toggle_fullscreen_b
+      #   # @can_toggle_fullscreen_a = false
+      #   # @can_toggle_fullscreen_b = false
+      #   GameWindow.fullscreen(self)
+      # end
 
 
-      if Gosu.button_down?(Gosu::KB_P) && @can_pause
-        @can_pause = false
+      if Gosu.button_down?(Gosu::KB_P) && key_id_lock(Gosu::KB_P)
         @game_pause = !@game_pause
       end
 
-      if Gosu.button_down?(Gosu::KB_O) && @can_resize
-        @can_resize = false
+      if Gosu.button_down?(Gosu::KB_O) && key_id_lock(Gosu::KB_O)
+        # @can_resize = false
         GameWindow.resize(self, 1920, 1080, false)
       end
 
-      if Gosu.button_down?(Gosu::KB_MINUS) && @can_resize
-        @can_resize = false
+      if Gosu.button_down?(Gosu::KB_MINUS) && key_id_lock(Gosu::KB_MINUS)
+        # @can_resize = false
         GameWindow.down_resolution(self)
       end
-      if Gosu.button_down?(Gosu::KB_EQUALS) && @can_resize
-        @can_resize = false
+      if Gosu.button_down?(Gosu::KB_EQUALS) && key_id_lock(Gosu::KB_EQUALS)
+        # @can_resize = false
         GameWindow.up_resolution(self)
       end
 
 
 
       if @player.is_alive && !@game_pause && !menus_active
-        if Gosu.button_down?(Gosu::KB_TAB) || Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)
-          @can_toggle_secondary = false
-          @player.toggle_secondary
-        end
+        # if Gosu.button_down?(Gosu::KB_TAB) || Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)
+        #   @can_toggle_secondary = false
+        #   @player.toggle_secondary
+        # end
 
         if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
           # @can_toggle_scroll_factor = false
@@ -721,8 +754,8 @@ class GameWindow < Gosu::Window
         end
 
         @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
-        @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
-        @player.move_right if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
+        # @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
+        # @player.move_right if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @player.accelerate if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
         @player.brake      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
@@ -920,7 +953,7 @@ class GameWindow < Gosu::Window
 
     @open_gl_executer.draw(self, @gl_background, @player, @pointer, @buildings, @pickups)
 
-    @mini_map.draw
+    @mini_map.draw if @show_minimap
 
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     # @smoke.draw

@@ -73,7 +73,7 @@ class ScreenMap < ScreenFixedObject
     end
   end
 
-  def update player_tile_x, player_tile_y, buildings#, ships
+  def update player_tile_x, player_tile_y, buildings, ships
     Thread.new do
       @player_tile_x = player_tile_x
       @player_tile_y = player_tile_y
@@ -92,6 +92,23 @@ class ScreenMap < ScreenFixedObject
             image: image,
             x: convert_tile_x_to_screen_x(b.current_map_tile_x, b.mini_map_image_width_half),
             y: convert_tile_y_to_screen_y(b.current_map_tile_y, b.mini_map_image_height_half)
+          }
+          # puts "ICONS HERE:"
+          # puts "Tile #{b.current_map_tile_x} - #{b.current_map_tile_y}"
+          # puts "X: #{convert_tile_x_to_screen_x(b.current_map_tile_x, b.mini_map_image_width_half)} Y: #{convert_tile_y_to_screen_y(b.current_map_tile_y, b.mini_map_image_height_half)}"
+          # puts "IMAGE H AND W: #{b.mini_map_image_width_half}  -  #{b.mini_map_image_height_half}"
+        end
+      end
+
+      ships.each do |ship_id, ship|
+        image = ship.minimap_image
+        if image
+          # b.current_map_pixel_x
+          # b.current_map_pixel_y
+          icons << {
+            image: image,
+            x: convert_tile_x_to_screen_x(ship.current_map_tile_x, ship.mini_map_image_width_half),
+            y: convert_tile_y_to_screen_y(ship.current_map_tile_y, ship.mini_map_image_height_half)
           }
           # puts "ICONS HERE:"
           # puts "Tile #{b.current_map_tile_x} - #{b.current_map_tile_y}"

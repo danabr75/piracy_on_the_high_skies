@@ -149,6 +149,15 @@ class AIShip < ScreenMapFixedObject
     @cannot_fire_counter = 0
   end
 
+
+  def self.get_minimap_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_ai_ship.png")
+  end
+
+  def get_minimap_image
+    return self.class.get_minimap_image
+  end
+
   def hit_objects(object_groups, options)
     return @ship.hit_objects(self, object_groups, options)
   end
