@@ -214,10 +214,10 @@ class GLBackground
     @gps_map_center_y = nil # player_y ? (player_y / (@tile_pixel_height)).round : 0
 
 
-    @map_top_row    = nil
-    @map_bottom_row = nil
-    @map_left_row   = nil
-    @map_right_row  = nil
+    # @map_top_row    = nil
+    # @map_bottom_row = nil
+    # @map_left_row   = nil
+    # @map_right_row  = nil
 
 
     @map_name = "desert_v13_small"
@@ -337,8 +337,19 @@ class GLBackground
   # Shouldn't use center here.. should use player center..
   def init_map current_target_tile_x, current_target_tile_y, window
     # puts "INIT MAP"
-    @gps_map_center_x = current_target_tile_x
-    @gps_map_center_y = current_target_tile_y
+    # @map_tile_width - 
+
+    # START IN MIDDLE, go to top right
+    # player 0 - 0
+    # @gps_map_center_x: 0
+    # @gps_map_center_y: 250
+    # @map_tile_left_row    = 256
+    # @map_tile_right_row = 243
+    # @map_tile_top_row   = 245
+    # @map_tile_bottom_row  = 254
+
+    @gps_map_center_x = @map_tile_width - 1 - current_target_tile_x
+    @gps_map_center_y = @map_tile_height - 1 - current_target_tile_y
 
     map_has_a_center_x_square = @map_tile_width  % 2 == 1 #=  @map["map_width"]
     map_has_a_center_y_square = @map_tile_height % 2 == 1 #= @map["map_height"]
@@ -400,11 +411,12 @@ class GLBackground
 
         if @map_data[y_index] && @map_data[y_index][x_index]
           @visible_map[index_h][index_w] = @map_data[y_index][x_index]
+          @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
         else
           @visible_map[index_h][index_w] = @off_edge_map_value
+        @visual_map_of_visible_to_map[index_h][index_w] = "N/A"
         end
 
-        @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
       end
     end
 
@@ -451,6 +463,7 @@ class GLBackground
 
   # How to draw enemies that can move? Projectiles and enemies
   def update_objects_relative_to_map local_map_movement_x, local_map_movement_y, objects, tile_movement_x, tile_movement_y
+
     delete_index = []
     objects.each_with_index do |object, index|
       # Objects will move themselves across tiles
@@ -509,18 +522,16 @@ class GLBackground
   # This is printing out in the wrong order. 249, 249 is reading as 0,0
   # This is confusing.
   def print_visible_map
-    if @debug
-     # puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
+     puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
       @visual_map_of_visible_to_map.each do |y_row|
         output = "|"
         y_row.each do |x_row|
           output << x_row
           output << '|'
         end
-       # puts output
-       # puts "_" * 80
+       puts output
+       puts "_" * 80
       end
-    end
   end
 
   # I think this is dependent on the map being square
@@ -586,15 +597,29 @@ class GLBackground
     raise "WRONG MAP WIDTH!  Expected #{@visible_map_tile_width  + @extra_map_tile_width } Got #{@visible_map[0].length}" if @visible_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
     raise "WRONG MAP HEIGHT! Expected #{@visible_map_tile_height + @extra_map_tile_height} Got #{@visible_map.length}"    if @visible_map.length    != @visible_map_tile_height + @extra_map_tile_height
 
+# player 0 - 1
+# @gps_map_center_x: 0
+# @gps_map_center_y: -2
+# @map_tile_left_row    = 6
+# @map_tile_right_row = -7
+# @map_tile_top_row   = -7
+# @map_tile_bottom_row  = 2
+
     # puts "UPDATE --------------------- UPDATE"
-    # puts "@map_tile_top_row    = #{@map_tile_top_row}"
-    # puts "@map_tile_bottom_row = #{@map_tile_bottom_row}"
-    # puts "@map_tile_left_row   = #{@map_tile_left_row}"
-    # puts "@map_tile_right_row  = #{@map_tile_right_row}"
+    puts "@gps_map_center_x: #{@gps_map_center_x}"
+    puts "@gps_map_center_y: #{@gps_map_center_y}"
+    puts "@map_tile_left_row    = #{@map_tile_left_row}"
+    puts "@map_tile_right_row = #{@map_tile_right_row}"
+    puts "@map_tile_top_row   = #{@map_tile_top_row}"
+    puts "@map_tile_bottom_row  = #{@map_tile_bottom_row}"
     # puts "@gps_map_center_x    = #{@gps_map_center_x}"
     # puts "@gps_map_center_y    = #{@gps_map_center_y}"
-    # print_visible_map
+    print_visible_map
+    # @map_tile_left_row   = @gps_map_center_x + @gps_tile_offset_x - 1
+    # @map_tile_right_row  = @gps_map_center_x - @gps_tile_offset_x
 
+    # @map_tile_top_row    = @gps_map_center_y - @gps_tile_offset_y
+    # @map_tile_bottom_row = @gps_map_center_y + @gps_tile_offset_y - 1
 
 
     if @debug
@@ -626,7 +651,7 @@ class GLBackground
 
     # 1 should be 1 GPS coord unit. No height scale should be on it.
     if @local_map_movement_y >= @tile_pixel_height# / @visible_map_tile_height.to_f# * @height_scale * 1.1
-     # puts "ADDING IN ARRAY 1 - SOUTH"
+     puts "ADDING IN ARRAY 1 - SOUTH"
       tile_movement = true
       if @current_map_pixel_center_y < (@map_pixel_height)
         # puts "CURRENT WAS LESS THAN EXTERNIOR: #{@current_map_pixel_center_y} - #{EXTERIOR_MAP_HEIGHT}"
@@ -715,7 +740,7 @@ class GLBackground
     # Adding to bottom of map
     # Convert on screen movement to map
     if @local_map_movement_y <= -@tile_pixel_height# / @visible_map_tile_height.to_f
-     # puts "ADDING IN ARRAY 2 - NORTH - #{@map_tile_top_row}"
+     puts "ADDING IN ARRAY 2 - NORTH - #{@map_tile_top_row}"
       tile_movement = true
       if @current_map_pixel_center_y > 0
        # puts "PRE gps_map_center_y: #{@gps_map_center_y}"
@@ -808,8 +833,8 @@ class GLBackground
     # if @local_map_movement_x >= @tile_pixel_width 
     #  # puts "TEST HERE: #{@gps_map_center_x} - #{@map_tile_width}"
     # end
-    if @local_map_movement_x >= @tile_pixel_width && !(@gps_map_center_x >= @map_tile_width - 1)
-     # puts "ADDING IN ARRAY 3 - WEST"
+    if @local_map_movement_x >= @tile_pixel_width && @gps_map_center_x < @map_tile_width
+     puts "ADDING IN ARRAY 3 - WEST"
      # puts "!(@gps_map_center_x >= @map_tile_width)"
      # puts "!(#{@gps_map_center_x} >= #{@map_tile_width})"
      # puts "#{!(@gps_map_center_x >= @map_tile_width)}"
@@ -817,7 +842,7 @@ class GLBackground
       # print_visible_map
       if @current_map_pixel_center_x < (@map_pixel_width)
        # puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
-        @gps_map_center_x    += 1
+        @gps_map_center_x    -= 1
         # @map_tile_left_row  
         # @map_tile_right_row 
         # @map_tile_top_row    
@@ -834,7 +859,7 @@ class GLBackground
         # @map_tile_right_row <= 0
         # -8 <= 0
         if @map_tile_right_row < 0
-         # puts "RIGHT EDGE OF MAP"
+         puts "RIGHT EDGE OF MAP"
 
           @visible_map.each do |row|
             row.pop
@@ -850,7 +875,7 @@ class GLBackground
           end
 
         else
-         # puts "NORMAL MAP EDGE:"
+         puts "NORMAL MAP EDGE:"
          # puts "@map_tile_right_row > (@map_tile_width)"
          # puts "#{@map_tile_right_row} <= #{(@map_tile_width)}"
           # START
@@ -917,16 +942,20 @@ class GLBackground
         # Without this, you stick to the edge of the map?
         @local_map_movement_x = 0 if @local_map_movement_x > 0
       end
+    else
+      puts "TEST HERE FAIL"
+      puts "@gps_map_center_x >= @map_tile_width - 1"
+      puts "#{@gps_map_center_x} >= #{@map_tile_width - 1}"
     end
   
 
     # MOVING TO THE LEFT
     if @local_map_movement_x <= -@tile_pixel_width# * @width_scale * 1.1
-     # puts "ADDING IN ARRAY 4 - EAST"
+     puts "ADDING IN ARRAY 4 - EAST"
       # print_visible_map
       if @current_map_pixel_center_x < (@map_pixel_width)
        # puts "PRE GPS MAP CENTER X: #{@gps_map_center_x}"
-        @gps_map_center_x    -= 1
+        @gps_map_center_x    += 1
         @map_tile_left_row   += 1
         @map_tile_right_row  += 1
         # @map_tile_top_row    

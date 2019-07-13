@@ -57,6 +57,8 @@ class Player < ScreenFixedObject
     @current_map_pixel_y = current_map_pixel_y
     @current_map_tile_x  = current_map_tile_x
     @current_map_tile_y  = current_map_tile_y
+
+
     # run_pixel_to_tile_validations
     # puts "current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y"
     # puts "#{current_map_pixel_x}, #{current_map_pixel_y}, #{current_map_tile_x}, #{current_map_tile_y}"
@@ -73,6 +75,17 @@ class Player < ScreenFixedObject
     options[:image] = ship_klass.get_image(ship_klass::ITEM_MEDIA_DIRECTORY)
     options[:id]    = 'player'
     super(options)
+
+    if (@current_map_pixel_x.nil? || @current_map_pixel_y.nil?) && (@current_map_tile_x && @current_map_tile_y)
+      puts "@current_map_tile_x: #{@current_map_tile_x}"
+      @current_map_pixel_x = ((@current_map_tile_x * @tile_pixel_width)  + @tile_pixel_width  / 2).to_i
+      @current_map_pixel_y = ((@current_map_tile_y * @tile_pixel_height) + @tile_pixel_height / 2).to_i
+    elsif (@current_map_pixel_x && @current_map_pixel_y)
+      get_map_tile_location_from_map_pixel_location
+    else
+      raise "You have to provide either map pixels or map tiles! #{[@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"
+    end
+
     update_x_and_y(@screen_pixel_width  / 2, @screen_pixel_height / 2)
    # puts "NEW2 X AND Y: #{@x} - #{@y}"
     # super(@screen_pixel_width  / 2, @screen_pixel_height / 2)
@@ -559,6 +572,7 @@ class Player < ScreenFixedObject
   end
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y
+    puts "player #{@current_map_tile_x} - #{@current_map_tile_y}"
     @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y)
     if !@controls_enabled
       @ship.brake

@@ -241,47 +241,27 @@ class GameWindow < Gosu::Window
 
 
     @shipwrecks = Array.new
-    # @enemies_random_spawn_timer = 100
-    # @enemies_random_spawn_timer = 5
-    # @enemies_spawner_counter = 0
-    # @enemies_spawner_counter = 5
-
-    # @max_enemy_count = 30
-    # @enemies_killed = 0
     
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
-    # @max_enemies = 4
-    # @max_enemies = 0
 
     @ui_y = 0
     @footer_bar = FooterBar.new(@width, @height, @height_scale, @height_scale)
     reset_font_ui_y
 
-    # @boss_active_at_enemies_killed = 500
-    # if @difficulty == 'easy'
-    #   @boss_active_at_enemies_killed = 300
-    #   @boss_active_at_level          = 2
-    #   @handicap = 0.3
-    # elsif @difficulty == "medium"
-    #   @boss_active_at_level          = 3
-    #   @boss_active_at_enemies_killed = 450
-    #   @handicap = 0.6
-    # else
-    #   @boss_active_at_level          = 4
-    #   @boss_active_at_enemies_killed = 700
-    #   @handicap = 1
-    # end
-
-    # @player = Player.new(
-    #   @scale, @width / 2, @height / 2, @width, @height,
-    #   @gl_background.player_position_x, @gl_background.player_position_y, @gl_background.global_map_width, @gl_background.global_map_height,
-    #   {handicap: @handicap, max_movable_height: @height - @footer_bar.height}
-
     # In the future, can use the map to mark insertion point for player. for now, we will choose the center
+    # @player = Player.new(
+    #   @gl_background.map_pixel_width / 2.0, @gl_background.map_pixel_height / 2.0,
+    #   @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2
+    # )
     @player = Player.new(
-      @gl_background.map_pixel_width / 2.0, @gl_background.map_pixel_height / 2.0,
-      @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2
+      nil, nil,
+      0, 0
     )
+
+    puts "RIGHT HERE"
+    raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
+    raise "@player.current_map_pixel_y.nil" if @player.current_map_pixel_y.nil?
+
 
     @center_target = @player
     
@@ -621,7 +601,6 @@ class GameWindow < Gosu::Window
 
 
 
-    @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
 
     # @smoke.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
@@ -689,8 +668,6 @@ class GameWindow < Gosu::Window
     end
 
     if !@block_all_controls
-      # Moving up buildings, so clickable buildings can block the player from attacking.
-      @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y) }
       # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
@@ -753,7 +730,11 @@ class GameWindow < Gosu::Window
           @player.rotate_clockwise
         end
 
+
         @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
+        @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
+        # Moving up buildings, so clickable buildings can block the player from attacking.
+        @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y) }
         # @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
         # @player.move_right if Gosu.button_down?(Gosu::KB_E)# Gosu.button_down?(Gosu::KB_RIGHT) || Gosu.button_down?(Gosu::GP_RIGHT)   || 
         # puts "MOVEMENT HERE: #{@movement_x} and #{@movemeny_y}"if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
