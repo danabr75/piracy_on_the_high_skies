@@ -132,6 +132,16 @@ class Player < ScreenFixedObject
     # puts "PLAYER @image_radius: #{@image_radius}"
   end
 
+
+  def self.get_minimap_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_player.png")
+  end
+
+  def get_minimap_image
+    return self.class.get_minimap_image
+  end
+
+
   def enable_boost
     @boost_active = true
   end

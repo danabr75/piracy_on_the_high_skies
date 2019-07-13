@@ -39,6 +39,14 @@ class OffensiveStore < Building
     @interactible = true
   end
 
+  def self.get_minimap_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_offensive_store.png") 
+  end
+
+  def get_minimap_image
+    return self.class.get_minimap_image
+  end
+
   def set_drops drops
     @drops = drops
   end

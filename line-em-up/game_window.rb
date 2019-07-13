@@ -541,7 +541,7 @@ class GameWindow < Gosu::Window
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
     
-    @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y)
+    @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings)
 
     @add_projectiles.reject! do |projectile|
       @projectiles[projectile.id] = projectile

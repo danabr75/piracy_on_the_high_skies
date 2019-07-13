@@ -31,7 +31,17 @@ class Building < BackgroundFixedObject
     @image = self.class.get_image
     @info = @image.gl_tex_info
     @interactible = false
+
   end
+
+  def self.get_minimap_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/minimap_building.png") 
+  end
+
+  def get_minimap_image
+    return self.class.get_minimap_image
+  end
+
 
   # def drops
   #   # rand_num = rand(10)
