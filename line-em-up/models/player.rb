@@ -587,7 +587,7 @@ class Player < ScreenFixedObject
     # puts "PLAYER CAN EXIT: #{@can_exit_map}"
     # puts "PLAYER EXITING MAP: #{@exiting_map}"
     # true && true && true && false && true
-    if @can_exit_map == false && @current_map_tile_y > 1 && @current_map_tile_x > 1 && @current_map_tile_x < @map_tile_width - 1 && @current_map_tile_y < @map_tile_height - 1
+    if @can_exit_map == false && @current_map_tile_y > 3 && @current_map_tile_x > 3 && @current_map_tile_x < @map_tile_width - 3 && @current_map_tile_y < @map_tile_height - 3
       # puts "CAN EXIT MAP"
       @can_exit_map = true
     # else

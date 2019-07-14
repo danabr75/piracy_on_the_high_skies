@@ -113,7 +113,7 @@ class ShipLoadoutSetting < Setting
     @hardpoints_height = nil
     @hardpoints_width  = nil
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
-    @button = LUIT::Button.new(@window, :back, max_width / 2, 30 * @height_scale, ZOrder::UI, "Return to Game", 30, 30)
+    @button = LUIT::Button.new(@window, :back, max_width / 2, 30 * @height_scale, ZOrder::UI, "Return to Game", 15 * @height_scale, 15 * @height_scale)
     @font_height  = (12 * @height_scale).to_i
     @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
@@ -133,8 +133,29 @@ class ShipLoadoutSetting < Setting
     @ship_steam_core_usage    = 0
     @steam_core_capacity_text = "  Steam Core Capacity: "
     @steam_core_usage_text    = "  Steam Core Usage: "
-    @steam_core_capacity_button = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale, ZOrder::UI, @message_stub, 30, 30)
-    @steam_core_usage_button    = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale + @steam_core_capacity_button.h, ZOrder::UI, @message_stub, 30, 30)
+    @steam_core_capacity_button = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale, ZOrder::UI, @message_stub, 15 * @height_scale, 15 * @height_scale)
+    @steam_core_usage_button    = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale + @steam_core_capacity_button.h, ZOrder::UI, @message_stub, 15 * @height_scale, 15 * @height_scale)
+
+    font_color = 0xff_000000
+    button_height = 5 * @height_scale
+    button_width  = 5 * @height_scale # max_width  - 50
+    @legend_1 = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Hardpoint Legend", 15 * @height_scale, 15 * @height_scale)
+    button_height += @legend_1.h
+    color, hover_color = Hardpoint.get_hardpoint_colors(:offensive)
+    # puts "HOVER COLOR: #{[color, hover_color]}"
+    @legend_2    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Red: Offensive", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    button_height += @legend_2.h
+    color, hover_color = Hardpoint.get_hardpoint_colors(:engine)
+    @legend_3    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Blue: Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    button_height += @legend_3.h
+    color, hover_color = Hardpoint.get_hardpoint_colors(:steam_core)
+    @legend_4    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Yellow: Power", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    button_height += @legend_4.h
+    color, hover_color = Hardpoint.get_hardpoint_colors(:generic)
+    @legend_5    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Green: Offensive/Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+
+
+    @buttons = [@steam_core_capacity_button, @steam_core_usage_button, @legend_1, @legend_2, @legend_3, @legend_4, @legend_5]
   end
 
   def add_to_ship_inventory_credits new_credits
@@ -229,8 +250,8 @@ class ShipLoadoutSetting < Setting
         if image
           # puts "TEST: #{[@hardpoint_image_z, @height_scale, @height_scale]}"
           image.draw(
-            value[:x] - (image.width  ) / IMAGE_SCALER,
-            value[:y] - (image.height ) / IMAGE_SCALER,
+            value[:x] - (image.width  / 2 ) / IMAGE_SCALER * @height_scale,
+            value[:y] - (image.height / 2 ) / IMAGE_SCALER * @height_scale,
             @hardpoint_image_z,
             @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
           )
@@ -239,8 +260,8 @@ class ShipLoadoutSetting < Setting
         # if value[:hp].slot_type != item[:hardpoint_item_slot_type]
         if !value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type])
           @invalid_hardpoint_image.draw(
-            value[:x] - (image.width ) / IMAGE_SCALER,
-            value[:y] - (image.height) / IMAGE_SCALER,
+            value[:x] - (image.width / 2) / IMAGE_SCALER * @height_scale,
+            value[:y] - (image.height / 2) / IMAGE_SCALER * @height_scale,
             @hardpoint_image_z,
             @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
           )
@@ -432,8 +453,9 @@ class ShipLoadoutSetting < Setting
       # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
       # @button.update
       @button.update(-(@button.w / 2), -(@button.h / 2))
-      @steam_core_capacity_button.update(0,0)
-      @steam_core_usage_button.update(0,0)
+      # @steam_core_capacity_button.update(0,0)
+      # @steam_core_usage_button.update(0,0)
+      @buttons.each {|b| b.update(0,0)}
 
       # get ship value from player. used to come from update
       # if ship_value != @ship_value
@@ -574,8 +596,9 @@ class ShipLoadoutSetting < Setting
 
       # @button.draw(-(@button.w / 2), -(@y_offset - @button.h / 2))
       @button.draw(-(@button.w / 2), -(@button.h / 2))
-      @steam_core_capacity_button.draw(0, 0)
-      @steam_core_usage_button.draw(0, 0)
+      # @steam_core_capacity_button.draw(0, 0)
+      # @steam_core_usage_button.draw(0, 0)
+      @buttons.each {|b| b.draw(0,0)}
 
       @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 

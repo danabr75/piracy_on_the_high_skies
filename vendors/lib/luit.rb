@@ -46,7 +46,7 @@ module LUIT
 
   class LUITElement
     attr_reader :id, :x, :y, :w, :h, :hover
-    def initialize(holder, id, x, y, z, w, h, color = nil, hover_color = nil)
+    def initialize(holder, id, x, y, z, w, h, color = nil, hover_color = nil, font_color = nil)
       @holder = holder
       @id = id
       @x = x
@@ -56,9 +56,9 @@ module LUIT
       @z = z
       @msDown = false
       @hover = true
-      @hover_color = color || LUIT.uiColorLight
-      @color       = hover_color || LUIT.uiColor
-
+      @color       = color       || LUIT.uiColor
+      @hover_color = hover_color || LUIT.uiColorLight
+      @font_color  = font_color  || 0xff_ffffff
     end
 
     def draw(x = 0, y = 0)
@@ -224,22 +224,23 @@ module LUIT
 
   class Button < LUITElement
     #w and h will auto adjust to the text size + 10px padding if its not set (or set lower than acceptable)
-    def initialize(holder, id, x, y, z, text, w = 20, h = 50)
+    def initialize(holder, id, x, y, z, text, w = 20, h = 50, color = nil, hover_color = nil, font_color = nil)
      # puts "PARAMS: #{w} - #{h}"
       # h = [50, h].max
       inner_h = (h * 2.0 / 3.0).to_i
       @text = text
-      @buttonColor = LUIT.uiColor
-     # puts "what is h and inner_h: #{h} - #{inner_h}"
+      # @buttonColor = color || LUIT.uiColor
       @font = Gosu::Font.new(inner_h)
       @textW = @font.text_width(@text)
       w = @textW + inner_h if w < @textW + inner_h
-      super(holder, id, x, y, z, w, h)
+      super(holder, id, x, y, z, w, h, color, hover_color, font_color)
     end
 
     def draw(x = 0, y = 0)
-      Gosu::draw_rect(x + @x, y + @y, @w, @h, @hover ? LUIT.uiColorLight : LUIT.uiColor, @z)
-      @font.draw_rel(@text, @x + x + @w / 2, @y + y + @h / 2, @z + 1, 0.5, 0.5)
+      Gosu::draw_rect(x + @x, y + @y, @w, @h, @hover ? @hover_color : @color, @z)
+      # @font.draw("You won! Your score: #{@player.score}", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw_rel(@text, @x + x + @w / 2, @y + y + @h / 2, @z + 1, 0.5, 0.5, 1, 1, @font_color)
     end
 
     def update_text(text)

@@ -137,8 +137,10 @@ class GameWindow < Gosu::Window
     #   @scale = (width_scale + height_scale) / 2
     # end
     value = ConfigSetting.get_setting(@config_path, 'resolution', ResolutionSetting::SELECTION[0])
+    # puts "VALUE here: #{value}"
     raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
     width, height = value.split('x')
+    # puts "HERE: #{[width, height]}"
     @width, @height = [width.to_i, height.to_i]
 
     default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
@@ -191,6 +193,7 @@ class GameWindow < Gosu::Window
     end
 
 
+    # puts "SUPER HERE: #{[@width, @height]}"
     super(@width, @height)
     # @width, @height = [@width.to_f, @height.to_f]
    # puts "TRYING TO SET RESOLUTION HERE: #{@width} and #{@height}"
@@ -257,7 +260,7 @@ class GameWindow < Gosu::Window
     # )
     @player = Player.new(
       nil, nil,
-      0, 0
+      120, 120
     )
 
     # puts "RIGHT HERE"
@@ -1016,7 +1019,7 @@ class GameWindow < Gosu::Window
       # @font.draw("Armor: #{@player.armor}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Rockets: #{@player.rockets}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'missile'
       # @font.draw("Bombs: #{@player.bombs}", 10, 70, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @player.secondary_weapon == 'bomb'
-      @font.draw("Time Alive: #{@player.time_alive}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Time Alive: #{@player.time_alive}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("STEAM: #{@player.ship.current_steam_capacity}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Ship count: #{@ships.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("enemy_projectiles: #{@enemy_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -1027,12 +1030,12 @@ class GameWindow < Gosu::Window
       # @font.draw("Object count: #{@ships.count + @projectiles.count + @destructable_projectiles.count + @pickups.count + @buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Damage Reduction: #{@player.damage_reduction.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Boost Incease: #{@player.boost_increase.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("BG - GPS: #{@gl_background.gps_map_center_x} - #{@gl_background.gps_map_center_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("GPS: #{@player.current_map_tile_x} - #{@player.current_map_tile_y}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("MAP PIXEL: #{@player.current_map_pixel_x.round(1)} - #{@player.current_map_pixel_y.round(1)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Angle: #{@player.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Angle: #{@player.angle}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Momentum: #{@player.ship.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
