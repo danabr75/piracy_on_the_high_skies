@@ -191,13 +191,13 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
+    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true, :none)
     @collision_counter = 0
     @destructable_collision_counter = 2
-    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
+    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :none)
     # @projectile_update_manager    = AsyncProcessManager.new()
-    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
-    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
+    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true, :none)
+    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true, :none)
 
     # r, w = IO.pipe
     # @projectile_update_pipe_out, @projectile_update_pipe_in = IO.pipe

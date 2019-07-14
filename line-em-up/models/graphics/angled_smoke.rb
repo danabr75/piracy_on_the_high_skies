@@ -21,7 +21,7 @@ module Graphics
     NUMBER_OF_PARTICLES = 1
 
     def self.get_image
-      @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/smoke.png")
+      @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/smoke.png")
     end
 
   end

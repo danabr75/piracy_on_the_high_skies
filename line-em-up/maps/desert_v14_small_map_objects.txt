@@ -1,0 +1,23 @@
+{
+  "buildings":{
+    "125":{
+      "124":[
+        {"klass_name":"OffensiveStore","data":null}
+      ]
+    },
+    "127":{
+      "128":[
+        {"klass_name":"Building","data":null}
+      ]
+    },
+    "0":{
+      "0":[
+        {"klass_name":"Building","data":null}
+      ]
+    }
+  },
+
+
+  "ships":{
+  }
+}

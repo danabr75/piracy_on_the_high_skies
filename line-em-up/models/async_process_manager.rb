@@ -9,27 +9,39 @@ require "thwait"
 
 class AsyncProcessManager
 
-  def initialize thread_type_klass, threads, list_is_hash = false, use_processes = false
+  def initialize thread_type_klass, threads, list_is_hash = false, use_type = :threads #, :processes, :none
     @thread_type_klass = thread_type_klass
-    @use_processes = use_processes
     # @processor_count = 2
     @processor_count = threads
     @list_is_hash = list_is_hash
+    @use_processes = use_type == :processes
+    @use_threads   = use_type == :threads
+    @use_nothing   = use_type == :none
     Thread.abort_on_exception = true
   end
 
   def update window, items, *args
-    if !@use_processes
+    if @use_nothing
+      if @list_is_hash
+        items.each do |key, item|
+          @thread_type_klass.update(window, item, args)
+        end
+      else
+        items.each do |item|
+          @thread_type_klass.update(window, item, args)
+        end
+      end
+    end
+
+    if @use_threads
       Thread.new do
         if @list_is_hash
           Parallel.each(items, in_threads: 8) do |key, item|
             @thread_type_klass.update(window, item, args)
-            # rand(255)
           end
         else
           Parallel.each(items, in_threads: 8) do |item|
             @thread_type_klass.update(window, item, args)
-            # rand(255)
           end
         end
       end

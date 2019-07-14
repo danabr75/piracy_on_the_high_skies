@@ -220,9 +220,9 @@ class GLBackground
     # @map_right_row  = nil
 
 
-    @map_name = "desert_v13_small"
+    @map_name = "desert_v14_small"
     @map = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}.txt").first)
-    @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}//#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
+    @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []
 
 
@@ -237,14 +237,14 @@ class GLBackground
     # @infos << image.gl_tex_info
     @alt_infos = {}
     @terrains.each_with_index do |terrain_path, index|
-      image = Gosu::Image.new(terrain_path, :tileable => true)
+      image = Gosu::Image.new(MEDIA_DIRECTORY + '/' + terrain_path, :tileable => true)
       @images << image
       @infos  << image.gl_tex_info
       @alt_infos[index.to_s] = image.gl_tex_info
     end
 
     out_of_bounds_path = @map["out_of_bounds_terrain_path"]
-    image = Gosu::Image.new(out_of_bounds_path, :tileable => true)
+    image = Gosu::Image.new(MEDIA_DIRECTORY + '/' + out_of_bounds_path, :tileable => true)
     @images << image
     @infos  << image.gl_tex_info
     @alt_infos[@alt_infos.count.to_s] = image.gl_tex_info
