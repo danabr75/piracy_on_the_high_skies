@@ -2,8 +2,8 @@ module HardpointObjects
   class MinigunHardpoint < HardpointObjects::HardpointObject
 
     HARDPOINT_NAME = "minigun_launcher"
-    LAUNCHER_MIN_ANGLE = -40
-    LAUNCHER_MAX_ANGLE = 40
+    LAUNCHER_MIN_ANGLE = -60
+    LAUNCHER_MAX_ANGLE = 60
     LAUNCHER_ROTATE_SPEED = 1
     PROJECTILE_CLASS = Bullet
     FIRING_GROUP_NUMBER = 2

@@ -72,7 +72,7 @@ class ScreenMapFixedObject < GeneralObject
     convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y)
     # Is on map and is alive, essentially
     # puts "SMFO - UPDATE: #{is_on_map?} - #{is_alive} - #{@health}"
-    return(is_on_map? && super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y))
+    return(super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y))
   end
 
   def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}

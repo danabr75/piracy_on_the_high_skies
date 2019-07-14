@@ -1,8 +1,8 @@
 module HardpointObjects
   class BulletHardpoint < HardpointObjects::HardpointObject
     HARDPOINT_NAME = "bullet_launcher"
-    LAUNCHER_MIN_ANGLE = -70
-    LAUNCHER_MAX_ANGLE = 70
+    LAUNCHER_MIN_ANGLE = -80
+    LAUNCHER_MAX_ANGLE = 80
     LAUNCHER_ROTATE_SPEED = 3
     PROJECTILE_CLASS = Bullet
     FIRING_GROUP_NUMBER = 2

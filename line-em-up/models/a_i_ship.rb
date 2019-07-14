@@ -296,7 +296,9 @@ class AIShip < ScreenMapFixedObject
       speed = @ship.tiles_per_second * (@ship.current_momentum / (@ship.mass))
       # end
       ignore1, ignore2, halt = self.movement(speed, @angle)
-      if halt
+      # puts "SHIP AI UPdATE here: [#{@current_map_pixel_x}, #{@current_map_tile_y}] - halt? #{halt}"
+      # puts "DIFFS: #{ignore1} - #{ignore2}"
+      if false #halt
         @ship.current_momentum -= @ship.mass / 100.0
         @ship.current_momentum = 0 if @ship.current_momentum < 0
       end
@@ -559,6 +561,28 @@ class AIShip < ScreenMapFixedObject
 
     @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, target_map_x, target_map_y)
     # puts "AI SHIP UPDATE: #{@id}"
+
+
+    if !(@current_map_pixel_y < @map_pixel_height) # * @tile_height
+      # puts "CASE 1"
+      # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
+      @current_momentum = 0
+      @current_map_pixel_y = @map_pixel_height - 1
+    elsif @current_map_pixel_y < 0
+      # puts "CASE 2"
+      @current_momentum = 0
+      @current_map_pixel_y = 0
+    end
+    if !(@current_map_pixel_x < @map_pixel_width) # * @tile_width
+      # puts "CASE 3"
+      @current_momentum = 0
+      @current_map_pixel_x = @map_pixel_width - 1
+    elsif @current_map_pixel_x < 0
+      # puts "CASE 4"
+      @current_momentum = 0
+      @current_map_pixel_x = 0
+    end
+
     result = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
 
     @ship.x = @x
@@ -584,7 +608,7 @@ class AIShip < ScreenMapFixedObject
 
 
     return {
-      is_alive: result, projectiles: projectiles, shipwreck: shipwreck,
+      is_alive: is_alive, projectiles: projectiles, shipwreck: shipwreck,
       destructable_projectiles: destructable_projectiles, graphical_effects: graphical_effects
     }
   end
