@@ -386,14 +386,14 @@ class PilotableShip < GeneralObject
   def accelerate rate = 1
     if @current_momentum <= @mass && !@block_momentum_increase
       # puts "case 1 : #{@momentum_rate} - #{rate}"
-      @current_momentum += @momentum_rate * rate
+      @current_momentum += @momentum_rate * rate * @fps_scaler
       @current_momentum = @mass if @current_momentum > @mass
     end
   end
 
   def reverse rate = 1
     if @current_momentum >= -@half_mass && !@block_momentum_decrease
-      @current_momentum -= @momentum_rate * rate
+      @current_momentum -= @momentum_rate * rate * @fps_scaler
       @current_momentum = -@half_mass if @current_momentum < -@half_mass
     end
   end

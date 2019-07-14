@@ -70,7 +70,7 @@ class Shipwreck < ScreenMapFixedObject
       if false #halt
         @current_momentum = 0
       else
-        @current_momentum -= 1
+        @current_momentum -= 1 * @fps_scaler
         @current_momentum = 0 if @current_momentum < 0
       end
     elsif @current_momentum < 0.0
@@ -79,7 +79,7 @@ class Shipwreck < ScreenMapFixedObject
       if false #halt
         @current_momentum = 0
       else
-        @current_momentum += 1
+        @current_momentum += 1 * @fps_scaler
         @current_momentum = 0 if @current_momentum > 0
       end
     end

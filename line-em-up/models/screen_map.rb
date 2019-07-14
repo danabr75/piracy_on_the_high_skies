@@ -5,7 +5,7 @@ class ScreenMap < ScreenFixedObject
 
   IMAGE_SCALER = 2.5
 
-  ICON_IMAGE_SCALER = 20
+  ICON_IMAGE_SCALER = 25
 
   def initialize(map_name, map_tile_width, map_tile_height, options = {})
     super(options)

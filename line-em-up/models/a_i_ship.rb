@@ -181,7 +181,7 @@ class AIShip < ScreenMapFixedObject
 
   def rotate_counterclockwise
     # puts "ROTATING COUNTER AI"
-    increment = @rotation_speed
+    increment = @rotation_speed * @fps_scaler
     if @angle + increment >= 360
       @angle = (@angle + increment) - 360
     else
@@ -194,7 +194,7 @@ class AIShip < ScreenMapFixedObject
 
   def rotate_clockwise
     # puts "ROTATING AI"
-    increment = @rotation_speed
+    increment = @rotation_speed * @fps_scaler
     if @angle - increment <= 0
       @angle = (@angle - increment) + 360
     else
@@ -244,7 +244,7 @@ class AIShip < ScreenMapFixedObject
       if false #halt
         @current_momentum = 0
       else
-        @current_momentum -= 1
+        @current_momentum -= 1 * @fps_scaler
         @current_momentum = 0 if @current_momentum < 0
       end
     elsif @current_momentum < 0.0
@@ -254,7 +254,7 @@ class AIShip < ScreenMapFixedObject
       if false #halt
         @current_momentum = 0
       else
-        @current_momentum += 1
+        @current_momentum += 1 * @fps_scaler
         @current_momentum = 0 if @current_momentum > 0
       end
     end

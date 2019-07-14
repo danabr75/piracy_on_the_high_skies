@@ -76,6 +76,7 @@ class GeneralObject
     @average_scale       = GlobalVariables.average_scale
     @effects_volume      = GlobalVariables.effects_volume
     @music_volume        = GlobalVariables.music_volume
+    @fps_scaler          = GlobalVariables.fps_scaler
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
@@ -283,7 +284,7 @@ class GeneralObject
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     # if @last_updated_at < @time_alive
-      @time_alive += 1
+      @time_alive += 1 * @fps_scaler
       # @last_updated_at = @time_alive
       get_map_tile_location_from_map_pixel_location
     # end
@@ -581,12 +582,12 @@ class GeneralObject
     # puts "MOVEMENT: #{speed}, #{angle}"
     # puts "PLAYER MOVEMENT map size: #{@map_pixel_width} - #{@map_pixel_height}"
     # base = speed# / 100.0
-    base = speed * @average_scale
+    base = speed * @height_scale * @fps_scaler
     # @width_scale  = width_scale
     # @height_scale = height_scale
     # raise "BASE: #{base}"
     
-    map_edge = 50
+    # map_edge = 50
 
     step = (Math::PI/180 * (angle + 90))# - 180
     # puts "BASE HERE: #{base}"

@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'line-em-up'
-  s.version     = '3.0.6'
+  s.version     = '3.0.8'
   s.date        = '2018-05-24'
   s.summary     = "2D Video Game"
   s.description = "A Ruby\\Gosu Video Game. Recommended Ruby version 2.4.4"

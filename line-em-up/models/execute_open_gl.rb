@@ -40,7 +40,7 @@ class ExecuteOpenGl
       # glEnable(GL_TEXTURE_2D)
       # glShadeModel(GL_SMOOTH)
       # glClearColor(0.0, 0.2, 0.5, 1.0)
-      glClearColor(0.0, 0.0, 0.0, 0.0)
+      # glClearColor(0.0, 0.0, 0.0, 0.0)
       glClearDepth(0)
       glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
       # glBlendFunc(GL_SRC_ALPHA,GL_ONE) #see nehe08

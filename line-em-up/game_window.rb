@@ -191,13 +191,13 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true, :none)
+    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
     @collision_counter = 0
     @destructable_collision_counter = 2
-    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :none)
+    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
     # @projectile_update_manager    = AsyncProcessManager.new()
-    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true, :none)
-    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true, :none)
+    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
+    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
 
     # r, w = IO.pipe
     # @projectile_update_pipe_out, @projectile_update_pipe_in = IO.pipe
@@ -234,9 +234,13 @@ class GameWindow < Gosu::Window
      # puts "resolution_scale: #{@resolution_scale}"
     end
 
+    @default_fps_interval = 16.666666
+    fps_value = ConfigSetting.get_setting(@config_path, "Frames Per Second", FpsSetting::SELECTION[0])
+    @target_fps_interval = FpsSetting.get_interval_value(fps_value)
 
+    @fps_scaler = (@target_fps_interval) / (@default_fps_interval)
     # puts "SUPER HERE: #{[@width, @height]}"
-    super(@width, @height)
+    super(@width, @height, {update_interval: @target_fps_interval})
     # @width, @height = [@width.to_f, @height.to_f]
    # puts "TRYING TO SET RESOLUTION HERE: #{@width} and #{@height}"
    # puts "ACTUAL IS: #{self.width} and #{self.height}"
@@ -263,7 +267,7 @@ class GameWindow < Gosu::Window
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      true
+      @fps_scaler, true
     )
     
     # @grappling_hook = nil

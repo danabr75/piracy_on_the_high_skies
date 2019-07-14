@@ -418,11 +418,11 @@ module HardpointObjects
        
         if !self.class::ACTIVE_DELAY.nil? && (!@within_angle || !@active) && @active_for > 0
           if !@active
-            @active_for -= 5   if @active_for != 0.0
-            @active_for  = 0   if @active_for <  0.0
+            @active_for -= 5 * @fps_scaler  if @active_for != 0.0
+            @active_for  = 0                if @active_for <  0.0
           else
-            @active_for -= 0.3 if @active_for != 0.0
-            @active_for  = 0   if @active_for <  0.0
+            @active_for -= 0.3 * @fps_scaler if @active_for != 0.0
+            @active_for  = 0                 if @active_for <  0.0
           end
         end
 
@@ -431,7 +431,7 @@ module HardpointObjects
           # @x = object.x
           # @y = object.y
         # end
-        @cooldown_wait -= 1.0 if @cooldown_wait > 0.0
+        @cooldown_wait -= (1.0 * @fps_scaler) if @cooldown_wait > 0.0
         if !@active && @projectiles.count == 0
           return false
         else

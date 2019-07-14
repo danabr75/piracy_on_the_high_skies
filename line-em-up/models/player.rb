@@ -338,7 +338,7 @@ class Player < ScreenFixedObject
 
   def rotate_counterclockwise
     if @controls_enabled
-      increment = @ship.rotation_speed
+      increment = @ship.rotation_speed * @fps_scaler
       if @angle + increment >= 360
         @angle = (@angle + increment) - 360
       else
@@ -352,7 +352,7 @@ class Player < ScreenFixedObject
 
   def rotate_clockwise
     if @controls_enabled
-      increment = @ship.rotation_speed
+      increment = @ship.rotation_speed * @fps_scaler
       if @angle - increment <= 0
         @angle = (@angle - increment) + 360
       else

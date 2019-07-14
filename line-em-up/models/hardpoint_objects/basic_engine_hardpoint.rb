@@ -11,7 +11,7 @@ module HardpointObjects
     TILES_PER_SECOND_MODIFIER = 1.25
     # TILES_PER_SECOND_MODIFIER = 2.35
     # TILES_PER_SECOND_MODIFIER = 4.0
-    ROTATION_MODIFIER         = 1.5
+    ROTATION_MODIFIER         = 1.1
 
     # Unimplemented
     BOOST_SPEED_MODIFIER  = 1.2

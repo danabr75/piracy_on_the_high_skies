@@ -20,6 +20,8 @@ module HardpointObjects
 
     SLOT_TYPE = :engine
 
+    IMAGE_SCALER = 16.0
+
     def self.get_hardpoint_image
       raise "OVERRIDE ME"
       # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
