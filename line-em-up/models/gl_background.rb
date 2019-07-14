@@ -522,16 +522,16 @@ class GLBackground
   # This is printing out in the wrong order. 249, 249 is reading as 0,0
   # This is confusing.
   def print_visible_map
-     puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
-      @visual_map_of_visible_to_map.each do |y_row|
-        output = "|"
-        y_row.each do |x_row|
-          output << x_row
-          output << '|'
-        end
-       puts output
-       puts "_" * 80
-      end
+     # puts "print_visible_map - #{@visual_map_of_visible_to_map[0].length} x #{@visual_map_of_visible_to_map.length}"
+     #  @visual_map_of_visible_to_map.each do |y_row|
+     #    output = "|"
+     #    y_row.each do |x_row|
+     #      output << x_row
+     #      output << '|'
+     #    end
+     #   puts output
+     #   puts "_" * 80
+     #  end
   end
 
   # I think this is dependent on the map being square
@@ -606,12 +606,12 @@ class GLBackground
 # @map_tile_bottom_row  = 2
 
     # puts "UPDATE --------------------- UPDATE"
-    puts "@gps_map_center_x: #{@gps_map_center_x}"
-    puts "@gps_map_center_y: #{@gps_map_center_y}"
-    puts "@map_tile_left_row    = #{@map_tile_left_row}"
-    puts "@map_tile_right_row = #{@map_tile_right_row}"
-    puts "@map_tile_top_row   = #{@map_tile_top_row}"
-    puts "@map_tile_bottom_row  = #{@map_tile_bottom_row}"
+    # puts "@gps_map_center_x: #{@gps_map_center_x}"
+    # puts "@gps_map_center_y: #{@gps_map_center_y}"
+    # puts "@map_tile_left_row    = #{@map_tile_left_row}"
+    # puts "@map_tile_right_row = #{@map_tile_right_row}"
+    # puts "@map_tile_top_row   = #{@map_tile_top_row}"
+    # puts "@map_tile_bottom_row  = #{@map_tile_bottom_row}"
     # puts "@gps_map_center_x    = #{@gps_map_center_x}"
     # puts "@gps_map_center_y    = #{@gps_map_center_y}"
     print_visible_map
@@ -943,9 +943,9 @@ class GLBackground
         @local_map_movement_x = 0 if @local_map_movement_x > 0
       end
     else
-      puts "TEST HERE FAIL"
-      puts "@gps_map_center_x >= @map_tile_width - 1"
-      puts "#{@gps_map_center_x} >= #{@map_tile_width - 1}"
+      # puts "TEST HERE FAIL"
+      # puts "@gps_map_center_x >= @map_tile_width - 1"
+      # puts "#{@gps_map_center_x} >= #{@map_tile_width - 1}"
     end
   
 

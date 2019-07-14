@@ -232,7 +232,7 @@ class AIShip < ScreenMapFixedObject
       speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
       # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
       x_diff, y_diff, halt = self.movement(speed, @angle)
-      if halt
+      if false #halt
         @current_momentum = 0
       else
         @current_momentum -= 1
@@ -241,7 +241,8 @@ class AIShip < ScreenMapFixedObject
     elsif @current_momentum < 0.0
       speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
       garbage1, garbage2, halt = self.movement(-speed, @angle + 180)
-      if halt
+      # Disable stopping at map boundary
+      if false #halt
         @current_momentum = 0
       else
         @current_momentum += 1
@@ -302,7 +303,7 @@ class AIShip < ScreenMapFixedObject
     elsif @ship.current_momentum < 0.0
       speed = (0.6 * @ship.tiles_per_second) * (@ship.current_momentum / (@ship.mass))
       ignore1, ignore2, halt = self.movement(speed, @angle)
-      if halt
+      if false #halt
         @ship.current_momentum -= @ship.mass / 100.0
         @ship.current_momentum = 0 if @ship.current_momentum < 0
       end

@@ -67,7 +67,7 @@ class Shipwreck < ScreenMapFixedObject
       speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
       # puts "PLAYER UPDATE HERE - momentum ANGLE: #{@angle}"
       x_diff, y_diff, halt = self.movement(speed, @angle)
-      if halt
+      if false #halt
         @current_momentum = 0
       else
         @current_momentum -= 1
@@ -76,7 +76,7 @@ class Shipwreck < ScreenMapFixedObject
     elsif @current_momentum < 0.0
       speed = (@ship.mass / 10.0) * (@current_momentum / 10.0) / 90.0
       garbage1, garbage2, halt = self.movement(-speed, @angle + 180)
-      if halt
+      if false #halt
         @current_momentum = 0
       else
         @current_momentum += 1

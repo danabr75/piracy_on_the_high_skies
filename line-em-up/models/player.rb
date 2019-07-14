@@ -78,8 +78,8 @@ class Player < ScreenFixedObject
 
     if (@current_map_pixel_x.nil? || @current_map_pixel_y.nil?) && (@current_map_tile_x && @current_map_tile_y)
       puts "@current_map_tile_x: #{@current_map_tile_x}"
-      @current_map_pixel_x = ((@current_map_tile_x * @tile_pixel_width)  + @tile_pixel_width  / 2).to_i
-      @current_map_pixel_y = ((@current_map_tile_y * @tile_pixel_height) + @tile_pixel_height / 2).to_i
+      @current_map_pixel_x = ((@current_map_tile_x * @tile_pixel_width)  + @tile_pixel_width - 1).to_i
+      @current_map_pixel_y = ((@current_map_tile_y * @tile_pixel_height) + @tile_pixel_height - 1).to_i
     elsif (@current_map_pixel_x && @current_map_pixel_y)
       get_map_tile_location_from_map_pixel_location
     else
@@ -585,14 +585,15 @@ class Player < ScreenFixedObject
       speed = @ship.tiles_per_second * (@ship.current_momentum / (@ship.mass))
       # end
       ignore1, ignore2, halt = self.movement(speed, @angle)
-      if halt
+      puts "PALYER MOVEMENT RETURN: #{[ignore1, ignore2, halt]}"
+      if false #halt
         @ship.current_momentum -= @ship.mass / 100.0
         @ship.current_momentum = 0 if @ship.current_momentum < 0
       end
     elsif @ship.current_momentum < 0.0
       speed = (0.6 * @ship.tiles_per_second) * (@ship.current_momentum / (@ship.mass))
       ignore1, ignore2, halt = self.movement(speed, @angle)
-      if halt
+      if false #halt
         @ship.current_momentum -= @ship.mass / 100.0
         @ship.current_momentum = 0 if @ship.current_momentum < 0
       end
