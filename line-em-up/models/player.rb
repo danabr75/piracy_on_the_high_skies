@@ -143,6 +143,8 @@ class Player < ScreenFixedObject
     @boost_active     = false
     # @steam_power  = MAX_STEAM_POWER
     # puts "PLAYER @image_radius: #{@image_radius}"
+    @can_exit_map = false
+    @exiting_map  = false
   end
 
 
@@ -571,8 +573,35 @@ class Player < ScreenFixedObject
     return @ship.hit_objects(self, object_groups, options)
   end
 
+  def exiting_map?
+    # puts "CALLING EXITING MAP: #{[@can_exit_map, @exiting_map]}"
+    @can_exit_map && @exiting_map
+  end
+
+  def cancel_map_exit
+    @can_exit_map = false
+    @exiting_map = false
+  end
+
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y
-    puts "player #{@current_map_tile_x} - #{@current_map_tile_y}"
+    # puts "PLAYER CAN EXIT: #{@can_exit_map}"
+    # puts "PLAYER EXITING MAP: #{@exiting_map}"
+    # true && true && true && false && true
+    if @can_exit_map == false && @current_map_tile_y > 1 && @current_map_tile_x > 1 && @current_map_tile_x < @map_tile_width - 1 && @current_map_tile_y < @map_tile_height - 1
+      # puts "CAN EXIT MAP"
+      @can_exit_map = true
+    # else
+      # @can_exit_map = false
+    end
+    if @can_exit_map && @exiting_map == false && (@current_map_tile_y <= 0 || @current_map_tile_x <= 0 || @current_map_tile_x >= @map_tile_width - 1 || @current_map_tile_y >= @map_tile_height - 1)
+      # puts "EXITING MAP = true"
+      @exiting_map = true
+    else
+      # puts "EXITING MAP = false"
+      @exiting_map = false
+    end
+
+    # puts "player #{@current_map_tile_x} - #{@current_map_tile_y}"
     @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y)
     if !@controls_enabled
       @ship.brake
@@ -585,7 +614,7 @@ class Player < ScreenFixedObject
       speed = @ship.tiles_per_second * (@ship.current_momentum / (@ship.mass))
       # end
       ignore1, ignore2, halt = self.movement(speed, @angle)
-      puts "PALYER MOVEMENT RETURN: #{[ignore1, ignore2, halt]}"
+      # puts "PALYER MOVEMENT RETURN: #{[ignore1, ignore2, halt]}"
       if false #halt
         @ship.current_momentum -= @ship.mass / 100.0
         @ship.current_momentum = 0 if @ship.current_momentum < 0

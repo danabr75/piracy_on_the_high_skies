@@ -88,6 +88,8 @@ class GameWindow < Gosu::Window
   attr_accessor :add_ships, :remove_ship_ids
   attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
 
+  attr_reader :player
+
   include GlobalVariables
 
   def initialize width = nil, height = nil, fullscreen = false, options = {}
@@ -300,7 +302,7 @@ class GameWindow < Gosu::Window
     # START MENU INIT
     # Can punt to different file
     @window = self
-    @menu = Menu.new(@window, @width / 2, 10 * @average_scale, ZOrder::UI, @resolution_scale)
+    @menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @resolution_scale)
     @menu.add_item(
       :resume, "Resume",
       0, 0,
@@ -331,6 +333,32 @@ class GameWindow < Gosu::Window
       nil,
       {is_button: true}
     )
+
+    @exit_map_menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @resolution_scale)
+    @exit_map_menu.add_item(
+      nil, "Exit Map?",
+      0, 0,
+      lambda {|window, menu, id| },
+      nil,
+      {is_button: true}
+    )
+    @exit_map_menu.add_item(
+      :exit_map, "Yes",
+      0, 0,
+      # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
+      lambda {|window, menu, id| window.block_all_controls = true; window.close },
+      nil,
+      {is_button: true}
+    )
+    # This will close the window... which i guess is fine.
+    @exit_map_menu.add_item(
+      :cancel_map_exit, "No",
+      0, 0,
+      lambda {|window, menu, id|  window.block_all_controls = true; window.player.cancel_map_exit; menu.disable  }, 
+      nil,
+      {is_button: true}
+    )
+
     # END  MENU INIT
 
     # START SHIP LOADOUT INIT.
@@ -339,7 +367,7 @@ class GameWindow < Gosu::Window
     @ship_loadout_menu = ShipLoadoutSetting.new(@window, @width, @height, get_center_font_ui_y, @config_path, @height_scale, @height_scale, {scale: @average_scale})
     # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
-    @menus = [@ship_loadout_menu, @menu]
+    @menus = [@ship_loadout_menu, @menu, @exit_map_menu]
     # LUIT.config({window: @window, z: 25})
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
     @show_minimap = true
@@ -414,6 +442,8 @@ class GameWindow < Gosu::Window
       @menu.onClick(element_id)
     elsif @ship_loadout_menu.active
       @ship_loadout_menu.onClick(element_id)
+    elsif
+      @exit_map_menu.onClick(element_id)
     else
       if @effects.any?
         @effects.each do |effect|
@@ -610,6 +640,7 @@ class GameWindow < Gosu::Window
     end
     # reset_center_font_ui_y
     @menu.update
+    @exit_map_menu.update
     @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
     # puts "HERE UPDATE: [@game_pause, menus_active, @menu_open, @menu.active]"
@@ -674,6 +705,10 @@ class GameWindow < Gosu::Window
 
       if Gosu.button_down?(Gosu::KbEscape) && !menus_active && key_id_lock(Gosu::KbEscape)
         @menu.enable
+      end
+
+      if @player.exiting_map?
+        @exit_map_menu.enable
       end
 
       # if Gosu.button_down?(Gosu::KB_LEFT_SHIFT) && !menus_active
@@ -939,6 +974,7 @@ class GameWindow < Gosu::Window
     @pointer.draw# if @grappling_hook.nil? || !@grappling_hook.active
     # @smoke.draw
     @menu.draw
+    @exit_map_menu.draw
     @ship_loadout_menu.draw
     # @button.draw
     @footer_bar.draw(@player)
