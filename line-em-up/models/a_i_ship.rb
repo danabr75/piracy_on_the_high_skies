@@ -38,7 +38,6 @@ class AIShip < ScreenMapFixedObject
     options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
-    @drops = ["HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint"]
 
     @score = 0
     @cooldown_wait = 0
@@ -68,7 +67,7 @@ class AIShip < ScreenMapFixedObject
 
     hardpoint_data = {
       :hardpoint_data => {
-        "0" => "HardpointObjects::BulletHardpoint","1" => "HardpointObjects::BulletHardpoint",
+        "0" => "HardpointObjects::MinigunHardpoint","1" => "HardpointObjects::BulletHardpoint",
         "4" => "HardpointObjects::BulletHardpoint","3" => "HardpointObjects::BulletHardpoint",
         "5" => "HardpointObjects::BulletHardpoint","2" => "HardpointObjects::BulletHardpoint",
         "7" => "HardpointObjects::BulletHardpoint","6" => "HardpointObjects::BulletHardpoint",
@@ -76,6 +75,16 @@ class AIShip < ScreenMapFixedObject
         "12" => "HardpointObjects::AdvancedSteamCoreHardpoint"
       }
     }
+
+    # @drops = ["HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint"]
+    # INIT DROPS Randomly from equiped AI
+    @drops = []
+    index_length = hardpoint_data[:hardpoint_data].count - 1
+    keys = hardpoint_data[:hardpoint_data].keys
+    get_keys = []
+    (0..2).each do |i|
+      @drops << hardpoint_data[:hardpoint_data][keys[rand(index_length)]]
+    end
 
     # hardpoint_data = {
     #   :hardpoint_data=>

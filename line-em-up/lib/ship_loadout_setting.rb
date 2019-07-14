@@ -80,8 +80,15 @@ class ShipLoadoutSetting < Setting
 
     # Used to come from loadout window
     @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
-    klass = eval(@ship_value)
-
+    begin
+      klass = eval(@ship_value)
+    rescue Exception => e
+      puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
+      puts e.message
+      puts e.backtrace.join("\n")
+      puts "EVAL DATA:"
+      puts @ship_value
+    end
 
     hardpoint_data = Player.get_hardpoint_data(@ship_value)
     @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))

@@ -12,11 +12,11 @@ module QuestInterface
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
       "starting_level_quest" => {
         "init_ships_string" => [
-            "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 124, 120, {id: 'starting_level_quest_ship_10', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 124, 116, {id: 'starting_level_quest_ship_11', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 124, 114, {id: 'starting_level_quest_ship_12', special_target_focus_id: 'player'})",
-            "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player', special_ship_enemy_icon: true})",
+            "AIShip.new(nil, nil, 60, 120, {id: 'starting_level_quest_ship_10', special_target_focus_id: 'player'})",
+            "AIShip.new(nil, nil, 20, 116, {id: 'starting_level_quest_ship_11', special_target_focus_id: 'player'})",
+            # "AIShip.new(nil, nil, 124, 114, {id: 'starting_level_quest_ship_12', special_target_focus_id: 'player'})",
+            # "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 130, 110, {id: 'starting_level_quest_ship_9', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 125, 125, {id: 'starting_level_quest_ship_2', special_target_focus_id: 'player'})",
@@ -155,19 +155,29 @@ module QuestInterface
     found_errors = false
     raw_data = get_quests_data(config_path)
     quest_datas = JSON.parse(raw_data)
+    raw_data = nil
     quest_datas.each do |quest_key, quest_data|
       QUEST_KEYS_TO_EVAL.each do |string_key, values|
         begin
           if values["type"] == 'array'
             quest_data[values["new_key"]] = []
             quest_data[string_key].each do |element|
+              raw_data = element
               quest_data[values["new_key"]] << eval(element)
             end
           else
+            raw_data = quest_data[string_key]
             quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
           end
         rescue NameError, SyntaxError, NoMethodError => e
           found_errors = true
+
+          puts "Caught Error in Eval: #{e.class} when trying to 'get_quests'"
+          puts e.message
+          puts e.backtrace.join("\n")
+          puts "EVAL DATA:"
+          puts raw_data
+
          # puts e.backtrace
          # puts "ISSUE WITH: #{quest_key} on key: #{string_key}"
          # puts "RAW DATA: #{quest_data[string_key]}"

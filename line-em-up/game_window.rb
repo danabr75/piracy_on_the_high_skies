@@ -92,6 +92,42 @@ class GameWindow < Gosu::Window
 
   include GlobalVariables
 
+  def init_player_ship_data_if_necessary(config_path)
+    ship_value = ConfigSetting.get_setting(config_path, "ship")
+    if ship_value.nil? || ship_value == ''
+      ConfigSetting.set_setting(config_path, "ship", "BasicShip")
+      ship_value = "BasicShip"
+    end
+
+    # ship_hardpoint_values = ConfigSetting.get_setting(config_file_path, ship_value)
+
+    ship_hardpoint_values = ConfigSetting.get_mapped_setting(config_path, [ship_value, "hardpoint_locations"])
+    if ship_hardpoint_values.nil? || ship_hardpoint_values == ''
+
+      init_data = {
+        "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
+        "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",
+        "5":"HardpointObjects::DumbMissileHardpoint","2":"HardpointObjects::BulletHardpoint",
+        "10":"HardpointObjects::BasicEngineHardpoint",
+        # "7":"HardpointObjects::BasicEngineHardpoint",
+        "6":"HardpointObjects::MinigunHardpoint","8":"HardpointObjects::BasicEngineHardpoint",
+        # "9":"HardpointObjects::BasicEngineHardpoint",
+        "12":"HardpointObjects::BasicSteamCoreHardpoint",
+        # "11":"HardpointObjects::BasicEngineHardpoint"
+      }
+      init_data.each do |key, value|
+        ConfigSetting.set_mapped_setting(config_path, [ship_value, "hardpoint_locations", key], value)
+      end
+    end
+
+
+    credit_value = ConfigSetting.get_setting(config_path, "Credits")
+    if credit_value.nil? || credit_value == ''
+      ConfigSetting.set_setting(config_path, "Credits", "500")
+      # ship_value = "BasicShip"
+    end
+  end
+
   def initialize width = nil, height = nil, fullscreen = false, options = {}
 
 
@@ -107,6 +143,9 @@ class GameWindow < Gosu::Window
 
 
     @config_path = self.class::CONFIG_FILE
+
+    init_player_ship_data_if_necessary(@config_path)
+
     @window = self
     @open_gl_executer = ExecuteOpenGl.new
 
@@ -136,6 +175,9 @@ class GameWindow < Gosu::Window
     #   height_scale = @height / original_height.to_f
     #   @scale = (width_scale + height_scale) / 2
     # end
+
+
+
     value = ConfigSetting.get_setting(@config_path, 'resolution', ResolutionSetting::SELECTION[0])
     # puts "VALUE here: #{value}"
     raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
@@ -211,7 +253,7 @@ class GameWindow < Gosu::Window
     # @can_toggle_fullscreen_b = true
 
 
-    self.caption = "OpenGL Integration"
+    self.caption = "Piracy on the High Skies!"
     
 
     @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale)
@@ -260,7 +302,7 @@ class GameWindow < Gosu::Window
     # )
     @player = Player.new(
       nil, nil,
-      120, 120
+      0, 125
     )
 
     # puts "RIGHT HERE"
@@ -322,13 +364,13 @@ class GameWindow < Gosu::Window
       {is_button: true}
     )
     # This will close the window... which i guess is fine.
-    @menu.add_item(
-      :back_to_menu, "Back To Menu",
-      0, 0,
-      lambda {|window, menu, id| self.close; Main.new.show }, 
-      nil,
-      {is_button: true}
-    )
+    # @menu.add_item(
+    #   :back_to_menu, "Back To Menu",
+    #   0, 0,
+    #   lambda {|window, menu, id| self.close; Main.new.show }, 
+    #   nil,
+    #   {is_button: true}
+    # )
     @menu.add_item(
       :exit, "Exit",
       0, 0,

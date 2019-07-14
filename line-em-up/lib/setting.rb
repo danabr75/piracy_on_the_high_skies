@@ -61,6 +61,10 @@ class Setting
 
   def previous_clicked
     index = @selection.index(@value)
+    if index.nil?
+      puts "SELECTION DID NOT HAVE VALUE: #{@value} - SELECTION: #{@selection}"
+      index = 0
+    end
     value = @value
     if index == 0
       value = @selection[@selection.count - 1]
@@ -73,6 +77,10 @@ class Setting
 
   def next_clicked
     index = @selection.index(@value)
+    if index.nil?
+      puts "SELECTION DID NOT HAVE VALUE: #{@value} - SELECTION: #{@selection}"
+      index = 0
+    end
     value = @value
     if index == @selection.count - 1
       value = @selection[0]
