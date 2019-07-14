@@ -409,7 +409,7 @@ class GLBackground
         y_index = @gps_map_center_y + y_offset
         x_index = @gps_map_center_x + x_offset
 
-        if @map_data[y_index] && @map_data[y_index][x_index]
+        if @map_data[y_index] && @map_data[y_index][x_index] && x_index >= 0 && y_index >= 0
           @visible_map[index_h][index_w] = @map_data[y_index][x_index]
           @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
         else

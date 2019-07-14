@@ -258,7 +258,7 @@ class GameWindow < Gosu::Window
       0, 0
     )
 
-    puts "RIGHT HERE"
+    # puts "RIGHT HERE"
     raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
     raise "@player.current_map_pixel_y.nil" if @player.current_map_pixel_y.nil?
 
@@ -667,6 +667,7 @@ class GameWindow < Gosu::Window
 
     end
 
+      @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
     if !@block_all_controls
       # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
@@ -732,7 +733,6 @@ class GameWindow < Gosu::Window
 
 
         @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
-        @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
         # Moving up buildings, so clickable buildings can block the player from attacking.
         @buildings.reject! { |building| !building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y) }
         # @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 
