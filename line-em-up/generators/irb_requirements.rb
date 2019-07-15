@@ -1,5 +1,7 @@
 # pry -r ./irb_requirements.rb
-
+# require 'ruby_parser'
+# require 'ruby2c'
+  # sexp_processor, ruby_parser, ruby2c
 require 'rubygems'
 require 'gosu'
 # require 'opengl'
@@ -18,29 +20,19 @@ require 'parallel'
 # test = Ashton::ParticleEmitter.new(1, 1, 4)
 
 CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
-MEDIA_DIRECTORY   = File.expand_path('../', __FILE__) + "/media"
-VENDOR_DIRECTORY   = File.expand_path('../', __FILE__) + "/../vendors/"
-CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
-# # include OpenGL
-# # include GLUT
-# OpenGL.load_lib()
-# GLUT.load_lib()
-
-# CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
-
-Dir["#{CURRENT_DIRECTORY}/lib/*.rb"].each { |f| require f }
-Dir["#{VENDOR_DIRECTORY}/lib/*.rb"].each { |f| require f }
-include GlobalVariables
+require_relative "../lib/global_constants.rb"
 include GlobalConstants
+Dir["#{LIB_DIRECTORY}/*.rb"].each { |f| require f }
+Dir["#{LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
+Dir["#{VENDOR_LIB_DIRECTORY}/*.rb"].each { |f| require f }
+Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
+include GlobalVariables
 
-Dir["#{CURRENT_DIRECTORY}/models/*.rb"].each { |f| require f }
-# Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
-# Get subfolders
-Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
-# Dir["#{CURRENT_DIRECTORY}/models/**/*.rb"].each { |f| require f }
-Dir["#{CURRENT_DIRECTORY}/lib/**/*.rb"].each { |f| require f }
-Dir["#{VENDOR_DIRECTORY}/lib/**/*.rb"].each { |f| require f }
+
+Dir["#{MODEL_DIRECTORY}/*.rb"].each { |f| require f }
+Dir["#{MODEL_DIRECTORY}/**/*.rb"].each { |f| require f }
+
 Dir["#{GENERATORS_DIRECTORY}/*.rb"].each { |f| require f }
 
 
@@ -74,7 +66,7 @@ end
 GlobalVariables.set_config(1, 1, 450, 450,
   @map_pixel_width, @map_pixel_height,
   @map_tile_width, @map_tile_height,
-  @tile_pixel_width, @tile_pixel_height, true
+  @tile_pixel_width, @tile_pixel_height, 16.666, :basic, true
 )
 
 

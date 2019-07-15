@@ -66,6 +66,7 @@ class MenuWindow < Gosu::Window
     @fps_menu = FpsSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
     @graphics_menu = GraphicsSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+    @menu_background = Gosu::Image.new("#{MEDIA_DIRECTORY}/main_screen_background.png")
 
     @menu.enable
     @font_texts = [
@@ -107,6 +108,7 @@ class MenuWindow < Gosu::Window
   end
 
   def draw
+    @menu_background.draw(0, 0, ZOrder::Background, 1, 1)
     @cursor.draw(self.mouse_x, self.mouse_y, 2)
     # @back.draw(0,0,0)
     reset_center_font_ui_y
@@ -124,7 +126,7 @@ class MenuWindow < Gosu::Window
     # text = "Controls:"
     # @font.draw(text, @width / 2 - @font.text_width(text) / 2, get_center_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     @font_texts.each do |text|
-      @font.draw(text, @width / 2  - @font.text_width(text) / 2, get_center_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw(text, @width / 2  - @font.text_width(text) / 2, get_center_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_FFFFAA)
     end
     # @gl_background.draw(ZOrder::Background)
   end
