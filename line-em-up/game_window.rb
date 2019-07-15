@@ -251,8 +251,8 @@ class GameWindow < Gosu::Window
 
     if @graphics_setting == :basic
       # Maybe just wait for all threads to finish???
-      @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true, :none)
-      @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :none)
+      @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true, :joined_threads)
+      @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :joined_threads)
     else
       @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true)
       @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)

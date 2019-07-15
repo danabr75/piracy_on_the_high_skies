@@ -16,6 +16,7 @@ class AsyncProcessManager
     @list_is_hash = list_is_hash
     @use_processes = use_type == :processes
     @use_threads   = use_type == :threads
+    @use_joined_threads   = use_type == :joined_threads
     @use_nothing   = use_type == :none
     Thread.abort_on_exception = true
   end
@@ -31,6 +32,20 @@ class AsyncProcessManager
           @thread_type_klass.update(window, item, args)
         end
       end
+    end
+
+    if @use_joined_threads
+      # Thread.new do
+        if @list_is_hash
+          Parallel.each(items, in_threads: 8) do |key, item|
+            @thread_type_klass.update(window, item, args)
+          end
+        else
+          Parallel.each(items, in_threads: 8) do |item|
+            @thread_type_klass.update(window, item, args)
+          end
+        end
+      # end
     end
 
     if @use_threads
@@ -59,15 +74,6 @@ class AsyncProcessManager
       parameter_threads = []
       items.each do |key, item|
         t = Thread.new do
-          # testvar = item.get_data
-          # puts "TEST VAR"
-          # puts testvar.inspect
-          # test2var = Marshal.dump(testvar)
-          # puts "TEST2"
-          # puts test2var.inspect
-          # puts Marshal.load(test2var)
-          # puts "HERE WE GO"
-          # Thread.current[:pid] = Process.spawn({"MARSHALLED_DATA"=>Marshal.dump(item.get_data)}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
           Thread.current[:pid] = Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
           Thread.exit
         end

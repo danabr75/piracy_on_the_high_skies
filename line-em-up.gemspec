@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'line-em-up'
-  s.version     = '3.0.10'
+  s.version     = '3.0.11'
   s.date        = '2018-05-24'
   s.summary     = "2D Video Game"
   s.description = "A Ruby\\Gosu Video Game. Recommended Ruby version 2.4.4"
@@ -36,7 +36,4 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'parallel',  '1.17.0'
   s.add_runtime_dependency 'ruby-progressbar',  '1.10.1'
   s.add_runtime_dependency 'concurrent-ruby',  '1.1.5'
-    
-    
-
 end
