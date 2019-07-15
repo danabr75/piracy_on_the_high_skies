@@ -194,7 +194,6 @@ class GameWindow < Gosu::Window
     @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
     @collision_counter = 0
     @destructable_collision_counter = 2
-    @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
     # @projectile_update_manager    = AsyncProcessManager.new()
     @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
     @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
@@ -206,7 +205,8 @@ class GameWindow < Gosu::Window
 
     # end
 
-    @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+
+
     @ship_collision_manager = AsyncProcessManager.new(ShipCollisionThread, 8, true)
 
     # Need to just pull from config file.. and then do scaling.
@@ -235,7 +235,7 @@ class GameWindow < Gosu::Window
     end
 
     @default_fps_interval = 16.666666
-    fps_value = ConfigSetting.get_setting(@config_path, "Frames Per Second", FpsSetting::SELECTION[0])
+    fps_value = ConfigSetting.get_setting(@config_path, "Frames Per Second", FpsSetting::SELECTION[-1])
     @target_fps_interval = FpsSetting.get_interval_value(fps_value)
 
     @fps_scaler = (@target_fps_interval) / (@default_fps_interval)
@@ -246,6 +246,17 @@ class GameWindow < Gosu::Window
    # puts "ACTUAL IS: #{self.width} and #{self.height}"
    # puts "Gosu.screen width: #{Gosu.screen_height} and Gosu.screen_height: #{Gosu.screen_height}"
     
+    graphics_value = ConfigSetting.get_setting(@config_path, "Graphics Setting", GraphicsSetting::SELECTION[0])
+    @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
+
+    if @graphics_setting == :basic
+      # Maybe just wait for all threads to finish???
+      @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true, :none)
+      @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :none)
+    else
+      @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+      @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
+    end
 
     @game_pause = false
     # @menu = nil
@@ -259,19 +270,15 @@ class GameWindow < Gosu::Window
 
     self.caption = "Piracy on the High Skies!"
     
-
-    @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale)
-
+    @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
 
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      @fps_scaler, true
+      @fps_scaler, @graphics_setting, true
     )
-    
-    # @grappling_hook = nil
-    
+
     @buildings = Array.new
     @projectiles = {}
 
@@ -632,42 +639,46 @@ class GameWindow < Gosu::Window
 
   def update
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
-    
-    @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
 
-    @add_projectiles.reject! do |projectile|
-      @projectiles[projectile.id] = projectile
-      true
+    Thread.new do
+      @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
     end
 
-    @remove_projectile_ids.reject! do |projectile_id|
-      @projectiles.delete(projectile_id)
-      true
-    end
+    # Thread.new do
+      @add_projectiles.reject! do |projectile|
+        @projectiles[projectile.id] = projectile
+        true
+      end
 
-    @add_ships.reject! do |ship|
-      @ships[ship.id] = ship
-      true
-    end
+      @remove_projectile_ids.reject! do |projectile_id|
+        @projectiles.delete(projectile_id)
+        true
+      end
+    # end
+    # Thread.new do
 
-    @remove_ship_ids.reject! do |ship_id|
-      @ships.delete(ship_id)
-      true
-    end
+      @add_ships.reject! do |ship|
+        @ships[ship.id] = ship
+        true
+      end
 
+      @remove_ship_ids.reject! do |ship_id|
+        @ships.delete(ship_id)
+        true
+      end
+    # end
 
-    @add_destructable_projectiles.reject! do |dp|
-      @destructable_projectiles[dp.id] = dp
-      true
-    end
+    # Thread.new do
+      @add_destructable_projectiles.reject! do |dp|
+        @destructable_projectiles[dp.id] = dp
+        true
+      end
 
-    @remove_destructable_projectile_ids.reject! do |dp_id|
-      @destructable_projectiles.delete(dp_id)
-      true
-    end
-
-
-
+      @remove_destructable_projectile_ids.reject! do |dp_id|
+        @destructable_projectiles.delete(dp_id)
+        true
+      end
+    # end
 
     if @ship_loadout_menu.refresh_player_ship
       @player.refresh_ship
@@ -690,7 +701,7 @@ class GameWindow < Gosu::Window
     # reset_center_font_ui_y
     @menu.update
     @exit_map_menu.update
-    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+    @ship_loadout_menu.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) if @ship_loadout_menu.active
 
     # puts "HERE UPDATE: [@game_pause, menus_active, @menu_open, @menu.active]"
     if !@game_pause && !menus_active && !@menu_open && !@menu.active
@@ -1016,7 +1027,9 @@ class GameWindow < Gosu::Window
     # puts @enemy_projectiles.class
     # puts @enemy_projectiles
 
-    @open_gl_executer.draw(self, @gl_background, @player, @pointer, @buildings, @pickups)
+    @open_gl_executer.draw(self, @gl_background, @player, @pointer, @buildings, @pickups) if @graphics_setting == :advanced
+    @gl_background.draw(@player, player.current_map_pixel_x, player.current_map_pixel_y, @buildings, @pickups)
+
 
     @mini_map.draw if @show_minimap
 

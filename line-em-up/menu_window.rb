@@ -65,6 +65,8 @@ class MenuWindow < Gosu::Window
 
     @fps_menu = FpsSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
 
+    @graphics_menu = GraphicsSetting.new(@window, window_height, @width, @height, get_center_font_ui_y, config_path)
+
     @menu.enable
     @font_texts = [
       "Controls:",
@@ -97,6 +99,7 @@ class MenuWindow < Gosu::Window
     @resolution_menu.update(self.mouse_x, self.mouse_y)
     @difficulty_menu.update(self.mouse_x, self.mouse_y)
     @fps_menu.update(self.mouse_x, self.mouse_y)
+    @graphics_menu.update(self.mouse_x, self.mouse_y)
 
     @game_window_width, @game_window_height, @fullscreen = @resolution_menu.get_values
     @difficulty = @difficulty_menu.get_values
@@ -115,6 +118,8 @@ class MenuWindow < Gosu::Window
     get_center_font_ui_y
     @fps_menu.draw
     get_center_font_ui_y
+    @graphics_menu.draw
+    get_center_font_ui_y
     
     # text = "Controls:"
     # @font.draw(text, @width / 2 - @font.text_width(text) / 2, get_center_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -130,6 +135,7 @@ class MenuWindow < Gosu::Window
       @resolution_menu.clicked(self.mouse_x, self.mouse_y)
       @difficulty_menu.clicked(self.mouse_x, self.mouse_y)
       @fps_menu.clicked(self.mouse_x, self.mouse_y)
+      @graphics_menu.clicked(self.mouse_x, self.mouse_y)
     end
   end
 

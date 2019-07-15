@@ -77,6 +77,7 @@ class GeneralObject
     @effects_volume      = GlobalVariables.effects_volume
     @music_volume        = GlobalVariables.music_volume
     @fps_scaler          = GlobalVariables.fps_scaler
+    @graphics_setting    = GlobalVariables.graphics_setting
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,

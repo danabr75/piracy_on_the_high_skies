@@ -98,32 +98,32 @@ class OffensiveStore < Building
   end
 
 
-  def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
-    # @image.draw(800, 450, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_e1ffcd))
+  # def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
+  #   # @image.draw(800, 450, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_e1ffcd))
 
-    # @image.draw(@x, @y, 1, @height_scale, @height_scale)
-    # @image.draw((@x + get_width / 2.0), (@y - get_height  / 2.0), 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_e1ffcd))
+  #   # @image.draw(@x, @y, 1, @height_scale, @height_scale)
+  #   # @image.draw((@x + get_width / 2.0), (@y - get_height  / 2.0), 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_e1ffcd))
 
-    # @image.draw(@x - get_width / 2.0, @y - get_height / 2.0, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_ff0000))
-    # @click_area.draw(@x - get_width / 2.0, @y - get_height  / 2.0) #if @drops.any?
+  #   # @image.draw(@x - get_width / 2.0, @y - get_height / 2.0, 1, @height_scale, @height_scale, Gosu::Color.argb(0xff_ff0000))
+  #   # @click_area.draw(@x - get_width / 2.0, @y - get_height  / 2.0) #if @drops.any?
 
 
 
-    # @image.draw((@x - get_width / 4.0), (@y - get_height / 2.0), 1, @height_scale, @height_scale)
-    # color = Gosu::Color.argb(0xff_ffffff)
-    # if @drops.any?
-    #   if @is_hovering && @is_close_enough_to_open
-    #     color = Gosu::Color.argb(0xff_e1ffcd)
-    #   elsif @is_hovering
-    #     color = Gosu::Color.argb(0xff_ff9479)
-    #   end
-    # end
-    # For testing!!!!!!!!!!!!
-    # @image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, @height_scale, @height_scale)
-    # @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, 0, 0.5, 0.5, @average_scale / 2.0, @average_scale / 2.0)
-    # Super doesn't do anything right now, keeping for consistency
-    # super(viewable_pixel_offset_x,  viewable_pixel_offset_y)
-  end
+  #   # @image.draw((@x - get_width / 4.0), (@y - get_height / 2.0), 1, @height_scale, @height_scale)
+  #   # color = Gosu::Color.argb(0xff_ffffff)
+  #   # if @drops.any?
+  #   #   if @is_hovering && @is_close_enough_to_open
+  #   #     color = Gosu::Color.argb(0xff_e1ffcd)
+  #   #   elsif @is_hovering
+  #   #     color = Gosu::Color.argb(0xff_ff9479)
+  #   #   end
+  #   # end
+  #   # For testing!!!!!!!!!!!!
+  #   # @image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, @height_scale, @height_scale)
+  #   # @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, 0, 0.5, 0.5, @average_scale / 2.0, @average_scale / 2.0)
+  #   # Super doesn't do anything right now, keeping for consistency
+  #   # super(viewable_pixel_offset_x,  viewable_pixel_offset_y)
+  # end
 
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)

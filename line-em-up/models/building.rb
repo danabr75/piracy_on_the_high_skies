@@ -63,7 +63,20 @@ class Building < BackgroundFixedObject
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
-    # @image.draw((@x - get_width / 4.0) + @x_offset, (@y - get_height / 4.0) + @y_offset, 1, @height_scale, @height_scale)
+    if @interactible
+      if @is_hovering && @is_close_enough_to_open
+        # colors = [0.5, 1, 0.5, 1]
+        colors = Gosu::Color.argb(0xff_80ff00)
+      elsif @is_hovering
+        # colors = [1, 0.5, 0.5, 1]
+        colors = Gosu::Color.argb(0xff_ff0000)
+      else
+        colors = Gosu::Color.argb(0xff_ffffff)
+      end
+    else
+      colors = Gosu::Color.argb(0xff_ffffff)
+    end
+    @image.draw((@x - get_width / 4.0) + @x_offset, (@y - get_height / 4.0) + @y_offset, 1, @height_scale, @height_scale, colors)
   end
 
   # def convert_screen_to_opengl x, y, w = nil, h = nil

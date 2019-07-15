@@ -96,11 +96,10 @@ class GLBackground
   # end
 
 
-  def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height, resolution_scale
+  def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height, resolution_scale, graphics_setting
     @debug = true
     # @debug = false
-
-    @time_alive = 0
+    @graphics_setting = graphics_setting
     # @y_add_top_tracker = []
     # @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/earth.png", :tileable => true)
 
@@ -219,6 +218,22 @@ class GLBackground
     # @map_left_row   = nil
     # @map_right_row  = nil
 
+    if @graphics_setting == :basic
+      @dirt_image = Gosu::Image.new(MEDIA_DIRECTORY + '/earth.png')
+      @snow_image = Gosu::Image.new(MEDIA_DIRECTORY + '/snow.png')
+      @water_image = Gosu::Image.new(MEDIA_DIRECTORY + '/water.png')
+      @out_of_bounds_image = Gosu::Image.new(MEDIA_DIRECTORY + '/earth_3.png')
+      height_scale_adjustment = (@tile_pixel_height) / (@dirt_image.height)
+      @adjusted_height_scale = height_scale_adjustment + (height_scale_adjustment / 80.0)
+      # 200 - 200.0 - 1.0 - 2.5
+      # width and width and scale: 200 - 160.0 - 0.83125 - 2.406015037593985
+      # width and width and scale: 200 - 160.0 - 0.83125 - 1.6625 - 2.0
+      # width and width and scale: 133 - 160.0 - 0.83125 - 1.6625 - 2.0
+      # width and width and scale:       133 -                 160.0 -               1.2030075187969924 -            2.406015037593985 -          2.0
+      # puts "width and width and scale: #{@dirt_image.width} - #{@tile_pixel_width} - #{height_scale_adjustment} - #{@adjusted_height_scale} - #{@height_scale}"
+      # @adjusted_height_scale = @adjusted_height_scale / 1.3
+    end
+
 
     @map_name = "desert_v14_small"
     @map = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}.txt").first)
@@ -308,45 +323,34 @@ class GLBackground
     return @off_edge_map_value
   end
 
-  def recenter_map center_target
-    raise "did not work"
-    @gps_map_center_x  = center_target.current_map_tile_x
-    @gps_map_center_y  = center_target.current_map_tile_x
+  # def recenter_map center_target
+  #   raise "did not work"
+  #   @gps_map_center_x  = center_target.current_map_tile_x
+  #   @gps_map_center_y  = center_target.current_map_tile_x
 
-    (0..@visible_map_tile_height + @extra_map_tile_height - 1).each_with_index do |visible_height, index_h|
-      y_offset = visible_height - @visible_map_tile_height / 2
-      y_offset = y_offset - @extra_map_tile_height / 2
-      # @y_add_top_tracker << (player_y + y_offset)
-      (0..@visible_map_tile_width + @extra_map_tile_width - 1).each_with_index do |visible_width, index_w|
-        x_offset = visible_width  - @visible_map_tile_width  / 2
-        x_offset = x_offset - @extra_map_tile_width / 2
-        y_index = @gps_map_center_y + y_offset
-        x_index = @gps_map_center_x + x_offset
-        @visible_map[index_h][index_w] = @map_data[y_index][x_index]
-        @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
-      end
-    end
-    @current_map_pixel_center_x = center_target.current_map_pixel_x
-    @current_map_pixel_center_y = center_target.current_map_pixel_y
+  #   (0..@visible_map_tile_height + @extra_map_tile_height - 1).each_with_index do |visible_height, index_h|
+  #     y_offset = visible_height - @visible_map_tile_height / 2
+  #     y_offset = y_offset - @extra_map_tile_height / 2
+  #     # @y_add_top_tracker << (player_y + y_offset)
+  #     (0..@visible_map_tile_width + @extra_map_tile_width - 1).each_with_index do |visible_width, index_w|
+  #       x_offset = visible_width  - @visible_map_tile_width  / 2
+  #       x_offset = x_offset - @extra_map_tile_width / 2
+  #       y_index = @gps_map_center_y + y_offset
+  #       x_index = @gps_map_center_x + x_offset
+  #       @visible_map[index_h][index_w] = @map_data[y_index][x_index]
+  #       @visual_map_of_visible_to_map[index_h][index_w] = "#{y_index}, #{x_index}"
+  #     end
+  #   end
+  #   @current_map_pixel_center_x = center_target.current_map_pixel_x
+  #   @current_map_pixel_center_y = center_target.current_map_pixel_y
 
-    @local_map_movement_y = @current_map_pixel_center_x
-    @local_map_movement_x = @current_map_pixel_center_y
-  end
+  #   @local_map_movement_y = @current_map_pixel_center_x
+  #   @local_map_movement_x = @current_map_pixel_center_y
+  # end
 
   # @current_map_pixel_center_x and @current_map_pixel_center_y must be defined at this point.
   # Shouldn't use center here.. should use player center..
   def init_map current_target_tile_x, current_target_tile_y, window
-    # puts "INIT MAP"
-    # @map_tile_width - 
-
-    # START IN MIDDLE, go to top right
-    # player 0 - 0
-    # @gps_map_center_x: 0
-    # @gps_map_center_y: 250
-    # @map_tile_left_row    = 256
-    # @map_tile_right_row = 243
-    # @map_tile_top_row   = 245
-    # @map_tile_bottom_row  = 254
 
     @gps_map_center_x = @map_tile_width - 1 - current_target_tile_x
     @gps_map_center_y = @map_tile_height - 1 - current_target_tile_y
@@ -536,60 +540,60 @@ class GLBackground
 
   # I think this is dependent on the map being square
   def verify_visible_map
-    # Doesn't work with recenter function
-    if @map_inited && @debug
+    # # Doesn't work with recenter function
+    # if @map_inited && @debug
 
-      @visual_map_of_visible_to_map.each_with_index do |y_row, index|
-        # print_visible_map if y_row.nil? || y_row.empty? || y_row.length != @visible_map_tile_width + @extra_map_tile_width - 1
-        raise "Y Column was nil" if y_row.nil? || y_row.empty?
-        raise "Y Column size wasn't correct. Expected #{@visible_map_tile_width + @extra_map_tile_width}. GOT: #{y_row.length}" if y_row.length != @visible_map_tile_width + @extra_map_tile_width
-      end
+    #   @visual_map_of_visible_to_map.each_with_index do |y_row, index|
+    #     # print_visible_map if y_row.nil? || y_row.empty? || y_row.length != @visible_map_tile_width + @extra_map_tile_width - 1
+    #     raise "Y Column was nil" if y_row.nil? || y_row.empty?
+    #     raise "Y Column size wasn't correct. Expected #{@visible_map_tile_width + @extra_map_tile_width}. GOT: #{y_row.length}" if y_row.length != @visible_map_tile_width + @extra_map_tile_width
+    #   end
 
-      # puts "verify_visible_map"
-      y_length = @visual_map_of_visible_to_map.length - 1
-      x_length = @visual_map_of_visible_to_map[0].length - 1
-      raise "MAP IS TOO SHORT Y: #{@visual_map_of_visible_to_map.length} != #{@visible_map_tile_height + @extra_map_tile_height}"  if @visual_map_of_visible_to_map.length    != @visible_map_tile_height + @extra_map_tile_height
-      raise "MAP IS TOO SHORT X: #{@visual_map_of_visible_to_map[0].length} != #{@visible_map_tile_width + @extra_map_tile_width}" if @visual_map_of_visible_to_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
-      element = @visual_map_of_visible_to_map[0][0]
-      int = 0
-      outer_int = 0
-      while element == "N/A" && outer_int <= x_length
-        while element == "N/A" && int < @visual_map_of_visible_to_map.length - 1
-          int += 1
-          element = @visual_map_of_visible_to_map[int][outer_int]
-        end
-        outer_int += 1
-      end
-      if element && element != "N/A"
-        comp_y, do_nothing = element.split(', ').collect{|v| v.to_i}
-        (1..y_length).each do |y|
-          first_x_element = @visual_map_of_visible_to_map[y][0]
-          next if first_x_element == "N/A"
-          value_y, value_x = first_x_element.split(', ').collect{|v| v.to_i}
-          (1..x_length).each do |x|
-            element = @visual_map_of_visible_to_map[y][x]
-            next if element == "N/A"
-            do_nothing, comp_x = element.split(', ').collect{|v| v.to_i}
-            if value_x + x == comp_x
-              # All Good
-            else
-              print_visible_map
-              raise "1ISSUE WITH MAP AT X value Y: #{y} and X: #{x} -> #{value_x + x} != #{comp_x}"
-            end
-            if value_y == comp_y + y - int
-              # All Good
-            else
-              print_visible_map
-              raise "2ISSUE WITH MAP AT Y Value Y: #{y} and X: #{x} -> #{value_y} != #{comp_y + y - int}"
-            end
-          end
-        end
-      else
-        # puts "START MAP NOT VERIFIABLE"
-        # print_visible_map
-        # puts "END   MAP NOT VERIFIABLE"
-      end
-    end
+    #   # puts "verify_visible_map"
+    #   y_length = @visual_map_of_visible_to_map.length - 1
+    #   x_length = @visual_map_of_visible_to_map[0].length - 1
+    #   raise "MAP IS TOO SHORT Y: #{@visual_map_of_visible_to_map.length} != #{@visible_map_tile_height + @extra_map_tile_height}"  if @visual_map_of_visible_to_map.length    != @visible_map_tile_height + @extra_map_tile_height
+    #   raise "MAP IS TOO SHORT X: #{@visual_map_of_visible_to_map[0].length} != #{@visible_map_tile_width + @extra_map_tile_width}" if @visual_map_of_visible_to_map[0].length != @visible_map_tile_width  + @extra_map_tile_width
+    #   element = @visual_map_of_visible_to_map[0][0]
+    #   int = 0
+    #   outer_int = 0
+    #   while element == "N/A" && outer_int <= x_length
+    #     while element == "N/A" && int < @visual_map_of_visible_to_map.length - 1
+    #       int += 1
+    #       element = @visual_map_of_visible_to_map[int][outer_int]
+    #     end
+    #     outer_int += 1
+    #   end
+    #   if element && element != "N/A"
+    #     comp_y, do_nothing = element.split(', ').collect{|v| v.to_i}
+    #     (1..y_length).each do |y|
+    #       first_x_element = @visual_map_of_visible_to_map[y][0]
+    #       next if first_x_element == "N/A"
+    #       value_y, value_x = first_x_element.split(', ').collect{|v| v.to_i}
+    #       (1..x_length).each do |x|
+    #         element = @visual_map_of_visible_to_map[y][x]
+    #         next if element == "N/A"
+    #         do_nothing, comp_x = element.split(', ').collect{|v| v.to_i}
+    #         if value_x + x == comp_x
+    #           # All Good
+    #         else
+    #           print_visible_map
+    #           raise "1ISSUE WITH MAP AT X value Y: #{y} and X: #{x} -> #{value_x + x} != #{comp_x}"
+    #         end
+    #         if value_y == comp_y + y - int
+    #           # All Good
+    #         else
+    #           print_visible_map
+    #           raise "2ISSUE WITH MAP AT Y Value Y: #{y} and X: #{x} -> #{value_y} != #{comp_y + y - int}"
+    #         end
+    #       end
+    #     end
+    #   else
+    #     # puts "START MAP NOT VERIFIABLE"
+    #     # print_visible_map
+    #     # puts "END   MAP NOT VERIFIABLE"
+    #   end
+    # end
   end
 
 
@@ -625,8 +629,6 @@ class GLBackground
     if @debug
       # puts "@gps_map_center_y: #{@gps_map_center_y}, @gps_map_center_x: #{@gps_map_center_x}"
     end
-
-    @time_alive += 1
 
     # viewable_pixel_offset_x, viewable_pixel_offset_y
 
@@ -1049,16 +1051,40 @@ class GLBackground
   end
 
   
-  # Not needed
-  def draw(z)
-    # # gl will execute the given block in a clean OpenGL environment, then reset
-    # # everything so Gosu's rendering can take place again.
-    # Gosu.gl(z) do
-    #   glClearColor(0.0, 0.2, 0.5, 1.0)
-    #   glClearDepth(0)
-    #   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
-    #   exec_gl
-    # end
+  def draw player, player_x, player_y, buildings, pickups
+    return false if @graphics_setting != :basic
+
+    # @dirt_image = Gosu::Image.new(MEDIA_DIRECTORY + '/earth.png')
+    # @snow_image = Gosu::Image.new(MEDIA_DIRECTORY + '/snow.png')
+    # @water_image = Gosu::Image.new(MEDIA_DIRECTORY + '/snow.png')
+    # @out_of_bounds_image = Gosu::Image.new(MEDIA_DIRECTORY + '/earth_3.png')
+    # {"height"=>2.402866873199251, "terrain_type"=>"dirt", "terrain_index"=>0, "corner_heights"=>{"top_left"=>2.3248380114363396, "top_right"=>2.5335181135447193, "bottom_left"=>1.990020819472701, "bottom_right"=>2.3316200544175043}, "terrain_paths_and_weights"=>{"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>1.0}, "bottom_left"=>{"0"=>1.0}, "bottom_right"=>{"0"=>1.0}}, "gps_y"=>130, "gps_x"=>6}
+
+    tile_row_y_max = @visible_map.length #@visible_map.length - 1 - (@extra_map_tile_height)
+    @visible_map.each_with_index do |y_row, y_index|
+      tile_row_x_max = y_row.length # y_row.length - 1 - (@extra_map_tile_width)
+      y_row.each_with_index do |x_element, x_index|
+        # splits across middle 0  -7..0..7 if visible map is 15
+        new_x_index = x_index - (tile_row_x_max / 2.0)
+        new_y_index = y_index - (tile_row_y_max / 2.0)
+
+        screen_x = @tile_pixel_width   * new_x_index
+        screen_x += @tile_pixel_width  * 4.0
+        screen_y = @screen_pixel_height - @tile_pixel_height  * new_y_index
+        screen_y -= @tile_pixel_height  * 4.0
+
+        case x_element['terrain_type']
+        when 'dirt'
+          @dirt_image.draw(screen_x + @local_map_movement_x, screen_y - @local_map_movement_y, ZOrder::Background, @adjusted_height_scale, @adjusted_height_scale)
+        when 'snow'
+          @snow_image.draw(screen_x + @local_map_movement_x, screen_y - @local_map_movement_y, ZOrder::Background, @adjusted_height_scale, @adjusted_height_scale)
+        when 'water'
+          @water_image.draw(screen_x + @local_map_movement_x, screen_y - @local_map_movement_y, ZOrder::Background, @adjusted_height_scale, @adjusted_height_scale)
+        else
+          @out_of_bounds_image.draw(screen_x + @local_map_movement_x, screen_y - @local_map_movement_y, ZOrder::Background, @adjusted_height_scale, @adjusted_height_scale)
+        end
+      end
+    end
   end
   
   # include Gl
@@ -1069,6 +1095,11 @@ class GLBackground
   
   # player param is soley used for debugging
   def exec_gl player, player_x, player_y, buildings, pickups
+    return false if @graphics_setting != :advanced
+
+    glClearDepth(0)
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
+
     player_x, player_y = [player_x.to_i, player_y.to_i]
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)
