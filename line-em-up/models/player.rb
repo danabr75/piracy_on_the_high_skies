@@ -32,6 +32,7 @@ class Player < ScreenFixedObject
   # lets not set a timer that will kill us.
   MAX_TIME_ALIVE = nil
   IMAGE_SCALER = 5.0
+  ENABLE_POLYGON_HIT_BOX_DETECTION = true
 
 
   # SECONDARY_WEAPONS = [RocketLauncherPickup::NAME] + %w[bomb]
@@ -109,6 +110,10 @@ class Player < ScreenFixedObject
     # @drawable_items_near_self = []
     @angle = 0
 
+    # @test_image = Gosu::Image.new(MEDIA_DIRECTORY + '/hardpoints/hardpoint_empty.png')
+
+    # @test_image_half_width = (@test_image.width / 2.0)   * @height_scale / 28.0
+    # @test_image_half_height = (@test_image.height / 2.0) * @height_scale / 28.0
 
     # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"starboard_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"port_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
 
@@ -544,6 +549,18 @@ class Player < ScreenFixedObject
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+    # x, y = GeneralObject.convert_map_pixel_location_to_screen(@current_map_pixel_x, @current_map_pixel_y, @ship.top_right_point.x, @ship.top_right_point.y, @screen_pixel_width, @screen_pixel_height)
+    # @test_image.draw(x - @test_image_half_width, y - @test_image_half_height, ZOrder::UI, @height_scale / 28.0, @height_scale / 28.0)
+
+    # x, y = GeneralObject.convert_map_pixel_location_to_screen(@current_map_pixel_x, @current_map_pixel_y, @ship.top_left_point.x, @ship.top_left_point.y, @screen_pixel_width, @screen_pixel_height)
+    # @test_image.draw(x - @test_image_half_width, y - @test_image_half_height, ZOrder::UI, @height_scale / 28.0, @height_scale / 28.0)
+
+    # x, y = GeneralObject.convert_map_pixel_location_to_screen(@current_map_pixel_x, @current_map_pixel_y, @ship.bottom_right_point.x, @ship.bottom_right_point.y, @screen_pixel_width, @screen_pixel_height)
+    # @test_image.draw(x - @test_image_half_width, y - @test_image_half_height, ZOrder::UI, @height_scale / 28.0, @height_scale / 28.0)
+
+    # x, y = GeneralObject.convert_map_pixel_location_to_screen(@current_map_pixel_x, @current_map_pixel_y, @ship.bottom_left_point.x, @ship.bottom_left_point.y, @screen_pixel_width, @screen_pixel_height)
+    # @test_image.draw(x - @test_image_half_width, y - @test_image_half_height, ZOrder::UI, @height_scale / 28.0, @height_scale / 28.0)
+
     # @drawable_items_near_self.reject! { |item| item.draw }
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
   end
@@ -583,6 +600,10 @@ class Player < ScreenFixedObject
     @exiting_map = false
   end
 
+  def get_map_pixel_polygon_points
+    return @ship.get_map_pixel_polygon_points
+  end
+
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y
     # puts "PLAYER CAN EXIT: #{@can_exit_map}"
     # puts "PLAYER EXITING MAP: #{@exiting_map}"
@@ -602,7 +623,7 @@ class Player < ScreenFixedObject
     end
 
     # puts "player #{@current_map_tile_x} - #{@current_map_tile_y}"
-    @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, cursor_map_pixel_x, cursor_map_pixel_y)
+    @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, self, cursor_map_pixel_x, cursor_map_pixel_y)
     if !@controls_enabled
       @ship.brake
     end

@@ -26,6 +26,12 @@ class GeneralObject
   EXPECTED_IMAGE_PIXEL_WIDTH  = nil
   IMAGE_SCALER = 1.0
 
+  # ENABLE FOR RECTANGLE objects, that cannot rotate
+  ENABLE_RECTANGLE_HIT_BOX_DETECTION = false
+
+  # FOR ODD SHAPES, ROTATED SHAPES, like ships
+  ENABLE_POLYGON_HIT_BOX_DETECTION   = false
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end

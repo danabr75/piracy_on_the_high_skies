@@ -38,12 +38,12 @@ class BasicShip < PilotableShip
     {
       angle_offset: 0,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
+      x_offset: lambda { |image, scale| ((image.width * scale) / 4.34) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
     },
     {
       angle_offset: 0,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 7) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
+      x_offset: lambda { |image, scale| -((image.width * scale) / 4.34) },  y_offset: lambda { |image, scale| -((image.height * scale) / 2.5) },
     },
   # ]
   # # LEFT SIDE
@@ -52,19 +52,19 @@ class BasicShip < PilotableShip
     {
       angle_offset: 90,
       slot_type: :generic, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| (image.height * scale) / 5.0 }   
+      x_offset: lambda { |image, scale| ((image.width * scale) / 3.1)}, y_offset: lambda { |image, scale| (image.height * scale) / 5.0 }   
     },
     # Middle One
     {
       angle_offset: 90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 4)}, y_offset: lambda { |image, scale| 0 } 
+      x_offset: lambda { |image, scale| ((image.width * scale) / 2.5)}, y_offset: lambda { |image, scale| 0 } 
     },
     # Top One
     {
       angle_offset: 90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4.0) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 3.1)}, y_offset: lambda { |image, scale| -((image.height * scale) / 4.0) }
     },
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   # ]
@@ -74,39 +74,39 @@ class BasicShip < PilotableShip
     {
       angle_offset: -90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4.0 }   
+      x_offset: lambda { |image, scale| -((image.width * scale) / 3.1)}, y_offset: lambda { |image, scale| -(image.height * scale) / 4.0 }   
     },
     # Middle One
     {
       angle_offset: -90,
       slot_type: :offensive, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 4)}, y_offset: lambda { |image, scale| 0 } 
+      x_offset: lambda { |image, scale| -((image.width * scale) / 2.5)}, y_offset: lambda { |image, scale| 0 } 
     },
     # bottom One
     {
       angle_offset: -90,
       slot_type: :generic, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 5)}, y_offset: lambda { |image, scale| ((image.height * scale) / 5.0) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 3.1)}, y_offset: lambda { |image, scale| ((image.height * scale) / 5.0) }
     },
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| ((image.height * scale) / 10.0) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 1.8)}, y_offset: lambda { |image, scale| ((image.height * scale) / 10.0) }
     },
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| ((image.height * scale) / 10.0) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 1.8)}, y_offset: lambda { |image, scale| ((image.height * scale) / 10.0) }
     },
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| -((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| -((image.height * scale) / 10.0) }
+      x_offset: lambda { |image, scale| -((image.width * scale) / 1.8)}, y_offset: lambda { |image, scale| -((image.height * scale) / 10.0) }
     },
     {
       angle_offset: 180, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :engine, 
-      x_offset: lambda { |image, scale| ((image.width * scale) / 2.9)}, y_offset: lambda { |image, scale| -((image.height * scale) / 10.0) }
+      x_offset: lambda { |image, scale| ((image.width * scale) / 1.8)}, y_offset: lambda { |image, scale| -((image.height * scale) / 10.0) }
     },
     {
       angle_offset: 0, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation

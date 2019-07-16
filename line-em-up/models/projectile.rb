@@ -410,41 +410,22 @@ class Projectile < ScreenMapFixedObject
           if object.health <= 0
             next
           end
-          # if Gosu.distance(@x, @y, object.x, object.y) < (self.get_size / 2)
           # maybe add advanced collision in when support multi-threads
-          if false && self.class.get_advanced_hit_box_detection
-            # Disabling advanced hit detection for now
-            # self_object = [[(@x - get_width / 2), (@y - get_height / 2)], [(@x + get_width / 2), (@y + get_height / 2)]]
-            # other_object = [[(object.x - object.get_width / 2), (object.y - object.get_height / 2)], [(object.x + object.get_width / 2), (object.y + object.get_height / 2)]]
-            # hit_object = rec_intersection(self_object, other_object)
+          # Not sure if this 100% works.
+          if object.class::ENABLE_RECTANGLE_HIT_BOX_DETECTION
+            self_object = [
+              [(@current_map_pixel_x - @image_width_half), (@current_map_pixel_y - @image_height_half)],
+              [(@current_map_pixel_x + @image_width_half), (@current_map_pixel_y + @image_height_half)]
+            ]
+            other_object = [
+              [(object.current_map_pixel_x - @image_width_half), (object.current_map_pixel_y - @image_height_half)],
+              [(object.current_map_pixel_x + @image_width_half), (object.current_map_pixel_y + @image_height_half)]
+            ]
+            hit_object = rec_intersection(self_object, other_object)
+          elsif object.class::ENABLE_POLYGON_HIT_BOX_DETECTION
+            hit_object = is_point_inside_polygon(OpenStruct.new(x: @current_map_pixel_x, y: @current_map_pixel_y), object.get_map_pixel_polygon_points)
           else
-            # puts "HIT OBJECT DETECTION: proj-size: #{(self.get_size / 2)}"
-            # puts "HIT OBJECT DETECTION:  obj-size: #{(self.get_size / 2)}"
-            # raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD X" if @debug && !object.respond_to?(:current_map_pixel_x)
-            # raise "OBJECT #{object.class.name} IN COLLISION DIDN'T HAVE COORD Y" if @debug && !object.respond_to?(:current_map_pixel_y)
-            # raise "OBJECT #{object.class.name} IN COLLISION COORD X WAS NIL" if @debug && object.current_map_pixel_x.nil?
-            # raise "OBJECT #{object.class.name} IN COLLISION COORD Y WAS NIL" if @debug && object.current_map_pixel_y.nil?
-            # if @debug
-            #   if self.get_radius.nil?
-            #     raise "NO RADIUS FOUND FOR #{self.class.name}. Does it have an Image assigned? Is image nil? #{self.get_image.nil?} and is image nil? #{object.image.nil?}"
-            #   end
-            #   if object.get_radius.nil?
-            #     raise "NO RADIUS FOUND FOR #{object.class.name}. Does it have an Image assigned? Is get image nil? #{object.get_image.nil?} and is image nil? #{object.image.nil?}"
-            #   end
-            # end
-            # puts "HITTING OBJECT RADIUSES - self.class: #{self.class.name}"
-            # puts "#{self.get_radius + object.get_radius} : #{self.get_radius} + #{object.get_radius}"
-            # puts "distance = #{Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y)}"
-            # HITTING OBJECT RADIUSES - self.class: GrapplingHook
-            # 317.96875 : 250.0 + 67.96875
-            # HITTING OBJECT RADIUSES - self.class: GrapplingHook
-            # 77.31770833333333 : 9.348958333333334 + 67.96875
-            
-            # HITTING OBJECT RADIUSES - self.class: GrapplingHook
-            # 105.36458333333334 : 37.395833333333336 + 67.96875
-
             hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
-            # puts "HIT THIS OBJECT: #{object.id} - #{object.class}" if hit_object
           end
           if hit_object && self.class.get_aoe <= 0
             # puts "HIT GRAPPLEHOOK HERE" if object.class.name == "GrapplingHook"
@@ -559,7 +540,7 @@ class Projectile < ScreenMapFixedObject
     y_max = [rect1[1][1], rect2[1][1]].min
 
     return nil if ((x_max < x_min) || (y_max < y_min))
-    return [[x_min, y_min], [x_max, y_max]]
+    return true #[[x_min, y_min], [x_max, y_max]]
   end
 
     # puts rec_intersection(

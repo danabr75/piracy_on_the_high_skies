@@ -32,6 +32,8 @@ class PilotableShip < GeneralObject
 
   attr_accessor :current_momentum
 
+  attr_reader :top_right_point, :top_left_point, :bottom_right_point, :bottom_left_point
+
     # @speed             = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
     # @speed_steam_usage = @engine_steam_usage_increment
     # @boost_speed       = ((self.class::SPEED * @average_scale) + ((acceleration_boost * boost_speed_modifier)  * @average_scale)) / 3.0
@@ -310,13 +312,67 @@ class PilotableShip < GeneralObject
     # puts "BOOST MASS #{@boost_mass}" if owner.class == Player
 
     # @current_map_pixel_x = current_map_pixel_x
-    # @current_map_pixel_y = current_map_pixel_y
+    # owner.current_map_pixel_y = current_map_pixel_y
     # @current_map_tile_x  = current_map_tile_x
     # @current_map_tile_y  = current_map_tile_y
     @block_momentum_increase = false
     @block_momentum_decrease = false
+
+    # @polygon_points = {}
+    if !options[:block_initial_angle]
+      @polygon_points     = []
+      @center_point       = OpenStruct.new(:x => owner.current_map_pixel_x, :y => owner.current_map_pixel_y)
+      # puts ":@image_width_half: #{@image_width_half} - #{@image_height_half}"
+      @top_right_point    = OpenStruct.new(:x => owner.current_map_pixel_x + @image_width_half, :y => owner.current_map_pixel_y - @image_height_half)
+      @top_right_angle    = self.class.angle_1to360(calc_angle(@center_point, @top_right_point) - 90)
+
+      @top_left_point     = OpenStruct.new(:x => owner.current_map_pixel_x - @image_width_half, :y => owner.current_map_pixel_y - @image_height_half)
+      @top_left_angle     = self.class.angle_1to360(calc_angle(@center_point, @top_left_point) - 90)
+
+      @bottom_right_point = OpenStruct.new(:x => owner.current_map_pixel_x + @image_width_half, :y => owner.current_map_pixel_y + @image_height_half)
+      @bottom_right_angle = self.class.angle_1to360(calc_angle(@center_point, @bottom_right_point) - 90)
+
+      @bottom_left_point  = OpenStruct.new(:x => owner.current_map_pixel_x - @image_width_half, :y => owner.current_map_pixel_y + @image_height_half)
+      @bottom_left_angle  = self.class.angle_1to360(calc_angle(@center_point, @bottom_left_point) - 90)
+
+      # Radius should be the same for all points, it's just angles rectangles.
+      @object_polygon_radius = Gosu.distance(owner.current_map_pixel_x, owner.current_map_pixel_y, owner.current_map_pixel_x + @image_width_half, owner.current_map_pixel_y + @image_height_half)
+      # @object_polygon_radius = @object_polygon_radius * 0.9
+    end
   end
 
+  # is_point_inside_polygon
+
+  def update_current_map_pixel_coords owner_map_pixel_x, owner_map_pixel_y
+    # step = (Math::PI/180 * (360 -  @angle_from_center + @angle + 90)) + 90.0 + 45.0
+    # point_map_pixel_x = Math.cos(step) * @object_polygon_radius + owner_map_pixel_x
+    # point_map_pixel_y = Math.sin(step) * @object_polygon_radius + owner_map_pixel_y
+    angle_correction = 5
+
+    step = (Math::PI/180 * (360 -  @top_right_angle + @angle + 90 + angle_correction)) + 90.0 + 45.0
+    point_map_pixel_x = Math.cos(step) * @object_polygon_radius + owner_map_pixel_x
+    point_map_pixel_y = Math.sin(step) * @object_polygon_radius + owner_map_pixel_y
+    @top_right_point    = OpenStruct.new(:x => point_map_pixel_x, :y => point_map_pixel_y)
+
+    step = (Math::PI/180 * (360 -  @top_left_angle + @angle + 90 + angle_correction)) + 90.0 + 45.0
+    point_map_pixel_x = Math.cos(step) * @object_polygon_radius + owner_map_pixel_x
+    point_map_pixel_y = Math.sin(step) * @object_polygon_radius + owner_map_pixel_y
+    @top_left_point    = OpenStruct.new(:x => point_map_pixel_x, :y => point_map_pixel_y)
+
+    step = (Math::PI/180 * (360 -  @bottom_right_angle + @angle + 90 + angle_correction)) + 90.0 + 45.0
+    point_map_pixel_x = Math.cos(step) * @object_polygon_radius + owner_map_pixel_x
+    point_map_pixel_y = Math.sin(step) * @object_polygon_radius + owner_map_pixel_y
+    @bottom_right_point    = OpenStruct.new(:x => point_map_pixel_x, :y => point_map_pixel_y)
+
+    step = (Math::PI/180 * (360 -  @bottom_left_angle + @angle + 90 + angle_correction)) + 90.0 + 45.0
+    point_map_pixel_x = Math.cos(step) * @object_polygon_radius + owner_map_pixel_x
+    point_map_pixel_y = Math.sin(step) * @object_polygon_radius + owner_map_pixel_y
+    @bottom_left_point    = OpenStruct.new(:x => point_map_pixel_x, :y => point_map_pixel_y)
+  end
+
+  def get_map_pixel_polygon_points
+    [@top_right_point, @top_left_point, @bottom_right_point, @bottom_left_point]
+  end
 
   def hit_objects(owner, object_groups, options)
     # puts "OWHNER: #{@owner.class}"
@@ -333,7 +389,7 @@ class PilotableShip < GeneralObject
           next if owner.id == object.id
           # puts "OBJECTCLASS: #{object.class.name} against #{owner.class.name}"
           # puts "OBJECT.CLASS: #{object.class.name} - #{object.current_map_pixel_x} - #{object.current_map_pixel_y}"
-          # puts "#{self.class.name} - #{@current_map_pixel_x} - #{@current_map_pixel_y}"
+          # puts "#{self.class.name} - #{@current_map_pixel_x} - #{owner.current_map_pixel_y}"
           hit_object = Gosu.distance(owner.current_map_pixel_x, owner.current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < (self.get_radius + object.get_radius) / 2.0
           collided_object = object if hit_object
           # puts "I, #{self.owner.class}, collided_object.class: #{collided_object.class} - radius where: #{self.get_radius} and #{object.get_radius}" if hit_object
@@ -670,8 +726,10 @@ class PilotableShip < GeneralObject
     glEnd
   end
   
-  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, target_map_pixel_x, target_map_pixel_y
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, owner, target_map_pixel_x, target_map_pixel_y
     validate_not_nil([mouse_x, mouse_y], self.class.name, __callee__)
+
+    update_current_map_pixel_coords(owner.current_map_pixel_x, owner.current_map_pixel_y)
 
     # hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) 
 

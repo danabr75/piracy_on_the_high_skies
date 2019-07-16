@@ -29,6 +29,7 @@ class AIShip < ScreenMapFixedObject
 
   CLASS_TYPE = :ship
   IMAGE_SCALER = 5.0
+  ENABLE_POLYGON_HIT_BOX_DETECTION = true
 
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
@@ -273,6 +274,10 @@ class AIShip < ScreenMapFixedObject
 
   def get_draw_ordering
     ZOrder::AIShip
+  end
+
+  def get_map_pixel_polygon_points
+    return @ship.get_map_pixel_polygon_points
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
@@ -568,7 +573,7 @@ class AIShip < ScreenMapFixedObject
     target_map_x = agro_target ? agro_target.current_map_pixel_x : nil
     target_map_y = agro_target ? agro_target.current_map_pixel_y : nil
 
-    @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, target_map_x, target_map_y)
+    @ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, self, target_map_x, target_map_y)
     # puts "AI SHIP UPDATE: #{@id}"
 
 
