@@ -40,6 +40,7 @@ class Cursor < GeneralObject
     @owner_steam_max_capacity     = owner.get_steam_max_capacity
     @owner_current_steam_capacity = owner.current_steam_capacity
     @steam_angle_increment        = @owner_steam_max_capacity / 45.0
+    @colors = Gosu::Color.argb(0x88_ffffff)
 
   #     puts "TEST123"
   #     puts [
@@ -63,22 +64,23 @@ class Cursor < GeneralObject
     @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @height_scale, @height_scale)
 
     health_counter = 0.0
-    current_angle  = 11.0
+    # current_angle  = 11.0
+    current_angle  = -165.0
     while @owner_health > 0 && health_counter <= @owner_health
       # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-      @health_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 3.8, 3.8, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+      @health_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 3.8, 3.8, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @colors)
 
       health_counter += @health_angle_increment
-      current_angle  += 8
+      current_angle  += 4
     end
 
     steam_counter = 0.0
-    current_angle  = 11.0
+    current_angle  = 20.0
     while @owner_steam_max_capacity > 0 && steam_counter <= @owner_steam_max_capacity
       if steam_counter < @owner_steam_max_capacity - @owner_current_steam_capacity
-        @steam_used_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 5, 5, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+        @steam_used_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 3.8, 3.8, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @colors)
       else
-        @steam_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 5, 5, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+        @steam_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 3.8, 3.8, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @colors)
       end
 
       steam_counter += @steam_angle_increment
@@ -168,12 +170,12 @@ class Cursor < GeneralObject
 
     # need to update these on ship refresh.. or right now
     @owner_max_health = owner.max_health
-    @health_angle_increment = @owner_max_health / 45.0
+    @health_angle_increment = @owner_max_health / 43.0
     @owner_health     = owner.health
 
     @owner_steam_max_capacity     = owner.get_steam_max_capacity
     @owner_current_steam_capacity = owner.current_steam_capacity
-    @steam_angle_increment        = @owner_steam_max_capacity / 45.0
+    @steam_angle_increment        = @owner_steam_max_capacity / 42.0
 
     @current_map_pixel_x = player_map_pixel_x + (mouse_x * -1) +  (@screen_pixel_width  / 2) + viewable_pixel_offset_x
     @current_map_pixel_y = player_map_pixel_y + (mouse_y     ) -  (@screen_pixel_height / 2) + viewable_pixel_offset_y
