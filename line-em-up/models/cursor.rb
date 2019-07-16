@@ -40,8 +40,8 @@ class Cursor < GeneralObject
     @owner_steam_max_capacity     = owner.get_steam_max_capacity
     @owner_current_steam_capacity = owner.current_steam_capacity
     @steam_angle_increment        = @owner_steam_max_capacity / 25.0
-    @health_colors = Gosu::Color.argb(0xee_ffffff)
-    @steam_colors = Gosu::Color.argb(0x88_ffffff)
+    @health_colors = Gosu::Color.argb(0xff_ffffff)
+    @steam_colors = Gosu::Color.argb(0xee_ffffff)
 
   #     puts "TEST123"
   #     puts [

@@ -157,6 +157,11 @@ class AIShip < ScreenMapFixedObject
     @can_fire = true
     @can_fire_counter = 0
     @cannot_fire_counter = 0
+
+    @health_unit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_cursor_unit.png")
+    @height_scaler_with_health_unit_image = @height_scale / 8.0
+    # Lower diviser means fewer bases
+    @health_angle_increment = max_health / 10.0
   end
 
 
@@ -175,9 +180,13 @@ class AIShip < ScreenMapFixedObject
   def get_speed
     return @ship.speed
   end
-  
+
   def health
     @ship.health
+  end
+
+  def max_health
+    @ship.max_health
   end
 
   def rotate_counterclockwise
@@ -281,17 +290,21 @@ class AIShip < ScreenMapFixedObject
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
-    # puts "DRAWING AI SHIP: #{@id} - #{@x} - #{@y}"
-    # question = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
-
-    # i2 = Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
-    # i2.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @height_scale, @height_scale)
-    # puts "DRAWING SHIP: #{@id}"
-    # @drawable_items_near_self.reject! { |item| item.draw }
-    # puts "DRAWING SHIP - #{@x} - #{@y}"
-    # @ship.front_hard_points.first.image_hardpoint.draw_rot(@x, @y, ZOrder::Hardpoint, @angle, 0.5, 0.5, @height_scale, @height_scale)
-    # question.draw(@x, @y, 5000, @height_scale, @height_scale)
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
+
+    health_counter = 0.0
+    # current_angle  = 11.0
+    # Lower is counter clockwise
+    # Higher is clockwise
+    current_angle  = 155.0
+    while max_health != health && health > 0 && health_counter <= health
+      # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+      @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+
+      health_counter += @health_angle_increment
+      current_angle  += 6
+    end
+
   end
 
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
