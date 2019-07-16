@@ -2,6 +2,9 @@
 # require 'glu'
 require 'glut'
 
+# Too Expensive
+Dir["#{MODEL_DIRECTORY}/projectiles/*.rb"].each { |f| require f }
+
 #used to be launcher
 
 module HardpointObjects

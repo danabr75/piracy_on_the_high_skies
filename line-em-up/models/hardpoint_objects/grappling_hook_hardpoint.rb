@@ -1,10 +1,11 @@
+require_relative '../projectiles/grappling_hook.rb'
 module HardpointObjects
   class GrapplingHookHardpoint < HardpointObjects::HardpointObject
     HARDPOINT_NAME = "grappling_hook_launcher"
     LAUNCHER_MIN_ANGLE = -60
     LAUNCHER_MAX_ANGLE = 60
     LAUNCHER_ROTATE_SPEED = 3
-    PROJECTILE_CLASS = GrapplingHook
+    PROJECTILE_CLASS = Projectiles::GrapplingHook
     FIRING_GROUP_NUMBER = 3
     # FIRING_GROUP_NUMBER = 2
     COOLDOWN_DELAY = 120

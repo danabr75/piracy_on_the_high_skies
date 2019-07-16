@@ -1,10 +1,11 @@
+require_relative '../projectiles/bullet.rb'
 module HardpointObjects
   class BulletHardpoint < HardpointObjects::HardpointObject
     HARDPOINT_NAME = "bullet_launcher"
-    LAUNCHER_MIN_ANGLE = -80
-    LAUNCHER_MAX_ANGLE = 80
+    LAUNCHER_MIN_ANGLE = -70
+    LAUNCHER_MAX_ANGLE = 70
     LAUNCHER_ROTATE_SPEED = 3
-    PROJECTILE_CLASS = Bullet
+    PROJECTILE_CLASS = Projectiles::Bullet
     FIRING_GROUP_NUMBER = 2
     SHOW_HARDPOINT_BASE = true
     

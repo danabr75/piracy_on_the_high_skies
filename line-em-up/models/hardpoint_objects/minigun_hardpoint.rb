@@ -1,3 +1,6 @@
+require_relative '../projectiles/bullet.rb'
+
+
 module HardpointObjects
   class MinigunHardpoint < HardpointObjects::HardpointObject
 
@@ -5,7 +8,7 @@ module HardpointObjects
     LAUNCHER_MIN_ANGLE = -60
     LAUNCHER_MAX_ANGLE = 60
     LAUNCHER_ROTATE_SPEED = 1
-    PROJECTILE_CLASS = Bullet
+    PROJECTILE_CLASS = Projectiles::Bullet
     FIRING_GROUP_NUMBER = 2
     COOLDOWN_DELAY = 20
     ACTIVE_DELAY   = 120

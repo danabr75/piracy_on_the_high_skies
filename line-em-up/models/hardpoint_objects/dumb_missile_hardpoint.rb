@@ -1,3 +1,4 @@
+require_relative '../projectiles/missile.rb'
 module HardpointObjects
   class DumbMissileHardpoint < HardpointObjects::HardpointObject
     # 0 is NORTH, 180 is SOUTH
@@ -10,7 +11,7 @@ module HardpointObjects
     COOLDOWN_DELAY = 240
     # COOLDOWN_DELAY = 15
     HARDPOINT_NAME = "missile_launcher"
-    PROJECTILE_CLASS = Missile
+    PROJECTILE_CLASS = Projectiles::Missile
     FIRING_GROUP_NUMBER = 2
     STORE_RARITY = 5 # 1 is lowest
     STEAM_POWER_USAGE = 30.0
