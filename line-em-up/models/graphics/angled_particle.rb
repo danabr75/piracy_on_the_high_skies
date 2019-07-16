@@ -21,8 +21,9 @@ module Graphics
       raise "override me"
     end
 
-    def initialize current_map_pixel_x, current_map_pixel_y, speed, angle_min, angle_max, width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {}
+    def initialize current_map_pixel_x, current_map_pixel_y, speed, angle_min, angle_max, width_scale, height_scale, screen_pixel_width, screen_pixel_height, fps_scaler, options = {}
       @points = []
+      @fps_scaler = fps_scaler
 
       @scale_multiplier = options[:scale_multiplier] || 1.0
 
@@ -83,7 +84,7 @@ module Graphics
 
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
       # puts "PARTICLE UPDATES RIGHT HERE"
-      @time_alive += 1.0 * @decay_rate
+      @time_alive += 1.0 * @decay_rate * @fps_scaler
 
 
       @points.each do |p|

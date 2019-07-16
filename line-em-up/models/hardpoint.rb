@@ -318,7 +318,7 @@ class Hardpoint < GeneralObject
         destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
         @drawable_items_near_self << Graphics::AngledSmoke.new(
           @current_map_pixel_x, @current_map_pixel_y, 3, destination_angle, nil, @width_scale,
-          @height_scale, @screen_pixel_width, @screen_pixel_height,
+          @height_scale, @screen_pixel_width, @screen_pixel_height, @fps_scaler,
           {
             green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
             scale_multiplier: 0.25
@@ -414,7 +414,7 @@ class Hardpoint < GeneralObject
     # puts "HERE: 100 - #{(((@owner.current_momentum / 10).round * 10) )}"
     if false && @slot_type == :engine && @item && @owner.current_momentum > 10 && @owner.time_alive %  (110 - (((@owner.current_momentum / 10) * 10) )) / 2 == 0
       # speed = @owner.current_momentum / 100.0
-      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @screen_pixel_width, @screen_pixel_height)
+      @drawable_items_near_self << Graphics::AngledSmoke.new(@current_map_pixel_x, @current_map_pixel_y, 0, @owner.angle - 45, @owner.angle + 45, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @screen_pixel_width, @screen_pixel_height, @fps_scaler)
       # puts "ADDING TO @drawable_items_near_self EHERE!!!"
     end
     # if @slot_type == :engine && @owner.current_momentum.nil?

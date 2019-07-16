@@ -462,14 +462,14 @@ module Projectiles
         # end
 
         if self.class::POST_DESTRUCTION_EFFECTS
-          puts "AADDING GRAPHICAL EEFFECTS 1"
+          # puts "AADDING GRAPHICAL EEFFECTS 1"
           self.get_post_destruction_effects.each do |effect|
             # puts "COUNT 1 herer"
             graphical_effects << effect
           end
         end
         if actual_hit_object.class::POST_DESTRUCTION_EFFECTS
-          puts "AADDING GRAPHICAL EEFFECTS 2"
+          # puts "AADDING GRAPHICAL EEFFECTS 2"
           actual_hit_object.get_post_destruction_effects.each do |effect|
             # puts "COUNT 1 herer"
             graphical_effects << effect

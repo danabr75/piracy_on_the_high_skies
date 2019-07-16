@@ -22,26 +22,26 @@ module Projectiles
 
     POST_DESTRUCTION_EFFECTS = true
 
-    def self.get_post_destruction_effects # Give parameters
-      # raise 'stop here'
-      return [
-        Graphics::Smoke.new(
-          @current_map_pixel_x, @current_map_pixel_y, @width_scale,
-          @height_scale, @screen_pixel_width, @screen_pixel_height,
-          {
-            green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
-            scale_multiplier: 0.25, scale_init_boost: 0.3
-          }
-        )
-      ]
-    end
+    # def self.get_post_destruction_effects # Give parameters
+    #   # raise 'stop here'
+    #   return [
+    #     Graphics::Explosion.new(
+    #       @current_map_pixel_x, @current_map_pixel_y, @width_scale,
+    #       @height_scale, @screen_pixel_width, @screen_pixel_height, @fps_scaler,
+    #       {
+    #         green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
+    #         scale_multiplier: 0.25, scale_init_boost: 0.3
+    #       }
+    #     )
+    #   ]
+    # end
 
     def get_post_destruction_effects # Give parameters
       # raise 'stop here'
       return [
-        Graphics::Smoke.new(
+        Graphics::Explosion.new(
           @current_map_pixel_x, @current_map_pixel_y, @width_scale,
-          @height_scale, @screen_pixel_width, @screen_pixel_height,
+          @height_scale, @screen_pixel_width, @screen_pixel_height, @fps_scaler,
           {
             green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
             scale_multiplier: 0.25, scale_init_boost: 0.3

@@ -21,8 +21,9 @@ module Graphics
       raise "override me"
     end
 
-    def initialize current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, options = {}
+    def initialize current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, fps_scaler, options = {}
       raise "NO SCALES WERE GIVEN: #{height_scale} - #{width_scale}" if width_scale.nil? || height_scale.nil?
+      @fps_scaler = fps_scaler
       @points = []
 
       @scale_multiplier = options[:scale_multiplier] || 1.0
@@ -53,7 +54,7 @@ module Graphics
     end
 
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
-      @time_alive += 1.0 * @decay_rate
+      @time_alive += 1.0 * @decay_rate * @fps_scaler
 
 
       @points.each do |p|
@@ -79,7 +80,7 @@ module Graphics
 
         color = Gosu::Color.new(255 - (@time_alive).to_i, new_r, new_g, new_b)
 
-        @image.draw_rot(p[2] + viewable_pixel_offset_x, p[3] + viewable_pixel_offset_y, ZOrder::UI, @time_alive, 0.5, 0.5, scale * @scale_multiplier, scale * @scale_multiplier, color) #if @image
+        @image.draw_rot(p[2] + viewable_pixel_offset_x, p[3] + viewable_pixel_offset_y, ZOrder::Explosions, @time_alive, 0.5, 0.5, scale * @scale_multiplier, scale * @scale_multiplier, color) #if @image
         if @time_alive >= 255.0
           @is_alive = false
         end
