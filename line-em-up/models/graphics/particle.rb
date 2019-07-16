@@ -57,7 +57,7 @@ module Graphics
 
 
       @points.each do |p|
-        x, y = GeneralObject.convert_map_pixel_location_to_screen(player, p[0], p[1], @screen_pixel_width, @screen_pixel_height)
+        x, y = GeneralObject.convert_map_pixel_location_to_screen(player_map_pixel_x, player_map_pixel_y, p[0], p[1], @screen_pixel_width, @screen_pixel_height)
         p[2] = x
         p[3] = y
       end

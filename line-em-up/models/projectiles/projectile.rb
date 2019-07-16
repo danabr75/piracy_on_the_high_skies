@@ -383,7 +383,8 @@ module Projectiles
 
     def hit_objects(object_groups, options)
       # puts "PROJ hit objects"
-      hit_object = false
+      hit_object    = false
+      actual_hit_object = nil
       graphical_effects = []
       is_thread = options[:is_thread] || false
       if @health > 0
@@ -434,6 +435,7 @@ module Projectiles
               # puts "GRAPPLE HEALTH WAS: #{object.health}" if object.class.name == "GrapplingHook"
               # drops = drops + result[:drops] if result[:drops].any?
             end
+            actual_hit_object = object if hit_object
           end
         end
       else
@@ -460,8 +462,15 @@ module Projectiles
         # end
 
         if self.class::POST_DESTRUCTION_EFFECTS
-          # puts "AADDING GRAPHICAL EEFFECTS"
+          puts "AADDING GRAPHICAL EEFFECTS 1"
           self.get_post_destruction_effects.each do |effect|
+            # puts "COUNT 1 herer"
+            graphical_effects << effect
+          end
+        end
+        if actual_hit_object.class::POST_DESTRUCTION_EFFECTS
+          puts "AADDING GRAPHICAL EEFFECTS 2"
+          actual_hit_object.get_post_destruction_effects.each do |effect|
             # puts "COUNT 1 herer"
             graphical_effects << effect
           end
@@ -472,6 +481,7 @@ module Projectiles
       @health = self.take_damage(@health) if hit_object
       # puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
       # return {is_alive: @health > 0, graphical_effects: graphical_effects}
+      # raise "found graphical effects" if graphical_effects.count > 0
       return {graphical_effects: graphical_effects}
     end
 

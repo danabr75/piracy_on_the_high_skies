@@ -32,6 +32,8 @@ class GeneralObject
   # FOR ODD SHAPES, ROTATED SHAPES, like ships
   ENABLE_POLYGON_HIT_BOX_DETECTION   = false
 
+  POST_DESTRUCTION_EFFECTS = false
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end

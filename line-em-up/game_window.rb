@@ -83,7 +83,7 @@ class GameWindow < Gosu::Window
 
   attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
 
-  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks
+  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks, :add_graphical_effects
   attr_accessor :add_projectiles, :remove_projectile_ids
   attr_accessor :add_ships, :remove_ship_ids
   attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
@@ -337,6 +337,7 @@ class GameWindow < Gosu::Window
     @messages = []
     @effects = []
     @graphical_effects = []
+    @add_graphical_effects = []
 
     @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
     viewable_center_target = nil
@@ -644,6 +645,11 @@ class GameWindow < Gosu::Window
       @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
     end
 
+      @add_graphical_effects.reject! do |graphical_effect|
+        @graphical_effects << graphical_effect
+        true
+      end
+
     # Thread.new do
       @add_projectiles.reject! do |projectile|
         @projectiles[projectile.id] = projectile
@@ -710,9 +716,9 @@ class GameWindow < Gosu::Window
         !effect_group.is_active
       end
 
-      # @graphical_effects.reject! do |effect|
-      #   !effect.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
-      # end
+      @graphical_effects.reject! do |effect|
+        !effect.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      end
 
       if @collision_counter < 4
         # puts "SKIPPING COLLISION MANAGER"
@@ -1071,9 +1077,10 @@ class GameWindow < Gosu::Window
     # @effects.each_with_index do |effect, index|
     #   effect.draw
     # end
-    # @graphical_effects.each { |effect| effect.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @graphical_effects.each { |effect| effect.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
 
     @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     if false &&@debug
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -1144,7 +1151,6 @@ class GameWindow < Gosu::Window
         @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
         @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       end
-      @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("SHIPWRECK COUNT: #{@shipwrecks.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # local_count = 0
       # @buildings.each do |b|
