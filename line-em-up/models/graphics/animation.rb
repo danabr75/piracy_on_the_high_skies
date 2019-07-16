@@ -15,6 +15,12 @@ module Graphics
 
   class Animation
     IMAGE_SCALER = 8.0
+
+    FRAME_HEIGHT      = 128
+    # FRAME_HEIGHT_HALF = FRAME_HEIGHT / 2.0
+    FRAME_WIDTH       = 128
+    # FRAME_WIDTH_HALF  = FRAME_WIDTH / 2.0
+
     def initialize current_map_pixel_x, current_map_pixel_y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, fps_scaler, options = {}
       @fps_scaler = fps_scaler
       @current_map_pixel_x = current_map_pixel_x
@@ -22,9 +28,18 @@ module Graphics
       @screen_pixel_width = screen_pixel_width
       @screen_pixel_height = screen_pixel_height
       @frames = self.class.get_frames
+
+      # puts "TEST"
+      # puts @frames[0].width
+      # puts @frames[0].height
+      @frame_height_half = (self.class::FRAME_HEIGHT / self.class::IMAGE_SCALER) * height_scale
+      @frame_width_half  = (self.class::FRAME_WIDTH  / self.class::IMAGE_SCALER) * height_scale
+      # puts "@frames.size: #{@frames.size}"
+
       @height_scale = height_scale
 
-      @frames_limit = 3
+      # smaller is faster, larger is slower
+      @frames_limit = 1.5
 
       @height_scale_with_image_scaler = height_scale / self.class::IMAGE_SCALER
 
@@ -42,7 +57,11 @@ module Graphics
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
       if @x && @y
-        @frames[@time_alive / (@frames_limit)].draw(@x + viewable_pixel_offset_x, @y + viewable_pixel_offset_y, ZOrder::Explosions, @height_scale_with_image_scaler, @height_scale_with_image_scaler) #if @image
+        if @time_alive / (@frames_limit) > @frames.size
+          raise "invalid frame: #{time_alive / (@frames_limit)} for #{@frames.size}"
+        end
+        # @frames[@time_alive / (@frames_limit)].draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Explosions, @height_scale_with_image_scaler, @height_scale_with_image_scaler) #if @image
+        @frames[@time_alive / (@frames_limit)].draw(@x + viewable_pixel_offset_x - @frame_width_half, @y - viewable_pixel_offset_y - @frame_height_half, ZOrder::Explosions, @height_scale_with_image_scaler, @height_scale_with_image_scaler) #if @image
       end
     end
 

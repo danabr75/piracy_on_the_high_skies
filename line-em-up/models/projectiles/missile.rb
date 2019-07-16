@@ -14,6 +14,8 @@ module Projectiles
     DAMAGE = 10
     AOE = 0
     MAX_SPEED      = 10
+
+    HEALTH = 2
     
     MAX_CURSOR_FOLLOW = 4
     ADVANCED_HIT_BOX_DETECTION = true
@@ -21,6 +23,7 @@ module Projectiles
     MAX_TILE_TRAVEL = 6
 
     POST_DESTRUCTION_EFFECTS = true
+    POST_COLLISION_EFFECTS   = true
 
     # def self.get_post_destruction_effects # Give parameters
     #   # raise 'stop here'
@@ -36,11 +39,35 @@ module Projectiles
     #   ]
     # end
 
-    def get_post_destruction_effects # Give parameters
+    def get_post_destruction_effects overriding_map_pixel_x = nil, overriding_map_pixel_y = nil
       # raise 'stop here'
+      # radius = @image_height_half
+      # angle_correction = 5
+
+      # # puts "ANGLE HERE: #{@angle}"
+      # step = (Math::PI/180 * (360 -  @angle + 90 + angle_correction)) + 90.0 + 45.0
+      # point_map_pixel_x = Math.cos(step) * radius + @current_map_pixel_x
+      # point_map_pixel_y = Math.sin(step) * radius + @current_map_pixel_y
+      # test1 = @current_map_pixel_x + (@current_map_pixel_x - point_map_pixel_x)
+      # test2 = @current_map_pixel_y + (@current_map_pixel_y - point_map_pixel_y)
+
       return [
         Graphics::Explosion.new(
-          @current_map_pixel_x, @current_map_pixel_y, @width_scale,
+          # point_map_pixel_x, point_map_pixel_y, @width_scale,
+          overriding_map_pixel_x || @current_map_pixel_x, overriding_map_pixel_y || @current_map_pixel_y, @width_scale,
+          @height_scale, @screen_pixel_width, @screen_pixel_height, @fps_scaler
+          # {
+          #   green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,
+          #   scale_multiplier: 0.25, scale_init_boost: 0.3
+          # }
+        )
+      ]
+    end
+
+    def get_post_collided_effects overriding_map_pixel_x = nil, overriding_map_pixel_y = nil
+      return [
+        Graphics::Smoke.new(
+          overriding_map_pixel_x || @current_map_pixel_x, overriding_map_pixel_y || @current_map_pixel_y, @width_scale,
           @height_scale, @screen_pixel_width, @screen_pixel_height, @fps_scaler,
           {
             green: 35, blue: 13, decay_rate_multiplier: 15.0, shift_blue: true, shift_green: true,

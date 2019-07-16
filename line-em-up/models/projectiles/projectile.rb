@@ -33,14 +33,20 @@ module Projectiles
 
 
     POST_DESTRUCTION_EFFECTS = false
+    POST_COLLISION_EFFECTS = false
 
     def get_post_destruction_effects
       raise 'override me!'
     end
 
-    def self.get_post_destruction_effects
+    def get_post_collided_effects
       raise 'override me!'
     end
+
+
+    # def self.get_post_destruction_effects
+    #   raise 'override me!'
+    # end
 
     def self.get_image
       return Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
@@ -468,9 +474,9 @@ module Projectiles
             graphical_effects << effect
           end
         end
-        if actual_hit_object.class::POST_DESTRUCTION_EFFECTS
+        if actual_hit_object.class::POST_COLLISION_EFFECTS
           # puts "AADDING GRAPHICAL EEFFECTS 2"
-          actual_hit_object.get_post_destruction_effects.each do |effect|
+          actual_hit_object.get_post_collided_effects(@current_map_pixel_x, @current_map_pixel_y).each do |effect|
             # puts "COUNT 1 herer"
             graphical_effects << effect
           end

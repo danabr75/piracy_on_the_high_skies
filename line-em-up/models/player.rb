@@ -199,7 +199,7 @@ class Player < ScreenFixedObject
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
     # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
-    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, ZOrder::HardpointBase, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum}))
+    @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, ZOrder::HardpointBase, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum, health: @ship.health}))
     # @ship.mass = @ship.mass# * 3 # speed here?
   end
 

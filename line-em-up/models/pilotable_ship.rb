@@ -107,7 +107,7 @@ class PilotableShip < GeneralObject
     # if @debug
     #   @health = INIT_HEALTH * 10000
     # else
-    @health     = self.class::HEALTH
+    @health     = options[:health] || self.class::HEALTH
     @max_health = self.class::HEALTH
     # end
     @armor = 0

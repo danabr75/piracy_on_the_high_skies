@@ -62,7 +62,7 @@ module Graphics
         p[2] = x
         p[3] = y
       end
-      puts "PARTICLE HERE - returning: #{@is_alive}"
+      # puts "PARTICLE HERE - returning: #{@is_alive}"
       return @is_alive
     end
 
