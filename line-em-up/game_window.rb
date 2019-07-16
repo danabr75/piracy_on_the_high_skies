@@ -758,7 +758,8 @@ class GameWindow < Gosu::Window
 
     end
 
-      @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
+    @pointer.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
+
     if !@block_all_controls
       # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }

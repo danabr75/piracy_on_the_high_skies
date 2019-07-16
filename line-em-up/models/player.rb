@@ -192,6 +192,10 @@ class Player < ScreenFixedObject
     @ship.health
   end
 
+  def max_health
+    @ship.max_health
+  end
+
   def refresh_ship options = {}
     hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
     # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
@@ -202,6 +206,11 @@ class Player < ScreenFixedObject
   def get_steam_max_capacity
     @ship.steam_max_capacity
   end
+
+  def current_steam_capacity
+    @ship.current_steam_capacity
+  end
+
   def steam_rate_increase
     @ship.steam_rate_increase
   end

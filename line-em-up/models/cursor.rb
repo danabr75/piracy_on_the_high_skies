@@ -9,7 +9,7 @@ class Cursor < GeneralObject
   end
 
   
-  def initialize screenx, screeny, width_scale, height_scale, player
+  def initialize screenx, screeny, width_scale, height_scale, owner
     @width_scale  = width_scale
     @height_scale = height_scale
     @screen_pixel_width  = screenx
@@ -26,6 +26,32 @@ class Cursor < GeneralObject
     @current_map_pixel_x = 0
     @current_map_pixel_y = 0
 
+    @health_unit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_cursor_unit.png")
+    @owner_max_health = owner.max_health
+    @owner_health     = owner.health
+    # @health_angle_increments = 360.0 / (@owner_max_health / 10.0)
+    @health_angle_increment = @owner_max_health / 45.0
+    @radius = @image_width_half + (@image_width_half / 10.0)
+    @height_scaler_with_health_unit_image = @height_scale / 8.0
+
+
+    @steam_unit_image      = Gosu::Image.new("#{MEDIA_DIRECTORY}/steam_cursor_unit.png")
+    @steam_used_unit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/steam_cursor_used_unit.png")
+    @owner_steam_max_capacity     = owner.get_steam_max_capacity
+    @owner_current_steam_capacity = owner.current_steam_capacity
+    @steam_angle_increment        = @owner_steam_max_capacity / 45.0
+
+  #     puts "TEST123"
+  #     puts [
+  # @owner_steam_max_capacity,
+  # @owner_current_steam_capacity,
+  # @steam_angle_increment
+  #     ]
+# TEST123
+# 150.0
+# 50.0
+# 3.3333333333333335
+
     # TEST
     # @image2 = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_3.png", :tileable => true)
     # @info2 = @image2.gl_tex_info
@@ -35,40 +61,62 @@ class Cursor < GeneralObject
 
   def draw
     @image.draw(@x - @image_width_half, @y - @image_height_half, ZOrder::Cursor, @height_scale, @height_scale)
+
+    health_counter = 0.0
+    current_angle  = 11.0
+    while @owner_health > 0 && health_counter <= @owner_health
+      # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+      @health_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 3.8, 3.8, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+
+      health_counter += @health_angle_increment
+      current_angle  += 8
+    end
+
+    steam_counter = 0.0
+    current_angle  = 11.0
+    while @owner_steam_max_capacity > 0 && steam_counter <= @owner_steam_max_capacity
+      if steam_counter < @owner_steam_max_capacity - @owner_current_steam_capacity
+        @steam_used_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 5, 5, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+      else
+        @steam_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 5, 5, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+      end
+
+      steam_counter += @steam_angle_increment
+      current_angle += 4
+    end
   end
 
   def draw_gl
-    # # Y is reversed?
-    result = convert_screen_to_opengl(@x, @screen_pixel_height - (@y), 10, 10)
-    opengl_coord_x = result[:o_x]
-    opengl_coord_y = result[:o_y]
-    opengl_increment_x = result[:o_w]
-    opengl_increment_y = result[:o_h]
-    # puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y} - w and h: #{opengl_increment_x} - #{opengl_increment_y}"
+    # # # Y is reversed?
+    # result = convert_screen_to_opengl(@x, @screen_pixel_height - (@y), 10, 10)
+    # opengl_coord_x = result[:o_x]
+    # opengl_coord_y = result[:o_y]
+    # opengl_increment_x = result[:o_w]
+    # opengl_increment_y = result[:o_h]
+    # # puts "CURSOR OPENGL = #{opengl_coord_x} - #{opengl_coord_y} - w and h: #{opengl_increment_x} - #{opengl_increment_y}"
 
-    # z = -10 makes us even at the x axis
-    z = -10
+    # # z = -10 makes us even at the x axis
+    # z = -10
 
-    colors = [1, 0.5, 1, 1]
-    colors = [1, 0.5, 1, 1]
-    glBegin(GL_TRIANGLE_STRIP)
-      vert_pos = [opengl_coord_x , opengl_coord_y , z]
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+    # colors = [1, 0.5, 1, 1]
+    # colors = [1, 0.5, 1, 1]
+    # glBegin(GL_TRIANGLE_STRIP)
+    #   vert_pos = [opengl_coord_x , opengl_coord_y , z]
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
-      vert_pos = [opengl_coord_x , opengl_coord_y + opengl_increment_y , z]
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+    #   vert_pos = [opengl_coord_x , opengl_coord_y + opengl_increment_y , z]
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
-      vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y , z]
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+    #   vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y , z]
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
 
-      vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y + opengl_increment_y , z]
-      glColor4d(colors[0], colors[1], colors[2], colors[3])
-      glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
-    glEnd
-
+    #   vert_pos = [opengl_coord_x + opengl_increment_x , opengl_coord_y + opengl_increment_y , z]
+    #   glColor4d(colors[0], colors[1], colors[2], colors[3])
+    #   glVertex3d(vert_pos[0], vert_pos[1], vert_pos[2])
+    # glEnd
   end
 
   def get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
@@ -114,9 +162,18 @@ class Cursor < GeneralObject
     return [new_pos_x, new_pos_y, increment_x, increment_y]
   end
 
-  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, viewable_pixel_offset_x, viewable_pixel_offset_y
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, owner, viewable_pixel_offset_x, viewable_pixel_offset_y
     @x = mouse_x
     @y = mouse_y
+
+    # need to update these on ship refresh.. or right now
+    @owner_max_health = owner.max_health
+    @health_angle_increment = @owner_max_health / 45.0
+    @owner_health     = owner.health
+
+    @owner_steam_max_capacity     = owner.get_steam_max_capacity
+    @owner_current_steam_capacity = owner.current_steam_capacity
+    @steam_angle_increment        = @owner_steam_max_capacity / 45.0
 
     @current_map_pixel_x = player_map_pixel_x + (mouse_x * -1) +  (@screen_pixel_width  / 2) + viewable_pixel_offset_x
     @current_map_pixel_y = player_map_pixel_y + (mouse_y     ) -  (@screen_pixel_height / 2) + viewable_pixel_offset_y

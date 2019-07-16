@@ -19,6 +19,7 @@ class PilotableShip < GeneralObject
   IMAGE_SCALER = 5.0
 
   attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
+  attr_reader :max_health
 
   attr_accessor :grapple_hook_cooldown_wait, :damage_reduction, :boost_increase, :damage_increase, :kill_count
   attr_accessor :special_attack, :main_weapon, :drawable_items_near_self
@@ -27,6 +28,7 @@ class PilotableShip < GeneralObject
   # attr_reader :steam_max_capacity, :steam_rate_increase, :current_steam_capacity
   # attr_reader :mass, :boost_speed, :speed, :speed_steam_usage, :boost_speed_steam_usage
   # attr_reader :boost_mass
+  attr_reader :steam_max_capacity
 
   attr_reader :current_steam_capacity, :tiles_per_second
 
@@ -105,7 +107,8 @@ class PilotableShip < GeneralObject
     # if @debug
     #   @health = INIT_HEALTH * 10000
     # else
-      @health = self.class::HEALTH
+    @health     = self.class::HEALTH
+    @max_health = self.class::HEALTH
     # end
     @armor = 0
     @rockets = 50
@@ -247,6 +250,7 @@ class PilotableShip < GeneralObject
         true
       end
     end
+    @current_steam_capacity = 0
 
 
     @engine_permanent_steam_usage     = engine_permanent_steam_usage
