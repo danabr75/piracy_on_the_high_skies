@@ -19,12 +19,14 @@ module Projectiles
   class Cannon < Projectiles::Projectile
     # COOLDOWN_DELAY = 40
     MAX_SPEED      = 5
-    MIN_SPEED      = 0.00001
+    MIN_SPEED      = 0.8
     STARTING_SPEED = 5
-    INITIAL_DELAY  = 0.0
-    SPEED_INCREASE_INCREMENT = -0.2
+    INITIAL_DELAY  = nil
+    # SPEED_INCREASE_INCREMENT = -0.5
+    SPEED_INCREASE_FACTOR    = 0.9
+
     MAX_TILE_TRAVEL = 1.2
-    DAMAGE = 10
+    DAMAGE = 20
     AOE = 0
 
     IMAGE_SCALER = 4.0
@@ -42,6 +44,10 @@ module Projectiles
     #     )
     #   ]
     # end
+
+    def get_damage
+      return (self.class::DAMAGE * @damage_increase / MAX_SPEED) * @speed
+    end
 
     def get_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/cannon_ball.png")

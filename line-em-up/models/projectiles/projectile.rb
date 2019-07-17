@@ -11,9 +11,9 @@ module Projectiles
     STARTING_SPEED = 0.1
     MAX_SPEED      = 1
     MIN_SPEED      = nil
-    INITIAL_DELAY  = 0
-    SPEED_INCREASE_FACTOR = 0.0
-    SPEED_INCREASE_INCREMENT = 0.0
+    INITIAL_DELAY  = nil
+    SPEED_INCREASE_FACTOR    = nil
+    SPEED_INCREASE_INCREMENT = nil
     DAMAGE = 5
     AOE = 0
     MAX_CURSOR_FOLLOW = 5 # Do we need this if we have a max speed?
@@ -180,17 +180,21 @@ module Projectiles
         end
 
         # new_speed = 0
-        if self.class.get_initial_delay && (@time_alive > (@custom_initial_delay || self.class.get_initial_delay))
-          speed_factor = self.class::SPEED_INCREASE_FACTOR
-          # puts "ORIGINAL SPEED: #{@speed}"
-          if (@speed < self.class::MAX_SPEED) || (self.class::MIN_SPEED && @speed > self.class::MIN_SPEED)
-            if speed_factor #&& speed_factor > 0.0
-              @speed = @speed + (@time_alive * speed_factor)
+        # puts "TEST HERE: #{self.class::SPEED_INCREASE_INCREMENT}"
+        if self.class::INITIAL_DELAY.nil? || self.class::INITIAL_DELAY && (@time_alive > (@custom_initial_delay || self.class::INITIAL_DELAY))
+          # puts "(self.class::MAX_SPEED && @speed < self.class::MAX_SPEED) || (self.class::MIN_SPEED && @speed > self.class::MIN_SPEED)"
+          # puts "(self.class::MAX_SPEED && #{@speed < self.class::MAX_SPEED}) || (#{self.class::MIN_SPEED} && @speed > self.class::MIN_SPEED)"
+          if (self.class::MAX_SPEED && @speed < self.class::MAX_SPEED) || (self.class::MIN_SPEED && @speed > self.class::MIN_SPEED)
+            if self.class::SPEED_INCREASE_FACTOR #&& speed_factor > 0.0
+              @speed = @speed * (self.class::SPEED_INCREASE_FACTOR)
               # puts "NEW SPEED: #{@speed}"
             end
             
-            if self.class::SPEED_INCREASE_INCREMENT #&& speed_increment > 0.0
-              @speed = @speed + self.class::SPEED_INCREASE_INCREMENT
+            if !self.class::SPEED_INCREASE_INCREMENT.nil? #&& speed_increment > 0.0
+              # puts "cannonval: #{self.class::SPEED_INCREASE_INCREMENT}"
+              @speed = @speed + (self.class::SPEED_INCREASE_INCREMENT * @height_scale)
+            else
+              # puts "cannonval2: #{self.class::SPEED_INCREASE_INCREMENT}"
             end
 
             @speed = self.class::MAX_SPEED if @speed > self.class::MAX_SPEED
@@ -206,6 +210,7 @@ module Projectiles
           factor_in_scale_speed = @speed * @height_scale
           movement(factor_in_scale_speed, @angle, true) if factor_in_scale_speed != 0
         end
+        # puts "test123"
 
         @health = self.take_damage(@health) if self.class::MAX_TIME_ALIVE && @time_alive >= self.class::MAX_TIME_ALIVE
 
@@ -515,9 +520,12 @@ module Projectiles
     end
 
     def trigger_object_collision(object)
-      object.take_damage(self.class.get_damage * @damage_increase)
+      object.take_damage(self.get_damage)
     end
 
+    def get_damage
+      self.class::DAMAGE * @damage_increase
+    end
 
     def self.get_damage
       self::DAMAGE

@@ -6,14 +6,14 @@ require_relative 'projectile.rb'
 module Projectiles
   class Missile < Projectiles::Projectile
     COOLDOWN_DELAY = 3
-    MAX_SPEED      = 1
 
     STARTING_SPEED = 0.0
-    INITIAL_DELAY  = 3
-    SPEED_INCREASE_FACTOR = 0.002
+    INITIAL_DELAY  = 6
+    SPEED_INCREASE_FACTOR    = 1.02
+    SPEED_INCREASE_INCREMENT = 0.05
     DAMAGE = 10
     AOE = 0
-    MAX_SPEED      = 10
+    MAX_SPEED      = 5
 
     HEALTH = 2
     

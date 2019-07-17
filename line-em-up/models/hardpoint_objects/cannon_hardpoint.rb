@@ -32,7 +32,10 @@ module HardpointObjects
     end
 
     def self.description
-      "This is a standard cannon launcher. Fires cannons."
+      [
+        "This is a standard cannon launcher. Fires cannons.",
+        "A lot of firepower. More damage the closer you are."
+      ]
     end
 
     def self.value
