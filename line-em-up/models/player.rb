@@ -188,12 +188,21 @@ class Player < ScreenFixedObject
   #   @ship.armor    
   # end
 
+  def increase_health amount
+    @ship.health = @ship.health + amount
+    @ship.health = @ship.max_health if @ship.health > @ship.max_health
+  end
+
   def health
     @ship.health
   end
 
   def max_health
     @ship.max_health
+  end
+
+  def is_full_health?
+    @ship.health >= @ship.max_health
   end
 
   def refresh_ship options = {}

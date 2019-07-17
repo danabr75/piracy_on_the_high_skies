@@ -1547,7 +1547,7 @@ class GLBackground
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
 
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
-            if !building.kind_of?(Landwreck) #&& !building.kind_of?(OffensiveStore)
+            if !building.kind_of?(Buildings::Landwreck) #&& !building.kind_of?(OffensiveStore)
               building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
             #   # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
             else
