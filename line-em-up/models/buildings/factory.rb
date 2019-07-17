@@ -40,7 +40,7 @@ module Buildings
       if @time_alive > @last_created_ship_at + @create_ship_every && @ships.count < self.class::SHIP_LIMIT
         # puts "CREATING NEW SHIP"
         # puts "GETTING NEW SHIP HERE: #{self.get_faction_id}"
-        new_ship = AIShip.new(nil, nil, @current_map_tile_x, @current_map_tile_y, {special_target_focus_id: 'player', long_range: true, angle: 45.0, faction_id: self.get_faction_id})
+        new_ship = AIShip.new(nil, nil, @current_map_tile_x, @current_map_tile_y, {special_target_focus_id: 'player', long_range: true, angle: 0.0, faction_id: self.get_faction_id})
         @ships << new_ship
         # Create new ship
         @last_created_ship_at = @time_alive

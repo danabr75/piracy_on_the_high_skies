@@ -13,7 +13,7 @@ module Projectiles
     SPEED_INCREASE_INCREMENT = 0.05
     DAMAGE = 10
     AOE = 0
-    MAX_SPEED      = 5
+    MAX_SPEED      = 4
 
     HEALTH = 2
     

@@ -272,11 +272,13 @@ class GameWindow < Gosu::Window
     
     @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
 
+    @factions = Faction.init_factions
+
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      @fps_scaler, @graphics_setting, Faction.init_factions, true
+      @fps_scaler, @graphics_setting, @factions, true
     )
 
     @buildings = Array.new
@@ -1090,6 +1092,10 @@ class GameWindow < Gosu::Window
     @graphical_effects.each { |effect| effect.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
 
     @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("Faction Relations:", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @factions.each do |faction|
+      @font.draw("#{faction.id.upcase}: #{faction.display_factional_relation(@player.get_faction_id)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    end
     if false &&@debug
       @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       # @font.draw("Attack Speed: #{@player.attack_speed.round(2)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

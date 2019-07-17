@@ -520,16 +520,16 @@ module Projectiles
     end
 
     def trigger_object_collision(object)
-      object.take_damage(self.get_damage)
+      object.take_damage(get_damage, @owner)
     end
 
     def get_damage
       self.class::DAMAGE * @damage_increase
     end
 
-    def self.get_damage
-      self::DAMAGE
-    end
+    # def self.get_damage
+    #   self::DAMAGE
+    # end
     def self.get_aoe
       self::AOE
     end

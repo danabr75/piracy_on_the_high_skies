@@ -97,7 +97,7 @@ module Projectiles
       @health > 0 || !@attached_target.nil?
     end
 
-    def take_damage damage
+    def take_damage damage, owner = nil
       if @attached_target.nil?
         @health -= damage
       end

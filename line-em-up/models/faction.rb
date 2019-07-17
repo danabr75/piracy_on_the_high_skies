@@ -2,12 +2,12 @@ class Faction
   attr_reader :id
   attr_reader :factional_relations
 
-  MIN_FACTIONAL_RELATION = -100
-  OPENLY_HOSTILE_AT_OR_LESS = -15
+  MIN_FACTIONAL_RELATION = -1000
+  OPENLY_HOSTILE_AT_OR_LESS = -50
   # 0 is neutral
   DEFAULT_FACTIONAL_RELATION = 0
-  OPENLY_DEFEND_AT_OR_GREATER = 15
-  MAX_FACTIONAL_RELATION = 100
+  OPENLY_DEFEND_AT_OR_GREATER = 50
+  MAX_FACTIONAL_RELATION = 1000
 
   def initialize id
     @id = id
@@ -46,6 +46,15 @@ class Faction
     else
       @factional_relations[faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(faction_name) == false
       return @factional_relations[faction_name] >= OPENLY_DEFEND_AT_OR_GREATER
+    end
+  end
+
+  def display_factional_relation faction_name
+    if faction_name == @id
+      return MAX_FACTIONAL_RELATION / 10
+    else
+      @factional_relations[faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(faction_name) == false
+      return @factional_relations[faction_name] / 10
     end
   end
 

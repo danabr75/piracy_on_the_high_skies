@@ -288,7 +288,7 @@ class GeneralObject
     (!health_change.nil? && health_change != 0) ? (health + health_change > 0) : (health > 0)
   end
 
-  def take_damage damage
+  def take_damage damage, owner = nil
     if !@invulnerable
       @health -= damage
     end

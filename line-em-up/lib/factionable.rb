@@ -31,8 +31,14 @@ module Factionable
   end
 
   def is_friendly_to? faction_name
-    @faction.is_hostile_to?(faction_name)
+    @faction.is_friendly_to?(faction_name)
   end
+
+  # testing only
+  def get_faction_relations
+    return @faction.factional_relations
+  end
+
 
   def get_faction_id
     # puts "SELF>CLAASS: #{self.class}"

@@ -255,13 +255,11 @@ class AIShip < ScreenMapFixedObject
     return 1
   end
 
-  def take_damage damage
-    if @debug
-      @ship.take_damage(damage * 6.0)
-    else
-      @ship.take_damage(damage)
+  def take_damage damage, owner = nil
+    if owner
+      decrease_faction_relations(owner.get_faction_id, damage)
     end
-    # @health -= damage * @damage_reduction
+    @ship.take_damage(damage)
   end
 
   def is_alive
@@ -405,14 +403,18 @@ class AIShip < ScreenMapFixedObject
     # @special_target_focus_type = options[:special_target_focus_type] if options[:special_target_focus_type]
     # @special_target_focus = nil
     if @special_target_focus.nil?
+      # Don't have to check for targets on every single call.....
       air_targets.each do |target_id, target|
-        # Don't fire at self. don't fire at allies. Figure out ally logic
+        # Don't fire at self. don't fire at allies.
         next if target_id == self.id
-        # Implement relationships.
-        # next if target.allied
-        # FOR TESTING, to keep them from murdering each other
-        # next if target.id != player.id
-        # next if target.id == player.id && !player.is_alive
+        # puts "IS FREIDNLY TO #{target_id}: #{self.is_friendly_to?(target.get_faction_id)}"
+        # puts "FACTION NAME: #{@faction.id} - to #{target.get_faction_id}"
+        # puts "FACITONAL RELATIOPNS: #{get_faction_relations}"
+        next if self.is_friendly_to?(target.get_faction_id)
+        # puts "IS HOSTILE TO #{target_id}: #{self.is_hostile_to?(target.get_faction_id)}"
+        next if !self.is_hostile_to?(target.get_faction_id)
+        next if !target.is_alive
+
 
         if @special_target_focus_id && @special_target_focus_id == target_id
           @special_target_focus = agro_target = target if @special_target_focus_id == target_id
@@ -435,6 +437,7 @@ class AIShip < ScreenMapFixedObject
           agro_target = target
           agro_target_distance = distance_to_target
         end
+
       end
     else
       agro_target = @special_target_focus
@@ -470,6 +473,7 @@ class AIShip < ScreenMapFixedObject
           # case #@angle
           # when (@angle <= 45.0 || @angle >= 315.0) || (@angle >= 225.0 && @angle <= 315.0)
           # FIRING SAFETY AREA
+            # NEED TO ROTATE THESE POINTS ON THE SHIP ANGLE. NOT DOIGN THAT ATM
             point_a_x = @current_map_pixel_x + @image_radius / 2
             point_a_y = @current_map_pixel_y
 

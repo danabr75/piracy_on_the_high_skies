@@ -23,7 +23,7 @@ module GlobalVariables
     @screen_pixel_width  = screen_pixel_width
     @screen_pixel_height = screen_pixel_height
     @debug = debug
-    @damage_increase = 1
+    @damage_increase = 4
     @average_scale = (@width_scale + @height_scale) / 2.0
    # puts "AVERAGE SCALE IS: #{@average_scale} = (#{@width_scale} * #{@height_scale}) / 2.0"
     # Grab from config, default to 0.2

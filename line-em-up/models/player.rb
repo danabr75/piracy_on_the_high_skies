@@ -414,7 +414,7 @@ class Player < ScreenFixedObject
   # end
 
 
-  def take_damage damage
+  def take_damage damage, owner = nil
     if @can_take_damage 
       @ship.take_damage(damage)
     end
