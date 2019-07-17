@@ -11,6 +11,10 @@ require 'glut'
 # include GLUT
 
 class Player < ScreenFixedObject
+
+  # DEFAULT_FACTION = 'player'
+  prepend Factionable
+
   CONFIG_FILE = "#{APP_DIRECTORY}/config.txt"
  # puts "CONFIG SHOULD BE HERE: #{CONFIG_FILE}"
   # SPEED = 7
@@ -51,6 +55,7 @@ class Player < ScreenFixedObject
   # def initialize(scale, x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
  # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
+    # puts "PLAYER NEW"
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
 
@@ -75,10 +80,11 @@ class Player < ScreenFixedObject
     # I HATE this image retrieval system!!!!
     options[:image] = ship_klass.get_image(ship_klass::ITEM_MEDIA_DIRECTORY)
     options[:id]    = 'player'
+    options[:faction_id]    = 'player'
     super(options)
 
     if (@current_map_pixel_x.nil? || @current_map_pixel_y.nil?) && (@current_map_tile_x && @current_map_tile_y)
-      puts "@current_map_tile_x: #{@current_map_tile_x}"
+      # puts "@current_map_tile_x: #{@current_map_tile_x}"
       @current_map_pixel_x = ((@current_map_tile_x * @tile_pixel_width)  + @tile_pixel_width - 1).to_i
       @current_map_pixel_y = ((@current_map_tile_y * @tile_pixel_height) + @tile_pixel_height - 1).to_i
     elsif (@current_map_pixel_x && @current_map_pixel_y)

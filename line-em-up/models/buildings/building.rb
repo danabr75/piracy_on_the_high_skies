@@ -10,6 +10,7 @@ require 'glut'
 # include GLU # - defined gluProject
 module Buildings
   class Building < BackgroundFixedObject
+    prepend Factionable
     include OpenGL
     include GLUT
     POINT_VALUE_BASE = 1
@@ -17,6 +18,7 @@ module Buildings
     CLASS_TYPE = :building
 
 
+    # Still used?
     attr_accessor :drops
 
     # For radius size calculations
@@ -26,7 +28,10 @@ module Buildings
 
     # building by itself doesn't need 'window', it's for inheritance
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
+      # STill used?
       @drops = @drops || options[:drops] || []
+      # puts "options156123"
+      # puts options.inspect
       super(current_map_tile_x, current_map_tile_y, options)
       @image = self.class.get_image
       @info = @image.gl_tex_info

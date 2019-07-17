@@ -276,7 +276,7 @@ class GameWindow < Gosu::Window
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      @fps_scaler, @graphics_setting, true
+      @fps_scaler, @graphics_setting, Faction.init_factions, true
     )
 
     @buildings = Array.new
@@ -311,10 +311,7 @@ class GameWindow < Gosu::Window
     #   @gl_background.map_pixel_width / 2.0, @gl_background.map_pixel_height / 2.0,
     #   @gl_background.map_tile_width / 2, @gl_background.map_tile_height / 2
     # )
-    @player = Player.new(
-      nil, nil,
-      0, 125
-    )
+    @player = Player.new(nil, nil, 0, 125)
 
     # puts "RIGHT HERE"
     raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?

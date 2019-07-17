@@ -87,6 +87,7 @@ class GeneralObject
     @music_volume        = GlobalVariables.music_volume
     @fps_scaler          = GlobalVariables.fps_scaler
     @graphics_setting    = GlobalVariables.graphics_setting
+    @factions            = GlobalVariables.factions
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
@@ -96,8 +97,18 @@ class GeneralObject
   # Location Y and X are where they are on GPS
   # screen_x and screen_y are used when object is fixed to the map, but are 2D, not 3D.
   # Scale has been deprecated in favor of height scale and width scale.
+
+  # Will be overridden by the factional module, if it's present. If not, it'll use the object ID.
+  def get_faction_id
+    return self.id
+  end
+
   def initialize(options = {})
     init_global_vars
+
+    # puts "T: #{self.class.name} - #{options[:faction_id]}"
+    # puts options.inspect
+    set_faction(options[:faction_id]) if !options[:faction_id].nil? && self.respond_to?(:set_faction)
 
     # @height_scale  = @height_scale
     # @width_scale   = @width_scale

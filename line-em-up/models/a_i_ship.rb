@@ -11,7 +11,8 @@ require 'glut'
 # include GLUT
 
 class AIShip < ScreenMapFixedObject
-  CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+  prepend Factionable
+  # CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
   attr_accessor :special_target_focus
@@ -38,7 +39,8 @@ class AIShip < ScreenMapFixedObject
 
     options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
-
+    # puts "NEW SHIP HJERE: "
+    # puts @faction
 
     @score = 0
     @cooldown_wait = 0

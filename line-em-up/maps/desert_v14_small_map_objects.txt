@@ -2,23 +2,23 @@
   "buildings":{
     "125":{
       "124":[
-        {"klass_name":"Buildings::OffensiveStore","data":null}
+        {"klass_name":"Buildings::OffensiveStore","data":{"faction_id":"faction_1"}}
       ],
       "125":[
-        {"klass_name":"Buildings::RepairArea","data":null}
+        {"klass_name":"Buildings::RepairArea","data":{"faction_id":"faction_1"}}
       ],
       "126":[
-        {"klass_name":"Buildings::Factory","data":null}
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
       ]
     },
     "127":{
       "128":[
-        {"klass_name":"Buildings::Building","data":null}
+        {"klass_name":"Buildings::Building","data":{"faction_id":"faction_1"}}
       ]
     },
     "0":{
       "0":[
-        {"klass_name":"Buildings::Building","data":null}
+        {"klass_name":"Buildings::Building","data":{"faction_id":"faction_1"}}
       ]
     }
   },

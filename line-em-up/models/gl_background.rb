@@ -433,7 +433,22 @@ class GLBackground
         data.each do |x_value, elements|
           elements.each do |element|
             klass = eval(element["klass_name"])
-            buildings << klass.new(x_value.to_i, y_value.to_i, window, {z: @map_data[y_value.to_i][x_value.to_i]['height']})
+            data  = element["data"]
+            # puts "DATA HERE"
+            # puts data.inspect
+            options = {z: @map_data[y_value.to_i][x_value.to_i]['height']}
+            if data
+              converted_data = {}
+              data.each do |key, value|
+                converted_data[key.to_sym] = value
+              end
+              # puts "2DATA"
+              # puts converted_data.inspect
+              options.merge!(converted_data)
+            end
+            # puts "OPTIONS"
+            # puts options.inspect
+            buildings << klass.new(x_value.to_i, y_value.to_i, window, options)
           end
         end
       end
