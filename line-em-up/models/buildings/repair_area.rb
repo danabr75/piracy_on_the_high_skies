@@ -17,11 +17,11 @@ module Buildings
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets = {}, options = {}
       air_targets.each do |key, target|
         if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
-          target.increase_health(1)
+          target.increase_health(0.2 * @fps_scaler)
         end
       end
       if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
-        player.increase_health(1)
+        player.increase_health(0.2 * @fps_scaler)
       end
 
       return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets, options)
