@@ -23,7 +23,7 @@ module Projectiles
     SPEED_INCREASE_FACTOR = 2
     DAMAGE = 0
     AOE = 0
-    MAX_TILE_LENGTH = 3.5
+    MAX_TILE_LENGTH = 2.2
     MAX_TILE_TRAVEL = nil
     BREAKING_POINT_TILE_LENGTH = 15
     HIT_OBJECT_CLASS_FILTER = [:ship]

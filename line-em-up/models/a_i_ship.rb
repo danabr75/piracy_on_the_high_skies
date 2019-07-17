@@ -65,17 +65,48 @@ class AIShip < ScreenMapFixedObject
     #     "10" => "HardpointObjects::AdvancedSteamCoreHardpoint"
     #   }
     # }
-
-    hardpoint_data = {
-      :hardpoint_data => {
-        "0" => "HardpointObjects::MinigunHardpoint","1" => "HardpointObjects::BulletHardpoint",
-        "4" => "HardpointObjects::BulletHardpoint","3" => "HardpointObjects::BulletHardpoint",
-        "5" => "HardpointObjects::BulletHardpoint","2" => "HardpointObjects::BulletHardpoint",
-        "7" => "HardpointObjects::BulletHardpoint","6" => "HardpointObjects::BulletHardpoint",
-        "8" => "HardpointObjects::BasicEngineHardpoint","9" => "HardpointObjects::BasicEngineHardpoint",
-        "12" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+    hardpoint_data = nil
+    if options[:close_range]   == true
+      @distance_preference_max = 1   * @average_tile_size
+      @distance_preference_min = nil
+      hardpoint_data = {
+        :hardpoint_data => {
+          "0" => "HardpointObjects::MinigunHardpoint","1" => "HardpointObjects::CannonHardpoint",
+          "4" => "HardpointObjects::CannonHardpoint","3" => "HardpointObjects::CannonHardpoint",
+          "5" => "HardpointObjects::CannonHardpoint","2" => "HardpointObjects::CannonHardpoint",
+          "7" => "HardpointObjects::CannonHardpoint","6" => "HardpointObjects::CannonHardpoint",
+          "8" => "HardpointObjects::BasicEngineHardpoint","9" => "HardpointObjects::BasicEngineHardpoint",
+          "12" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+        }
       }
-    }
+    elsif options[:long_range] == true
+      @distance_preference_max = 3 * @average_tile_size
+      @distance_preference_min = 2 * @average_tile_size
+      hardpoint_data = {
+        :hardpoint_data => {
+          "0" => "HardpointObjects::DumbMissileHardpoint","1" => "HardpointObjects::MinigunHardpoint",
+          "4" => "HardpointObjects::MinigunHardpoint","3" => "HardpointObjects::MinigunHardpoint",
+          "5" => "HardpointObjects::DumbMissileHardpoint","2" => "HardpointObjects::MinigunHardpoint",
+          "7" => "HardpointObjects::MinigunHardpoint","6" => "HardpointObjects::DumbMissileHardpoint",
+          "8" => "HardpointObjects::BasicEngineHardpoint","9" => "HardpointObjects::BasicEngineHardpoint",
+          "12" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+        }
+      }
+    else
+      @distance_preference_max = PREFERRED_MAX_TILE_DISTANCE * @average_tile_size
+      @distance_preference_min = nil #PREFERRED_MIN_TILE_DISTANCE * @average_tile_size
+
+      hardpoint_data = {
+        :hardpoint_data => {
+          "0" => "HardpointObjects::MinigunHardpoint","1" => "HardpointObjects::BulletHardpoint",
+          "4" => "HardpointObjects::BulletHardpoint","3" => "HardpointObjects::BulletHardpoint",
+          "5" => "HardpointObjects::BulletHardpoint","2" => "HardpointObjects::BulletHardpoint",
+          "7" => "HardpointObjects::BulletHardpoint","6" => "HardpointObjects::BulletHardpoint",
+          "8" => "HardpointObjects::BasicEngineHardpoint","9" => "HardpointObjects::BasicEngineHardpoint",
+          "12" => "HardpointObjects::AdvancedSteamCoreHardpoint"
+        }
+      }
+    end
 
     # @drops = ["HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint", "HardpointObjects::BulletHardpoint"]
     # INIT DROPS Randomly from equiped AI
@@ -141,9 +172,7 @@ class AIShip < ScreenMapFixedObject
       # hp.inspect
     end
 
-    @distance_preference_max = PREFERRED_MAX_TILE_DISTANCE * @average_tile_size
-    # Don't want to get boarded also
-    @distance_preference_min = PREFERRED_MIN_TILE_DISTANCE * @average_tile_size
+
 
     @firing_distance = FIRING_TILE_DISTANCE * @average_tile_size
 
@@ -547,7 +576,7 @@ class AIShip < ScreenMapFixedObject
         # end
         accelerate
 
-      elsif agro_target_distance < @distance_preference_min
+      elsif !@distance_preference_min.nil? && agro_target_distance < @distance_preference_min
         need_to_move = true
         # Move away from player
        # puts "IMPLEMENT REVERSE LATER FOR AI"
