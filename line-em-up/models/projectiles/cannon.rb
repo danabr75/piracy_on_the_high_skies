@@ -16,13 +16,15 @@ require 'glut'
 # GLUT.load_lib()
 
 module Projectiles
-  class Bullet < Projectiles::Projectile
-    # COOLDOWN_DELAY = 2
-    MAX_SPEED      = 3
-    STARTING_SPEED = 3
+  class Cannon < Projectiles::Projectile
+    # COOLDOWN_DELAY = 40
+    MAX_SPEED      = 5
+    MIN_SPEED      = 0.00001
+    STARTING_SPEED = 5
     INITIAL_DELAY  = 0.0
-    SPEED_INCREASE_FACTOR = 2
-    DAMAGE = 1
+    SPEED_INCREASE_INCREMENT = -0.2
+    MAX_TILE_TRAVEL = 1.2
+    DAMAGE = 10
     AOE = 0
 
     IMAGE_SCALER = 4.0
@@ -42,7 +44,7 @@ module Projectiles
     # end
 
     def get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/cannon_ball.png")
     end
 
     def self.get_init_sound
@@ -53,12 +55,12 @@ module Projectiles
       "#{SOUND_DIRECTORY}/bullet.ogg"
     end
 
-    def drops
-      [
-        # Add back in once SE has been updated to display on map, not on screen.
-        # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
-      ]
-    end
+    # def drops
+    #   [
+    #     # Add back in once SE has been updated to display on map, not on screen.
+    #     # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+    #   ]
+    # end
 
     
     # def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y

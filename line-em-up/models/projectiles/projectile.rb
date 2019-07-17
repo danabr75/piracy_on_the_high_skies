@@ -10,6 +10,7 @@ module Projectiles
     # COOLDOWN_DELAY = 50
     STARTING_SPEED = 0.1
     MAX_SPEED      = 1
+    MIN_SPEED      = nil
     INITIAL_DELAY  = 0
     SPEED_INCREASE_FACTOR = 0.0
     SPEED_INCREASE_INCREMENT = 0.0
@@ -180,17 +181,20 @@ module Projectiles
 
         # new_speed = 0
         if self.class.get_initial_delay && (@time_alive > (@custom_initial_delay || self.class.get_initial_delay))
-          speed_factor = self.class.get_speed_increase_factor
-          if @speed < self.class.get_max_speed
-            if speed_factor && speed_factor > 0.0
+          speed_factor = self.class::SPEED_INCREASE_FACTOR
+          # puts "ORIGINAL SPEED: #{@speed}"
+          if (@speed < self.class::MAX_SPEED) || (self.class::MIN_SPEED && @speed > self.class::MIN_SPEED)
+            if speed_factor #&& speed_factor > 0.0
               @speed = @speed + (@time_alive * speed_factor)
+              # puts "NEW SPEED: #{@speed}"
             end
-            speed_increment = self.class.get_speed_increase_increment
-            if speed_increment && speed_increment > 0.0
-              @speed = @speed + speed_increment
+            
+            if self.class::SPEED_INCREASE_INCREMENT #&& speed_increment > 0.0
+              @speed = @speed + self.class::SPEED_INCREASE_INCREMENT
             end
 
-            @speed = self.class.get_max_speed if @speed > self.class.get_max_speed
+            @speed = self.class::MAX_SPEED if @speed > self.class::MAX_SPEED
+            @speed = self.class::MIN_SPEED if self.class::MIN_SPEED && @speed < self.class::MIN_SPEED
           end
 
           # puts "SPEED HERE: #{@speed}"
@@ -530,12 +534,12 @@ module Projectiles
     def self.get_initial_delay
       self::INITIAL_DELAY
     end
-    def self.get_speed_increase_factor
-      self::SPEED_INCREASE_FACTOR
-    end
-    def self.get_speed_increase_increment
-      self::SPEED_INCREASE_INCREMENT
-    end
+    # def self.get_speed_increase_factor
+    #   self::SPEED_INCREASE_FACTOR
+    # end
+    # def self.get_speed_increase_increment
+    #   self::SPEED_INCREASE_INCREMENT
+    # end
     # need to re-implement this
     def self.get_max_cursor_follow
       self::MAX_CURSOR_FOLLOW
