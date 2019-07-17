@@ -61,21 +61,21 @@ module Buildings
       ZOrder::Building
     end
 
-    def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+    def draw viewable_pixel_offset_x, viewable_pixel_offset_y, colors = nil
       # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
       if @graphics_setting == :basic
         if @interactible
           if @is_hovering && @is_close_enough_to_open
             # colors = [0.5, 1, 0.5, 1]
-            colors = Gosu::Color.argb(0xff_80ff00)
+            colors = colors || Gosu::Color.argb(0xff_80ff00)
           elsif @is_hovering
             # colors = [1, 0.5, 0.5, 1]
-            colors = Gosu::Color.argb(0xff_ff0000)
+            colors = colors || Gosu::Color.argb(0xff_ff0000)
           else
-            colors = Gosu::Color.argb(0xff_ffffff)
+            colors = colors || Gosu::Color.argb(0xff_ffffff)
           end
         else
-          colors = Gosu::Color.argb(0xff_ffffff)
+          colors = colors || Gosu::Color.argb(0xff_ffffff)
         end
         @image.draw((@x - @image_width_half), (@y - @image_height_half), ZOrder::Building, @height_scale, @height_scale, colors)
       end
@@ -95,19 +95,19 @@ module Buildings
     #   end
     # end
 
-    def tile_draw_gl v1, v2, v3, v4
+    def tile_draw_gl v1, v2, v3, v4, colors = nil
       info = @info
 
       if @interactible
         if @is_hovering && @is_close_enough_to_open
-          colors = [0.5, 1, 0.5, 1]
+          colors = colors || [0.5, 1, 0.5, 1]
         elsif @is_hovering
-          colors = [1, 0.5, 0.5, 1]
+          colors = colors || [1, 0.5, 0.5, 1]
         else
-          colors = [1, 1, 1, 1]
+          colors = colors || [1, 1, 1, 1]
         end
       else
-        colors = [1, 1, 1, 1]
+        colors = colors || [1, 1, 1, 1]
       end
 
       glBindTexture(GL_TEXTURE_2D, info.tex_name)
@@ -242,7 +242,8 @@ module Buildings
         get_map_pixel_location_from_map_tile_location
         # end
       end
-      return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+      is_alive = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+      return {is_alive: is_alive}
     end
 
     # maybe use this in the future...

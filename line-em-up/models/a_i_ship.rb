@@ -44,7 +44,7 @@ class AIShip < ScreenMapFixedObject
     @cooldown_wait = 0
     @secondary_cooldown_wait = 0
     @grapple_hook_cooldown_wait = 0
-    @angle = 90
+    @angle = options[:angle] || 90
 
     # hardpoint_data = Player.get_hardpoint_data('BasicShip')
     # hardpoint_data = {

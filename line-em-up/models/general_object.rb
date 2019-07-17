@@ -180,8 +180,8 @@ class GeneralObject
       @minimap_image = get_minimap_image
     end
     if @minimap_image
-      @mini_map_image_width  = @image_width  / ScreenMap::ICON_IMAGE_SCALER
-      @mini_map_image_height = @image_height / ScreenMap::ICON_IMAGE_SCALER
+      @mini_map_image_width  = @minimap_image.width  / ScreenMap::ICON_IMAGE_SCALER
+      @mini_map_image_height = @minimap_image.height / ScreenMap::ICON_IMAGE_SCALER
       @mini_map_image_width_half  = @mini_map_image_width  / 2.0
       @mini_map_image_height_half = @mini_map_image_height / 2.0
     end

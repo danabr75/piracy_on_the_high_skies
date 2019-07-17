@@ -6,6 +6,9 @@
       ],
       "125":[
         {"klass_name":"Buildings::RepairArea","data":null}
+      ],
+      "126":[
+        {"klass_name":"Buildings::Factory","data":null}
       ]
     },
     "127":{

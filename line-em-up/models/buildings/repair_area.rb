@@ -12,18 +12,45 @@ module Buildings
       super(current_map_tile_x, current_map_tile_y, options)
       @image = self.class::get_image
       @info = @image.gl_tex_info
+
+
+      @inactive_color = [1, 1, 1, 1]
+      @basic_inactive_color = Gosu::Color.argb(0xff_ffffff)
+
+      @active_color = [0.7, 1, 0.7, 1]
+      @basic_active_color = Gosu::Color.argb(0xff_aaffaa)
+
+      @color = @inactive_color
+      @basic_color = @basic_inactive_color
     end
 
+    def tile_draw_gl v1, v2, v3, v4
+      super(v1, v2, v3, v4, @color)
+    end
 
+    def viewable_pixel_offset_x viewable_pixel_offset_x, viewable_pixel_offset_y
+      super(viewable_pixel_offset_x, viewable_pixel_offset_y, @basic_color)
+    end
 
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets = {}, options = {}
+      was_used = false
       air_targets.each do |key, target|
         if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           target.increase_health(0.2 * @fps_scaler)
+          was_used = true
         end
       end
       if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
         player.increase_health(0.2 * @fps_scaler)
+        was_used = true
+      end
+
+      if was_used
+        @color = @active_color
+        @basic_color = @basic_active_color
+      else
+        @color = @inactive_color
+        @basic_color = @basic_inactive_color
       end
 
       return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets, options)
