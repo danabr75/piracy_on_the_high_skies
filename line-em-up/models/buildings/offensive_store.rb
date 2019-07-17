@@ -127,7 +127,7 @@ module Buildings
     # end
 
     def self.get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/offensive_store.png", :tileable => true)
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/offensive_store.png", :tileable => true)
     end
 
     # def tile_draw_gl v1, v2, v3, v4

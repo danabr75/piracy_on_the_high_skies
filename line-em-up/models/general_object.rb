@@ -135,7 +135,7 @@ class GeneralObject
     @last_updated_at = @time_alive
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
     if @image
-      @image_width  = @image.width  * (@width_scale || @scale)# / self.class::IMAGE_SCALER
+      @image_width  = @image.width  * (@height_scale || @scale)# / self.class::IMAGE_SCALER
       @image_height = @image.height * (@height_scale || @scale)# / self.class::IMAGE_SCALER
       @image_size   = @image_width  * @image_height / 2
       @image_radius = (@image_width  + @image_height) / 4

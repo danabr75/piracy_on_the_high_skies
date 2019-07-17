@@ -21,7 +21,7 @@ module Buildings
 
     # For radius size calculations
     def self.get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/building.png", :tileable => true)
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/building.png", :tileable => true)
     end
 
     # building by itself doesn't need 'window', it's for inheritance
@@ -77,7 +77,7 @@ module Buildings
         else
           colors = Gosu::Color.argb(0xff_ffffff)
         end
-        @image.draw((@x - get_width / 4.0) + @x_offset, (@y - get_height / 4.0) + @y_offset, 1, @height_scale, @height_scale, colors)
+        @image.draw((@x - @image_width_half), (@y - @image_height_half), ZOrder::Building, @height_scale, @height_scale, colors)
       end
     end
 

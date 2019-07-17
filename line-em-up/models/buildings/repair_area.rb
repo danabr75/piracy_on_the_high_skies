@@ -10,6 +10,8 @@ module Buildings
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
       @window = window
       super(current_map_tile_x, current_map_tile_y, options)
+      @image = self.class::get_image
+      @info = @image.gl_tex_info
     end
 
 
@@ -43,7 +45,7 @@ module Buildings
 
 
     def self.get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/repair_area.png", :tileable => true)
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/repair_area.png", :tileable => true)
     end
 
   end
