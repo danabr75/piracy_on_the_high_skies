@@ -32,6 +32,8 @@ class AIShip < ScreenMapFixedObject
   IMAGE_SCALER = 5.0
   ENABLE_POLYGON_HIT_BOX_DETECTION = true
 
+  ENABLE_HOVER = true
+
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
@@ -330,17 +332,22 @@ class AIShip < ScreenMapFixedObject
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
 
-    health_counter = 0.0
-    # current_angle  = 11.0
-    # Lower is counter clockwise
-    # Higher is clockwise
-    current_angle  = 155.0
-    while max_health != health && health > 0 && health_counter <= health
-      # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-      @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+    if @hover
+      @faction_font.draw(@faction.id, @x - (@faction_font.text_width(@faction.id) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
 
-      health_counter += @health_angle_increment
-      current_angle  += 6
+      health_counter = 0.0
+      # current_angle  = 11.0
+      # Lower is counter clockwise
+      # Higher is clockwise
+      current_angle  = 155.0
+      # while max_health != health && health > 0 && health_counter <= health
+      while health > 0 && health_counter <= health
+        # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+        @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+
+        health_counter += @health_angle_increment
+        current_angle  += 6
+      end
     end
 
   end

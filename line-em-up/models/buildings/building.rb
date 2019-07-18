@@ -218,7 +218,7 @@ module Buildings
       # Draw nothing here
     end
 
-    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets = [], options = {}
+    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
       if @interactible
         @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
         # puts "BUILDING UPDATE HERE: #{[player_map_pixel_x, player_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"

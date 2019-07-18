@@ -1,5 +1,5 @@
 class Faction
-  attr_reader :id
+  attr_reader :id, :color
   attr_reader :factional_relations
 
   MIN_FACTIONAL_RELATION = -1000
@@ -9,8 +9,9 @@ class Faction
   OPENLY_DEFEND_AT_OR_GREATER = 50
   MAX_FACTIONAL_RELATION = 1000
 
-  def initialize id
+  def initialize id, color
     @id = id
+    @color = color
     @factional_relations = {}
   end
 
@@ -61,8 +62,12 @@ class Faction
   # Can move to script
   def self.init_factions
     factions = []
-    ['faction_1', 'faction_2', 'player'].each do |value|
-      factions << Faction.new(value)
+    [
+      {name: 'faction_1', color: Gosu::Color.argb(0xff_0066ff)},
+      {name: 'faction_2', color: Gosu::Color.argb(0xff_ff0000)},
+      {name: 'player',    color: Gosu::Color.argb(0xff_00ff00)}
+    ].each do |value|
+      factions << Faction.new(value[:name], value[:color])
     end
 
     return factions

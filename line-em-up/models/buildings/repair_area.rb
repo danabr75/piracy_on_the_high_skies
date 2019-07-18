@@ -32,9 +32,9 @@ module Buildings
       super(viewable_pixel_offset_x, viewable_pixel_offset_y, @basic_color)
     end
 
-    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets = {}, options = {}
+    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
       was_used = false
-      air_targets.each do |key, target|
+      ships.each do |key, target|
         if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           target.increase_health(0.2 * @fps_scaler)
           was_used = true
@@ -53,7 +53,7 @@ module Buildings
         @basic_color = @basic_inactive_color
       end
 
-      return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets, options)
+      return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options)
     end
 
     def self.get_minimap_image

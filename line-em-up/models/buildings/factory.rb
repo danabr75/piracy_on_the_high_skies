@@ -33,8 +33,8 @@ module Buildings
       # @image_height_half = @image_height / 2.0
     end
 
-    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets = [], options = {}
-      result = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, air_targets, options)
+    def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
+      result = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options)
 
       new_ship = nil
       if @time_alive > @last_created_ship_at + @create_ship_every && @ships.count < self.class::SHIP_LIMIT

@@ -7,7 +7,10 @@ module Factionable
 
   def initialize *args
     # @faction_id = self.class::DEFAULT_FACTION
-    super(*args)
+    result = super(*args)
+    @faction_font_height = (12 * @height_scale).to_i
+    @faction_font  = Gosu::Font.new(@faction_font_height, {bold: true})
+    return result
   end
 
   def set_faction faction_id

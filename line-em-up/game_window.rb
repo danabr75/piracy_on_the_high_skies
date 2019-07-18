@@ -841,7 +841,7 @@ class GameWindow < Gosu::Window
         @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
         # Moving up buildings, so clickable buildings can block the player from attacking.
         @buildings.reject! do |building|
-          result = building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships)
+          result = building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings)
           if result[:add_ships]
             result[:add_ships].each do |ship|
               @add_ships << ship

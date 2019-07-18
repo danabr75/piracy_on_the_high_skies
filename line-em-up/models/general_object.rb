@@ -35,6 +35,8 @@ class GeneralObject
   POST_DESTRUCTION_EFFECTS = false
   POST_COLLISION_EFFECTS   = false
 
+  ENABLE_HOVER = false
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -196,6 +198,7 @@ class GeneralObject
       @mini_map_image_width_half  = @mini_map_image_width  / 2.0
       @mini_map_image_height_half = @mini_map_image_height / 2.0
     end
+    @hover = false
   end   
 
   def get_minimap_image
@@ -300,14 +303,22 @@ class GeneralObject
     self::HEALTH
   end
 
+  def is_mouse_hovering_over? mouse_x, mouse_y
+    mouse_x > @x - @image_width_half && mouse_x < @x + @image_width_half && mouse_y > @y - @image_height_half && mouse_y < @y + @image_height_half
+  end
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     # if @last_updated_at < @time_alive
-      @time_alive += 1 * @fps_scaler
-      # @last_updated_at = @time_alive
-      get_map_tile_location_from_map_pixel_location
+    if self.class::ENABLE_HOVER
+      @hover = is_mouse_hovering_over?(mouse_x, mouse_y)
+      # puts "FOUND HOVER" if @hover
+    end
+
+    @time_alive += 1 * @fps_scaler
+    # @last_updated_at = @time_alive
+    get_map_tile_location_from_map_pixel_location
     # end
     # return is_on_screen?
     return is_alive

@@ -1,13 +1,13 @@
 {
   "buildings":{
     "125":{
-      "124":[
+      "0":[
         {"klass_name":"Buildings::OffensiveStore","data":{"faction_id":"faction_1"}}
       ],
-      "125":[
+      "1":[
         {"klass_name":"Buildings::RepairArea","data":{"faction_id":"faction_1"}}
       ],
-      "126":[
+      "2":[
         {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
       ]
     },
