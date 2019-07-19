@@ -83,8 +83,8 @@ class Faction
   def self.init_factions height_scale
     factions = []
     [
-      {displayed_name: "USSR", name: 'faction_1', color: Gosu::Color.argb(0xff_FF0000)},
-      {displayed_name: "RenameME", name: 'faction_2', color: Gosu::Color.argb(0xff_ff0000)},
+      {displayed_name: "USSR",    name: 'faction_1', color: Gosu::Color.argb(0xff_FF0000)},
+      {displayed_name: "Bandits", name: 'faction_2', color: Gosu::Color.argb(0xff_ffffff)},
       {displayed_name: "Fortune's Horizon", name: 'player',    color: Gosu::Color.argb(0xff_00ff00)}
     ].each do |value|
       factions << Faction.new(value[:name], value[:displayed_name], value[:color], height_scale)

@@ -25,6 +25,27 @@
       "0":[
         {"klass_name":"Buildings::Building","data":{"faction_id":"faction_1"}}
       ]
+    },
+    "120":{
+      "1":[
+        {"klass_name":"Buildings::CommandCenter","data":{"faction_id":"faction_2"}}
+      ]
+    },
+    "121":{
+      "0":[
+        {"klass_name":"Buildings::OffensiveStore","data":{"faction_id":"faction_2"}}
+      ],
+      "1":[
+        {"klass_name":"Buildings::RepairArea","data":{"faction_id":"faction_2"}}
+      ],
+      "2":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ]
+    },
+    "119":{
+      "128":[
+        {"klass_name":"Buildings::Building","data":{"faction_id":"faction_2"}}
+      ]
     }
   },
 
