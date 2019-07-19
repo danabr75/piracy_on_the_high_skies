@@ -34,6 +34,7 @@ module HardpointObjects
     SHOW_READY_PROJECTILE = false
 
     SHOW_HARDPOINT_BASE = false
+    SHOW_HARDPOINT      = true
 
     LAUNCHER_MIN_ANGLE    = nil
     LAUNCHER_MAX_ANGLE    = nil
@@ -477,7 +478,9 @@ module HardpointObjects
       # else
         # puts "not showing proj - #{self.class.name}"
       end
-      @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @colors)
+      if self.class::SHOW_HARDPOINT
+        @image.draw_rot(x, y, z, angle - @firing_angle_offset, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler, @colors)
+      end
 
       if z_base && self.class::SHOW_HARDPOINT_BASE
         @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @hp_reference.height_scale_with_image_scaler, @hp_reference.height_scale_with_image_scaler, @colors)

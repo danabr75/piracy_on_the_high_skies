@@ -1,6 +1,13 @@
+# require_relative '../lib/global_constants'
+require_relative '../lib/global_variables.rb'
+
 class Faction
-  attr_reader :id, :color
+  # include GlobalVariables
+  include GlobalConstants
+
+  attr_reader :id, :displayed_name, :color
   attr_reader :factional_relations
+  attr_reader :emblem, :emblem_scaler, :emblem_width_half, :emblem_height_half, :emblem_info
 
   MIN_FACTIONAL_RELATION = -100
   OPENLY_HOSTILE_AT_OR_LESS = -50
@@ -9,10 +16,20 @@ class Faction
   OPENLY_DEFEND_AT_OR_GREATER = 50
   MAX_FACTIONAL_RELATION = 100
 
-  def initialize id, color
+  EMBLEM_SCALER = 16.0
+
+  def initialize id, displayed_name, color, height_scale
     @id = id
+    @displayed_name = displayed_name
     @color = color
     @factional_relations = {}
+    @emblem = Gosu::Image.new("#{MEDIA_DIRECTORY}/factions/#{@id}.png")
+    @emblem_info = @emblem.gl_tex_info
+    @emblem_width  = (@emblem.width  / 2.0) / height_scale
+    @emblem_width_half  = @emblem_width / 2.0
+    @emblem_height = (@emblem.height / 2.0) / height_scale
+    @emblem_height_half  = @emblem_height / 2.0
+    @emblem_scaler = height_scale / EMBLEM_SCALER
   end
 
   def increase_faction_relations faction_name, amount
@@ -63,14 +80,14 @@ class Faction
     @factional_relations
   end
   # Can move to script
-  def self.init_factions
+  def self.init_factions height_scale
     factions = []
     [
-      {name: 'faction_1', color: Gosu::Color.argb(0xff_0066ff)},
-      {name: 'faction_2', color: Gosu::Color.argb(0xff_ff0000)},
-      {name: 'player',    color: Gosu::Color.argb(0xff_00ff00)}
+      {displayed_name: "USSR", name: 'faction_1', color: Gosu::Color.argb(0xff_FF0000)},
+      {displayed_name: "RenameME", name: 'faction_2', color: Gosu::Color.argb(0xff_ff0000)},
+      {displayed_name: "Fortune's Horizon", name: 'player',    color: Gosu::Color.argb(0xff_00ff00)}
     ].each do |value|
-      factions << Faction.new(value[:name], value[:color])
+      factions << Faction.new(value[:name], value[:displayed_name], value[:color], height_scale)
     end
 
     return factions

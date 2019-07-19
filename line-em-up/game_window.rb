@@ -272,7 +272,7 @@ class GameWindow < Gosu::Window
     
     @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
 
-    @factions = Faction.init_factions
+    @factions = Faction.init_factions(@height_scale)
 
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,

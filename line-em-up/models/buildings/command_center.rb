@@ -48,7 +48,33 @@ module Buildings
     end
 
     def tile_draw_gl v1, v2, v3, v4
+
+      colors = [1, 1, 1, 1]
+      info = @faction.emblem_info
+      glBindTexture(GL_TEXTURE_2D, info.tex_name)
+      glBegin(GL_TRIANGLE_STRIP)
+        # bottom left 
+        glTexCoord2d(info.left, info.bottom)
+        glColor4d(colors[0], colors[1], colors[2], colors[3])
+        glVertex3d(v1[0], v1[1], v1[2])
+
+        # Top Left
+        glTexCoord2d(info.left, info.top)
+        glColor4d(colors[0], colors[1], colors[2], colors[3])
+        glVertex3d(v2[0], v2[1], v2[2])
+
+        # bottom Right
+        glTexCoord2d(info.right, info.bottom)
+        glColor4d(colors[0], colors[1], colors[2], colors[3])
+        glVertex3d(v3[0], v3[1], v3[2])
+
+        # top right
+        glTexCoord2d(info.right, info.top)
+        glColor4d(colors[0], colors[1], colors[2], colors[3])
+        glVertex3d(v4[0], v4[1], v4[2])
+      glEnd
       super(v1, v2, v3, v4, @color)
+
     end
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
@@ -72,6 +98,7 @@ module Buildings
       # puts "@current_take_over_time: #{@current_take_over_time}"
       being_taken_over = false
       ships.each do |key, target|
+        next if !target.is_hostile_to?(self.get_faction_id)
         if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           # target.increase_health(0.2 * @fps_scaler)
           if target.get_faction_id != get_faction_id
@@ -82,14 +109,16 @@ module Buildings
           end
         end
       end
-      if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
-        # player.increase_health(0.2 * @fps_scaler)
-        being_taken_over = true
-        if player.get_faction_id != get_faction_id
+      if player.is_hostile_to?(self.get_faction_id)
+        if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
+          # player.increase_health(0.2 * @fps_scaler)
           being_taken_over = true
-          @current_take_over_by = player
-        else
-          @take_over_block = true
+          if player.get_faction_id != get_faction_id
+            being_taken_over = true
+            @current_take_over_by = player
+          else
+            @take_over_block = true
+          end
         end
       end
 
@@ -113,7 +142,7 @@ module Buildings
       end
 
       if @current_take_over_time >= @time_to_be_taken_over
-        @faction.decrease_faction_relations(@current_take_over_by.get_faction_id, Faction::MIN_FACTIONAL_RELATION)
+        @faction.decrease_faction_relations(@current_take_over_by.get_faction_id, Faction::MAX_FACTIONAL_RELATION)
         old_faction_id = self.get_faction_id
         @current_take_over_time = 0
         @being_taken_over = false

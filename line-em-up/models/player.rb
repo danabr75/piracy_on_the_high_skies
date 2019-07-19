@@ -588,6 +588,10 @@ class Player < ScreenFixedObject
     # @test_image.draw(x - @test_image_half_width, y - @test_image_half_height, ZOrder::UI, @height_scale / 28.0, @height_scale / 28.0)
 
     # @drawable_items_near_self.reject! { |item| item.draw }
+    @faction.emblem.draw_rot(
+      @x, @y, ZOrder::FactionEmblem,
+      360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
+    )
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
   end
 

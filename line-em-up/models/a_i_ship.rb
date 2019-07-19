@@ -330,10 +330,14 @@ class AIShip < ScreenMapFixedObject
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+    @faction.emblem.draw_rot(
+      @x, @y, ZOrder::AIFactionEmblem,
+      360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
+    )
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
 
     if @hover
-      @faction_font.draw(@faction.id, @x - (@faction_font.text_width(@faction.id) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
+      @faction_font.draw(@faction.displayed_name, @x - (@faction_font.text_width(@faction.displayed_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
 
       health_counter = 0.0
       # current_angle  = 11.0

@@ -10,6 +10,8 @@ module HardpointObjects
     STEAM_MAX_CAPACITY  = nil
     STEAM_RATE_INCREASE = nil
 
+    SHOW_HARDPOINT = false
+
     SLOT_TYPE = :steam_core
 
     def self.get_hardpoint_image

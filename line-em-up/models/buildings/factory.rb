@@ -46,17 +46,23 @@ module Buildings
         @last_created_ship_at = @time_alive
         @factory_opened_at = @time_alive
         @image = @open_image
+        # puts "OPENING FACTORY"
         @info  = @open_info
-      end
-
-      if !@factory_opened_at.nil? && @factory_opened_at + @open_factory_length > @time_alive
-        @image = @close_image
-        @info  = @close_info
       end
 
       if @ships.count >= self.class::SHIP_LIMIT
         @last_created_ship_at = @time_alive
       end
+
+      if !@factory_opened_at.nil? && @time_alive > @factory_opened_at + @open_factory_length
+        # puts "CLOSING FACTORY"
+        # puts "@factory_opened_at + @open_factory_length > @time_alive"
+        # puts "#{@factory_opened_at} + #{@open_factory_length} > #{@time_alive}"
+        @image = @close_image
+        @info  = @close_info
+        @factory_opened_at = nil
+      end
+
 
       @ships.reject! do |ship|
         !ship.is_alive || ship.get_faction_id != get_faction_id

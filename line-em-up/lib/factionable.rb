@@ -14,6 +14,14 @@ module Factionable
     return result
   end
 
+  def draw *args
+  # def draw viewable_pixel_offset_x, viewable_pixel_offset_y#, options = {:show_factions = false}
+    result = super(*args)
+    # result = super(viewable_pixel_offset_x, viewable_pixel_offset_y)
+    # @faction.emblem.draw(@x - @faction.emblem_width_half, @y - @faction.emblem_height_half, ZOrder::FactionEmblem, @faction.emblem_scaler, @faction.emblem_scaler)
+    return result
+  end
+
   def set_faction faction_id
     @faction = nil
     @factions.each do |faction|

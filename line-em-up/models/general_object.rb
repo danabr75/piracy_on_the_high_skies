@@ -264,10 +264,9 @@ class GeneralObject
     return bearing
   end
 
-
   def draw
     # Will generate error if class name is not listed on ZOrder
-    @image.draw(@x - get_width / 2, @y - get_height / 2, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+    @image.draw(@x - @image_width_half, @y - @image_height, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
