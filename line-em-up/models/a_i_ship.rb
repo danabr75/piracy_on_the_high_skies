@@ -355,7 +355,7 @@ class AIShip < ScreenMapFixedObject
   # NEED to pass in other objects to shoot at.. and choose to shoot based on agro
   # enemies is relative.. can probably combine player and enemies.. No, player is used to calculate x
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets = [], ground_targets = [], options = {}
-    validate_not_nil([mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets, ground_targets], self.class.name, __callee__)
+    # validate_not_nil([mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets, ground_targets], self.class.name, __callee__)
     # return {
     #   is_alive: true, projectiles: [], shipwreck: nil,
     #   destructable_projectiles: [], graphical_effects: []
@@ -411,14 +411,23 @@ class AIShip < ScreenMapFixedObject
     # @special_target_focus = nil
     if @special_target_focus.nil?
       # Don't have to check for targets on every single call.....
+      if get_faction_id == "player"
+        # puts "FRIENDLY SHIP HERE"
+        # puts get_faction_relations
+      else
+        # puts "CAN FIORE: #{@can_fire}"
+      end
+
       air_targets.each do |target_id, target|
         # Don't fire at self. don't fire at allies.
         next if target_id == self.id
         # puts "IS FREIDNLY TO #{target_id}: #{self.is_friendly_to?(target.get_faction_id)}"
         # puts "FACTION NAME: #{@faction.id} - to #{target.get_faction_id}"
         # puts "FACITONAL RELATIOPNS: #{get_faction_relations}"
+        # puts "WAS FRIENDLY TO #{target.get_faction_id}" if get_faction_id == "player" && self.is_friendly_to?(target.get_faction_id)
         next if self.is_friendly_to?(target.get_faction_id)
         # puts "IS HOSTILE TO #{target_id}: #{self.is_hostile_to?(target.get_faction_id)}"
+        # puts "WAS HOSTILE TO #{target.get_faction_id}" if get_faction_id == "player" && self.is_friendly_to?(target.get_faction_id)
         next if !self.is_hostile_to?(target.get_faction_id)
         next if !target.is_alive
 
@@ -513,11 +522,17 @@ class AIShip < ScreenMapFixedObject
           point_d = OpenStruct.new(x: point_d_x, y: point_d_y)
           points = [point_a, point_b, point_c, point_d]
           air_targets.each do |at_id, at|
-            # replace with friend/foe system.
-            next if at_id == 'player'
+            # Don't fire at self. don't fire at allies.
             next if at_id == self.id
-            # assume all other air_targets are friendly
+            # next if self.is_friendly_to?(at.get_faction_id)
+            # Don't care about hitting hostiles.
+            next if self.is_hostile_to?(at.get_faction_id)
+            next if !at.is_alive
+
+
+
             friendly_in_firing_area = is_point_inside_polygon(OpenStruct.new(x: at.current_map_pixel_x, y: at.current_map_pixel_y), points)
+            # puts "FRIENDY IN FIRING AREA?: #{friendly_in_firing_area}"
             break if friendly_in_firing_area == true
           end
           # puts "FOUND FREINDLY IN FIREING AREA " if friendly_in_firing_area
@@ -528,6 +543,7 @@ class AIShip < ScreenMapFixedObject
         # end
 
         if !friendly_in_firing_area
+          # puts "TRYING TO ATTACK HERE"
 
           @ship.attack_group_1(@angle, @current_map_pixel_x, @current_map_pixel_y, agro_target).each do |results|
             results[:projectiles].each do |projectile|

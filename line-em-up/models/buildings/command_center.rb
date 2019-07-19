@@ -103,7 +103,7 @@ module Buildings
         # @color = @inactive_color
         # @basic_color = @basic_inactive_color
       elsif @being_taken_over == true && @take_over_block == false
-        @current_take_over_time += 0.2
+        @current_take_over_time += 1
         # @color = @active_color
         # @basic_color = @basic_active_color
       else
@@ -113,6 +113,7 @@ module Buildings
       end
 
       if @current_take_over_time >= @time_to_be_taken_over
+        @faction.decrease_faction_relations(@current_take_over_by.get_faction_id, Faction::MIN_FACTIONAL_RELATION)
         old_faction_id = self.get_faction_id
         @current_take_over_time = 0
         @being_taken_over = false

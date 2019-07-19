@@ -419,8 +419,8 @@ class PilotableShip < GeneralObject
      
       owner.brake(30)
       ignore1, ignore2, halt = collided_object.movement(speed, destination_angle - 180)
-      collided_object.take_damage((@mass / 100) )
-      owner.take_damage((collided_object.ship.mass / 100) )
+      collided_object.take_damage((@mass / 100), owner)
+      owner.take_damage((collided_object.ship.mass / 100), collided_object)
       collided_object.brake(30)
       # collided_object.ship.current_momentum = 0
       # start_point = OpenStruct.new(:x => @attached_target.current_map_pixel_x,     :y => @attached_target.current_map_pixel_y)

@@ -2,12 +2,12 @@ class Faction
   attr_reader :id, :color
   attr_reader :factional_relations
 
-  MIN_FACTIONAL_RELATION = -1000
+  MIN_FACTIONAL_RELATION = -100
   OPENLY_HOSTILE_AT_OR_LESS = -50
   # 0 is neutral
   DEFAULT_FACTIONAL_RELATION = 0
   OPENLY_DEFEND_AT_OR_GREATER = 50
-  MAX_FACTIONAL_RELATION = 1000
+  MAX_FACTIONAL_RELATION = 100
 
   def initialize id, color
     @id = id
@@ -59,6 +59,9 @@ class Faction
     end
   end
 
+  def get_relations
+    @factional_relations
+  end
   # Can move to script
   def self.init_factions
     factions = []

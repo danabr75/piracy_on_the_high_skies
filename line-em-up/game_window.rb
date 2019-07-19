@@ -638,6 +638,10 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    # @factions.each do |f|
+    #   puts "EACH FACTION: #{f.id}"
+    #   puts f.get_relations
+    # end
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
 
     Thread.new do
