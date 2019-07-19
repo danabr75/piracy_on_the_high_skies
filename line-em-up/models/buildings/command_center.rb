@@ -52,7 +52,7 @@ module Buildings
     end
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
-      if @being_taken_over && @take_over_block == false
+      if @current_take_over_time > 0 #@being_taken_over && @take_over_block == false
         take_over_counter = 0.0
         # current_angle  = 11.0
         current_angle  = 0
