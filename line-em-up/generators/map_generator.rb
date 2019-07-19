@@ -68,7 +68,7 @@ class MapGenerator
         else
           height = rand + rand + rand + rand + rand
         end
-        height = 0.1 if height < 0.1
+        height = 1 if height < 1
         height = 6.0 if height > 6.0
         width_rows << {height: height, terrain_type: 'dirt', terrain_index: rand(@terrain_random_gen), corner_heights: {}, terrain_paths_and_weights: {}}
       end

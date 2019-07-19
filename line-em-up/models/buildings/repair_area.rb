@@ -9,7 +9,7 @@ module Buildings
 
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
       @window = window
-      super(current_map_tile_x, current_map_tile_y, options)
+      super(current_map_tile_x, current_map_tile_y, window, options)
       @image = self.class::get_image
       @info = @image.gl_tex_info
 
@@ -28,7 +28,7 @@ module Buildings
       super(v1, v2, v3, v4, @color)
     end
 
-    def viewable_pixel_offset_x viewable_pixel_offset_x, viewable_pixel_offset_y
+    def draw viewable_pixel_offset_x, viewable_pixel_offset_y
       super(viewable_pixel_offset_x, viewable_pixel_offset_y, @basic_color)
     end
 

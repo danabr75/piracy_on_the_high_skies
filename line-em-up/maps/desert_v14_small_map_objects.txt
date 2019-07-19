@@ -1,5 +1,10 @@
 {
   "buildings":{
+    "124":{
+      "1":[
+        {"klass_name":"Buildings::CommandCenter","data":{"faction_id":"faction_1"}}
+      ]
+    },
     "125":{
       "0":[
         {"klass_name":"Buildings::OffensiveStore","data":{"faction_id":"faction_1"}}

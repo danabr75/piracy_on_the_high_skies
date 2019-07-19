@@ -10,6 +10,7 @@ module Factionable
     result = super(*args)
     @faction_font_height = (12 * @height_scale).to_i
     @faction_font  = Gosu::Font.new(@faction_font_height, {bold: true})
+    # raise "FACTION WAS NOT SET - Please call `set_faction` on initialized object - #{self.class}" if @faction.nil?
     return result
   end
 

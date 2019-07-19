@@ -9,7 +9,7 @@ module Buildings
 
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
       @window = window
-      super(current_map_tile_x, current_map_tile_y, options)
+      super(current_map_tile_x, current_map_tile_y, window, options)
       # offensive_types = Launcher.descendants
       offensive_types_with_rarities = {}
       HardpointObjects::HardpointObject.descendants.each do |launcher_klass|
