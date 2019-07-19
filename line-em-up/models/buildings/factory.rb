@@ -59,7 +59,7 @@ module Buildings
       end
 
       @ships.reject! do |ship|
-        !ship.is_alive
+        !ship.is_alive || ship.get_faction_id != get_faction_id
       end
 
       if new_ship

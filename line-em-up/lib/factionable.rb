@@ -49,4 +49,9 @@ module Factionable
     return @faction.id
   end
 
+  def get_faction_color
+    # puts "SELF>CLAASS: #{self.class}"
+    return @faction.color
+  end
+
 end

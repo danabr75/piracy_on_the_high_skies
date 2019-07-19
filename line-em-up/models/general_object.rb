@@ -105,6 +105,15 @@ class GeneralObject
     return self.id
   end
 
+  def self.convert_gosu_color_to_opengl gosu_color
+    return [
+      gosu_color.red / 255.0,
+      gosu_color.green / 255.0,
+      gosu_color.blue / 255.0,
+      gosu_color.alpha / 255.0
+    ]
+  end
+
   def initialize(options = {})
     init_global_vars
 
