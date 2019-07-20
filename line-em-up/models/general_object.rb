@@ -35,7 +35,8 @@ class GeneralObject
   POST_DESTRUCTION_EFFECTS = false
   POST_COLLISION_EFFECTS   = false
 
-  ENABLE_HOVER = false
+  ENABLE_AIR_HOVER    = false
+  ENABLE_GROUND_HOVER = false
 
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
@@ -317,18 +318,29 @@ class GeneralObject
     mouse_x > @x - @image_width_half && mouse_x < @x + @image_width_half && mouse_y > @y - @image_height_half && mouse_y < @y + @image_height_half
   end
 
-  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, options = {}
+    # puts "self.class.name: #{self.class.name}"
+    # puts options.inspect if self.class.name == "Buildings::OffensiveStore"
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
     # if @last_updated_at < @time_alive
-    if self.class::ENABLE_HOVER
+    if self.class::ENABLE_AIR_HOVER && options[:on_ground] != true
       @hover = is_mouse_hovering_over?(mouse_x, mouse_y)
-      # puts "FOUND HOVER" if @hover
+    elsif self.class::ENABLE_GROUND_HOVER && options[:on_ground] == true
+      @hover = is_mouse_hovering_over?(mouse_x, mouse_y)
+      # puts "HOVING OVER BUILDING" if @hover
+    else
+      @hover = false
     end
+
+    # if self.class::ENABLE_GROUND_HOVER
+    #   puts 'BUILDING OPTIONS'
+    #   puts options.inspect
+    # end
 
     @time_alive += 1 * @fps_scaler
     # @last_updated_at = @time_alive
-    get_map_tile_location_from_map_pixel_location
+    get_map_tile_location_from_map_pixel_location unless options[:block_tile_from_pixel_update]
     # end
     # return is_on_screen?
     return is_alive

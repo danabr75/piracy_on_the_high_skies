@@ -32,7 +32,7 @@ class AIShip < ScreenMapFixedObject
   IMAGE_SCALER = 5.0
   ENABLE_POLYGON_HIT_BOX_DETECTION = true
 
-  ENABLE_HOVER = true
+  ENABLE_AIR_HOVER = true
 
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
@@ -683,7 +683,7 @@ class AIShip < ScreenMapFixedObject
       @current_map_pixel_x = 0
     end
 
-    result = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+    result = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, options)
 
     @ship.x = @x
     @ship.y = @y

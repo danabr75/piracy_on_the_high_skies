@@ -7,8 +7,9 @@ module ShipUpdateThread
     player_map_pixel_y  = args[3]
     air_targets  = args[4]
     land_targets = args[5]
-
-    results = ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets, land_targets, {is_thread: true})
+    options = args[6] || {}
+    options[:is_thread] = true
+    results = ship.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, air_targets, land_targets, options)
     # puts "SHIIP DEAD" if !ship.is_alive
     # puts "SHIP UPDATE RESULT - SHIPWRECK"  if results[:shipwreck]
     # puts results.inspect  if results[:shipwreck]

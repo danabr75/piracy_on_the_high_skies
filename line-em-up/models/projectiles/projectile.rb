@@ -75,12 +75,23 @@ module Projectiles
       @z = z_projectile
 
       @target_on_ground = options[:target_on_ground] ? options[:target_on_ground] : false
+      if @target_on_ground
+        @ground_distance_to_travel     = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, end_point.x, end_point.y)
+        @max_ground_distance_to_travel = @ground_distance_to_travel + (@average_tile_size / 10.0)
+        @distance_traveled_so_far = 0
+        # puts "INIT TEST HERE"
+        # puts @ground_distance_to_travel
+        # puts @max_ground_distance_to_travel
+        # puts @distance_traveled_so_far
+      end
+
 
       if self.class::MAX_TILE_TRAVEL
         @max_distance = self.class::MAX_TILE_TRAVEL * @average_tile_size
       end
       @start_current_map_pixel_x = @current_map_pixel_x
       @start_current_map_pixel_y = @current_map_pixel_y
+      # puts "START PROJ LOCATION: #{@start_current_map_pixel_x} - #{@start_current_map_pixel_y}"
 
       @angle = self.class.angle_1to360(destination_angle)
       # puts "CALC ANGLE: #{@angle} INIT ANGLE: #{angle_init}"
@@ -168,6 +179,8 @@ module Projectiles
       graphical_effects = []
       # puts "PROJ SPEED: #{@speed}"
       if self.is_alive
+        # puts "DISTANCE TRAVLED HERE: #{[@start_current_map_pixel_x, @start_current_map_pixel_y]}   against  #{[]}"
+        @distance_traveled_so_far = Gosu.distance(@start_current_map_pixel_x, @start_current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
         if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
           if @current_image_angle != @end_image_angle
             @current_image_angle = @current_image_angle + @image_angle_incrementor
@@ -400,46 +413,55 @@ module Projectiles
 
     def hit_objects(air_object_groups, ground_object_groups, options)
       # puts "PROJ hit objects"
+      graphical_effects = []
       if @target_on_ground
-        puts "HITTING ground obects - trying to: #{ground_object_groups.count} - and #{ground_object_groups[0].count}"
+        # puts "@distance_traveled_so_far: #{@distance_traveled_so_far} against distance to travel: #{@ground_distance_to_travel}"
+        return {graphical_effects: graphical_effects} if @distance_traveled_so_far < @ground_distance_to_travel
+
+        if @distance_traveled_so_far >= @max_ground_distance_to_travel
+          # puts "HIT MAX TRAVEL: #{@distance_traveled_so_far } >= #{@max_ground_distance_to_travel}"
+          @health = 0
+          return {graphical_effects: graphical_effects}
+         end
+        
+        # puts "HITTING ground obects - trying to: #{ground_object_groups.count} - and #{ground_object_groups[0].count}"
         object_groups = ground_object_groups
       else
         object_groups = air_object_groups
       end
       hit_object    = false
       actual_hit_object = nil
-      graphical_effects = []
       is_thread = options[:is_thread] || false
       if @health > 0
         object_groups.each do |group|
           # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
-          puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
-          puts "break if @health == 0" if @health == 0
+          # puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
+          # puts "break if @health == 0" if @health == 0
           break if @health == 0
-          puts "break if hit_object" if hit_object
+          # puts "break if hit_object" if hit_object
           break if hit_object
           group.each do |object_id, object|
             # Thread.exit if @health == 0 && is_thread
-            puts "break if @health == 0" if @health == 0
+            # puts "break if @health == 0" if @health == 0
             break if @health == 0
-            puts "next if object.nil?" if object.nil?
+            # puts "next if object.nil?" if object.nil?
             next if object.nil?
             # Don't hit yourself
             # puts "NEXT IF OBJCT ID == ID"
             # puts "#{object.id} - #{@id}"
             # puts 'enxting' if object.id == @id
-            puts "next if object_id == @id" if object_id == @id
+            # puts "next if object_id == @id" if object_id == @id
             next if object_id == @id
             # Don't hit the ship that launched it
-            puts "next if object_id == @owner.id" if object_id == @owner.id
+            # puts "next if object_id == @owner.id" if object_id == @owner.id
             next if object_id == @owner.id
             # if object has an owner?
-            puts "next if object.owner && object.owner.id == @owner.id" if object.owner && object.owner.id == @owner.id
+            # puts "next if object.owner && object.owner.id == @owner.id" if object.owner && object.owner.id == @owner.id
             next if object.owner && object.owner.id == @owner.id
-            puts "next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter" if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
+            # puts "next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter" if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
             next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
             break if hit_object
-            puts "Got past to here"
+            # puts "Got past to here"
             # don't hit a dead object
             if object.health <= 0
               next

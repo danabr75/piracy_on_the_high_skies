@@ -766,7 +766,7 @@ class GameWindow < Gosu::Window
       @projectile_update_manager.update(self, @projectiles, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       # @projectile_update_manager.update
 
-      @ship_update_manager.update(self, @ships, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings)
+      @ship_update_manager.update(self, @ships, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings, {on_ground: @pointer.on_ground})
       @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
 
       #projectiles remove themselves
@@ -857,7 +857,7 @@ class GameWindow < Gosu::Window
       end
       if !@game_pause && !menus_active
         @buildings.reject! do |building_id, building|
-          result = building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings)
+          result = building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
           if result[:add_ships]
             result[:add_ships].each do |ship|
               @add_ships << ship

@@ -5,6 +5,7 @@ require 'gosu'
 require 'opengl'
 require 'glut'
 
+
 # include OpenGL
 # include GLUT
 # include GLU # - defined gluProject
@@ -16,7 +17,7 @@ module Buildings
     POINT_VALUE_BASE = 1
     HEALTH = 100
     CLASS_TYPE = :building
-
+    ENABLE_GROUND_HOVER = true
 
     # Still used?
     attr_accessor :drops
@@ -255,7 +256,7 @@ module Buildings
         get_map_pixel_location_from_map_tile_location
         # end
       end
-      is_alive = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+      is_alive = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, options)
       return {is_alive: is_alive}
     end
 
