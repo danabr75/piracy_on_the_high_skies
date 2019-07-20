@@ -1033,9 +1033,7 @@ class GameWindow < Gosu::Window
           if result[:building]
             result[:building].set_window(self)
             if result[:building]
-              result[:building].each do |b|
-                @buildings[b.id] = b
-              end
+              @buildings[result[:building].id] = result[:building]
             end
           end
           !result[:is_alive]
