@@ -96,6 +96,7 @@ module Buildings
 
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
       # puts "@current_take_over_time: #{@current_take_over_time}"
+      @current_take_over_by = nil
       being_taken_over = false
       ships.each do |key, target|
         next if !target.is_hostile_to?(self.get_faction_id)
@@ -109,7 +110,7 @@ module Buildings
           end
         end
       end
-      if player.is_hostile_to?(self.get_faction_id)
+      if player.is_alive && player.is_hostile_to?(self.get_faction_id)
         if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           # player.increase_health(0.2 * @fps_scaler)
           being_taken_over = true
@@ -150,6 +151,7 @@ module Buildings
         # @color = get_faction_color
         update_colors(get_faction_color)
         buildings.each do |building|
+          puts "TAKING OVER BUILDING CLASS: #{building.class}"
           building.set_faction(@current_take_over_by.get_faction_id) if building.get_faction_id == old_faction_id
         end
       end

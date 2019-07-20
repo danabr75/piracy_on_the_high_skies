@@ -3,6 +3,9 @@
     "124":{
       "1":[
         {"klass_name":"Buildings::CommandCenter","data":{"faction_id":"faction_1"}}
+      ],
+      "2":[
+        {"klass_name":"Buildings::Turret","data":{"faction_id":"faction_1"}}
       ]
     },
     "125":{

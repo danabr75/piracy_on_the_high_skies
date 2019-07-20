@@ -100,8 +100,8 @@ module Projectiles
         @angle = @angle - 360.0
       end
 
-      angle_min = self.class.angle_1to360(angle_min)
-      angle_max = self.class.angle_1to360(angle_max)
+      angle_min = self.class.angle_1to360(angle_min) if angle_min
+      angle_max = self.class.angle_1to360(angle_max) if angle_max
 
       if angle_min.nil? && angle_max.nil?
         # do nothing
