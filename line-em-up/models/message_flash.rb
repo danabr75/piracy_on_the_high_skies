@@ -1,6 +1,7 @@
 require_relative 'screen_fixed_object.rb'
 
 class MessageFlash < ScreenFixedObject
+  MAX_TIME_ALIVE = 360
   def initialize(text, options = {})
     super(options)
     @text = text

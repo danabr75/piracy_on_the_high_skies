@@ -26,6 +26,8 @@ class GeneralObject
   EXPECTED_IMAGE_PIXEL_WIDTH  = nil
   IMAGE_SCALER = 1.0
 
+  FIXNUM_MAX = (2**(0.size * 8 -2) -1) - 100 # - 100 for buffer
+
   # ENABLE FOR RECTANGLE objects, that cannot rotate
   ENABLE_RECTANGLE_HIT_BOX_DETECTION = false
 
@@ -91,6 +93,7 @@ class GeneralObject
     @fps_scaler          = GlobalVariables.fps_scaler
     @graphics_setting    = GlobalVariables.graphics_setting
     @factions            = GlobalVariables.factions
+    @resolution_scale    = GlobalVariables.resolution_scale
   end
 
   # Maybe should deprecate X and Y, nothing should really be fixed to the screen anymore, Except the player. And the Grappling hook,
@@ -339,6 +342,9 @@ class GeneralObject
     # end
 
     @time_alive += 1 * @fps_scaler
+    if @time_alive >= FIXNUM_MAX
+      @time_alive = @time_alive / 2
+    end
     # @last_updated_at = @time_alive
     get_map_tile_location_from_map_pixel_location unless options[:block_tile_from_pixel_update]
     # end

@@ -34,7 +34,6 @@ class Player < ScreenFixedObject
   CLASS_TYPE = :ship
 
   # lets not set a timer that will kill us.
-  MAX_TIME_ALIVE = nil
   IMAGE_SCALER = 5.0
   ENABLE_POLYGON_HIT_BOX_DETECTION = true
 

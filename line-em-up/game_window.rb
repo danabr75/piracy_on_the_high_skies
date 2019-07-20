@@ -278,7 +278,7 @@ class GameWindow < Gosu::Window
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      @fps_scaler, @graphics_setting, @factions, true
+      @fps_scaler, @graphics_setting, @factions, @resolution_scale, true
     )
 
     @buildings = {}
@@ -305,7 +305,7 @@ class GameWindow < Gosu::Window
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
     @ui_y = 0
-    @footer_bar = FooterBar.new(@width, @height, @height_scale, @height_scale)
+    @footer_bar = FooterBar.new(@width, @height, @width_scale, @height_scale, self)
     reset_font_ui_y
 
     # In the future, can use the map to mark insertion point for player. for now, we will choose the center
@@ -360,7 +360,7 @@ class GameWindow < Gosu::Window
     # START MENU INIT
     # Can punt to different file
     @window = self
-    @menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @resolution_scale)
+    @menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale)
     @menu.add_item(
       :resume, "Resume",
       0, 0,
@@ -392,7 +392,7 @@ class GameWindow < Gosu::Window
       {is_button: true}
     )
 
-    @exit_map_menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @resolution_scale)
+    @exit_map_menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale)
     @exit_map_menu.add_item(
       nil, "Exit Map?",
       0, 0,
@@ -468,6 +468,10 @@ class GameWindow < Gosu::Window
     @menus.collect{|menu| menu.active }.include?(true)
   end
 
+  def menus_disable
+    @menus.each{|menu| menu.disable }
+  end
+
 
   # Switch button downs to this method
   # This only triggers once during press. Use the other section for when we want it contunually triggered
@@ -500,9 +504,10 @@ class GameWindow < Gosu::Window
       @menu.onClick(element_id)
     elsif @ship_loadout_menu.active
       @ship_loadout_menu.onClick(element_id)
-    elsif
+    elsif @exit_map_menu.active
       @exit_map_menu.onClick(element_id)
     else
+      @footer_bar.onClick(element_id)
       if @effects.any?
         @effects.each do |effect|
           effect.onClick(element_id)
@@ -783,8 +788,22 @@ class GameWindow < Gosu::Window
       # puts "WINDOW BLOCK CONTROLS HER"
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
-      if Gosu.button_down?(Gosu::KbEscape) && !menus_active && key_id_lock(Gosu::KbEscape)
-        @menu.enable
+      if Gosu.button_down?(Gosu::KbEscape) && key_id_lock(Gosu::KbEscape)
+        if menus_active
+          menus_disable
+        else
+          @menu.enable
+        end
+      end
+
+      @footer_bar.update
+
+      if Gosu.button_down?(Gosu::KB_I) && key_id_lock(Gosu::KB_I)
+        if @ship_loadout_menu.active
+          @ship_loadout_menu.disable
+        else
+          @ship_loadout_menu.enable
+        end
       end
 
       if @player.exiting_map?
@@ -1088,7 +1107,7 @@ class GameWindow < Gosu::Window
     @exit_map_menu.draw
     @ship_loadout_menu.draw
     # @button.draw
-    @footer_bar.draw(@player)
+    @footer_bar.draw
     # @boss.draw if @boss
     # @pointer.draw(self.mouse_x, self.mouse_y) if @grappling_hook.nil? || !@grappling_hook.active
 

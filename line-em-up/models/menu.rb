@@ -2,7 +2,7 @@ require_relative 'menu_item.rb'
 class Menu
   attr_accessor :current_height, :x, :y
   attr_reader :active, :window
-  def initialize(window, x, y, z = ZOrder::UI, scale = 1)
+  def initialize(window, x, y, z = ZOrder::UI, scale = 1, options = {})
     # LUIT.config({window: self, z: 25})
     LUIT.config({window: window || self})
     @scale = scale
@@ -18,7 +18,7 @@ class Menu
     # Add to it while the buttons are being added, in add_item
     @button_id_mapping = {}
     @active = false
-    @button_size = (40 * scale).to_i
+    @button_size = ((options[:button_size] || 40) * scale).to_i
   end
 
   def enable

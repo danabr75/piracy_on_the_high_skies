@@ -422,15 +422,15 @@ module Projectiles
       if @air_to_ground || @ground_to_air
         # puts "@distance_traveled_so_far: #{@distance_traveled_so_far} against distance to travel: #{@ground_distance_to_travel}"
         if @distance_traveled_so_far < @ground_distance_to_travel
-          puts "Haven't git ground threshhold yet - @distance_traveled_so_far: #{@distance_traveled_so_far} < @ground_distance_to_travel: #{@ground_distance_to_travel}"
+          # puts "Haven't git ground threshhold yet - @distance_traveled_so_far: #{@distance_traveled_so_far} < @ground_distance_to_travel: #{@ground_distance_to_travel}"
           return {graphical_effects: graphical_effects} 
         elsif @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
           # puts "HIT MAX TRAVEL: #{@distance_traveled_so_far } >= #{@max_ground_distance_to_travel}"
           @health = 0
-          puts "TRAVeleld too far: @distance_traveled_so_far: #{@distance_traveled_so_far} >= @max_ground_distance_to_travel: #{@max_ground_distance_to_travel}"
+          # puts "TRAVeleld too far: @distance_traveled_so_far: #{@distance_traveled_so_far} >= @max_ground_distance_to_travel: #{@max_ground_distance_to_travel}"
           return {graphical_effects: graphical_effects}
         else
-          puts "HIT GROUND THREASHOLD"
+          # puts "HIT GROUND THREASHOLD"
           @was_collidable = true
         end
         
