@@ -2,12 +2,16 @@ require_relative 'general_object.rb'
 class Cursor < GeneralObject
   attr_accessor :x, :y, :image_width_half, :image_height_half
   attr_reader   :current_map_pixel_x, :current_map_pixel_y
+  attr_reader :on_ground
 
 
-  def get_image
+  def get_air_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/crosshair.png")
   end
 
+  def get_ground_image
+    Gosu::Image.new("#{MEDIA_DIRECTORY}/crosshair_ground.png")
+  end
   
   def initialize screenx, screeny, width_scale, height_scale, owner
     @width_scale  = width_scale
@@ -15,7 +19,9 @@ class Cursor < GeneralObject
     @screen_pixel_width  = screenx
     @screen_pixel_height = screeny
     @scale = (height_scale + width_scale) / 2
-    @image = get_image
+    @air_image    = get_air_image
+    @ground_image = get_ground_image
+    @image = @air_image
     @image_width  = @image.width  * width_scale
     @image_height = @image.height * height_scale
     @image_width_half  = @image_width  / 2
@@ -42,6 +48,8 @@ class Cursor < GeneralObject
     @steam_angle_increment        = @owner_steam_max_capacity / 25.0
     @health_colors = Gosu::Color.argb(0xff_ffffff)
     @steam_colors = Gosu::Color.argb(0xee_ffffff)
+
+    @on_ground = false
 
   #     puts "TEST123"
   #     puts [
@@ -86,6 +94,15 @@ class Cursor < GeneralObject
 
       steam_counter += @steam_angle_increment
       current_angle += 6
+    end
+  end
+
+  def toggle_ground_or_air
+    @on_ground = !@on_ground
+    if @on_ground
+      @image = @ground_image
+    else
+      @image = @air_image
     end
   end
 

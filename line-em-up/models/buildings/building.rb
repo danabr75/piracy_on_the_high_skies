@@ -47,6 +47,14 @@ module Buildings
       return self.class.get_minimap_image
     end
 
+    def take_damage damage, owner = nil
+      if !@invulnerable
+        if owner
+          decrease_faction_relations(owner.get_faction_id, damage)
+        end
+        return super(damage, owner)
+      end
+    end
 
     # def drops
     #   # rand_num = rand(10)

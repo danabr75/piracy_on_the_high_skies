@@ -281,7 +281,7 @@ class GameWindow < Gosu::Window
       @fps_scaler, @graphics_setting, @factions, true
     )
 
-    @buildings = Array.new
+    @buildings = {}
     @projectiles = {}
 
     @add_projectiles = []
@@ -327,7 +327,9 @@ class GameWindow < Gosu::Window
     @quest_data = QuestInterface.get_quests(CONFIG_FILE)
 
     values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
-    @buildings = values[:buildings]
+    values[:buildings].each do |b|
+      @buildings[b.id] = b
+    end
     values[:ships].each do |ship|
       @ship[ship.id] = ship
     end
@@ -583,9 +585,9 @@ class GameWindow < Gosu::Window
     # if (id == Gosu::KB_P)
     #   @can_pause = true
     # end
-    if (id == Gosu::KB_TAB)
-      @can_toggle_secondary = true
-    end
+    # if (id == Gosu::KB_TAB)
+    #   @can_toggle_secondary = true
+    # end
     # if (id == Gosu::KB_Q || id == Gosu::KB_E)
     #   @can_toggle_scroll_factor = true
     # end
@@ -642,7 +644,9 @@ class GameWindow < Gosu::Window
     #   puts "EACH FACTION: #{f.id}"
     #   puts f.get_relations
     # end
+    # puts "@buildings.class: #{@buildings.class}"
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
+    # raise "Bad vuilding class: #{@buildings.class} and #{@buildings.class == Hash}" if @buildings.class != Hash
 
     Thread.new do
       @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
@@ -721,6 +725,7 @@ class GameWindow < Gosu::Window
     if !@game_pause && !menus_active && !@menu_open && !@menu.active
       @effects.reject! do |effect_group|
         @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
+        # raise "2 Bad vuilding class: #{@buildings.class} and #{@buildings.class == Hash}" if @buildings.class != Hash
         !effect_group.is_active
       end
 
@@ -733,7 +738,7 @@ class GameWindow < Gosu::Window
         @collision_counter += 1
       else
         # puts "CALLING COLLISION MANAGER"
-        @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ])
+        @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ], [@buildings])
         # @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
         # @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
         @collision_counter = 0
@@ -745,7 +750,7 @@ class GameWindow < Gosu::Window
       else
         # puts "CALLING COLLISION MANAGER"
         # @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ])
-        @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ])
+        @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ], [@buildings])
         # @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
         @destructable_collision_counter = 0
       end
@@ -831,6 +836,11 @@ class GameWindow < Gosu::Window
         #   @player.toggle_secondary
         # end
 
+        if Gosu.button_down?(Gosu::KB_TAB) && key_id_lock(Gosu::KB_TAB)
+          @pointer.toggle_ground_or_air
+        end
+
+
         if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
           # @can_toggle_scroll_factor = false
           @player.rotate_counterclockwise
@@ -846,7 +856,7 @@ class GameWindow < Gosu::Window
         # Moving up buildings, so clickable buildings can block the player from attacking.
       end
       if !@game_pause && !menus_active
-        @buildings.reject! do |building|
+        @buildings.reject! do |building_id, building|
           result = building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings)
           if result[:add_ships]
             result[:add_ships].each do |ship|
@@ -870,7 +880,12 @@ class GameWindow < Gosu::Window
         @player.reverse    if Gosu.button_down?(Gosu::KB_X)
 
         results = @gl_background.update(@player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
-        @buildings = results[:buildings]
+        if results[:buildings]
+          results[:buildings].each do |b_id, b|
+            # puts "building class here3 : #{b.class}"
+            @buildings[b.id] = b
+          end
+        end
         # @pickups = results[:pickups]
         # NEED to update background's projectiles
         # @projectiles = results[:projectiles]
@@ -1017,7 +1032,11 @@ class GameWindow < Gosu::Window
           # puts result.inspect
           if result[:building]
             result[:building].set_window(self)
-            @buildings << result[:building]
+            if result[:building]
+              result[:building].each do |b|
+                @buildings[b.id] = b
+              end
+            end
           end
           !result[:is_alive]
         end
@@ -1091,7 +1110,7 @@ class GameWindow < Gosu::Window
     @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @destructable_projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    @buildings.each { |building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @buildings.each { |building_id, building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     # @font.draw("Score: #{@player.score}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Level: #{@enemies_spawner_counter + 1}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # @font.draw("Enemies Killed: #{@enemies_killed}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

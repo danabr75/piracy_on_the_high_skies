@@ -74,6 +74,8 @@ module Projectiles
 
       @z = z_projectile
 
+      @target_on_ground = options[:target_on_ground] ? options[:target_on_ground] : false
+
       if self.class::MAX_TILE_TRAVEL
         @max_distance = self.class::MAX_TILE_TRAVEL * @average_tile_size
       end
@@ -396,8 +398,14 @@ module Projectiles
 
     # require 'benchmark'
 
-    def hit_objects(object_groups, options)
+    def hit_objects(air_object_groups, ground_object_groups, options)
       # puts "PROJ hit objects"
+      if @target_on_ground
+        puts "HITTING ground obects - trying to: #{ground_object_groups.count} - and #{ground_object_groups[0].count}"
+        object_groups = ground_object_groups
+      else
+        object_groups = air_object_groups
+      end
       hit_object    = false
       actual_hit_object = nil
       graphical_effects = []
@@ -406,23 +414,32 @@ module Projectiles
         object_groups.each do |group|
           # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
           puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
+          puts "break if @health == 0" if @health == 0
           break if @health == 0
+          puts "break if hit_object" if hit_object
           break if hit_object
           group.each do |object_id, object|
             # Thread.exit if @health == 0 && is_thread
+            puts "break if @health == 0" if @health == 0
             break if @health == 0
+            puts "next if object.nil?" if object.nil?
             next if object.nil?
             # Don't hit yourself
             # puts "NEXT IF OBJCT ID == ID"
             # puts "#{object.id} - #{@id}"
             # puts 'enxting' if object.id == @id
+            puts "next if object_id == @id" if object_id == @id
             next if object_id == @id
             # Don't hit the ship that launched it
+            puts "next if object_id == @owner.id" if object_id == @owner.id
             next if object_id == @owner.id
             # if object has an owner?
+            puts "next if object.owner && object.owner.id == @owner.id" if object.owner && object.owner.id == @owner.id
             next if object.owner && object.owner.id == @owner.id
+            puts "next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter" if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
             next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
             break if hit_object
+            puts "Got past to here"
             # don't hit a dead object
             if object.health <= 0
               next

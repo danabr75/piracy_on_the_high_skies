@@ -68,7 +68,7 @@ class GeneralObject
   attr_reader  :map_tile_width, :map_tile_height, :tile_pixel_width, :tile_pixel_height, :damage_increase, :average_scale
   attr_reader  :average_tile_size
 
-  attr_reader :owner
+  attr_reader :owner, :on_ground
 
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
@@ -120,6 +120,8 @@ class GeneralObject
     # puts "T: #{self.class.name} - #{options[:faction_id]}"
     # puts options.inspect
     set_faction(options[:faction_id]) if !options[:faction_id].nil? && self.respond_to?(:set_faction)
+
+    @on_ground = options[:on_ground] ? options[:on_ground] : false
 
     # @height_scale  = @height_scale
     # @width_scale   = @width_scale
@@ -189,7 +191,7 @@ class GeneralObject
     validate_image_parameters
 
     @owner = nil
-    @invulnerable = false
+    @invulnerable = options[:invulnerable] ? options[:invulnerable] : false
 
     if options[:special_ship_enemy_icon] && options[:special_ship_enemy_icon] == true
       @optional_icon_z = ZOrder::SpecialMiniMapIcon

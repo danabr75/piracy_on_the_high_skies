@@ -26,7 +26,7 @@ module Projectiles
     MAX_TILE_LENGTH = 2.2
     MAX_TILE_TRAVEL = nil
     BREAKING_POINT_TILE_LENGTH = 15
-    HIT_OBJECT_CLASS_FILTER = [:ship]
+    HIT_OBJECT_CLASS_FILTER = [:ship, :building]
     # BOARDING_TILE_DISTANCE = 0.5
     PULL_STRENGTH = 1.0
     MAX_TIME_ALIVE = nil

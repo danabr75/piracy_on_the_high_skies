@@ -84,7 +84,7 @@ class ScreenMap < ScreenFixedObject
 
       icons = []
 
-      buildings.each do |b|
+      buildings.each do |b_id, b|
         image = b.minimap_image
         if image
           # b.current_map_pixel_x

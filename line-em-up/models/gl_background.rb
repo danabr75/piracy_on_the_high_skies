@@ -484,7 +484,7 @@ class GLBackground
   def update_objects_relative_to_map local_map_movement_x, local_map_movement_y, objects, tile_movement_x, tile_movement_y
 
     delete_index = []
-    objects.each_with_index do |object, index|
+    objects.each do |object_id, object|
       # Objects will move themselves across tiles
       if tile_movement_x
         object.x = object.x + tile_movement_x
@@ -1531,7 +1531,7 @@ class GLBackground
           # Both these buildings and pickups drawing methods work. Building is more attached to the terrain.
           # Building draw the tile here
           # Pickups update the x and y coords, and then the pickup draws itself.
-          buildings.each do |building|
+          buildings.each do |building_id, building|
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
 
             # @local_map_movement_y

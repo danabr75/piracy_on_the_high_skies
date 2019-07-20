@@ -599,18 +599,7 @@ class PilotableShip < GeneralObject
     results = []
     @hardpoints.each do |hp|
       next if NON_ATTACK_HARDPOINT_SLOTS.include?(hp.slot_type)
-      # puts "HARDPOINT HERE: initial_ship_angle #{initial_ship_angle}" if hp.item
       results << hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer_or_target, options) if hp.group_number == group && hp.item
-      # puts "HP ATTACK RESULT"
-      # puts results
-     # puts "GROUP: #{group}"
-     # puts "results:"
-      # if group == 3 && results.any?
-      #  # puts "GROUP 3 - CAN ATTAC?:"
-      #   results.each do |result|
-      #    # puts result[:can_attack]
-      #   end
-      # end
     end
     # results = results.flatten
     results.reject!{|v| v.nil?}

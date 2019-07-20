@@ -11,6 +11,7 @@ module Buildings
       @window = window
       # puts "OTIONS"
       # puts options.inspect
+      options[:invulnerable] = true
       super(current_map_tile_x, current_map_tile_y, window, options)
       raise "really need a faction on this" if @faction.nil?
       @image = self.class::get_image
@@ -150,7 +151,7 @@ module Buildings
         self.set_faction(@current_take_over_by.get_faction_id)
         # @color = get_faction_color
         update_colors(get_faction_color)
-        buildings.each do |building|
+        buildings.each do |b_id, building|
           puts "TAKING OVER BUILDING CLASS: #{building.class}"
           building.set_faction(@current_take_over_by.get_faction_id) if building.get_faction_id == old_faction_id
         end

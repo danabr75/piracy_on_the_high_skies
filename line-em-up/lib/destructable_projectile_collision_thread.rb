@@ -1,9 +1,11 @@
 module DestructableProjectileCollisionThread
 
   def self.update window, projectile, args
-    targets = args[0]
+    air_targets    = args[0]
+    ground_targets = args[1]
+
     # puts "THREAD STARTING HERE - might not see this one."
-    results = projectile.hit_objects(targets, {is_thread: true})
+    results = projectile.hit_objects(air_targets, ground_targets, {is_thread: true})
     # puts "COLLISION RESULTS: RESULT"
     # puts results.inspect
     # {:is_alive=>true, :drops=>[], :point_value=>0, :killed=>0, :graphical_effects=>[]}

@@ -1,8 +1,9 @@
 module ProjectileCollisionThread
 
   def self.update window, projectile, args
-    targets = args[0]
-    results = projectile.hit_objects(targets, {is_thread: true})
+    air_targets    = args[0]
+    ground_targets = args[1]
+    results = projectile.hit_objects(air_targets, ground_targets, {is_thread: true})
 
     results[:graphical_effects].each do |effect|
       window.add_graphical_effects << effect
