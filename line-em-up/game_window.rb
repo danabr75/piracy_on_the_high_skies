@@ -89,7 +89,7 @@ class GameWindow < Gosu::Window
   attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
 
   attr_reader :player
-  attr_accessor :show_minimap
+  attr_accessor :show_minimap, :game_pause
 
   include GlobalVariables
 
@@ -306,7 +306,7 @@ class GameWindow < Gosu::Window
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
     @ui_y = 0
-    @footer_bar = FooterBar.new(@width, @height, @width_scale, @height_scale, self)
+    @footer_bar = FooterBar.new(self)
     reset_font_ui_y
 
     # In the future, can use the map to mark insertion point for player. for now, we will choose the center
@@ -361,7 +361,7 @@ class GameWindow < Gosu::Window
     # START MENU INIT
     # Can punt to different file
     @window = self
-    @menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale)
+    @menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
     @menu.add_item(
       :resume, "Resume",
       0, 0,
@@ -369,14 +369,14 @@ class GameWindow < Gosu::Window
       nil,
       {is_button: true}
     )
-    @menu.add_item(
-      :loadout, "Inventory",
-      0, 0,
-      # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
-      lambda {|window, menu, id| window.block_all_controls = true; window.menu.disable; window.ship_loadout_menu.enable },
-      nil,
-      {is_button: true}
-    )
+    # @menu.add_item(
+    #   :loadout, "Inventory",
+    #   0, 0,
+    #   # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
+    #   lambda {|window, menu, id| window.block_all_controls = true; window.menu.disable; window.ship_loadout_menu.enable },
+    #   nil,
+    #   {is_button: true}
+    # )
     # This will close the window... which i guess is fine.
     # @menu.add_item(
     #   :back_to_menu, "Back To Menu",

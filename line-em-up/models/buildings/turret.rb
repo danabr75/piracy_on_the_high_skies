@@ -101,9 +101,9 @@ module Buildings
 
       projectiles = []
       @launch_projectiles_at.reject! do |send_at|
-        if @time_alive >= send_at
+        if @time_alive >= send_at && !@found_target.nil?
           # puts "ATTACKING HERE"
-          raise "TARGET HERE DID NOT hAVE current_map_pixel_x: #{@found_target.class}" if !@found_target.respond_to?(:current_map_pixel_x)
+          # raise "TARGET HERE DID NOT hAVE current_map_pixel_x: #{@found_target.class}" if !@found_target.respond_to?(:current_map_pixel_x)
           projectiles << attack(@found_target.current_map_pixel_x, @found_target.current_map_pixel_y)
           true
         else

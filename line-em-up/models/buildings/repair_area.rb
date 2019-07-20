@@ -35,14 +35,17 @@ module Buildings
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
       was_used = false
       ships.each do |key, target|
+        next if !target.is_alive
         if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           target.increase_health(0.2 * @fps_scaler)
           was_used = true
         end
       end
-      if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
-        player.increase_health(0.2 * @fps_scaler)
-        was_used = true
+      if player.is_alive
+        if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
+          player.increase_health(0.2 * @fps_scaler)
+          was_used = true
+        end
       end
 
       if was_used

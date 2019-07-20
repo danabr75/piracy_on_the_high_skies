@@ -416,7 +416,7 @@ class Player < ScreenFixedObject
   def take_damage damage, owner = nil
     if @can_take_damage
       # Automating player relations
-      decrease_faction_relations(owner.get_faction_id, damage)
+      decrease_faction_relations(owner.get_faction_id, owner.get_faction, damage)
       @ship.take_damage(damage)
     end
   end

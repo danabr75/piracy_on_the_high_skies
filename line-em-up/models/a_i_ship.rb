@@ -260,7 +260,7 @@ class AIShip < ScreenMapFixedObject
   def take_damage damage, owner = nil
     if !@invulnerable
       if owner
-        decrease_faction_relations(owner.get_faction_id, damage)
+        decrease_faction_relations(owner.get_faction_id, owner.get_faction, damage)
       end
       @ship.take_damage(damage)
     end

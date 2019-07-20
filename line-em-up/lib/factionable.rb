@@ -30,6 +30,10 @@ module Factionable
     raise "COULD NOT FIND #{faction_id} for #{self.class}" if @faction.nil?
   end
 
+  def get_faction
+    return @faction
+  end
+
   def increase_faction_relations other_faction, amount
     if @faction
       @faction.increase_faction_relations(other_faction, amount)
@@ -37,9 +41,9 @@ module Factionable
   end
 
   # A landwreck was attached, threw an error. WRapping in `if faction` now.
-  def decrease_faction_relations other_faction, amount
+  def decrease_faction_relations other_faction_id, other_faction, amount
     if @faction
-      @faction.decrease_faction_relations(other_faction, amount)
+      @faction.decrease_faction_relations(other_faction_id, other_faction, amount)
     end
   end
 

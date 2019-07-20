@@ -100,25 +100,26 @@ module Buildings
       @current_take_over_by = nil
       being_taken_over = false
       ships.each do |key, target|
-        next if !target.is_hostile_to?(self.get_faction_id)
+        # next if !target.is_hostile_to?(self.get_faction_id)
         if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           # target.increase_health(0.2 * @fps_scaler)
-          if target.get_faction_id != get_faction_id
+          if target.get_faction_id != get_faction_id && target.is_hostile_to?(self.get_faction_id)
             being_taken_over = true
             @current_take_over_by = target
-          else
+          elsif target.is_friendly_to?(self.get_faction_id)
             @take_over_block = true
           end
         end
       end
       if player.is_alive && player.is_hostile_to?(self.get_faction_id)
         if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
-          # player.increase_health(0.2 * @fps_scaler)
-          being_taken_over = true
-          if player.get_faction_id != get_faction_id
+          # # player.increase_health(0.2 * @fps_scaler)
+          # being_taken_over = true
+          # @current_take_over_by = player
+          if player.get_faction_id != get_faction_id && player.is_hostile_to?(self.get_faction_id)
             being_taken_over = true
             @current_take_over_by = player
-          else
+          elsif player.is_friendly_to(self.get_faction_id)
             @take_over_block = true
           end
         end
@@ -144,7 +145,7 @@ module Buildings
       end
 
       if @current_take_over_time >= @time_to_be_taken_over
-        @faction.decrease_faction_relations(@current_take_over_by.get_faction_id, Faction::MAX_FACTIONAL_RELATION)
+        @faction.decrease_faction_relations(@current_take_over_by.get_faction_id, @current_take_over_by.get_faction, 50)
         old_faction_id = self.get_faction_id
         @current_take_over_time = 0
         @being_taken_over = false

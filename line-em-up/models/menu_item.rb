@@ -20,18 +20,26 @@ class MenuItem
         # @type = options[:type]
     end
 
-    def draw
+    def get_button_width
+      @button.w
+    end
+
+    def draw x_offset = 0
       # if @text && !@is_button
       #   @active_image.draw(@text, @x, @y, 1, 1.0, 1.0, 0xff_ffff00)
       # elsif !@is_button
       #   @active_image.draw(@x, @y, @z)
       # elsif @is_button
-      @button.draw(-(@button.w / 2), -(@button.h / 2))
+      # if is_horizontal
+
+      # else
+        @button.draw(-(@button.w / 2.0) + x_offset, -(@button.h / 2.0))
+      # end
         # @main_image.draw(0, 0)
       # end
     end
 
-    def update
+    def update x_offset = 0
         # @text = @get_value_callback.call(@config_file, @settings_name) if @get_value_callback && @config_file && @settings_name
         # puts "MENU ITEN: #{!@is_button}"
         # if !@is_button
@@ -50,7 +58,11 @@ class MenuItem
         #   end
         # else
           # @main_image.update(-(@main_image.w / 2), -(@y_offset - @main_image.h / 2))
-        @button.update(-(@button.w / 2), -(@button.h / 2))
+      # if is_horizontal
+
+      # else
+        @button.update(-(@button.w / 2.0) + x_offset, -(@button.h / 2.0))
+      # end
         # end
     end
 

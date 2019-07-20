@@ -32,47 +32,57 @@ class Faction
     @emblem_scaler = height_scale / EMBLEM_SCALER
   end
 
-  def increase_faction_relations faction_name, amount
+  # only to be used by other factions!
+  def set_factional_relations other_faction_name, value
+    @factional_relations[other_faction_name] = value
+  end
+
+  def increase_faction_relations other_faction_name, amount
     # can't increase faction relations to self!
-    if faction_name != @id
-      @factional_relations[faction_name] = @factional_relations[faction_name] + amount
-      @factional_relations[faction_name] = MAX_FACTIONAL_RELATION if @factional_relations[faction_name] > MAX_FACTIONAL_RELATION
+    if other_faction_name != @id
+      @factional_relations[other_faction_name] = @factional_relations[other_faction_name] + amount
+      @factional_relations[other_faction_name] = MAX_FACTIONAL_RELATION if @factional_relations[other_faction_name] > MAX_FACTIONAL_RELATION
     end
   end
 
-  def decrease_faction_relations faction_name, amount
+  def decrease_faction_relations other_faction_name, other_faction, amount
     # can't increase faction relations to self!
-    if faction_name != @id
-      @factional_relations[faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(faction_name) == false
-      @factional_relations[faction_name] = @factional_relations[faction_name] - amount
-      @factional_relations[faction_name] = MIN_FACTIONAL_RELATION if @factional_relations[faction_name] < MIN_FACTIONAL_RELATION
+    if other_faction_name != @id
+      @factional_relations[other_faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(other_faction_name) == false
+      @factional_relations[other_faction_name] = @factional_relations[other_faction_name] - amount
+      @factional_relations[other_faction_name] = MIN_FACTIONAL_RELATION if @factional_relations[other_faction_name] < MIN_FACTIONAL_RELATION
+
+      # Set other faction hostile to self if relations are now hostile.
+      if is_hostile_to?(other_faction_name) && !other_faction.is_hostile_to?(@id)
+        other_faction.set_factional_relations(@id, OPENLY_HOSTILE_AT_OR_LESS)
+      end
     end
   end
 
-  def is_hostile_to? faction_name
-    if faction_name == @id
+  def is_hostile_to? other_faction_name
+    if other_faction_name == @id
       return false
     else
-      @factional_relations[faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(faction_name) == false
-      return @factional_relations[faction_name] <= OPENLY_HOSTILE_AT_OR_LESS
+      @factional_relations[other_faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(other_faction_name) == false
+      return @factional_relations[other_faction_name] <= OPENLY_HOSTILE_AT_OR_LESS
     end
   end
 
-  def is_friendly_to? faction_name
-    if faction_name == @id
+  def is_friendly_to? other_faction_name
+    if other_faction_name == @id
       return true
     else
-      @factional_relations[faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(faction_name) == false
-      return @factional_relations[faction_name] >= OPENLY_DEFEND_AT_OR_GREATER
+      @factional_relations[other_faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(other_faction_name) == false
+      return @factional_relations[other_faction_name] >= OPENLY_DEFEND_AT_OR_GREATER
     end
   end
 
-  def display_factional_relation faction_name
-    if faction_name == @id
+  def display_factional_relation other_faction_name
+    if other_faction_name == @id
       return MAX_FACTIONAL_RELATION / 10
     else
-      @factional_relations[faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(faction_name) == false
-      return @factional_relations[faction_name] / 10
+      @factional_relations[other_faction_name] = DEFAULT_FACTIONAL_RELATION if @factional_relations.key?(other_faction_name) == false
+      return @factional_relations[other_faction_name] / 10
     end
   end
 
