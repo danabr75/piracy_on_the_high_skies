@@ -18,6 +18,7 @@ module Buildings
     HEALTH = 100
     CLASS_TYPE = :building
     ENABLE_GROUND_HOVER = true
+    IS_MOVABLE_OBJECT = false
 
     # Still used?
     attr_accessor :drops

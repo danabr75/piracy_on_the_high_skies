@@ -40,6 +40,8 @@ class GeneralObject
   ENABLE_AIR_HOVER    = false
   ENABLE_GROUND_HOVER = false
 
+  IS_MOVABLE_OBJECT = true
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end

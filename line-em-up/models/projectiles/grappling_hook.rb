@@ -140,8 +140,13 @@ module Projectiles
         angle_to_origin = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
         # Reversing direction
         # angle_to_origin = self.class.angle_1to360(angle_to_origin - 180)
-        @attached_target.movement(@pull_strength, angle_to_origin)
-        @owner.movement(@pull_strength, angle_to_origin + 180)
+
+        if @attached_target.class::IS_MOVABLE_OBJECT
+          @attached_target.movement(@pull_strength, angle_to_origin)
+          @owner.movement(@pull_strength, angle_to_origin + 180)
+        else
+          @owner.movement(@pull_strength * 2.0, angle_to_origin + 180)
+        end
 
         @current_map_pixel_x = @attached_target.current_map_pixel_x
         @current_map_pixel_y = @attached_target.current_map_pixel_y
