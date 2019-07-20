@@ -304,7 +304,7 @@ class Hardpoint < GeneralObject
       # ITEM ATTACKING ANGLE: 249.0 = 249.0 - 0
 
       options[:owner] = @owner
-      options[:target_on_ground] = pointer.on_ground
+      options[:air_to_ground] = pointer.on_ground
       result = @item.attack(current_ship_angle - @angle_offset,  @current_map_pixel_x, @current_map_pixel_y, start_point, end_point, nil, nil, @owner, @z_projectile, options)
       attack_projectile = result[:projectile]
       attack_destructable_projectile = result[:destructable_projectile]

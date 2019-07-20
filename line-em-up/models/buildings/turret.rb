@@ -129,7 +129,8 @@ module Buildings
         destination_angle, start_point, end_point,
         nil, nil, nil,
         @current_map_tile_x, @current_map_tile_y,
-        self, ZOrder::AIProjectile
+        self, ZOrder::AIProjectile,
+        {ground_to_air: true}
       )
       return projectile#, destructable_projectile: nil, effects: [], graphical_effects: graphical_effects}
     end

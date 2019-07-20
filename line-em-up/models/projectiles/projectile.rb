@@ -73,12 +73,15 @@ module Projectiles
       @owner = owner
 
 
-      @target_on_ground = options[:target_on_ground] ? options[:target_on_ground] : false
-      if @target_on_ground
+      @air_to_ground = options[:air_to_ground] ? options[:air_to_ground] : false
+      @ground_to_air = options[:ground_to_air] ? options[:ground_to_air] : false
+      if @air_to_ground || @ground_to_air
         @z = ZOrder::GroundProjectile
-        @ground_distance_to_travel     = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, end_point.x, end_point.y)
-        @max_ground_distance_to_travel = @ground_distance_to_travel + (@average_tile_size / 10.0)
+        @ground_distance_to_travel     = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, end_point.x, end_point.y) - (@average_tile_size / 20.0)
+        @max_ground_distance_to_travel = @ground_distance_to_travel + (@average_tile_size / 20.0)
         @distance_traveled_so_far = 0
+
+        @was_collidable = false
         # puts "INIT TEST HERE"
         # puts @ground_distance_to_travel
         # puts @max_ground_distance_to_travel
@@ -416,15 +419,20 @@ module Projectiles
     def hit_objects(air_object_groups, ground_object_groups, options)
       # puts "PROJ hit objects"
       graphical_effects = []
-      if @target_on_ground
+      if @air_to_ground || @ground_to_air
         # puts "@distance_traveled_so_far: #{@distance_traveled_so_far} against distance to travel: #{@ground_distance_to_travel}"
-        return {graphical_effects: graphical_effects} if @distance_traveled_so_far < @ground_distance_to_travel
-
-        if @distance_traveled_so_far >= @max_ground_distance_to_travel
+        if @distance_traveled_so_far < @ground_distance_to_travel
+          puts "Haven't git ground threshhold yet - @distance_traveled_so_far: #{@distance_traveled_so_far} < @ground_distance_to_travel: #{@ground_distance_to_travel}"
+          return {graphical_effects: graphical_effects} 
+        elsif @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
           # puts "HIT MAX TRAVEL: #{@distance_traveled_so_far } >= #{@max_ground_distance_to_travel}"
           @health = 0
+          puts "TRAVeleld too far: @distance_traveled_so_far: #{@distance_traveled_so_far} >= @max_ground_distance_to_travel: #{@max_ground_distance_to_travel}"
           return {graphical_effects: graphical_effects}
-         end
+        else
+          puts "HIT GROUND THREASHOLD"
+          @was_collidable = true
+        end
         
         # puts "HITTING ground obects - trying to: #{ground_object_groups.count} - and #{ground_object_groups[0].count}"
         object_groups = ground_object_groups

@@ -75,7 +75,7 @@ class Cursor < GeneralObject
     health_counter = 0.0
     # current_angle  = 11.0
     current_angle  = -165.0
-    if @owner_health != 0
+    if @owner_health > 0
       while @owner_health > 0 && health_counter <= @owner_health
         # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
         @health_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @health_colors)
