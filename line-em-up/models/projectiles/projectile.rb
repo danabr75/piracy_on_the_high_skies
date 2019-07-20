@@ -72,10 +72,10 @@ module Projectiles
 
       @owner = owner
 
-      @z = z_projectile
 
       @target_on_ground = options[:target_on_ground] ? options[:target_on_ground] : false
       if @target_on_ground
+        @z = ZOrder::GroundProjectile
         @ground_distance_to_travel     = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, end_point.x, end_point.y)
         @max_ground_distance_to_travel = @ground_distance_to_travel + (@average_tile_size / 10.0)
         @distance_traveled_so_far = 0
@@ -83,6 +83,8 @@ module Projectiles
         # puts @ground_distance_to_travel
         # puts @max_ground_distance_to_travel
         # puts @distance_traveled_so_far
+      else
+        @z = z_projectile
       end
 
 

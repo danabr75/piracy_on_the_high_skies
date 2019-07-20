@@ -38,6 +38,7 @@ module Buildings
       @info = @image.gl_tex_info
       @credits = rand(500) + 500
       @interactible = true
+      @invulnerable = true
     end
 
     def self.get_minimap_image

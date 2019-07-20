@@ -75,25 +75,27 @@ class Cursor < GeneralObject
     health_counter = 0.0
     # current_angle  = 11.0
     current_angle  = -165.0
-    while @owner_health > 0 && health_counter <= @owner_health
-      # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-      @health_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @health_colors)
+    if @owner_health != 0
+      while @owner_health > 0 && health_counter <= @owner_health
+        # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+        @health_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @health_colors)
 
-      health_counter += @health_angle_increment
-      current_angle  += 6
-    end
-
-    steam_counter = 0.0
-    current_angle  = 15.0
-    while @owner_steam_max_capacity > 0 && steam_counter <= @owner_steam_max_capacity
-      if steam_counter < @owner_steam_max_capacity - @owner_current_steam_capacity
-        @steam_used_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @steam_colors)
-      else
-        @steam_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @steam_colors)
+        health_counter += @health_angle_increment
+        current_angle  += 6
       end
 
-      steam_counter += @steam_angle_increment
-      current_angle += 6
+      steam_counter = 0.0
+      current_angle  = 15.0
+      while @owner_steam_max_capacity > 0 && steam_counter <= @owner_steam_max_capacity
+        if steam_counter < @owner_steam_max_capacity - @owner_current_steam_capacity
+          @steam_used_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @steam_colors)
+        else
+          @steam_unit_image.draw_rot(@x, @y, ZOrder::Cursor, current_angle, 0.5, 4, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image, @steam_colors)
+        end
+
+        steam_counter += @steam_angle_increment
+        current_angle += 6
+      end
     end
   end
 

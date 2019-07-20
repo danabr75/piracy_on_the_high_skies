@@ -88,24 +88,26 @@ module Buildings
         @faction.emblem.draw(@x - @faction.emblem_width_half, @y - @faction.emblem_height_half, ZOrder::FactionEmblem, @faction.emblem_scaler, @faction.emblem_scaler)
         @faction_font.draw(@faction.displayed_name, @x - (@faction_font.text_width(@faction.displayed_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
 
-        health_counter = 0.0
-        # current_angle  = 11.0
-        # Lower is counter clockwise
-        # Higher is clockwise
-        current_angle  = 155.0
-        # while max_health != health && health > 0 && health_counter <= health
-        while @health > 0 && health_counter <= @health
-          # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-          @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+        if !@invulnerable
+          health_counter = 0.0
+          # current_angle  = 11.0
+          # Lower is counter clockwise
+          # Higher is clockwise
+          current_angle  = 155.0
+          # while max_health != health && health > 0 && health_counter <= health
+          while @health > 0 && health_counter <= @health
+            # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+            @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
 
-          health_counter += @health_angle_increment
-          current_angle  += 6
+            health_counter += @health_angle_increment
+            current_angle  += 6
+          end
         end
       end
 
 
       # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
-      if true #@graphics_setting == :basic
+      if @graphics_setting == :basic
         if @interactible
           if @is_hovering && @is_close_enough_to_open
             # colors = [0.5, 1, 0.5, 1]
