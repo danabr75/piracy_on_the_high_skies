@@ -17,7 +17,7 @@ class FooterBar < ScreenFixedObject
     @menu.add_item(
       nil, "I",
       0, 0,
-      lambda {|window, menu, id| window.block_all_controls = true; window.ship_loadout_menu.enable },
+      lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
       nil,
       {is_button: true}
     )
