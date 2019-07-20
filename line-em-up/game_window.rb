@@ -790,6 +790,7 @@ class GameWindow < Gosu::Window
       @messages.reject! { |message| !message.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
       if Gosu.button_down?(Gosu::KbEscape) && key_id_lock(Gosu::KbEscape)
+        @player.cancel_map_exit if @exit_map_menu.active
         if menus_active
           menus_disable
         else
