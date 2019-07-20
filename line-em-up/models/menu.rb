@@ -14,11 +14,14 @@ class Menu
     # @offset_y = 0
     # @local_window = self
     @items = Array.new
-    @current_height = 30 * @scale
+    @current_height = y + @cell_padding
     # Add to it while the buttons are being added, in add_item
     @button_id_mapping = {}
     @active = false
     @button_size = ((options[:button_size] || 40) * scale).to_i
+
+    # Default is vertical
+    @is_horizontal = options[:is_horizontal] || false
   end
 
   def enable
@@ -30,19 +33,27 @@ class Menu
 
 
   # For external use
-  def increase_y_offset amount
-      @current_height = @current_height + amount
-  end
+  # def increase_y_offset amount
+  #     @current_height = @current_height + amount
+  # end
 
   def add_item(key, text, x, y, callback, hover_image = nil, options = {})
       @button_id_mapping[key] = callback
 
       button = LUIT::Button.new(self, key, self.x, self.y + self.current_height, @z, text, @button_size, @button_size)
 
-      if options[:is_button]
-        @current_height = @current_height + button.h + @cell_padding
+      if @is_horizontal
+        if options[:is_button]
+          @current_height = @current_height + button.h + @cell_padding
+        else
+          @current_height = @current_height + button.height + @cell_padding
+        end
       else
-        @current_height = @current_height + button.height + @cell_padding
+        if options[:is_button]
+          @current_height = @current_height + button.h + @cell_padding
+        else
+          @current_height = @current_height + button.height + @cell_padding
+        end
       end
       @items << MenuItem.new(@window, button, x, y, @z, callback, hover_image, options)
   end

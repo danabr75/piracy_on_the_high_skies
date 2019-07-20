@@ -89,6 +89,7 @@ class GameWindow < Gosu::Window
   attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
 
   attr_reader :player
+  attr_accessor :show_minimap
 
   include GlobalVariables
 

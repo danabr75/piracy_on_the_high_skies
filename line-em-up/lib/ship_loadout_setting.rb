@@ -586,7 +586,7 @@ class ShipLoadoutSetting < Setting
       # puts "BOX DIMENTIONS"
       # puts [box_x, box_y, box_width, box_height].join(", ")
       # 320, 960, 640, 72
-      Gosu::draw_rect(box_x, box_y, box_width, box_height, Gosu::Color.argb(0xff_595959), ZOrder::MenuBackground)
+      Gosu::draw_rect(box_x, box_y, box_width, box_height, Gosu::Color.argb(0xff_595959), ZOrder::MenuBackground) if texts.count > 0
 
       texts.each_with_index do |text, index|
         height_padding = index * @font_height

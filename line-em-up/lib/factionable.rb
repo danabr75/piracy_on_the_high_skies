@@ -31,24 +31,35 @@ module Factionable
   end
 
   def increase_faction_relations other_faction, amount
-    @faction.increase_faction_relations(other_faction, amount)
+    if @faction
+      @faction.increase_faction_relations(other_faction, amount)
+    end
   end
 
+  # A landwreck was attached, threw an error. WRapping in `if faction` now.
   def decrease_faction_relations other_faction, amount
-    @faction.decrease_faction_relations(other_faction, amount)
+    if @faction
+      @faction.decrease_faction_relations(other_faction, amount)
+    end
   end
 
   def is_hostile_to? faction_name
-    @faction.is_hostile_to?(faction_name)
+    if @faction
+      @faction.is_hostile_to?(faction_name)
+    end
   end
 
   def is_friendly_to? faction_name
-    @faction.is_friendly_to?(faction_name)
+    if @faction
+      @faction.is_friendly_to?(faction_name)
+    end
   end
 
   # testing only
   def get_faction_relations
-    return @faction.factional_relations
+    if @faction
+      return @faction.factional_relations
+    end
   end
 
 

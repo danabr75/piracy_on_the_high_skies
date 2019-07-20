@@ -13,11 +13,18 @@ class FooterBar < ScreenFixedObject
     # @width_scale = width_scale
     # @height_scale = height_scale
 
-    @menu = Menu.new(@window, @screen_pixel_width / 2, @screen_pixel_height - (50 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20})
+    @menu = Menu.new(@window, @screen_pixel_width / 2, @screen_pixel_height - (100 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20, is_horizontal: true})
     @menu.add_item(
-      nil, "I",
+      :inventory_hotbar, "I",
       0, 0,
       lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
+      nil,
+      {is_button: true}
+    )
+    @menu.add_item(
+      :minimap_hotbar, "M",
+      0, 0,
+      lambda {|window, menu, id| window.block_all_controls = true; window.show_minimap != window.show_minimap},
       nil,
       {is_button: true}
     )
