@@ -66,7 +66,7 @@ end
 GlobalVariables.set_config(1, 1, 450, 450,
   @map_pixel_width, @map_pixel_height,
   @map_tile_width, @map_tile_height,
-  @tile_pixel_width, @tile_pixel_height, 16.666, :basic, Faction.init_factions, true
+  @tile_pixel_width, @tile_pixel_height, 16.666, :basic, Faction.init_factions, 1, true
 )
 
 

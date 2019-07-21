@@ -55,8 +55,10 @@ class Player < ScreenFixedObject
  # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
     # puts "PLAYER NEW"
-    validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
-    validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
+    if @debug
+      validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
+      validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
+    end
 
     @current_map_pixel_x = current_map_pixel_x
     @current_map_pixel_y = current_map_pixel_y
@@ -587,10 +589,10 @@ class Player < ScreenFixedObject
     # @test_image.draw(x - @test_image_half_width, y - @test_image_half_height, ZOrder::UI, @height_scale / 28.0, @height_scale / 28.0)
 
     # @drawable_items_near_self.reject! { |item| item.draw }
-    @faction.emblem.draw_rot(
-      @x, @y, ZOrder::FactionEmblem,
-      360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
-    )
+    # @faction.emblem.draw_rot(
+    #   @x, @y, ZOrder::FactionEmblem,
+    #   360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
+    # )
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
   end
 
@@ -684,7 +686,7 @@ class Player < ScreenFixedObject
     @cooldown_wait -= 1              if @cooldown_wait > 0
     @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
-    @time_alive += 1 if self.is_alive
+    # @time_alive += 1 if self.is_alive
 
     # puts "PLAYER UPDATE: #{@current_map_pixel_x} - #{@current_map_pixel_y} - @map_pixel_height #{@map_pixel_height} - #{@map_pixel_width}" if @time_alive % 100 == 0
 
@@ -713,8 +715,13 @@ class Player < ScreenFixedObject
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER UPDATE: #{@x} - #{@y}"
-    super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
-    return true
+    is_alive = super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
+    result = {is_alive: is_alive}
+    # Add result buildings at some point.
+    if !is_alive
+      result[:shipwreck] = shipwreck
+    end
+    return result
   end
 
   def collect_pickups(pickups)

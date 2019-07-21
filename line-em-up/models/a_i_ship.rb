@@ -120,8 +120,10 @@ class AIShip < ScreenMapFixedObject
     index_length = hardpoint_data[:hardpoint_data].count - 1
     keys = hardpoint_data[:hardpoint_data].keys
     get_keys = []
-    (0..2).each do |i|
-      @drops << hardpoint_data[:hardpoint_data][keys[rand(index_length)]]
+    if !options[:no_drops]
+      (0..2).each do |i|
+        @drops << hardpoint_data[:hardpoint_data][keys[rand(index_length)]]
+      end
     end
 
     # hardpoint_data = {
@@ -335,11 +337,15 @@ class AIShip < ScreenMapFixedObject
     return @ship.get_map_pixel_polygon_points
   end
 
+  # def self.get_faction_emblem_arguments x, y, angle, scaler
+  #   return lambda do |x, y, angle|
+  #     x, y, ZOrder::AIFactionEmblem,
+  #     360 - angle, 0.5, 0.5, scaler, scaler
+  #   end
+  # end
+
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
-    @faction.emblem.draw_rot(
-      @x, @y, ZOrder::AIFactionEmblem,
-      360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
-    )
+
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
 
     if @hover
@@ -705,6 +711,7 @@ class AIShip < ScreenMapFixedObject
       # factor_in_scale_speed = @speed * @average_scale
 
       # movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
+    buildings = []
     shipwreck = nil
     if !result
       shipwreck = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle, @drops)

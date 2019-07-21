@@ -90,7 +90,7 @@ class Faction
     @factional_relations
   end
   # Can move to script
-  def self.init_factions height_scale
+  def self.init_factions height_scale = 1
     factions = []
     [
       {displayed_name: "USSR",    name: 'faction_1', color: Gosu::Color.argb(0xff_FF0000)},

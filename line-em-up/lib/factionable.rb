@@ -4,6 +4,7 @@ module Factionable
   # attr_accessor :faction
   # is overridable on prepending class.
   # DEFAULT_FACTION = 'generic'
+  IS_A_FACTIONABLE = true
 
   def initialize *args
     # @faction_id = self.class::DEFAULT_FACTION

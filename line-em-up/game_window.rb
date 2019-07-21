@@ -87,6 +87,7 @@ class GameWindow < Gosu::Window
   attr_accessor :add_projectiles, :remove_projectile_ids
   attr_accessor :add_ships, :remove_ship_ids, :add_buildings, :remove_building_ids
   attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
+  attr_accessor :add_shipwrecks, :remove_shipwreck_ids
 
   attr_reader :player
   attr_accessor :show_minimap, :game_pause
@@ -247,6 +248,7 @@ class GameWindow < Gosu::Window
       @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :joined_threads)
       # Building update needs to be joined, or else ships are updated with missing images
       @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
+      @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true) # , :joined_threads
     else
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
       @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
@@ -298,7 +300,9 @@ class GameWindow < Gosu::Window
 
 
 
-    @shipwrecks = Array.new
+    @shipwrecks = {}
+    @add_shipwrecks = []
+    @remove_shipwreck_ids = []
     
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
@@ -688,6 +692,16 @@ class GameWindow < Gosu::Window
         true
       end
 
+      @add_shipwrecks.reject! do |shipwreck|
+        @shipwrecks[shipwreck.id] = shipwreck
+        true
+      end
+
+      @remove_shipwreck_ids.reject! do |shipwreck_id|
+        @shipwrecks.delete(shipwreck_id)
+        true
+      end
+
       @add_buildings.reject! do |b|
         @buildings[b.id] = b
         true
@@ -879,7 +893,15 @@ class GameWindow < Gosu::Window
         end
 
 
-        @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
+        result = @player.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
+        if result[:buildings]
+          result[:buildings].each do |b|
+            @buildings[b.id] = b
+          end
+        end
+        if result[:shipwreck]
+          @shipwrecks[result[:shipwreck].id] = result[:shipwreck]
+        end
         # Moving up buildings, so clickable buildings can block the player from attacking.
       end
       if !@game_pause && !menus_active
@@ -1040,18 +1062,9 @@ class GameWindow < Gosu::Window
         # end
 
 
-        @shipwrecks.reject! do |ship|
-          result = ship.update(nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
-          # puts "SHIPWREK RESULT"
-          # puts result.inspect
-          if result[:building]
-            result[:building].set_window(self)
-            if result[:building]
-              @buildings[result[:building].id] = result[:building]
-            end
-          end
-          !result[:is_alive]
-        end
+        @shipwreck_update_manager.update(self, @shipwrecks, nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
+
+
         # puts "SHIPS HERE: #{@ships.count}"
         # puts "SHIPS ids: #{@ships.collect{|s| s.id }}"
         # @ships.reject! do |ship|
@@ -1119,7 +1132,7 @@ class GameWindow < Gosu::Window
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     # reactivate
     @ships.each { |key, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
-    @shipwrecks.each { |ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @shipwrecks.each { |ship_id, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @destructable_projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @buildings.each { |building_id, building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }

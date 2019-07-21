@@ -42,6 +42,8 @@ class GeneralObject
 
   IS_MOVABLE_OBJECT = true
 
+  IS_A_FACTIONABLE = false
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end

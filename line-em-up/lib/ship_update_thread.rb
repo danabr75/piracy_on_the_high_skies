@@ -25,7 +25,7 @@ module ShipUpdateThread
       window.graphical_effects.push(effect) if effect
     end
     # results[:shipwreck].each do |shipwreck|
-    window.shipwrecks.push(results[:shipwreck]) if results[:shipwreck]
+    window.add_shipwrecks.push(results[:shipwreck]) if results[:shipwreck]
     # end
 
     window.remove_ship_ids << ship.id if !results[:is_alive]

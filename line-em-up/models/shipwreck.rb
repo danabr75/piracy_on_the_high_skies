@@ -51,7 +51,9 @@ class Shipwreck < ScreenMapFixedObject
       options[:current_map_pixel_x] = @current_map_pixel_x
       options[:current_map_pixel_y] = @current_map_pixel_y
       revised_scale = 1.0 - ((1.0 - @current_scale) / 2.0)
-      building = Buildings::Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, revised_scale, @angle, @drops, options)
+      if @drops.any?
+        building = Buildings::Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, revised_scale, @angle, @drops, options)
+      end
       @health = 0
     end
     return {is_alive: is_alive, building: building }

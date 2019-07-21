@@ -58,13 +58,21 @@ class PilotableShip < GeneralObject
     # puts owner.inspect
     # puts owner.class
     # puts "NEW OWNER CLASS: #{owner.class.name}"
-    # @owner = owner
+    # puts owner.class
+    # puts owner && owner.class.const_defined?(IS_A_FACTIONABLE)
+    @owner_faction = owner.get_faction if owner.class.const_defined?(:IS_A_FACTIONABLE) && owner.class::IS_A_FACTIONABLE == true
+    @faction_z = owner.class == Player ? ZOrder::FactionEmblem : ZOrder::AIFactionEmblem
+    # puts "#{owner.class} GOT FACTION"
+    # puts @owner_faction
+    # @owner_class = owner.class
 
     # validate_array([], self.class.name, __callee__)
     # validate_string([], self.class.name, __callee__)
     # validate_float([], self.class.name, __callee__)
     # validate_int([], self.class.name, __callee__)
-    validate_not_nil([x, y, angle], self.class.name, __callee__)
+    if @debug
+      validate_not_nil([x, y, angle], self.class.name, __callee__)
+    end
 
     # validate_int([x, y, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle], self.class.name, __callee__)
     # validate_float([width_scale, height_scale], self.class.name, __callee__)
@@ -647,6 +655,13 @@ class PilotableShip < GeneralObject
   end
 
   def draw viewable_pixel_offset_x = 0, viewable_pixel_offset_y = 0, scale_offset = 1, options = {}
+    if @owner_faction
+      @owner_faction.emblem.draw_rot(
+        @x, @y, @faction_z,
+        360 - @angle, 0.5, 0.5, @owner_faction.emblem_scaler, @owner_faction.emblem_scaler
+      )
+    end
+
     @drawable_items_near_self.reject! { |item| item.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
     # puts "DRAWING HARDPOINTS"
     # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
