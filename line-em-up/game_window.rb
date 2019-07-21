@@ -394,7 +394,7 @@ class GameWindow < Gosu::Window
       {is_button: true}
     )
 
-    @exit_map_menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale)
+    @exit_map_menu = Menu.new(@window, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
     @exit_map_menu.add_item(
       nil, "Exit Map?",
       0, 0,
