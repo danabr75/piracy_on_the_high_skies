@@ -113,7 +113,7 @@ module Buildings
           end
         end
       end
-      if player.is_alive && player.is_hostile_to?(self.get_faction_id)
+      if player.is_alive #&& player.is_hostile_to?(self.get_faction_id)
         if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
           # # player.increase_health(0.2 * @fps_scaler)
           # being_taken_over = true
@@ -121,7 +121,7 @@ module Buildings
           if player.get_faction_id != get_faction_id && player.is_hostile_to?(self.get_faction_id)
             being_taken_over = true
             @current_take_over_by = player
-          elsif player.is_friendly_to(self.get_faction_id)
+          elsif player.is_friendly_to?(self.get_faction_id)
             @take_over_block = true
           end
         end
