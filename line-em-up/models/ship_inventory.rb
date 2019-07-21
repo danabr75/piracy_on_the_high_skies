@@ -30,12 +30,12 @@ class ShipInventory
 
   attr_reader :credits
 
-  def initialize window, local_window, options = {}#, parent_container
+  def initialize window, options = {}#, parent_container
     @buy_rate_from_store  = options[:buy_rate]  || 1.0
     @sell_rate_from_store = options[:sell_rate] || 1.0
     init_global_vars
     @window = window
-    @local_window = local_window
+    # @local_window = local_window
     # @parent_container = parent_container
     # @hardpoint_image_z = ZOrder::Hardpoint # Used to be 50
     @hardpoint_image_z = 50
@@ -55,7 +55,7 @@ class ShipInventory
     @font_height  = (12 * @height_scale).to_i
     @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
-    # @local_window.cursor_object = nil
+    # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
     @credits = JSON.parse(ConfigSetting.get_setting(@config_file_path, 'Credits', '0'))
     raise "INVALID CREDIT TYPE: #{@credits.class}" if !@credits.kind_of?(Integer)
@@ -120,7 +120,7 @@ class ShipInventory
   end
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
-    # puts "SHIP INVENTORY HAS CORSURE OBJECT" if @local_window.cursor_object
+    # puts "SHIP INVENTORY HAS CORSURE OBJECT" if @window.cursor_object
     hover_object = nil
     @mouse_x, @mouse_y = [mouse_x, mouse_y]
     (0..@inventory_matrix_max_height - 1).each do |y|
@@ -166,8 +166,8 @@ class ShipInventory
     @font.draw(text, (@inventory_width / 2.0) - (@font.text_width(text) / 2.0), (@screen_pixel_height / 2) - (@inventory_height / 2) - @font_height, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     Gosu::draw_rect(@cell_width_padding / 2.0, (@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height, @inventory_width + @cell_width_padding, @inventory_height + @cell_height_padding + @font_height, Gosu::Color.argb(0xff_9797fc), ZOrder::MenuBackground)
 
-    # if @local_window.cursor_object
-    #   @local_window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @height_scale, @height_scale)
+    # if @window.cursor_object
+    #   @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @height_scale, @height_scale)
     # end
   end
 
@@ -182,47 +182,47 @@ class ShipInventory
 
     # Resave new key when dropping element in.
 
-    if @local_window.cursor_object && element
-     # puts "@local_window.cursor_object[:key]: #{@local_window.cursor_object[:key]}"
+    if @window.cursor_object && element
+     # puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
      # puts "ID: #{id}"
-     # puts "== #{@local_window.cursor_object[:key] == id}"
-      if @local_window.cursor_object[:key] == id
+     # puts "== #{@window.cursor_object[:key] == id}"
+      if @window.cursor_object[:key] == id
         # Same Object, Unstick it, put it back
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
-        matrix_element[:item] = @local_window.cursor_object
+        matrix_element[:item] = @window.cursor_object
         ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
         matrix_element[:item][:key] = id
-        @local_window.cursor_object = nil
+        @window.cursor_object = nil
       else
         # Else, drop object, pick up new object
-        # @local_window.cursor_object[:follow_cursor] = false
+        # @window.cursor_object[:follow_cursor] = false
         # element[:follow_cursor] = true
         temp_element = element
-        matrix_element[:item] = @local_window.cursor_object
+        matrix_element[:item] = @window.cursor_object
         matrix_element[:item][:key] = id
         ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
-        @local_window.cursor_object = temp_element
-        @local_window.cursor_object[:key] = nil # Original home lost, no last home of key present
-        # @local_window.cursor_object[:follow_cursor] = true
+        @window.cursor_object = temp_element
+        @window.cursor_object[:key] = nil # Original home lost, no last home of key present
+        # @window.cursor_object[:follow_cursor] = true
         # WRRROOOONNGGG!
         # element = 
       end
     elsif element
       # Pick up element, no current object
       # element[:follow_cursor] = true
-      @local_window.cursor_object = element
+      @window.cursor_object = element
       matrix_element[:item] = nil
       ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
-    elsif @local_window.cursor_object
+    elsif @window.cursor_object
       # Placeing something new in inventory
-      matrix_element[:item] = @local_window.cursor_object
+      matrix_element[:item] = @window.cursor_object
       ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
       matrix_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
-      @local_window.cursor_object = nil
+      @window.cursor_object = nil
     end
-    return @local_window.cursor_object
+    return @window.cursor_object
   end
 
 

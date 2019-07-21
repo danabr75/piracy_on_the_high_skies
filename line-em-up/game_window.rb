@@ -210,6 +210,8 @@ class GameWindow < Gosu::Window
 
   def button_up id
     @block_all_controls = false
+    @inner_map.button_up(id)      if @inner_map.active
+    @inner_map.key_id_release(id) if @inner_map.active
     # if id == Gosu::KB_MINUS
     #   # @can_resize = true
     # end

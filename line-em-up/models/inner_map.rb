@@ -22,6 +22,7 @@ class InnerMap
 
   attr_reader :player, :mouse_x, :mouse_y
   attr_accessor :show_minimap, :game_pause
+  attr_reader :active
 
   include GlobalVariables
 
@@ -64,7 +65,7 @@ class InnerMap
 
   def initialize window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path, options = {}
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path]
-    @local_window = self
+    # @local_window = self
 
     @config_path = self.class::CONFIG_FILE
 
@@ -155,7 +156,7 @@ class InnerMap
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
     @ui_y = 0
-    @footer_bar = FooterBar.new(@window, self)
+    @footer_bar = FooterBar.new(self)
     reset_font_ui_y
 
     if rand(2) == 0
@@ -195,12 +196,12 @@ class InnerMap
 
     @viewable_offset_x = 0
     @viewable_offset_y = 0
-    @boss_active = false
-    @boss = nil
-    @boss_killed = false
+    # # @boss_active = false
+    # @boss = nil
+    # @boss_killed = false
 
     # @window = self
-    @menu = Menu.new(@window, self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
+    @menu = Menu.new(self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
     @menu.add_item(
       :resume, "Resume",
       0, 0,
@@ -216,7 +217,7 @@ class InnerMap
       {is_button: true}
     )
 
-    @exit_map_menu = Menu.new(@window, self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
+    @exit_map_menu = Menu.new(self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
     @exit_map_menu.add_item(
       nil, "Exit Map?",
       0, 0,
@@ -246,7 +247,7 @@ class InnerMap
     # START SHIP LOADOUT INIT.
     # @refresh_player_ship = false
     @cursor_object = nil
-    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @local_window, @width, @height, get_center_font_ui_y, @config_path, @height_scale, @height_scale, {scale: @average_scale})
+    @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, get_center_font_ui_y, @config_path, @height_scale, @height_scale, {scale: @average_scale})
     # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu, @exit_map_menu]
@@ -258,6 +259,15 @@ class InnerMap
     @key_pressed_map = {}
     @mouse_x = 0
     @mouse_y = 0
+    @active = true
+  end
+
+  def enable
+    @active = true
+  end
+
+  def disable
+    @active = false
   end
 
 
