@@ -4,7 +4,7 @@ require_relative 'building.rb'
 module Buildings
   class Factory < Buildings::Building
 
-    SHIP_LIMIT = 1
+    SHIP_LIMIT = 2
 
     attr_reader :credits
 

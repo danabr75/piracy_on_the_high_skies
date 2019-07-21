@@ -46,7 +46,7 @@ module LUIT
 
   class LUITElement
     attr_reader :id, :x, :y, :w, :h, :hover
-    def initialize(holder, id, x, y, z, w, h, color = nil, hover_color = nil, font_color = nil)
+    def initialize(holder, id, x, y, z, w, h, color = nil, hover_color = nil, font_color = nil, key_id = nil)
       @holder = holder
       @id = id
       @x = x
@@ -59,6 +59,7 @@ module LUIT
       @color       = color       || LUIT.uiColor
       @hover_color = hover_color || LUIT.uiColorLight
       @font_color  = font_color  || 0xff_ffffff
+      @key_id = key_id || Gosu::MsLeft
     end
 
     def draw(x = 0, y = 0)
@@ -73,9 +74,9 @@ module LUIT
     end
 
     def update(x = 0, y = 0)
-      if Gosu::button_down?(Gosu::MsLeft) or LUIT.touchDown
+      if Gosu::button_down?(@key_id) or LUIT.touchDown
         if !@msDown
-          button_down(Gosu::MsLeft)
+          button_down(@key_id)
         end
         @msDown = true
       else
@@ -88,7 +89,7 @@ module LUIT
     end
 
     def button_down(id)
-      if id == Gosu::MsLeft && @hover
+      if id == @key_id && @hover
         @holder.onClick(@id)
       end
     end
@@ -102,7 +103,7 @@ module LUIT
       w = [1, w].max
      # puts "HOVLER COLOR: #{hover_color }"
       @hide_rect_draw = options[:hide_rect_draw]
-      super(holder, id, x, y, z, w, h, color, hover_color)
+      super(holder, id, x, y, z, w, h, color, hover_color, options[:font_color], options[:key_id])
     end
 
     def draw(x = 0, y = 0)
@@ -224,7 +225,7 @@ module LUIT
 
   class Button < LUITElement
     #w and h will auto adjust to the text size + 10px padding if its not set (or set lower than acceptable)
-    def initialize(holder, id, x, y, z, text, w = 20, h = 50, color = nil, hover_color = nil, font_color = nil)
+    def initialize(holder, id, x, y, z, text, w = 20, h = 50, color = nil, hover_color = nil, font_color = nil, options = {})
      # puts "PARAMS: #{w} - #{h}"
       # h = [50, h].max
       inner_h = (h * 2.0 / 3.0).to_i
@@ -233,7 +234,7 @@ module LUIT
       @font = Gosu::Font.new(inner_h)
       @textW = @font.text_width(@text)
       w = @textW + inner_h if w < @textW + inner_h
-      super(holder, id, x, y, z, w, h, color, hover_color, font_color)
+      super(holder, id, x, y, z, w, h, color, hover_color, font_color, options[:key_id])
     end
 
     def draw(x = 0, y = 0)
@@ -277,7 +278,7 @@ module LUIT
       x += @x
       y += @y
       updateHover(x, y)
-      if @hover && (Gosu::button_down?(Gosu::MsLeft) or LUIT.touchDown)
+      if @hover && (Gosu::button_down?(@key_id) or LUIT.touchDown)
         @value = LUIT.mX - (x + 5)
         @value = 0 if @value < 0
         @value = @range if @value > @range
@@ -311,7 +312,7 @@ module LUIT
       x += @x
       y += @y
       updateHover(x, y)
-      if @hover && (Gosu::button_down?(Gosu::MsLeft) or LUIT.touchDown)
+      if @hover && (Gosu::button_down?(@key_id) or LUIT.touchDown)
         @value = LUIT.mY - (y + 5)
         @value = 0 if @value < 0
         @value = @range if @value > @range
@@ -350,7 +351,7 @@ module LUIT
     end
 
     def button_down(id)
-      if id == Gosu::MsLeft && @hover
+      if id == @key_id && @hover
         @value = !@value
         @holder.onClick(@id)
       end

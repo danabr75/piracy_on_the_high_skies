@@ -19,6 +19,7 @@ module Buildings
       @image = self.class::get_image
       @info = @image.gl_tex_info
 
+      @average_tile_size_half = @average_tile_size
 
       
       # @basic_color = get_faction_color
@@ -103,7 +104,7 @@ module Buildings
       being_taken_over = false
       ships.each do |key, target|
         # next if !target.is_hostile_to?(self.get_faction_id)
-        if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
+        if Gosu.distance(target.current_map_pixel_x, target.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size_half
           # target.increase_health(0.2 * @fps_scaler)
           if target.get_faction_id != get_faction_id && target.is_hostile_to?(self.get_faction_id)
             being_taken_over = true
@@ -114,7 +115,7 @@ module Buildings
         end
       end
       if player.is_alive #&& player.is_hostile_to?(self.get_faction_id)
-        if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size
+        if Gosu.distance(player.current_map_pixel_x, player.current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y) < @average_tile_size_half
           # # player.increase_health(0.2 * @fps_scaler)
           # being_taken_over = true
           # @current_take_over_by = player

@@ -240,13 +240,13 @@ class GameWindow < Gosu::Window
     @projectile_collision_manager              = AsyncProcessManager.new(ProjectileCollisionThread, 16, true)
     @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
     @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
-    @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 4, true)
+    @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 6, true)
     if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
-      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 4, true)
-      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true)
+      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :joined_threads)
       # Building update needs to be joined, or else ships are updated with missing images
-      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 4, true, :joined_threads) # , :joined_threads
+      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
     else
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
       @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
@@ -273,7 +273,7 @@ class GameWindow < Gosu::Window
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      @fps_scaler, @graphics_setting, @factions, @resolution_scale, true
+      @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
     )
 
     @buildings = {}

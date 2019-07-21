@@ -21,7 +21,7 @@ module Buildings
       (0..@store_item_count).each do |i|
         @drops << random_weighted(offensive_types_with_rarities)
       end
-      @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
+      @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
       # color, hover_color = [Gosu::Color.argb(0xff_8aff82), Gosu::Color.argb(0xff_c3ffbf)]
       # @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::UI, @image_width, @image_height, color, hover_color)
       @button_id_mapping = {}
@@ -34,7 +34,7 @@ module Buildings
       }
       @is_hovering = false
       @is_close_enough_to_open = false
-      @max_lootable_pixel_distance = 2 * @average_tile_size
+      @max_lootable_pixel_distance = 1 * @average_tile_size
       @image = self.class::get_image
       @info = @image.gl_tex_info
       @credits = rand(500) + 500

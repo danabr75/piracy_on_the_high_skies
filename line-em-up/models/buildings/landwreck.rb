@@ -41,12 +41,12 @@ module Buildings
       @health = 1
       @window = nil
 
-      @image_width  = @image.width  * (@width_scale) /  (@item.class::IMAGE_SCALER)
-      @image_height = @image.height * (@height_scale) / (@item.class::IMAGE_SCALER)
+      @image_width  = @image.width  * @current_scale#(@width_scale) /  (@item.class::IMAGE_SCALER)
+      @image_height = @image.height * @current_scale#(@height_scale) / (@item.class::IMAGE_SCALER)
       @image_width_half  = @image_width  / 2.0
       @image_height_half = @image_height / 2.0
 
-      @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true})
+      @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
       @button_id_mapping = {}
       @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
         if !window.ship_loadout_menu.active

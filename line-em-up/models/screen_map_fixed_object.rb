@@ -35,9 +35,11 @@ class ScreenMapFixedObject < GeneralObject
     # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, options = {})
     # Only use ID in debug\test
 
-    validate_int(    [@current_map_tile_x, @current_map_tile_y], self.class.name, __callee__)
-    validate_float_or_int(  [@current_map_pixel_x, @current_map_pixel_y], self.class.name, __callee__)
-    validate_not_nil([@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y], self.class.name, __callee__)
+    if @debug
+      validate_int(    [@current_map_tile_x, @current_map_tile_y], self.class.name, __callee__)
+      validate_float_or_int(  [@current_map_pixel_x, @current_map_pixel_y], self.class.name, __callee__)
+      validate_not_nil([@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y], self.class.name, __callee__)
+    end
 
 
 
