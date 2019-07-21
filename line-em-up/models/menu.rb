@@ -1,12 +1,13 @@
 require_relative 'menu_item.rb'
 class Menu
   attr_accessor :current_height, :x, :y
-  attr_reader :active, :window, :width, :height, :button_size, :button_size_half, :button_size_quarter
-  def initialize(window, x, y, z = ZOrder::UI, scale = 1, options = {})
+  attr_reader :active, :window, :local_window, :width, :height, :button_size, :button_size_half, :button_size_quarter
+  def initialize(window, local_window, x, y, z = ZOrder::UI, scale = 1, options = {})
     # LUIT.config({window: self, z: 25})
-    LUIT.config({window: window || self})
+    LUIT.config({window: local_window})
     @scale = scale
     @window = window
+    @local_window = local_window
     @x = x
     @y = y
     @z = z
@@ -74,7 +75,7 @@ class Menu
           @height += button.h + @cell_padding
         end
       end
-      @items << MenuItem.new(@window, button, x, y, @z, callback, hover_image, options)
+      @items << MenuItem.new(button, x, y, @z, callback, hover_image, options)
   end
 
   def draw
@@ -131,7 +132,7 @@ class Menu
       if button_clicked_exists
         # @button_id_mapping[element_id].call(@local_window, element_id)
         # raise "NEED T OBRING LOCAL WINDOW BACK #{self.class} is not menu - what was it? #{self.class.name}" if self.class.name != Menu
-        @button_id_mapping[element_id].call(self.window, self, element_id)
+        @button_id_mapping[element_id].call(self.local_window, self, element_id)
       else
        # puts "Clicked button that is not mapped: #{element_id}"
       end

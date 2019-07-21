@@ -4,8 +4,10 @@ require_relative 'general_object.rb'
 
 class FooterBar < ScreenFixedObject
 
-  def initialize(window, options = {})
-    @window = window
+  # `outer_window` is for mouse clicks. Local window is for actions.
+  def initialize(outer_window, local_window, options = {})
+    @outer_window = outer_window
+    @local_window = local_window
     super(options)
 
     # @screen_pixel_width = screen_pixel_width
@@ -14,7 +16,7 @@ class FooterBar < ScreenFixedObject
     # @height_scale = height_scale
     puts "@screen_pixel_height: #{@screen_pixel_height}"
 
-    @menu = Menu.new(@window, @screen_pixel_width / 2.0, @screen_pixel_height - (20 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20, is_horizontal: true})
+    @menu = Menu.new(@outer_window, @local_window, @screen_pixel_width / 2.0, @screen_pixel_height - (20 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20, is_horizontal: true})
     @menu.add_item(
       :inventory_hotbar, "I",
       0, 0,

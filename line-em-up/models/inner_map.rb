@@ -1,0 +1,677 @@
+require_relative "../lib/global_constants.rb"
+include GlobalConstants
+Dir["#{LIB_DIRECTORY  }/*.rb"].each { |f| require f }
+Dir["#{MODEL_DIRECTORY}/*.rb"].each { |f| require f }
+Dir["#{VENDOR_LIB_DIRECTORY}/*.rb"].each { |f| require f }
+# Sub folders as well.
+Dir["#{LIB_DIRECTORY  }/**/*.rb"].each { |f| require f }
+Dir["#{MODEL_DIRECTORY}/**/*.rb"].each { |f| require f }
+Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
+
+class InnerMap
+  include GlobalConstants
+  # CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
+
+  attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
+
+  attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks, :add_graphical_effects
+  attr_accessor :add_projectiles, :remove_projectile_ids
+  attr_accessor :add_ships, :remove_ship_ids, :add_buildings, :remove_building_ids
+  attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
+  attr_accessor :add_shipwrecks, :remove_shipwreck_ids
+
+  attr_reader :player, :mouse_x, :mouse_y
+  attr_accessor :show_minimap, :game_pause
+
+  include GlobalVariables
+
+  def init_player_ship_data_if_necessary(config_path)
+    ship_value = ConfigSetting.get_setting(config_path, "ship")
+    if ship_value.nil? || ship_value == ''
+      ConfigSetting.set_setting(config_path, "ship", "BasicShip")
+      ship_value = "BasicShip"
+    end
+
+    # ship_hardpoint_values = ConfigSetting.get_setting(config_file_path, ship_value)
+
+    ship_hardpoint_values = ConfigSetting.get_mapped_setting(config_path, [ship_value, "hardpoint_locations"])
+    if ship_hardpoint_values.nil? || ship_hardpoint_values == ''
+
+      init_data = {
+        "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
+        "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",
+        "5":"HardpointObjects::DumbMissileHardpoint","2":"HardpointObjects::BulletHardpoint",
+        "10":"HardpointObjects::BasicEngineHardpoint",
+        # "7":"HardpointObjects::BasicEngineHardpoint",
+        "6":"HardpointObjects::MinigunHardpoint","8":"HardpointObjects::BasicEngineHardpoint",
+        # "9":"HardpointObjects::BasicEngineHardpoint",
+        "12":"HardpointObjects::BasicSteamCoreHardpoint",
+        # "11":"HardpointObjects::BasicEngineHardpoint"
+      }
+      init_data.each do |key, value|
+        ConfigSetting.set_mapped_setting(config_path, [ship_value, "hardpoint_locations", key], value)
+      end
+    end
+
+
+    credit_value = ConfigSetting.get_setting(config_path, "Credits")
+    if credit_value.nil? || credit_value == ''
+      ConfigSetting.set_setting(config_path, "Credits", "500")
+      # ship_value = "BasicShip"
+    end
+  end
+
+
+  def initialize window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path, options = {}
+    @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path]
+    @local_window = self
+
+    @config_path = self.class::CONFIG_FILE
+
+    init_player_ship_data_if_necessary(@config_path)
+
+    @open_gl_executer = ExecuteOpenGl.new
+
+    # GET difficulty from config file.!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    @difficulty = options[:difficulty]
+    @block_all_controls = !options[:block_controls_until_button_up].nil? && options[:block_controls_until_button_up] == true ? true : false
+    @debug = true #options[:debug]
+    # GameWindow.fullscreen(self) if fullscreen
+    # @start_fullscreen = fullscreen
+    @center_ui_y = 0
+    @center_ui_x = 0
+    
+    graphics_value = ConfigSetting.get_setting(@config_path, "Graphics Setting", GraphicsSetting::SELECTION[0])
+    @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
+
+
+    @collision_counter = 0
+    @destructable_collision_counter = 1
+    @projectile_collision_manager              = AsyncProcessManager.new(ProjectileCollisionThread, 16, true)
+    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
+    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
+    @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 6, true)
+    if true #@graphics_setting == :basic
+      # Maybe just wait for all threads to finish???
+      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :joined_threads)
+      # Building update needs to be joined, or else ships are updated with missing images
+      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
+      @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true) # , :joined_threads
+    else
+      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
+      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 8, true)
+    end
+
+    @game_pause = false
+    # @menu = nil
+    # @can_open_menu = true
+    # @can_pause = true
+    @can_resize = !options[:block_resize].nil? && options[:block_resize] == true ? false : true
+    @can_toggle_secondary = true
+    # @can_toggle_fullscreen_a = true
+    # @can_toggle_fullscreen_b = true
+
+
+    
+    @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
+
+    @factions = Faction.init_factions(@height_scale)
+
+    GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+      @gl_background.map_pixel_width, @gl_background.map_pixel_height,
+      @gl_background.map_tile_width, @gl_background.map_tile_height,
+      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
+      @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
+    )
+
+    @buildings = {}
+    @projectiles = {}
+
+    @add_projectiles = []
+    @remove_projectile_ids = []
+
+    @add_destructable_projectiles = []
+    @remove_destructable_projectile_ids = []
+    @destructable_projectiles = {}
+
+    # @enemy_projectiles = Array.new
+    # @pickups = Array.new
+
+    @add_ships = []
+    @ships = {}
+    @remove_ship_ids = []
+
+    @add_buildings    = []
+    @remove_building_ids = []
+
+
+
+    @shipwrecks = {}
+    @add_shipwrecks = []
+    @remove_shipwreck_ids = []
+    
+    @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
+
+    @ui_y = 0
+    @footer_bar = FooterBar.new(@window, self)
+    reset_font_ui_y
+
+    if rand(2) == 0
+      @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
+    else
+      @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
+    end
+
+    raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
+    raise "@player.current_map_pixel_y.nil" if @player.current_map_pixel_y.nil?
+
+
+    @center_target = @player
+    
+    @pointer = Cursor.new(@width, @height, @height_scale, @height_scale, @player)
+
+    @quest_data = QuestInterface.get_quests(CONFIG_FILE)
+
+    values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
+    values[:buildings].each do |b|
+      @buildings[b.id] = b
+    end
+    values[:ships].each do |ship|
+      @ship[ship.id] = ship
+    end
+    # @pickups = values[:pickups]
+
+    @messages = []
+    @effects = []
+    @graphical_effects = []
+    @add_graphical_effects = []
+
+    @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
+    viewable_center_target = nil
+
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
+
+    @viewable_offset_x = 0
+    @viewable_offset_y = 0
+    @boss_active = false
+    @boss = nil
+    @boss_killed = false
+
+    # @window = self
+    @menu = Menu.new(@window, self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
+    @menu.add_item(
+      :resume, "Resume",
+      0, 0,
+      lambda {|window, menu, id| window.block_all_controls = true; menu.disable },
+      nil,
+      {is_button: true}
+    )
+    @menu.add_item(
+      :exit, "Exit",
+      0, 0,
+      lambda {|window, menu, id| window.close; }, 
+      nil,
+      {is_button: true}
+    )
+
+    @exit_map_menu = Menu.new(@window, self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
+    @exit_map_menu.add_item(
+      nil, "Exit Map?",
+      0, 0,
+      lambda {|window, menu, id| },
+      nil,
+      {is_button: true}
+    )
+    @exit_map_menu.add_item(
+      :exit_map, "Yes",
+      0, 0,
+      # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
+      lambda {|window, menu, id| window.block_all_controls = true; window.close },
+      nil,
+      {is_button: true}
+    )
+    # This will close the window... which i guess is fine.
+    @exit_map_menu.add_item(
+      :cancel_map_exit, "No",
+      0, 0,
+      lambda {|window, menu, id|  window.block_all_controls = true; window.player.cancel_map_exit; menu.disable  }, 
+      nil,
+      {is_button: true}
+    )
+
+    # END  MENU INIT
+
+    # START SHIP LOADOUT INIT.
+    # @refresh_player_ship = false
+    @cursor_object = nil
+    @ship_loadout_menu = ShipLoadoutSetting.new(@window, @local_window, @width, @height, get_center_font_ui_y, @config_path, @height_scale, @height_scale, {scale: @average_scale})
+    # @object_attached_to_cursor = nil
+    # END  SHIP LOADOUT INIT.
+    @menus = [@ship_loadout_menu, @menu, @exit_map_menu]
+    # LUIT.config({window: @window, z: 25})
+    # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
+    @show_minimap = true
+    @mini_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
+
+    @key_pressed_map = {}
+    @mouse_x = 0
+    @mouse_y = 0
+  end
+
+
+  def key_id_lock id
+    if @key_pressed_map.key?(id)
+      return false
+    else
+      @key_pressed_map[id] = true
+      return true
+    end
+  end
+
+  def key_id_release id
+    value = @key_pressed_map.delete(id)
+    # if value.is_a?(Hash)
+    #   @key_pressed_map.delete(value[:id])
+  end
+
+  def menus_active
+    @menus.collect{|menu| menu.active }.include?(true)
+  end
+
+  def menus_disable
+    @menus.each{|menu| menu.disable }
+  end
+
+  # # Switch button downs to this method
+  # # This only triggers once during press. Use the other section for when we want it contunually triggered
+  # def button_down(id)
+  #   if @player.is_alive && !@game_pause && !@menu_open
+  #     if id == Gosu::KB_LEFT_CONTROL && @player.ready_for_special?
+  #     end
+  #   end
+  # end
+
+
+
+  # required for LUIT objects, passes id of element
+  def onClick element_id
+    if @menu.active
+      @menu.onClick(element_id)
+    elsif @ship_loadout_menu.active
+      @ship_loadout_menu.onClick(element_id)
+    elsif @exit_map_menu.active
+      @exit_map_menu.onClick(element_id)
+    else
+      @footer_bar.onClick(element_id)
+      if @effects.any?
+        @effects.each do |effect|
+          effect.onClick(element_id)
+        end
+      end
+    end
+  end
+
+  def self.reset(window, options = {})
+    window = GameWindow.new(window.width, window.height, window.fullscreen?, options.merge({block_controls_until_button_up: true})).show
+  end
+
+  def button_up id
+    @block_all_controls = false
+    if id == Gosu::MS_RIGHT
+      @player.deactivate_group_3
+    end
+    if id == Gosu::MS_LEFT
+      @player.deactivate_group_2
+    end
+    if id == Gosu::KB_SPACE
+      @player.deactivate_group_1
+    end
+
+    if id == Gosu::KB_LEFT_SHIFT
+      @player.disable_boost
+    end
+    key_id_release(id)
+  end
+
+  def get_center_font_ui_y
+    return_value = @center_ui_y
+    @center_ui_y += 10 * @average_scale
+    return return_value
+  end
+
+  def get_center_font_ui_x
+    return @center_ui_x
+  end
+
+  def update mouse_x, mouse_y
+    @mouse_x = mouse_x
+    @mouse_y = mouse_y
+    
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
+
+    Thread.new do
+      @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
+    end
+
+    @add_graphical_effects.reject! do |graphical_effect|
+      @graphical_effects << graphical_effect
+      true
+    end
+
+    @add_projectiles.reject! do |projectile|
+      @projectiles[projectile.id] = projectile
+      true
+    end
+
+    @remove_projectile_ids.reject! do |projectile_id|
+      @projectiles.delete(projectile_id)
+      true
+    end
+
+    @add_ships.reject! do |ship|
+      @ships[ship.id] = ship
+      true
+    end
+
+    @remove_ship_ids.reject! do |ship_id|
+      @ships.delete(ship_id)
+      true
+    end
+
+    @add_shipwrecks.reject! do |shipwreck|
+      @shipwrecks[shipwreck.id] = shipwreck
+      true
+    end
+
+    @remove_shipwreck_ids.reject! do |shipwreck_id|
+      @shipwrecks.delete(shipwreck_id)
+      true
+    end
+
+    @add_buildings.reject! do |b|
+      @buildings[b.id] = b
+      true
+    end
+
+    @remove_building_ids.reject! do |b_id|
+      @buildings.delete(b_id)
+      true
+    end
+
+    @add_destructable_projectiles.reject! do |dp|
+      @destructable_projectiles[dp.id] = dp
+      true
+    end
+
+    @remove_destructable_projectile_ids.reject! do |dp_id|
+      @destructable_projectiles.delete(dp_id)
+      true
+    end
+
+    if @ship_loadout_menu.refresh_player_ship
+      @player.refresh_ship
+      @ship_loadout_menu.refresh_player_ship = false
+    end
+
+    @menu.update
+    @exit_map_menu.update
+    @ship_loadout_menu.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) if @ship_loadout_menu.active
+
+    if !@game_pause && !menus_active && !@menu_open && !@menu.active
+      @effects.reject! do |effect_group|
+        @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
+        !effect_group.is_active
+      end
+
+      @graphical_effects.reject! do |effect|
+        !effect.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      end
+
+      if @collision_counter < 2
+        @collision_counter += 1
+      else
+        @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ], [@buildings])
+        @collision_counter = 0
+      end
+
+      if @destructable_collision_counter < 2
+        @destructable_collision_counter += 1
+      else
+        @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ], [@buildings])
+        @destructable_collision_counter = 0
+      end
+
+      @destructable_projectile_update_manager.update(self, @destructable_projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      @projectile_update_manager.update(self, @projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+
+      @ship_update_manager.update(self, @ships, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings, {on_ground: @pointer.on_ground})
+      @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
+    end
+
+    @pointer.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
+
+    if !@block_all_controls
+      @messages.reject! { |message| !message.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
+
+      if Gosu.button_down?(Gosu::KbEscape) && key_id_lock(Gosu::KbEscape)
+        @player.cancel_map_exit if @exit_map_menu.active
+        if menus_active
+          menus_disable
+        else
+          @menu.enable
+        end
+      end
+
+      @footer_bar.update
+
+      if Gosu.button_down?(Gosu::KB_I) && key_id_lock(Gosu::KB_I)
+        if @ship_loadout_menu.active
+          @ship_loadout_menu.disable
+        else
+          @ship_loadout_menu.enable
+        end
+      end
+
+      if @player.exiting_map?
+        @exit_map_menu.enable
+      end
+
+      if Gosu.button_down?(Gosu::KB_M) && key_id_lock(Gosu::KB_M)
+        @show_minimap = !@show_minimap
+      end
+
+      if Gosu.button_down?(Gosu::KB_P) && key_id_lock(Gosu::KB_P)
+        @game_pause = !@game_pause
+      end
+
+      # if Gosu.button_down?(Gosu::KB_O) && key_id_lock(Gosu::KB_O)
+      #   GameWindow.resize(self, 1920, 1080, false)
+      # end
+
+      # if Gosu.button_down?(Gosu::KB_MINUS) && key_id_lock(Gosu::KB_MINUS)
+      #   GameWindow.down_resolution(self)
+      # end
+      # if Gosu.button_down?(Gosu::KB_EQUALS) && key_id_lock(Gosu::KB_EQUALS)
+      #   GameWindow.up_resolution(self)
+      # end
+
+
+
+      if @player.is_alive && !@game_pause && !menus_active
+        if Gosu.button_down?(Gosu::KB_TAB) && key_id_lock(Gosu::KB_TAB)
+          @pointer.toggle_ground_or_air
+        end
+
+        if Gosu.button_down?(Gosu::KB_A) || Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)
+          @player.rotate_counterclockwise
+        end
+
+        if Gosu.button_down?(Gosu::KB_D)
+          @player.rotate_clockwise
+        end
+
+
+        result = @player.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
+        if result[:buildings]
+          result[:buildings].each do |b|
+            @buildings[b.id] = b
+          end
+        end
+        if result[:shipwreck]
+          @shipwrecks[result[:shipwreck].id] = result[:shipwreck]
+        end
+      end
+      if !@game_pause && !menus_active
+        @building_update_manager.update(self, @buildings, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
+      end
+      if @player.is_alive && !@game_pause && !menus_active
+        @player.accelerate if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
+        @player.brake      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
+        @player.reverse    if Gosu.button_down?(Gosu::KB_X)
+
+        results = @gl_background.update(@player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
+        if results[:buildings]
+          results[:buildings].each do |b_id, b|
+            @buildings[b.id] = b
+          end
+        end
+        
+        if Gosu.button_down?(Gosu::MS_RIGHT)
+          @player.attack_group_3(@pointer).each do |results|
+            # puts "RESULTS HERE: #{}"
+            results[:projectiles].each do |projectile|
+              @projectiles[projectile.id] = projectile if projectile
+            end
+            results[:destructable_projectiles].each do |projectile|
+              # @destructable_projectiles.push(projectile) if projectile
+              @destructable_projectiles[projectile.id] = projectile if projectile
+            end
+            results[:graphical_effects].each do |effect|
+              @graphical_effects.push(effect) if effect
+            end
+          end
+        end
+
+        if Gosu.button_down?(Gosu::MS_LEFT)
+          @player.attack_group_2(@pointer).each do |results|
+            results[:projectiles].each do |projectile|
+              # @projectiles.push(projectile) if projectile
+              @projectiles[projectile.id] = projectile if projectile
+            end
+            results[:destructable_projectiles].each do |projectile|
+              # @destructable_projectiles.push(projectile) if projectile
+              @destructable_projectiles[projectile.id] = projectile if projectile
+            end
+            results[:graphical_effects].each do |effect|
+              @graphical_effects.push(effect) if effect
+            end
+          end
+        end
+
+        if Gosu.button_down?(Gosu::KB_SPACE)
+          @player.attack_group_1(@pointer).each do |results|
+            results[:projectiles].each do |projectile|
+              # @projectiles.push(projectile) if projectile
+              @projectiles[projectile.id] = projectile if projectile
+            end
+            results[:destructable_projectiles].each do |projectile|
+              # @destructable_projectiles.push(projectile) if projectile
+              @destructable_projectiles[projectile.id] = projectile if projectile
+            end
+            results[:graphical_effects].each do |effect|
+              @graphical_effects.push(effect) if projectile
+            end
+
+          end
+        end
+
+      end
+      if !@game_pause && !menus_active && !@menu_open && !@menu.active
+        @shipwreck_update_manager.update(self, @shipwrecks, nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      end
+    end
+  end
+
+  def draw
+    @open_gl_executer.draw(@window, @gl_background, @player, @pointer, @buildings, @pickups) if @graphics_setting == :advanced
+    @gl_background.draw(@player, player.current_map_pixel_x, player.current_map_pixel_y, @buildings, @pickups)
+
+
+    @mini_map.draw if @show_minimap
+
+    @pointer.draw
+    @menu.draw
+    @exit_map_menu.draw
+    @ship_loadout_menu.draw
+    @footer_bar.draw
+
+    @player.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) if @player.is_alive && !@ship_loadout_menu.active
+    if !menus_active && !@player.is_alive
+      @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    end
+    @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
+    @ships.each { |key, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @shipwrecks.each { |ship_id, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @destructable_projectiles.each { |key, projectile| projectile.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @buildings.each { |building_id, building| building.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+    @messages.each_with_index do |message, index|
+      message.draw(index)
+    end
+    @graphical_effects.each { |effect| effect.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
+
+    @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @font.draw("Faction Relations:", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    @factions.each do |faction|
+      @font.draw("#{faction.id.upcase}: #{faction.display_factional_relation(@player.get_faction_id)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    end
+    if false &&@debug
+      @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("STEAM: #{@player.ship.current_steam_capacity}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Ship count: #{@ships.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("destructable_proj: #{@destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("Momentum: #{@player.ship.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+
+      @font.draw("Active Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @quest_data.each do |quest_key, values|
+        next if values["map_name"] != @gl_background.map_name
+        if values['state'] == 'active'
+          @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        end
+      end
+      @font.draw("Completed Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      @quest_data.each do |quest_key, values|
+        next if values["map_name"] != @gl_background.map_name
+        if values['state'] == 'complete'
+          @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        end
+      end
+
+      if @effects.any?
+        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+        @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      end
+
+    end
+    reset_font_ui_y
+  end
+
+  def get_font_ui_y
+    return_value = @ui_y
+    @ui_y += 15 
+    return return_value
+  end
+  def reset_font_ui_y
+    @ui_y = 10
+  end
+
+
+end

@@ -1,7 +1,7 @@
 class MenuItem
     HOVER_OFFSET = 3
-    def initialize (window, button, x, y, z, callback, hover_image = nil, options = {})
-        @window = window
+    def initialize (button, x, y, z, callback, hover_image = nil, options = {})
+        # @window = window
         @button = button
         @hover_image = hover_image
         @original_x = @x = x

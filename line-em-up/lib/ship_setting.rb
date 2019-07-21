@@ -12,10 +12,11 @@ class ShipSetting < Setting
   # attr_accessor :mouse_x, :mouse_y, :window
   attr_accessor :window
   attr_accessor :mouse_x, :mouse_y
-  def initialize window, fullscreen_height, max_width, max_height, current_height, config_file_path
+  def initialize window, local_window, fullscreen_height, max_width, max_height, current_height, config_file_path
     raise "NO Window" if window.nil?
     @mouse_x, @mouse_y = [0,0]
-    @window = self # ignoring outer window here? Want actions relative to this window.
+    @window = window # ignoring outer window here? Want actions relative to this window.
+    @local_window = local_window
     @selection = self.class::SELECTION
     # puts "INNITING #{config_file_path}"
     @font = Gosu::Font.new(20)
@@ -33,14 +34,14 @@ class ShipSetting < Setting
     @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     @fullscreen_height = fullscreen_height
     # LUIT.config(window, nil, nil, 1)
-    LUIT.config({window: @window, z: 25})
-    @next_button = LUIT::Button.new(@window, :next, @next_x, @y, ZOrder::UI, "Next", 0, 1)
+    LUIT.config({window: @local_window, z: 25})
+    @next_button = LUIT::Button.new(self, :next, @next_x, @y, ZOrder::UI, "Next", 0, 1)
     # puts "CREATING NEXT BUTTON WINDOW HERE"
     # puts @window.class.name
     # raise "STOP HERRE"
     # @next_button.x = @next_x - (@next_button.w / 2)
 
-    @prev_button = LUIT::Button.new(@window, :previous, @prev_x, @y, ZOrder::UI, "Previous", 0, 1)
+    @prev_button = LUIT::Button.new(self, :previous, @prev_x, @y, ZOrder::UI, "Previous", 0, 1)
     @button_id_mapping = self.class.get_id_button_mapping
     # puts "SHIP SETTING MAPPING"
     # puts @button_id_mapping 

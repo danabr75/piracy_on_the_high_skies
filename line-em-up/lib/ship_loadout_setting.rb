@@ -36,17 +36,18 @@ class ShipLoadoutSetting < Setting
 
   # attr_accessor :cursor_object
 
-  def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
+  def initialize window, local_window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
     @width_scale  = width_scale
     @height_scale = height_scale
     @average_scale = (@width_scale + @height_scale) / 2.0
 
     @refresh_player_ship = false
     # @z = ZOrder::HardPointClickableLocation
-    LUIT.config({window: window || self})
+    LUIT.config({window: local_window})
     # @window = window # Want relative to self, not window. Can't do that from settting, not a window.
     @mouse_x, @mouse_y = [0,0]
     @window = window # ignoring outer window here? Want actions relative to this window.
+    @local_window = local_window
     @scale = options[:scale] || 1
     # puts "SHIP LOADOUT SETTING SCALE: #{@scale}"
     @font = Gosu::Font.new(20)
@@ -58,7 +59,7 @@ class ShipLoadoutSetting < Setting
     @prev_x = @max_width - 5 * @scale - @font.text_width('>')
     @selection = []
 
-    @ship_inventory = ShipInventory.new(window)
+    @ship_inventory = ShipInventory.new(window, local_window)
     # @launchers = ::Launcher.descendants.collect{|d| d.name}
     # @meta_launchers = {}
     # @filler_items = []
@@ -116,7 +117,7 @@ class ShipLoadoutSetting < Setting
     # puts "FILLER ITEMS: #{@filler_items}"
     # @inventory_items = retrieve_inventory_items
     # fill_matrix(@filler_items)
-    # @window.cursor_object = nil
+    # @local_window.cursor_object = nil
     @hardpoints_height = nil
     @hardpoints_width  = nil
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
@@ -178,7 +179,7 @@ class ShipLoadoutSetting < Setting
   def loading_object_inventory object, drops = [], credits = 0, holding_type = :not_available, options = {}
    # puts "LAODING OJECT INVENTORY #{drops}"
    # puts "WHAT WAS ON THE OBHECT: #{object.drops}"
-    @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object, holding_type, options)
+    @object_inventory = ObjectInventory.new(@window, @local_window, object.class.to_s, drops, credits, object, holding_type, options)
 
     @buy_rate_from_store  = @object_inventory.buy_rate
     @sell_rate_from_store = @object_inventory.sell_rate
@@ -187,7 +188,7 @@ class ShipLoadoutSetting < Setting
       raise "INVALID OBJECT INVENTORY RATES"
     end
     # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
-    @ship_inventory = ShipInventory.new(window, {sell_rate: @sell_rate_from_store, buy_rate: @buy_rate_from_store})
+    @ship_inventory = ShipInventory.new(@window, @local_window, {sell_rate: @sell_rate_from_store, buy_rate: @buy_rate_from_store})
     @object_inventory_holding_type = holding_type
   end 
 
@@ -205,7 +206,7 @@ class ShipLoadoutSetting < Setting
       @object_inventory = nil
       @buy_rate_from_store  = 1.0
       @sell_rate_from_store = 1.0
-      @ship_inventory = ShipInventory.new(window)
+      @ship_inventory = ShipInventory.new(@window, @local_window)
       @object_inventory_holding_type = :none
       # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     end
@@ -329,7 +330,7 @@ class ShipLoadoutSetting < Setting
    # puts "click_ship_hardpoint: #{id}"
     # Key is front, right, or left
     # left_hardpoint_0
-    # current_object = @window.cursor_object || @ship_inventory.cursor_object
+    # current_object = @local_window.cursor_object || @ship_inventory.cursor_object
 
 
     result = id.scan(/hardpoint_(\d+)/).first
@@ -339,49 +340,49 @@ class ShipLoadoutSetting < Setting
 
     hardpoint_element = @ship_hardpoints[i]
     element = hardpoint_element ? hardpoint_element[:item] : nil
-   # puts "@window.cursor_object:"
-   # puts @window.cursor_object.inspect
+   # puts "@local_window.cursor_object:"
+   # puts @local_window.cursor_object.inspect
 
-    if @window.cursor_object && element
-     # puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
+    if @local_window.cursor_object && element
+     # puts "@local_window.cursor_object[:key]: #{@local_window.cursor_object[:key]}"
      # puts "ID: #{id}"
-     # puts "== #{@window.cursor_object[:key] == id}"
-      if @window.cursor_object[:key] == id
+     # puts "== #{@local_window.cursor_object[:key] == id}"
+      if @local_window.cursor_object[:key] == id
         # Same Object, Unstick it, put it back
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
-        hardpoint_element[:item] = @window.cursor_object
+        hardpoint_element[:item] = @local_window.cursor_object
        # puts "CONFIG SETTING 1"
         ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         hardpoint_element[:item][:key] = id
-        @window.cursor_object = nil
+        @local_window.cursor_object = nil
       else
         # Else, drop object, pick up new object
-        # @window.cursor_object[:follow_cursor] = false
+        # @local_window.cursor_object[:follow_cursor] = false
         # element[:follow_cursor] = true
         temp_element = element
-        hardpoint_element[:item] = @window.cursor_object
+        hardpoint_element[:item] = @local_window.cursor_object
         hardpoint_element[:item][:key] = id
        # puts "CONFIG SETTING 2 "
         ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
-        @window.cursor_object = temp_element
-        @window.cursor_object[:key] = nil # Original home lost, no last home of key present
-        # @window.cursor_object[:follow_cursor] = true
+        @local_window.cursor_object = temp_element
+        @local_window.cursor_object[:key] = nil # Original home lost, no last home of key present
+        # @local_window.cursor_object[:follow_cursor] = true
         # WRRROOOONNGGG!
         # element = 
       end
     elsif element
       # Pick up element, no current object
       # element[:follow_cursor] = true
-      @window.cursor_object = element
+      @local_window.cursor_object = element
       hardpoint_element[:item] = nil
        # puts "CONFIG SETTING 3 "
         # Not working.. 
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
       ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], nil)
-    elsif @window.cursor_object
+    elsif @local_window.cursor_object
       # Placeing something new in inventory
-      hardpoint_element[:item] = @window.cursor_object
+      hardpoint_element[:item] = @local_window.cursor_object
       # puts "PUTTING ELEMENT IN: #{hardpoint_element[:item]}"
         # puts "CONFIG SETTING 4 "
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
@@ -389,7 +390,7 @@ class ShipLoadoutSetting < Setting
       ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
       hardpoint_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
-      @window.cursor_object = nil
+      @local_window.cursor_object = nil
     end
   end
 
@@ -432,8 +433,8 @@ class ShipLoadoutSetting < Setting
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
     if @active
-      # puts "SHIP LOADOUT SETTING - HAD CURSOR OJBECT" if @window.cursor_object
-      # if @window.cursor_object.nil? && @ship_inventory
+      # puts "SHIP LOADOUT SETTING - HAD CURSOR OJBECT" if @local_window.cursor_object
+      # if @local_window.cursor_object.nil? && @ship_inventory
       @mouse_x, @mouse_y = [mouse_x, mouse_y]
 
       @hover_object = hardpoint_update
@@ -604,8 +605,8 @@ class ShipLoadoutSetting < Setting
 
       detail_box_draw
 
-      if @window.cursor_object
-        @window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
+      if @local_window.cursor_object
+        @local_window.cursor_object[:image].draw(@mouse_x, @mouse_y, @hardpoint_image_z, @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER)
       end
 
       hardpoint_draw

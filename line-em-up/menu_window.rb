@@ -38,7 +38,7 @@ class MenuWindow < Gosu::Window
     #   y += lineHeight
     # }, lambda {}]
     # @menu = Menu.new(self)
-    @menu = Menu.new(@window, @width / 2, 0, ZOrder::UI, @height_scale, {add_top_padding: 40})
+    @menu = Menu.new(@window, @window, @width / 2, 0, ZOrder::UI, @height_scale, {add_top_padding: 40})
     @menu.add_item(
       :resume, "Play Piracy on the High Skies!",
       0, 0,

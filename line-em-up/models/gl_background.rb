@@ -1572,9 +1572,9 @@ class GLBackground
             # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
           end
 
-          pickups.each do |pickup|
-            next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
-          end
+          # pickups.each do |pickup|
+          #   next if pickup.current_map_tile_x != x_element['gps_x'] || pickup.current_map_tile_y != x_element['gps_y']
+          # end
 
           
           if player.current_map_tile_x == x_element['gps_x'] && player.current_map_tile_y == x_element['gps_y']
