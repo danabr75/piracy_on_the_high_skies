@@ -34,6 +34,8 @@ class AIShip < ScreenMapFixedObject
 
   ENABLE_AIR_HOVER = true
 
+  # attr_reader :inited
+
   # Just test out the tile part first.. or whatever
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
@@ -195,6 +197,8 @@ class AIShip < ScreenMapFixedObject
     @height_scaler_with_health_unit_image = @height_scale / 8.0
     # Lower diviser means fewer bases
     @health_angle_increment = max_health / 10.0
+
+    # @inited = true
   end
 
 
@@ -206,8 +210,8 @@ class AIShip < ScreenMapFixedObject
     return self.class.get_minimap_image
   end
 
-  def hit_objects(object_groups, options)
-    return @ship.hit_objects(self, object_groups, options)
+  def hit_objects object_groups#, options
+    return @ship.hit_objects(self, object_groups)#, options)
   end
 
   def get_speed

@@ -1,9 +1,10 @@
 module ShipCollisionThread
 
   def self.update window, ship, args
-    targets = args[0]
+    # Thread.exit if !ship.inited
+    # targets = args[0]
     # puts "THREAD STARTING HERE - might not see this one."
-    ship.hit_objects(targets, {is_thread: true})
+    ship.hit_objects(*args)
     # puts "COLLISION RESULTS: RESULT"
     # puts results.inspect
     # {:is_alive=>true, :drops=>[], :point_value=>0, :killed=>0, :graphical_effects=>[]}

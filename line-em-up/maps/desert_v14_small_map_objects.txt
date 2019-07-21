@@ -6,6 +6,9 @@
       ],
       "2":[
         {"klass_name":"Buildings::Turret","data":{"faction_id":"faction_1"}}
+      ],
+      "0":[
+        {"klass_name":"Buildings::Turret","data":{"faction_id":"faction_1"}}
       ]
     },
     "125":{
@@ -16,6 +19,12 @@
         {"klass_name":"Buildings::RepairArea","data":{"faction_id":"faction_1"}}
       ],
       "2":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
+      ],
+      "3":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
+      ],
+      "4":[
         {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
       ]
     },
@@ -32,6 +41,12 @@
     "120":{
       "1":[
         {"klass_name":"Buildings::CommandCenter","data":{"faction_id":"faction_2"}}
+      ],
+      "2":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ],
+      "3":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
       ]
     },
     "121":{

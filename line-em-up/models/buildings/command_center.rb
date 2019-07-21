@@ -7,6 +7,8 @@ module Buildings
 
     attr_reader :credits
 
+    ENABLE_FACTION_COLORS = true
+
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
       @window = window
       # puts "OTIONS"
@@ -18,7 +20,7 @@ module Buildings
       @info = @image.gl_tex_info
 
 
-      update_colors(get_faction_color)
+      
       # @basic_color = get_faction_color
       # @color = GeneralObject.convert_gosu_color_to_opengl(@basic_color)
 
@@ -74,7 +76,7 @@ module Buildings
         glColor4d(colors[0], colors[1], colors[2], colors[3])
         glVertex3d(v4[0], v4[1], v4[2])
       glEnd
-      super(v1, v2, v3, v4, @color)
+      super(v1, v2, v3, v4)
 
     end
 
@@ -92,7 +94,7 @@ module Buildings
         end
         # puts "ENDING ANGLE: #{current_angle}"
       end
-      super(viewable_pixel_offset_x, viewable_pixel_offset_y, @basic_color)
+      super(viewable_pixel_offset_x, viewable_pixel_offset_y)
     end
 
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
@@ -153,17 +155,12 @@ module Buildings
         # @color = get_faction_color
         update_colors(get_faction_color)
         buildings.each do |b_id, building|
-          puts "TAKING OVER BUILDING CLASS: #{building.class}"
+          # puts "TAKING OVER BUILDING CLASS: #{building.class}"
           building.set_faction(@current_take_over_by.get_faction_id) if building.get_faction_id == old_faction_id
         end
       end
 
       return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options)
-    end
-
-    def update_colors gosu_color
-      @basic_color = gosu_color
-      @color = GeneralObject.convert_gosu_color_to_opengl(gosu_color)
     end
 
     def self.get_minimap_image

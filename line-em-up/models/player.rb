@@ -615,8 +615,8 @@ class Player < ScreenFixedObject
     @ship.current_momentum
   end
 
-  def hit_objects(object_groups, options)
-    return @ship.hit_objects(self, object_groups, options)
+  def hit_objects object_groups#, options = {})
+    return @ship.hit_objects(self, object_groups)#, options)
   end
 
   def exiting_map?

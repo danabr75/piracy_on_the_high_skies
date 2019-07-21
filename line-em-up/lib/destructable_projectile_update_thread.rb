@@ -25,13 +25,14 @@ module DestructableProjectileUpdateThread
   # end
 
   def self.update window, projectile, args
+    # Thread.exit if !projectile.inited
     # puts "DestructableProjectileUpdateThread - projectile.class: #{projectile.class.name} - #{projectile.id} - #{projectile.is_alive} - #{projectile.health}"
     if projectile.is_alive
       # puts "CASE 1"
-      results = projectile.update_with_args(args)
+      result = projectile.update(*args)
       # puts "results: #{results}" if !results[:is_alive]
       # puts "DElETING FROM THREAD1 #{projectile.id}" if !results[:is_alive]
-      window.remove_destructable_projectile_ids.push(projectile.id) if !results[:is_alive]
+      window.remove_destructable_projectile_ids.push(projectile.id) if !result[:is_alive]
     else
       # puts "DElETING FROM THREAD2 #{projectile.id}  - #{projectile.health}"
       window.remove_destructable_projectile_ids.push(projectile.id)

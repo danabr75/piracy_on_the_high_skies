@@ -378,12 +378,12 @@ class PilotableShip < GeneralObject
     [@top_right_point, @top_left_point, @bottom_right_point, @bottom_left_point]
   end
 
-  def hit_objects(owner, object_groups, options)
+  def hit_objects owner, object_groups#, options)
     # puts "OWHNER: #{@owner.class}"
     # return if @owner.nil?
     hit_object = false
     # graphical_effects = []
-    is_thread = options[:is_thread] || false
+    # is_thread = options[:is_thread] || false
     collided_object = nil
     if @health > 0
       object_groups.each do |group|

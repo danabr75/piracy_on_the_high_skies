@@ -85,7 +85,7 @@ class GameWindow < Gosu::Window
 
   attr_accessor :projectiles, :destructable_projectiles, :ships, :graphical_effects, :shipwrecks, :add_graphical_effects
   attr_accessor :add_projectiles, :remove_projectile_ids
-  attr_accessor :add_ships, :remove_ship_ids
+  attr_accessor :add_ships, :remove_ship_ids, :add_buildings, :remove_building_ids
   attr_accessor :add_destructable_projectiles, :remove_destructable_projectile_ids
 
   attr_reader :player
@@ -192,23 +192,7 @@ class GameWindow < Gosu::Window
     # @width, @height = [default_width.to_i, default_height.to_i]
     # END TESTING
 
-    @projectile_collision_manager = AsyncProcessManager.new(ProjectileCollisionThread, 8, true)
-    @collision_counter = 0
-    @destructable_collision_counter = 1
-    # @projectile_update_manager    = AsyncProcessManager.new()
-    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
-    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
 
-    # r, w = IO.pipe
-    # @projectile_update_pipe_out, @projectile_update_pipe_in = IO.pipe
-    # @projectile_update_pid = fork do
-    #   AsyncProcessManager.new(@projectile_update_pipe_in, @projectile_update_pipe_out)
-
-    # end
-
-
-
-    @ship_collision_manager = AsyncProcessManager.new(ShipCollisionThread, 8, true)
 
     # Need to just pull from config file.. and then do scaling.
     # index = GameWindow.find_index_of_current_resolution(self.width, self.height)
@@ -250,13 +234,23 @@ class GameWindow < Gosu::Window
     graphics_value = ConfigSetting.get_setting(@config_path, "Graphics Setting", GraphicsSetting::SELECTION[0])
     @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
 
-    if @graphics_setting == :basic
+
+    @collision_counter = 0
+    @destructable_collision_counter = 1
+    @projectile_collision_manager              = AsyncProcessManager.new(ProjectileCollisionThread, 16, true)
+    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
+    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
+    @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 4, true)
+    if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
-      @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true, :joined_threads)
-      @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :joined_threads)
+      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 4, true)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true)
+      # Building update needs to be joined, or else ships are updated with missing images
+      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 4, true, :joined_threads) # , :joined_threads
     else
-      @ship_update_manager    = AsyncProcessManager.new(ShipUpdateThread, 8, true)
-      @projectile_update_manager    = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
+      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
+      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 8, true)
     end
 
     @game_pause = false
@@ -298,6 +292,9 @@ class GameWindow < Gosu::Window
     @add_ships = []
     @ships = {}
     @remove_ship_ids = []
+
+    @add_buildings    = []
+    @remove_building_ids = []
 
 
 
@@ -690,7 +687,16 @@ class GameWindow < Gosu::Window
         @ships.delete(ship_id)
         true
       end
-    # end
+
+      @add_buildings.reject! do |b|
+        @buildings[b.id] = b
+        true
+      end
+
+      @remove_building_ids.reject! do |b_id|
+        @buildings.delete(b_id)
+        true
+      end
 
     # Thread.new do
       @add_destructable_projectiles.reject! do |dp|
@@ -877,20 +883,7 @@ class GameWindow < Gosu::Window
         # Moving up buildings, so clickable buildings can block the player from attacking.
       end
       if !@game_pause && !menus_active
-        @buildings.reject! do |building_id, building|
-          result = building.update(self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
-          if result[:add_ships]
-            result[:add_ships].each do |ship|
-              @add_ships << ship
-            end
-          end
-          if result[:projectiles]
-            result[:projectiles].each do |p|
-              @projectiles[p.id] = p
-            end
-          end
-          !result[:is_alive]
-        end
+        @building_update_manager.update(self, @buildings, self.mouse_x, self.mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
       end
       if @player.is_alive && !@game_pause && !menus_active
         # @player.move_left  if Gosu.button_down?(Gosu::KB_Q)# Gosu.button_down?(Gosu::KB_LEFT)  || Gosu.button_down?(Gosu::GP_LEFT)    || 

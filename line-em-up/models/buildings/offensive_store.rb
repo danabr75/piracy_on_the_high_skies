@@ -5,6 +5,7 @@ module Buildings
   class OffensiveStore < Buildings::Building
 
 
+    ENABLE_FACTION_COLORS = true
     attr_reader :credits
 
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
@@ -38,7 +39,7 @@ module Buildings
       @info = @image.gl_tex_info
       @credits = rand(500) + 500
       @interactible = true
-      @invulnerable = true
+      # @invulnerable = true
     end
 
     def self.get_minimap_image
@@ -65,7 +66,7 @@ module Buildings
     end
 
     def onClick element_id
-      if @is_close_enough_to_open
+      if @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
         button_clicked_exists = @button_id_mapping.key?(element_id)
         if button_clicked_exists
          # puts "BUTTON EXISTS: #{element_id}"

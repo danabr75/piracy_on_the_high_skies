@@ -22,8 +22,8 @@ module Projectiles
 
     MAX_TILE_TRAVEL = 6
 
-    POST_DESTRUCTION_EFFECTS = true
-    POST_COLLISION_EFFECTS   = true
+    # POST_DESTRUCTION_EFFECTS = true
+    # POST_COLLISION_EFFECTS   = true
 
     # def self.get_post_destruction_effects # Give parameters
     #   # raise 'stop here'

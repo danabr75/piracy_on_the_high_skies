@@ -1,5 +1,8 @@
 require_relative '../background_fixed_object.rb'
 
+require_relative '../object_3_d.rb'
+
+
 # require 'glu'
 require 'gosu'
 require 'opengl'
@@ -20,6 +23,8 @@ module Buildings
     ENABLE_GROUND_HOVER = true
     IS_MOVABLE_OBJECT = false
 
+    ENABLE_FACTION_COLORS = false
+
     # Still used?
     attr_accessor :drops
 
@@ -27,6 +32,8 @@ module Buildings
     def self.get_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/building.png", :tileable => true)
     end
+    
+    # attr_reader :inited
 
     # building by itself doesn't need 'window', it's for inheritance
     def initialize(current_map_tile_x, current_map_tile_y, window, options = {})
@@ -38,10 +45,19 @@ module Buildings
       @image = self.class.get_image
       @info = @image.gl_tex_info
       @interactible = false
+      @interactable_object = nil
       @health_unit_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/health_cursor_unit.png")
       @height_scaler_with_health_unit_image = @height_scale / 8.0
       @max_health = self.class::HEALTH
       @health_angle_increment = @max_health / 10.0
+
+      if self.class::ENABLE_FACTION_COLORS
+        @original_faction_id = get_faction_id
+        update_colors(get_faction_color)
+      end
+
+      # @inited = true
+      # @object3D = Object3D.read_file("#{MEDIA_DIRECTORY}/3D_models/gourd.obj")
     end
 
     def self.get_minimap_image
@@ -79,8 +95,13 @@ module Buildings
       ZOrder::Building
     end
 
-    def draw viewable_pixel_offset_x, viewable_pixel_offset_y, colors = nil
+    def update_colors gosu_color
+      @basic_color = gosu_color
+      @color = GeneralObject.convert_gosu_color_to_opengl(gosu_color)
+    end
 
+    def draw viewable_pixel_offset_x, viewable_pixel_offset_y, colors = @basic_color
+      # @object3D.draw
       if @hover
         # @faction.emblem.draw_rot(
         #   @x, @y, ZOrder::AIFactionEmblem,
@@ -110,12 +131,12 @@ module Buildings
       # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
       if @graphics_setting == :basic
         if @interactible
-          if @is_hovering && @is_close_enough_to_open
+          if @is_hovering && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
             # colors = [0.5, 1, 0.5, 1]
-            colors = colors || Gosu::Color.argb(0xff_80ff00)
+            colors = Gosu::Color.argb(0xff_80ff00)
           elsif @is_hovering
             # colors = [1, 0.5, 0.5, 1]
-            colors = colors || Gosu::Color.argb(0xff_ff0000)
+            colors = Gosu::Color.argb(0xff_ff0000)
           else
             colors = colors || Gosu::Color.argb(0xff_ffffff)
           end
@@ -140,14 +161,14 @@ module Buildings
     #   end
     # end
 
-    def tile_draw_gl v1, v2, v3, v4, colors = nil
+    def tile_draw_gl v1, v2, v3, v4, colors = @color
       info = @info
 
       if @interactible
-        if @is_hovering && @is_close_enough_to_open
-          colors = colors || [0.5, 1, 0.5, 1]
+        if @is_hovering && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
+          colors = [0.5, 1, 0.5, 1]
         elsif @is_hovering
-          colors = colors || [1, 0.5, 0.5, 1]
+          colors = [1, 0.5, 0.5, 1]
         else
           colors = colors || [1, 1, 1, 1]
         end
@@ -259,7 +280,13 @@ module Buildings
     end
 
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
+
+      if self.class::ENABLE_FACTION_COLORS && @original_faction_id != get_faction_id
+        update_colors(get_faction_color)
+      end
+
       if @interactible
+        @interactable_object = player if @interactable_object.nil?
         @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
         # puts "BUILDING UPDATE HERE: #{[player_map_pixel_x, player_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"
         # distance = Gosu.distance(player_map_pixel_x, player_map_pixel_y, @current_map_tile_x, @current_map_tile_y)

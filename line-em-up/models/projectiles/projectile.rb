@@ -60,6 +60,8 @@ module Projectiles
     def draw_gl
     end
 
+    # attr_reader :inited
+
     # destination_map_pixel_x, destination_map_pixel_y params will become destination_angle
     def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, z_projectile, options = {})
       # puts "PROJETIL PARALMS"
@@ -162,7 +164,7 @@ module Projectiles
       # @i += 1
       # @i = -50 if @i > 50
       # @init_sound.play_pan(-5000,@effects_volume, 1, false) if @init_sound
-
+      # @inited = true
     end
 
     def self.get_init_sound
@@ -416,7 +418,7 @@ module Projectiles
 
     # require 'benchmark'
 
-    def hit_objects(air_object_groups, ground_object_groups, options)
+    def hit_objects air_object_groups, ground_object_groups#, options = {}
       # puts "PROJ hit objects"
       graphical_effects = []
       if @air_to_ground
@@ -457,7 +459,7 @@ module Projectiles
       end
       hit_object    = false
       actual_hit_object = nil
-      is_thread = options[:is_thread] || false
+      # is_thread = options[:is_thread] || false
       if @health > 0
         object_groups.each do |group|
           # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"

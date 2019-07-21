@@ -25,9 +25,10 @@ module ProjectileUpdateThread
   # end
 
   def self.update window, projectile, args
+    # Thread.exit if !projectile.inited
     if projectile.is_alive
-      results = projectile.update_with_args(args)
-      window.remove_projectile_ids.push(projectile.id) if !results[:is_alive]
+      result = projectile.update(*args)
+      window.remove_projectile_ids.push(projectile.id) if !result[:is_alive]
     else
       window.remove_projectile_ids.push(projectile.id)
     end
