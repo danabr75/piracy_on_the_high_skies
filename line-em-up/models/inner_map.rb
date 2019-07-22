@@ -254,7 +254,12 @@ class InnerMap
       :exit_map, "Yes",
       0, 0,
       # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
-      lambda {|window, menu, id| window.block_all_controls = true; window.exit_map = true },
+      lambda do |window, menu, id|
+        if !window.block_all_controls
+          window.block_all_controls = true
+          window.exit_map = true
+        end
+      end,
       nil,
       {is_button: true}
     )
@@ -262,7 +267,13 @@ class InnerMap
     @exit_map_menu.add_item(
       :cancel_map_exit, "No",
       0, 0,
-      lambda {|window, menu, id|  window.block_all_controls = true; window.player.cancel_map_exit; menu.disable  }, 
+      lambda do |window, menu, id|
+        if !window.block_all_controls 
+          window.block_all_controls = true
+          window.player.cancel_map_exit
+          menu.disable
+        end
+      end, 
       nil,
       {is_button: true}
     )

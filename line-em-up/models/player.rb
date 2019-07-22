@@ -694,25 +694,25 @@ class Player < ScreenFixedObject
     
     # Keeps us from getting outside mapspace, and getting stuck on boundary
     # Wasn't being used.
-    # if !(@current_map_pixel_y < @map_pixel_height) # * @tile_height
-    #   # puts "CASE 1"
-    #   # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
-    #   @current_momentum = 0
-    #   @current_map_pixel_y = @map_pixel_height - 1
-    # elsif @current_map_pixel_y < 0
-    #   # puts "CASE 2"
-    #   @current_momentum = 0
-    #   @current_map_pixel_y = 0
-    # end
-    # if !(@current_map_pixel_x < @map_pixel_width) # * @tile_width
-    #   # puts "CASE 3"
-    #   @current_momentum = 0
-    #   @current_map_pixel_x = @map_pixel_width - 1
-    # elsif @current_map_pixel_x < 0
-    #   # puts "CASE 4"
-    #   @current_momentum = 0
-    #   @current_map_pixel_x = 0
-    # end
+    if !(@current_map_pixel_y < @map_pixel_height) # * @tile_height
+      # puts "CASE 1"
+      # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
+      # @current_momentum = 0
+      @current_map_pixel_y = @map_pixel_height - 1
+    elsif @current_map_pixel_y < 0
+      # puts "CASE 2"
+      # @current_momentum = 0
+      @current_map_pixel_y = 0
+    end
+    if !(@current_map_pixel_x < @map_pixel_width) # * @tile_width
+      # puts "CASE 3"
+      # @current_momentum = 0
+      @current_map_pixel_x = @map_pixel_width - 1
+    elsif @current_map_pixel_x < 0
+      # puts "CASE 4"
+      # @current_momentum = 0
+      @current_map_pixel_x = 0
+    end
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER UPDATE: #{@x} - #{@y}"
