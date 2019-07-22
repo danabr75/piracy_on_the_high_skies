@@ -40,14 +40,14 @@ class MenuWindow < Gosu::Window
     # @menu = Menu.new(self)
     @menu = Menu.new(@window, @width / 2, 0, ZOrder::UI, @height_scale, {add_top_padding: 40})
     @menu.add_item(
-      :resume, "Play Piracy on the High Skies!",
+      :launcher_resume, "Play Piracy on the High Skies!",
       0, 0,
       lambda {|window, menu, id| self.close; GameWindow.start(); },
       nil,
       {is_button: true}
     )
     @menu.add_item(
-      :exit, "Exit",
+      :launcher_exit, "Exit",
       0, 0,
       lambda {|window, menu, id| window.close; },
       nil,

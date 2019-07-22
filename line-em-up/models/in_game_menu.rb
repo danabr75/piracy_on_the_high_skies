@@ -3,11 +3,12 @@ require_relative 'outer_map_objects/cursor.rb'
 class InGameMenu
   attr_reader :active
 
-  def initialize window, width, height, height_scale, config_path
+  def initialize window, width, height, width_scale, height_scale, config_path
     @width  = width
     @height = height
     @window = window
     @height_scale = height_scale
+    @width_scale = width_scale
 
     @cell_width  = 30 * height_scale
     @cell_height = 30 * height_scale
@@ -20,34 +21,35 @@ class InGameMenu
 
     refresh
 
+    @menu_background = Gosu::Image.new("#{MEDIA_DIRECTORY}/main_screen_background.png")
+
     @menu = Menu.new(self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
     @menu.add_item(
-      :resume, "Continue (if game data is present)",
+      :in_game_menu_resume, "Continue (if game data is present)",
       0, 0,
       lambda {|window, menu, id| menu.disable; window.activate_outer_map },
       nil,
       {is_button: true}
     )
     @menu.add_item(
-      :start_new_game, "Start New Game",
+      :in_game_menu_start_new_game, "Start New Game",
       0, 0,
       lambda {|window, menu, id| menu.disable; window.activate_outer_map },
       nil,
       {is_button: true}
     )
     @menu.add_item(
-      :exit, "Exit",
+      :in_game_menu_exit, "Exit",
       0, 0,
       lambda {|window, menu, id| window.exit_game; }, 
       nil,
       {is_button: true}
     )
     @activated_outer_map = false
-    @menu.enable
+    # @menu.enable
   end
 
   def refresh
-    puts "REFRESJ"
     LUIT.config({window: @window})
   end
 
@@ -62,12 +64,15 @@ class InGameMenu
   def enable
     puts "IN GAME MENY ENABLE - #{@menu.active}"
     refresh
+    @menu.enable
+    @activated_outer_map = false
     @active = true
     @menu.enable
   end
 
   def disable
-    @activated_outer_map = nil
+    @menu.disable
+    @activated_outer_map = false
     @active = false
   end
 
@@ -90,6 +95,7 @@ class InGameMenu
   end
 
   def activate_outer_map
+    # raise "STOP HERE"
     @activated_outer_map = true
   end
 
@@ -111,11 +117,13 @@ class InGameMenu
     @mouse_y = mouse_y
     @pointer.update(mouse_x, mouse_y)
     @menu.update
+    # puts "RETURNING: #{@activated_outer_map}"
     return @activated_outer_map
   end
 
   def draw
-    Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_d9d9d9), ZOrder::MenuBackground)
+    @menu_background.draw(0, 0, ZOrder::Background, @height_scale / 1.5, @height_scale / 1.5)
+    # Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_d9d9d9), ZOrder::MenuBackground)
     @pointer.draw
     @menu.draw
     # puts "MENU DRaring here:"

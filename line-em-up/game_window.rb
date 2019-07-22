@@ -70,14 +70,24 @@ class GameWindow < Gosu::Window
 
 
   def initialize options = {}
+    @block_all_controls = true
 
 
     @config_path = self.class::CONFIG_FILE
 
     value = ConfigSetting.get_setting(@config_path, 'resolution', ResolutionSetting::SELECTION[0])
-    raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
-    width, height = value.split('x')
-    @width, @height = [width.to_i, height.to_i]
+    # puts "VALUE: #{value}"
+    if value == 'fullscreen'
+      @width  = Gosu::screen_width
+      @height = Gosu::screen_height
+      fullscreen = true
+    else
+      raise "DID NOT GET A RESOLUTION FROM CONFIG" if value.nil?
+      width, height = value.split('x')
+      # puts "WIDTH and height; #{width}  - #{height}"
+      @width, @height = [width.to_i, height.to_i]
+      fullscreen = false
+    end
 
     default_width, default_height = ResolutionSetting::SELECTION[0].split('x')
 
@@ -101,13 +111,13 @@ class GameWindow < Gosu::Window
     @target_fps_interval = FpsSetting.get_interval_value(fps_value)
 
     @fps_scaler = (@target_fps_interval) / (@default_fps_interval)
-    super(@width, @height, {update_interval: @target_fps_interval})
+    super(@width, @height, {update_interval: @target_fps_interval, fullscreen: fullscreen})
     self.caption = "Piracy on the High Skies!"
 
     @inner_map = nil#InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
     @outer_map = nil#OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
     # @outer_map.enable
-    @in_game_menu = InGameMenu.new(self, @width, @height, @height_scale, @config_path)
+    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path)
     @in_game_menu.enable
     @key_pressed_map = {}
   end
@@ -127,6 +137,7 @@ class GameWindow < Gosu::Window
   end
 
   def activate_outer_map
+    # puts "ACTIVATING OUTER MAP"
     GC.start
     @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
     @in_game_menu.disable
@@ -135,7 +146,7 @@ class GameWindow < Gosu::Window
 
   def activate_main_menu
     GC.start
-    puts "activate_main_menu"
+    # puts "activate_main_menu"
     @outer_map.disable if @outer_map
     @outer_map = nil
     @inner_map.disable if @inner_map
@@ -244,7 +255,6 @@ class GameWindow < Gosu::Window
   # end
 
   def button_up id
-    @block_all_controls = false
     @inner_map.button_up(id)      if @inner_map && @inner_map.active
     @inner_map.key_id_release(id) if @inner_map && @inner_map.active
 
@@ -271,6 +281,7 @@ class GameWindow < Gosu::Window
     #   @player.disable_boost
     # end
     key_id_release(id)
+    @block_all_controls = false
   end
 
   def get_center_font_ui_y
@@ -286,27 +297,29 @@ class GameWindow < Gosu::Window
   def update
     # puts "@outer_map && @outer_map.active: #{@outer_map && @outer_map.active}"
     # puts "@in_game_menu: #{@in_game_menu.active}"
-    if @inner_map && @inner_map.active
-      # puts "UPDATING INNER MAP"
-      exiting_map = @inner_map.update(self.mouse_x, self.mouse_y)
-      if exiting_map
-        # puts "EXITING MAP HERE"
-        @inner_map = nil
-        @outer_map.enable
-      end
+    if !@block_all_controls
+      if @inner_map && @inner_map.active
+        # puts "UPDATING INNER MAP"
+        exiting_map = @inner_map.update(self.mouse_x, self.mouse_y)
+        if exiting_map
+          # puts "EXITING MAP HERE"
+          @inner_map = nil
+          @outer_map.enable
+        end
 
-    elsif @outer_map && @outer_map.active
-      # puts "OUTER MAP UPDATE"
-      map_name = @outer_map.update(self.mouse_x, self.mouse_y)
-      if map_name
-        @outer_map.post_activated_inner_map
-        activate_inner_map(map_name)
-      end
-    elsif @in_game_menu.active
-      in_game_activating_outer_map = @in_game_menu.update(self.mouse_x, self.mouse_y)
-      if in_game_activating_outer_map
-        @in_game_menu.disable
-        activate_outer_map
+      elsif @outer_map && @outer_map.active
+        # puts "OUTER MAP UPDATE"
+        map_name = @outer_map.update(self.mouse_x, self.mouse_y)
+        if map_name
+          @outer_map.post_activated_inner_map
+          activate_inner_map(map_name)
+        end
+      elsif @in_game_menu.active
+        in_game_activating_outer_map = @in_game_menu.update(self.mouse_x, self.mouse_y)
+        if in_game_activating_outer_map
+          @in_game_menu.disable
+          activate_outer_map
+        end
       end
     end
   end
