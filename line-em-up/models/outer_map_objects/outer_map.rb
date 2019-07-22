@@ -20,6 +20,10 @@ module OuterMapObjects
         desert_v14_small: {
           outer_map_icon: 'desert',
           displayed_name: 'desert', x: (225 * height_scale), y: (225 * height_scale)
+        },
+        snow_v15_very_small: {
+          outer_map_icon: 'snow',
+          displayed_name: 'snow', x: (100 * height_scale), y: (200 * height_scale)
         }
       }
 

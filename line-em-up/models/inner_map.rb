@@ -163,9 +163,17 @@ class InnerMap
     reset_font_ui_y
 
     if rand(2) == 0
-      @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
+      if rand(2) == 0
+        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
+      else
+        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
+      end
     else
-      @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
+      if rand(2) == 0
+        @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
+      else
+        @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
+      end
     end
 
     raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
@@ -215,7 +223,7 @@ class InnerMap
     @menu.add_item(
       :exit, "Exit",
       0, 0,
-      lambda {|window, menu, id| window.close; }, 
+      lambda {|window, menu, id| window.exit_game; }, 
       nil,
       {is_button: true}
     )
@@ -264,6 +272,10 @@ class InnerMap
     @mouse_x = 0
     @mouse_y = 0
     @active = true
+  end
+
+  def exit_game
+    @window.close
   end
 
   def enable

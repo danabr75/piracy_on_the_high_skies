@@ -1,6 +1,9 @@
 # In Console: 
 # mg = MapGenerator.new('desert_v14_small')
 # mg.generate
+
+# mg = MapGenerator.new('snow_v15_very_small', 120, 120, ['snow.png'], 'invalid_snow.png')
+# mg.generate
 require 'rmagick'
 
 class MapGenerator
@@ -9,11 +12,13 @@ class MapGenerator
 
   attr_accessor :map_tile_height, :map_tile_width, :terrain_image_path, :map_location
 
-  def initialize map_save_name, map_tile_height = 250, map_tile_width = 250, terrain_image_paths = ["earth.png"], out_of_bounds_terrain_path = "earth_3.png"
+  # options = {:add_mountain_range, :pepper_in_mountains, :add_river}
+  def initialize map_save_name, map_tile_height = 250, map_tile_width = 250, terrain_image_paths = ["earth.png"], out_of_bounds_terrain_path = "earth_3.png", options = {add_mountain_range: true, pepper_in_mountains: true, add_river: true}
     @map_tile_height         = map_tile_height
     @map_tile_width          = map_tile_width
     @map_file_location = "#{MAP_DIRECTORY}/#{map_save_name}.txt"
     @map_object_location = "#{MAP_DIRECTORY}/#{map_save_name}_map_objects.txt"
+    @options = options
 
     if !File.exist?(@map_object_location)
       File.open(@map_object_location, 'w') do |f|
@@ -38,16 +43,20 @@ class MapGenerator
     # @terrain_image = Gosu::Image.new(terrain_image_path, :tileable => true)
     @map_edge = 10
 
-    @mountain_areas = [
-      {x: 125, y: 130},
-      {x: 121, y: 135},
-      {x: 125, y: 125},
-      {x: 125, y: 123},
-      {x: 122, y: 121},
-      {x: 121, y: 119},
-      {x: 120, y: 117},
-      {x: 119, y: 115}
-    ]
+    if @options[:pepper_in_mountains]
+      @mountain_areas = [
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)},
+        {x: rand(map_tile_width), y: rand(map_tile_height)}
+      ]
+    else
+      @mountain_areas = []
+    end
   end
 
   def generate
@@ -92,81 +101,85 @@ class MapGenerator
     end
 
 
-    snow_height = 0
-    snow_width  = 0
-    while snow_width < @map_tile_width
-      height_rows[snow_height][snow_width][:terrain_index] = @snow_index
-      height_rows[snow_height][snow_width][:terrain_type] = 'snow'
-      height_rows[snow_height][snow_width][:height]        = 3
-      if snow_height == 0
-        # Go EAST OR SOUTH
-        value = rand(2)
-        if value == 0
-          snow_width += 1
+    if @options[:add_mountain_range]
+      snow_height = 0
+      snow_width  = 0
+      while snow_width < @map_tile_width
+        height_rows[snow_height][snow_width][:terrain_index] = @snow_index
+        height_rows[snow_height][snow_width][:terrain_type] = 'snow'
+        height_rows[snow_height][snow_width][:height]        = 3
+        if snow_height == 0
+          # Go EAST OR SOUTH
+          value = rand(2)
+          if value == 0
+            snow_width += 1
+          else
+            snow_height += 1
+            snow_width  += 1
+          end
+        elsif snow_height == @map_tile_height
+          # GO EAST or GO NORTH
+          value = rand(2)
+          if value == 0
+            snow_width += 1
+          else
+            snow_height -= 1
+            snow_width  += 1
+          end
         else
-          snow_height += 1
-          snow_width  += 1
-        end
-      elsif snow_height == @map_tile_height
-        # GO EAST or GO NORTH
-        value = rand(2)
-        if value == 0
-          snow_width += 1
-        else
-          snow_height -= 1
-          snow_width  += 1
-        end
-      else
-        # GO EAST NORTH OR SOUTH
-        value = rand(3)
-        if value == 0
-          snow_height += 1
-          snow_width += 1
-        elsif value == 1
-          snow_height -= 1
-          snow_width  += 1
-        else
-          snow_height += 1
-          snow_width  += 1
+          # GO EAST NORTH OR SOUTH
+          value = rand(3)
+          if value == 0
+            snow_height += 1
+            snow_width += 1
+          elsif value == 1
+            snow_height -= 1
+            snow_width  += 1
+          else
+            snow_height += 1
+            snow_width  += 1
+          end
         end
       end
     end
 
-    water_height = @map_tile_height / 2
-    water_width  = 0
-    while water_width < @map_tile_width
-      height_rows[water_height][water_width][:terrain_index] = @water_index
-      height_rows[water_height][water_width][:terrain_type]  = 'water'
-      height_rows[water_height][water_width][:height]        = 0.0001
-      if water_height == 0
-        # Go EAST OR SOUTH
-        value = rand(2)
-        if value == 0
-          water_width += 1
+    if @options[:add_river]
+      water_height = @map_tile_height / 2
+      water_width  = 0
+      while water_width < @map_tile_width
+        height_rows[water_height][water_width][:terrain_index] = @water_index
+        height_rows[water_height][water_width][:terrain_type]  = 'water'
+        height_rows[water_height][water_width][:height]        = 0.0001
+        if water_height == 0
+          # Go EAST OR SOUTH
+          value = rand(2)
+          if value == 0
+            water_width += 1
+          else
+            water_height += 1
+            water_width  += 1
+          end
+        elsif water_height == @map_tile_height
+          # GO EAST or GO NORTH
+          value = rand(2)
+          if value == 0
+            water_width += 1
+          else
+            water_height -= 1
+            water_width  += 1
+          end
         else
-          water_height += 1
-          water_width  += 1
-        end
-      elsif water_height == @map_tile_height
-        # GO EAST or GO NORTH
-        value = rand(2)
-        if value == 0
-          water_width += 1
-        else
-          water_height -= 1
-          water_width  += 1
-        end
-      else
-        # GO EAST NORTH OR SOUTH
-        value = rand(3)
-        if value == 0
-          water_width += 1
-        elsif value == 1
-          water_height -= 1
-          water_width  += 1
-        else
-          water_height += 1
-          water_width  += 1
+          # GO EAST NORTH OR SOUTH
+          value = rand(3)
+          if value == 0
+            water_width += 1
+          elsif value == 1
+            water_height -= 1
+            water_width  += 1
+          else
+            water_height += 1
+            water_width  += 1
+          end
         end
       end
     end
