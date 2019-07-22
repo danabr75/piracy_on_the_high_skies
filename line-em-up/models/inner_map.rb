@@ -299,7 +299,7 @@ class InnerMap
   def activate_main_menu
     @window.activate_main_menu
   end
-    
+
   def enable
     @active = true
   end
@@ -498,7 +498,7 @@ class InnerMap
 
     @pointer.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
 
-    if !@block_all_controls
+    if true#!@block_all_controls
       @messages.reject! { |message| !message.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) }
 
       if Gosu.button_down?(Gosu::KbEscape) && key_id_lock(Gosu::KbEscape)
@@ -583,53 +583,54 @@ class InnerMap
             @buildings[b.id] = b
           end
         end
-        
-        if Gosu.button_down?(Gosu::MS_RIGHT)
-          @player.attack_group_3(@pointer).each do |results|
-            # puts "RESULTS HERE: #{}"
-            results[:projectiles].each do |projectile|
-              @projectiles[projectile.id] = projectile if projectile
-            end
-            results[:destructable_projectiles].each do |projectile|
-              # @destructable_projectiles.push(projectile) if projectile
-              @destructable_projectiles[projectile.id] = projectile if projectile
-            end
-            results[:graphical_effects].each do |effect|
-              @graphical_effects.push(effect) if effect
-            end
-          end
-        end
-
-        if Gosu.button_down?(Gosu::MS_LEFT)
-          @player.attack_group_2(@pointer).each do |results|
-            results[:projectiles].each do |projectile|
-              # @projectiles.push(projectile) if projectile
-              @projectiles[projectile.id] = projectile if projectile
-            end
-            results[:destructable_projectiles].each do |projectile|
-              # @destructable_projectiles.push(projectile) if projectile
-              @destructable_projectiles[projectile.id] = projectile if projectile
-            end
-            results[:graphical_effects].each do |effect|
-              @graphical_effects.push(effect) if effect
+        if !@block_all_controls
+          if Gosu.button_down?(Gosu::MS_RIGHT)
+            @player.attack_group_3(@pointer).each do |results|
+              # puts "RESULTS HERE: #{}"
+              results[:projectiles].each do |projectile|
+                @projectiles[projectile.id] = projectile if projectile
+              end
+              results[:destructable_projectiles].each do |projectile|
+                # @destructable_projectiles.push(projectile) if projectile
+                @destructable_projectiles[projectile.id] = projectile if projectile
+              end
+              results[:graphical_effects].each do |effect|
+                @graphical_effects.push(effect) if effect
+              end
             end
           end
-        end
 
-        if Gosu.button_down?(Gosu::KB_SPACE)
-          @player.attack_group_1(@pointer).each do |results|
-            results[:projectiles].each do |projectile|
-              # @projectiles.push(projectile) if projectile
-              @projectiles[projectile.id] = projectile if projectile
+          if Gosu.button_down?(Gosu::MS_LEFT)
+            @player.attack_group_2(@pointer).each do |results|
+              results[:projectiles].each do |projectile|
+                # @projectiles.push(projectile) if projectile
+                @projectiles[projectile.id] = projectile if projectile
+              end
+              results[:destructable_projectiles].each do |projectile|
+                # @destructable_projectiles.push(projectile) if projectile
+                @destructable_projectiles[projectile.id] = projectile if projectile
+              end
+              results[:graphical_effects].each do |effect|
+                @graphical_effects.push(effect) if effect
+              end
             end
-            results[:destructable_projectiles].each do |projectile|
-              # @destructable_projectiles.push(projectile) if projectile
-              @destructable_projectiles[projectile.id] = projectile if projectile
-            end
-            results[:graphical_effects].each do |effect|
-              @graphical_effects.push(effect) if projectile
-            end
+          end
 
+          if Gosu.button_down?(Gosu::KB_SPACE)
+            @player.attack_group_1(@pointer).each do |results|
+              results[:projectiles].each do |projectile|
+                # @projectiles.push(projectile) if projectile
+                @projectiles[projectile.id] = projectile if projectile
+              end
+              results[:destructable_projectiles].each do |projectile|
+                # @destructable_projectiles.push(projectile) if projectile
+                @destructable_projectiles[projectile.id] = projectile if projectile
+              end
+              results[:graphical_effects].each do |effect|
+                @graphical_effects.push(effect) if projectile
+              end
+
+            end
           end
         end
 
