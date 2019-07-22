@@ -221,7 +221,21 @@ class InnerMap
       {is_button: true}
     )
     @menu.add_item(
-      :exit, "Exit",
+      :save_game, "Save",
+      0, 0,
+      lambda {|window, menu, id| window.save_game; },
+      nil,
+      {is_button: true}
+    )
+    @menu.add_item(
+      :exit_to_main_menu, "Exit to Main Menu",
+      0, 0,
+      lambda {|window, menu, id| menu.disable; window.activate_main_menu; }, 
+      nil,
+      {is_button: true}
+    )
+    @menu.add_item(
+      :exit_to_desktop, "Exit to Desktop",
       0, 0,
       lambda {|window, menu, id| window.exit_game; }, 
       nil,
@@ -278,6 +292,14 @@ class InnerMap
     @window.close
   end
 
+  def save_game
+    @window.save_game
+  end
+
+  def activate_main_menu
+    @window.activate_main_menu
+  end
+    
   def enable
     @active = true
   end

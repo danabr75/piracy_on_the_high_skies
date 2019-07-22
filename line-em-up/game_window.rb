@@ -105,15 +105,42 @@ class GameWindow < Gosu::Window
     self.caption = "Piracy on the High Skies!"
 
     @inner_map = nil#InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
-    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
-    @outer_map.enable
+    @outer_map = nil#OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    # @outer_map.enable
+    @in_game_menu = InGameMenu.new(self, @width, @height, @height_scale, @config_path)
+    @in_game_menu.enable
     @key_pressed_map = {}
   end
 
+  def save_game
+    puts "save_game here"
+    #save inner_map data if in inner_map
+    #save outer_map details
+  end
+
   def activate_inner_map map_name
+    GC.start
     @inner_map = InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
     @outer_map.disable
+    @in_game_menu.disable
     @inner_map.enable
+  end
+
+  def activate_outer_map
+    GC.start
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @in_game_menu.disable
+    @outer_map.enable
+  end
+
+  def activate_main_menu
+    GC.start
+    puts "activate_main_menu"
+    @outer_map.disable if @outer_map
+    @outer_map = nil
+    @inner_map.disable if @inner_map
+    @inner_map = nil
+    @in_game_menu.enable
   end
 
   # def key_id_combo_lock_3 id, id2, id3
@@ -146,13 +173,13 @@ class GameWindow < Gosu::Window
     #   @key_pressed_map.delete(value[:id])
   end
 
-  def menus_active
-    @menus.collect{|menu| menu.active }.include?(true)
-  end
+  # def menus_active
+  #   @menus.collect{|menu| menu.active }.include?(true)
+  # end
 
-  def menus_disable
-    @menus.each{|menu| menu.disable }
-  end
+  # def menus_disable
+  #   @menus.each{|menu| menu.disable }
+  # end
 
 
 
@@ -221,8 +248,8 @@ class GameWindow < Gosu::Window
     @inner_map.button_up(id)      if @inner_map && @inner_map.active
     @inner_map.key_id_release(id) if @inner_map && @inner_map.active
 
-    @outer_map.button_up(id)      if @outer_map.active
-    @outer_map.key_id_release(id) if @outer_map.active
+    @outer_map.button_up(id)      if @outer_map && @outer_map.active
+    @outer_map.key_id_release(id) if @outer_map && @outer_map.active
 
     # if id == Gosu::KB_MINUS
     #   # @can_resize = true
@@ -257,6 +284,8 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    # puts "@outer_map && @outer_map.active: #{@outer_map && @outer_map.active}"
+    # puts "@in_game_menu: #{@in_game_menu.active}"
     if @inner_map && @inner_map.active
       # puts "UPDATING INNER MAP"
       exiting_map = @inner_map.update(self.mouse_x, self.mouse_y)
@@ -266,13 +295,18 @@ class GameWindow < Gosu::Window
         @outer_map.enable
       end
 
-    end
-    if @outer_map.active
+    elsif @outer_map && @outer_map.active
       # puts "OUTER MAP UPDATE"
       map_name = @outer_map.update(self.mouse_x, self.mouse_y)
       if map_name
         @outer_map.post_activated_inner_map
         activate_inner_map(map_name)
+      end
+    elsif @in_game_menu.active
+      in_game_activating_outer_map = @in_game_menu.update(self.mouse_x, self.mouse_y)
+      if in_game_activating_outer_map
+        @in_game_menu.disable
+        activate_outer_map
       end
     end
   end
@@ -281,10 +315,11 @@ class GameWindow < Gosu::Window
     if @inner_map && @inner_map.active
       # puts "DRAWING INNER MAP"
       @inner_map.draw
-    end
-    if @outer_map.active
+    elsif @outer_map && @outer_map.active
       # puts "OUTER MAP DRAW"
       @outer_map.draw
+    elsif @in_game_menu.active
+      @in_game_menu.draw
     end
   end
 
