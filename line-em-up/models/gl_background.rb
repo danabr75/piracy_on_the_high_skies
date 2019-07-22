@@ -96,7 +96,7 @@ class GLBackground
   # end
 
 
-  def initialize width_scale, height_scale, screen_pixel_width, screen_pixel_height, resolution_scale, graphics_setting
+  def initialize map_name, width_scale, height_scale, screen_pixel_width, screen_pixel_height, resolution_scale, graphics_setting
     @debug = true
     # @debug = false
     @graphics_setting = graphics_setting
@@ -235,7 +235,7 @@ class GLBackground
     end
 
 
-    @map_name = "desert_v14_small"
+    @map_name = map_name
     @map = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}.txt").first)
     @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
     @active_map_objects = []

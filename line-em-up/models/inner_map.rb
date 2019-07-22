@@ -24,6 +24,8 @@ class InnerMap
   attr_accessor :show_minimap, :game_pause
   attr_reader :active
 
+  attr_accessor :exit_map
+
   include GlobalVariables
 
   def init_player_ship_data_if_necessary(config_path)
@@ -63,9 +65,10 @@ class InnerMap
   end
 
 
-  def initialize window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path, options = {}
+  def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path, options = {}
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path]
     # @local_window = self
+    @map_name = map_name
 
     @config_path = self.class::CONFIG_FILE
 
@@ -116,7 +119,7 @@ class InnerMap
 
 
     
-    @gl_background = GLBackground.new(@height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
+    @gl_background = GLBackground.new(@map_name, @height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
 
     @factions = Faction.init_factions(@height_scale)
 
@@ -229,7 +232,7 @@ class InnerMap
       :exit_map, "Yes",
       0, 0,
       # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
-      lambda {|window, menu, id| window.block_all_controls = true; window.close },
+      lambda {|window, menu, id| window.block_all_controls = true; window.exit_map = true },
       nil,
       {is_button: true}
     )
@@ -241,6 +244,7 @@ class InnerMap
       nil,
       {is_button: true}
     )
+    @exit_map = false
 
     # END  MENU INIT
 
@@ -282,8 +286,6 @@ class InnerMap
 
   def key_id_release id
     value = @key_pressed_map.delete(id)
-    # if value.is_a?(Hash)
-    #   @key_pressed_map.delete(value[:id])
   end
 
   def menus_active
@@ -602,6 +604,7 @@ class InnerMap
         @shipwreck_update_manager.update(self, @shipwrecks, nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
       end
     end
+    return @exit_map
   end
 
   def draw

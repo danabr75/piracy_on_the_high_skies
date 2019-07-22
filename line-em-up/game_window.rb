@@ -104,8 +104,16 @@ class GameWindow < Gosu::Window
     super(@width, @height, {update_interval: @target_fps_interval})
     self.caption = "Piracy on the High Skies!"
 
-    @inner_map = InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
+    @inner_map = nil#InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @outer_map.enable
     @key_pressed_map = {}
+  end
+
+  def activate_inner_map map_name
+    @inner_map = InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
+    @outer_map.disable
+    @inner_map.enable
   end
 
   # def key_id_combo_lock_3 id, id2, id3
@@ -210,8 +218,12 @@ class GameWindow < Gosu::Window
 
   def button_up id
     @block_all_controls = false
-    @inner_map.button_up(id)      if @inner_map.active
-    @inner_map.key_id_release(id) if @inner_map.active
+    @inner_map.button_up(id)      if @inner_map && @inner_map.active
+    @inner_map.key_id_release(id) if @inner_map && @inner_map.active
+
+    @outer_map.button_up(id)      if @outer_map.active
+    @outer_map.key_id_release(id) if @outer_map.active
+
     # if id == Gosu::KB_MINUS
     #   # @can_resize = true
     # end
@@ -245,11 +257,35 @@ class GameWindow < Gosu::Window
   end
 
   def update
-    @inner_map.update(self.mouse_x, self.mouse_y)
+    if @inner_map && @inner_map.active
+      # puts "UPDATING INNER MAP"
+      exiting_map = @inner_map.update(self.mouse_x, self.mouse_y)
+      if exiting_map
+        # puts "EXITING MAP HERE"
+        @inner_map = nil
+        @outer_map.enable
+      end
+
+    end
+    if @outer_map.active
+      # puts "OUTER MAP UPDATE"
+      map_name = @outer_map.update(self.mouse_x, self.mouse_y)
+      if map_name
+        @outer_map.post_activated_inner_map
+        activate_inner_map(map_name)
+      end
+    end
   end
 
   def draw
-    @inner_map.draw
+    if @inner_map && @inner_map.active
+      # puts "DRAWING INNER MAP"
+      @inner_map.draw
+    end
+    if @outer_map.active
+      # puts "OUTER MAP DRAW"
+      @outer_map.draw
+    end
   end
 
   def get_font_ui_y
