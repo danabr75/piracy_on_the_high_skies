@@ -7,7 +7,7 @@ module HardpointObjects
     PROJECTILE_CLASS   = nil 
     FIRING_GROUP_NUMBER = nil # Passive
 
-    STEAM_MAX_CAPACITY  = 100.0
+    STEAM_MAX_CAPACITY  = 150.0
     # STEAM_MAX_CAPACITY  = 1000000.0
     STEAM_RATE_INCREASE = 0.2
 

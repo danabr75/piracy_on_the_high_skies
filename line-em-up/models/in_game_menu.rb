@@ -62,7 +62,7 @@ class InGameMenu
   # end
 
   def enable
-    puts "IN GAME MENY ENABLE - #{@menu.active}"
+    # puts "IN GAME MENY ENABLE - #{@menu.active}"
     refresh
     @menu.enable
     @activated_outer_map = false

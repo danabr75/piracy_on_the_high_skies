@@ -66,7 +66,7 @@ module Buildings
     end
 
     def onClick element_id
-      if @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
+      if @window.player.is_alive && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
         button_clicked_exists = @button_id_mapping.key?(element_id)
         if button_clicked_exists
          # puts "BUTTON EXISTS: #{element_id}"

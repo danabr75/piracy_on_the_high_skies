@@ -693,25 +693,26 @@ class Player < ScreenFixedObject
     # puts "PLAYER: @current_map_pixel_y >= @map_pixel_height: #{@current_map_pixel_y} >= #{@map_pixel_height}"
     
     # Keeps us from getting outside mapspace, and getting stuck on boundary
-    if !(@current_map_pixel_y < @map_pixel_height) # * @tile_height
-      # puts "CASE 1"
-      # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
-      @current_momentum = 0
-      @current_map_pixel_y = @map_pixel_height - 1
-    elsif @current_map_pixel_y < 0
-      # puts "CASE 2"
-      @current_momentum = 0
-      @current_map_pixel_y = 0
-    end
-    if !(@current_map_pixel_x < @map_pixel_width) # * @tile_width
-      # puts "CASE 3"
-      @current_momentum = 0
-      @current_map_pixel_x = @map_pixel_width - 1
-    elsif @current_map_pixel_x < 0
-      # puts "CASE 4"
-      @current_momentum = 0
-      @current_map_pixel_x = 0
-    end
+    # Wasn't being used.
+    # if !(@current_map_pixel_y < @map_pixel_height) # * @tile_height
+    #   # puts "CASE 1"
+    #   # puts "LOCATION Y on PLAYER IS OVER MAP HEIGHT"
+    #   @current_momentum = 0
+    #   @current_map_pixel_y = @map_pixel_height - 1
+    # elsif @current_map_pixel_y < 0
+    #   # puts "CASE 2"
+    #   @current_momentum = 0
+    #   @current_map_pixel_y = 0
+    # end
+    # if !(@current_map_pixel_x < @map_pixel_width) # * @tile_width
+    #   # puts "CASE 3"
+    #   @current_momentum = 0
+    #   @current_map_pixel_x = @map_pixel_width - 1
+    # elsif @current_map_pixel_x < 0
+    #   # puts "CASE 4"
+    #   @current_momentum = 0
+    #   @current_map_pixel_x = 0
+    # end
 
     # raise "ISSUE3" if @current_map_pixel_x.class != Integer || @current_map_pixel_y.class != Integer 
     # puts "PLAYER UPDATE: #{@x} - #{@y}"
@@ -719,7 +720,8 @@ class Player < ScreenFixedObject
     result = {is_alive: is_alive}
     # Add result buildings at some point.
     if !is_alive
-      result[:shipwreck] = shipwreck
+      result[:shipwreck] = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @ship.current_momentum, @angle, [], {persist: true})
+      # @ship = nil
     end
     return result
   end

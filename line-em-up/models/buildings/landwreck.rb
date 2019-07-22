@@ -58,6 +58,7 @@ module Buildings
       @max_lootable_pixel_distance = 2 * @average_tile_size
       @credits = rand(50) # in the future, grab from AIShip.. or whatever the original owner was
       @interactible = true
+      @persist = options[:persist] || false
       # @block_map_pixel_from_tile_update = true
     end
 
@@ -83,7 +84,7 @@ module Buildings
     def onClick element_id
       # puts "ONCLICK mappuing"
       # puts @button_id_mapping
-      if @is_close_enough_to_open
+      if @window.player.is_alive && @is_close_enough_to_open
         button_clicked_exists = @button_id_mapping.key?(element_id)
         if button_clicked_exists
          # puts "BUTTON EXISTS: #{element_id}"
@@ -100,7 +101,7 @@ module Buildings
     # Need to calculate distance to player, only allow click when close, and maybe not use a left-click button to activate?  
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options = {}
       @interactible = false if @drops.count == 0 && @credits == 0
-      if @drops.count == 0
+      if @drops.count == 0 && !@persist
         @health = 0
       end
       return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, player_x, player_y, player, ships, buildings, options)

@@ -345,7 +345,7 @@ class InnerMap
   def onClick element_id
     if @menu.active
       @menu.onClick(element_id)
-    elsif @ship_loadout_menu.active
+    elsif @player.is_alive && @ship_loadout_menu.active
       @ship_loadout_menu.onClick(element_id)
     elsif @exit_map_menu.active
       @exit_map_menu.onClick(element_id)
@@ -532,6 +532,15 @@ class InnerMap
         @game_pause = !@game_pause
       end
 
+      results = @gl_background.update(@player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
+      if results[:buildings]
+        results[:buildings].each do |b_id, b|
+          @buildings[b.id] = b
+        end
+      end
+      if !@game_pause && !menus_active
+        @building_update_manager.update(self, @buildings, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
+      end
       # if Gosu.button_down?(Gosu::KB_O) && key_id_lock(Gosu::KB_O)
       #   GameWindow.resize(self, 1920, 1080, false)
       # end
@@ -545,7 +554,28 @@ class InnerMap
 
 
 
+      if !@game_pause && !menus_active  && !@player_perma_death
+        result = @player.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
+        # puts "PLAYER RESULT"
+        # puts result
+        if !result[:is_alive]
+          @player_perma_death = true
+        end
+        if result[:buildings]
+          result[:buildings].each do |b|
+            @buildings[b.id] = b
+          end
+        end
+        if result[:shipwreck]
+          # puts "PLAYER ADDING SHIPWRECK To list."
+          @add_shipwrecks << result[:shipwreck]
+          # @shipwrecks[result[:shipwreck].id] = result[:shipwreck]
+        end
+      end
       if @player.is_alive && !@game_pause && !menus_active
+        @player.accelerate if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
+        @player.brake      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
+        @player.reverse    if Gosu.button_down?(Gosu::KB_X)
         if Gosu.button_down?(Gosu::KB_TAB) && key_id_lock(Gosu::KB_TAB)
           @pointer.toggle_ground_or_air
         end
@@ -558,31 +588,6 @@ class InnerMap
           @player.rotate_clockwise
         end
 
-
-        result = @player.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @pointer.current_map_pixel_x, @pointer.current_map_pixel_y)
-        if result[:buildings]
-          result[:buildings].each do |b|
-            @buildings[b.id] = b
-          end
-        end
-        if result[:shipwreck]
-          @shipwrecks[result[:shipwreck].id] = result[:shipwreck]
-        end
-      end
-      if !@game_pause && !menus_active
-        @building_update_manager.update(self, @buildings, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
-      end
-      if @player.is_alive && !@game_pause && !menus_active
-        @player.accelerate if Gosu.button_down?(Gosu::KB_UP)    || Gosu.button_down?(Gosu::GP_UP)      || Gosu.button_down?(Gosu::KB_W)
-        @player.brake      if Gosu.button_down?(Gosu::KB_DOWN)  || Gosu.button_down?(Gosu::GP_DOWN)    || Gosu.button_down?(Gosu::KB_S)
-        @player.reverse    if Gosu.button_down?(Gosu::KB_X)
-
-        results = @gl_background.update(@player.current_map_pixel_x, @player.current_map_pixel_y, @buildings, @pickups, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
-        if results[:buildings]
-          results[:buildings].each do |b_id, b|
-            @buildings[b.id] = b
-          end
-        end
         if !@block_all_controls
           if Gosu.button_down?(Gosu::MS_RIGHT)
             @player.attack_group_3(@pointer).each do |results|

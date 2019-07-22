@@ -1,6 +1,6 @@
 class Shipwreck < ScreenMapFixedObject
 
-  def initialize current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, ship, momentum, angle, drops, options = {}
+  def initialize current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, ship, momentum, angle, drops = [], options = {}
    # puts "NEW SHIPWREKC: #{[current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, momentum, angle]}"
     @ship = ship
     @ship.turn_off_hardpoints
@@ -16,6 +16,8 @@ class Shipwreck < ScreenMapFixedObject
     @current_momentum = momentum
 
     @drops = drops
+
+    @persist = options[:persist] || false
 
     options[:no_image] = true
 
@@ -50,8 +52,9 @@ class Shipwreck < ScreenMapFixedObject
       options = {}
       options[:current_map_pixel_x] = @current_map_pixel_x
       options[:current_map_pixel_y] = @current_map_pixel_y
+      options[:persist] = @persist
       revised_scale = 1.0 - ((1.0 - @current_scale) / 2.0)
-      if @drops.any?
+      if @drops.any? || @persist
         building = Buildings::Landwreck.new(current_map_tile_x, current_map_tile_y, @ship, revised_scale, @angle, @drops, options)
       end
       @health = 0
