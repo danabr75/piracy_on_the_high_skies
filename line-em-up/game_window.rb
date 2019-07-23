@@ -69,24 +69,7 @@ class GameWindow < Gosu::Window
   DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
 
-  def init_current_save_file_if_necessary(save_file_path)
-    if !File.file?(save_file_path)
-      ConfigSetting.set_setting(save_file_path, "current_ship_index", "0")
-      ConfigSetting.set_mapped_setting(save_file_path, ["player_fleet", "0", "klass"], "BasicShip")
-      init_data = {
-        "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
-        "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",
-        "5":"HardpointObjects::DumbMissileHardpoint","2":"HardpointObjects::BulletHardpoint",
-        "10":"HardpointObjects::BasicEngineHardpoint",
-        "6":"HardpointObjects::MinigunHardpoint","8":"HardpointObjects::BasicEngineHardpoint",
-        "12":"HardpointObjects::BasicSteamCoreHardpoint",
-      }
-      init_data.each do |key, value|
-        ConfigSetting.set_mapped_setting(save_file_path, ["player_fleet", "0", "hardpoint_locations", key], value)
-      end
-      ConfigSetting.set_setting(save_file_path, "Credits", "500")
-    end
-  end
+
 
   def initialize options = {}
     @block_all_controls = true
@@ -96,7 +79,7 @@ class GameWindow < Gosu::Window
 
     @current_save_path = self.class::CURRENT_SAVE_FILE
 
-    init_current_save_file_if_necessary(@current_save_path)
+    
 
     value = ConfigSetting.get_setting(@config_path, 'resolution', ResolutionSetting::SELECTION[0])
     # puts "VALUE: #{value}"
@@ -140,7 +123,7 @@ class GameWindow < Gosu::Window
     @inner_map = nil#InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
     @outer_map = nil#OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
     # @outer_map.enable
-    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path)
+    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path)
     @in_game_menu.enable
     @key_pressed_map = {}
   end
@@ -150,6 +133,7 @@ class GameWindow < Gosu::Window
     #save inner_map data if in inner_map
     #save outer_map details
   end
+  
   def load_game
     puts "load_game here"
   end
@@ -177,6 +161,7 @@ class GameWindow < Gosu::Window
     @outer_map = nil
     @inner_map.disable if @inner_map
     @inner_map = nil
+    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path)
     @in_game_menu.enable
   end
 
