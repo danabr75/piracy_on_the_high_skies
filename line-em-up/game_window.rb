@@ -156,7 +156,7 @@ class GameWindow < Gosu::Window
 
   def activate_inner_map map_name
     GC.start
-    @inner_map = InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
+    @inner_map = InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
     @outer_map.disable
     @in_game_menu.disable
     @inner_map.enable

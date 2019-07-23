@@ -29,12 +29,13 @@ class InnerMap
 
 
 
-  def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path, options = {}
-    @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path]
+  def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, options = {}
+    @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height]
     # @local_window = self
     @map_name = map_name
 
     @config_path = self.class::CONFIG_FILE
+    @save_file_path = self.class::CURRENT_SAVE_FILE
 
     @open_gl_executer = ExecuteOpenGl.new
 
@@ -146,7 +147,7 @@ class InnerMap
     
     @pointer = Cursor.new(@width, @height, @height_scale, @height_scale, @player)
 
-    @quest_data = QuestInterface.get_quests(CONFIG_FILE)
+    @quest_data = QuestInterface.get_quests(@save_file_path)
 
     values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
     values[:buildings].each do |b|
@@ -165,7 +166,7 @@ class InnerMap
     @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
     viewable_center_target = nil
 
-    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
 
     @viewable_offset_x = 0
     @viewable_offset_y = 0
@@ -368,7 +369,7 @@ class InnerMap
     @mouse_x = mouse_x
     @mouse_y = mouse_y
     
-    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@config_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
 
     Thread.new do
       @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
