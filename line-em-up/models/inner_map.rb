@@ -220,6 +220,7 @@ class InnerMap
       lambda do |window, menu, id|
         if !window.block_all_controls
           window.block_all_controls = true
+          window.save_inner_map_data
           window.exit_map = true
         end
       end,
@@ -264,6 +265,11 @@ class InnerMap
 
   def exit_game
     @window.close
+  end
+
+  def save_inner_map_data
+    puts "save_inner_map_data"
+    @gl_background.store_background_data(@buildings)
   end
 
   def save_game

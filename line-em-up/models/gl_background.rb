@@ -13,11 +13,12 @@ require 'glut'
 # For opengl-bindings
 # OpenGL.load_lib()
 # GLUT.load_lib()
-
+require_relative '../lib/global_constants.rb'
 
 class GLBackground
   include OpenGL
   include GLUT
+  include GlobalConstants
   # Height map size
   # MAP_HEIGHT_EDGE = 700
   # MAP_WIDTH_EDGE_RIGHT = 450
@@ -97,7 +98,8 @@ class GLBackground
 
 
   def initialize map_name, width_scale, height_scale, screen_pixel_width, screen_pixel_height, resolution_scale, graphics_setting
-    @debug = true
+    # @debug = true
+    @save_file_path = CURRENT_SAVE_FILE
     # @debug = false
     @graphics_setting = graphics_setting
     # @y_add_top_tracker = []
@@ -237,7 +239,19 @@ class GLBackground
 
     @map_name = map_name
     @map = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}.txt").first)
-    @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
+
+
+    existing_map_data = ConfigSetting.get_mapped_setting(@save_file_path, [@map_name, 'map_objects'])
+    if existing_map_data
+      puts "existing map data"
+      @map_objects = existing_map_data
+    else
+      puts "GETTING NEW MAP DATA"
+      @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
+    end
+
+
+
     @active_map_objects = []
 
 
@@ -282,13 +296,13 @@ class GLBackground
     # @map_tile_width = @map["map_width"]
     # @map_tile_height = @map["map_height"]
     @map_data = @map["data"]
-    if @debug
+    # if @debug
       @map_data.each_with_index do |e, y|
         e.each_with_index do |v, x|
           @map_data[y][x] = @map_data[y][x].merge({'gps_y' => (@map_tile_height - y) - 1, 'gps_x' => (@map_tile_width - x) - 1 })
         end
       end
-    end
+    # end
     @visual_map_of_visible_to_map = Array.new(@visible_map_tile_height + @extra_map_tile_height) { Array.new(@visible_map_tile_width + @extra_map_tile_width) { nil } }
 
     # @y_top_tracker    = nil
@@ -315,6 +329,17 @@ class GLBackground
 
     # @y_add_top_tracker << nil
     # puts @visible_map
+  end
+
+
+  def store_background_data buildings
+    map_data = {buildings: {}}
+    buildings.each do |b_id, b|
+      map_data[:buildings][b.current_map_tile_y.to_s] ||= {}
+      map_data[:buildings][b.current_map_tile_y.to_s][b.current_map_tile_x.to_s] ||= []
+      map_data[:buildings][b.current_map_tile_y.to_s][b.current_map_tile_x.to_s] << {klass_name: b.class.to_s, data: {faction_id: b.get_faction_id }}
+    end
+    ConfigSetting.set_mapped_setting(@save_file_path, [@map_name, 'map_objects'], map_data)
   end
 
   def get_random_off_map_value
@@ -448,7 +473,10 @@ class GLBackground
             end
             # puts "OPTIONS"
             # puts options.inspect
-            buildings << klass.new(x_value.to_i, y_value.to_i, window, options)
+            b = klass.new(x_value.to_i, y_value.to_i, window, options)
+            # puts "CREATED NEW B: #{b.class}"
+            buildings << b
+
           end
         end
       end
@@ -1532,6 +1560,9 @@ class GLBackground
           # Building draw the tile here
           # Pickups update the x and y coords, and then the pickup draws itself.
           buildings.each do |building_id, building|
+            # puts "NEXTING BUILDING: #{building.current_map_tile_x} - to #{x_element['gps_x']} and maybe: #{x_element[:gps_x]}" if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
+            # puts x_element.inspect
+# {"height"=>2.464469126412455, "terrain_type"=>"dirt", "terrain_index"=>0, "corner_heights"=>{"top_left"=>2.583977320907705, "top_right"=>3, "bottom_left"=>2.9365365230516582, "bottom_right"=>3}, "terrain_paths_and_weights"=>{"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5}, "bottom_left"=>{"0"=>1.0}, "bottom_right"=>{"0"=>0.5}}}
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
 
             # @local_map_movement_y
@@ -1563,9 +1594,11 @@ class GLBackground
 
               # building.alt_draw(opengl_coord_x, opengl_coord_y, opengl_increment_x, opengl_increment_y, x_element['height'])
             if !building.kind_of?(Buildings::Landwreck) #&& !building.kind_of?(OffensiveStore)
+              # puts "BUILDING DRAW TILE HERE: #{building.class}"
               building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
             #   # building.x_and_y_update((x_index * @tile_pixel_width) - @local_map_movement_x, (y_index * @tile_pixel_height) + @local_map_movement_y)
             else
+              # puts "NOT BUILDING DRAW TILE HERE: #{building.class}"
               # building.tile_draw_gl(vert_pos1, vert_pos2, vert_pos3, vert_pos4)
               # building.update_from_3D(vert_pos1, vert_pos2, vert_pos3, vert_pos4, x_element['height'], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), glGetFloatv(GL_VIEWPORT))
             end
