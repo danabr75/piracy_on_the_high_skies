@@ -1,12 +1,12 @@
 # require_relative '../lib/global_constants'
-require_relative '../lib/global_variables.rb'
+# require_relative '../lib/global_variables.rb'
+require_relative '../lib/global_constants.rb'
 
 class Faction
   # include GlobalVariables
   include GlobalConstants
 
-  attr_reader :id, :displayed_name, :color
-  attr_reader :factional_relations
+  attr_reader :id, :displayed_name, :color, :raw_color, :factional_relations
   attr_reader :emblem, :emblem_scaler, :emblem_width_half, :emblem_height_half, :emblem_info
 
   MIN_FACTIONAL_RELATION = -100
@@ -18,11 +18,12 @@ class Faction
 
   EMBLEM_SCALER = 16.0
 
-  def initialize id, displayed_name, color, height_scale
+  def initialize id, displayed_name, color, height_scale, factional_relations = {}
     @id = id
     @displayed_name = displayed_name
-    @color = color
-    @factional_relations = {}
+    @color = Gosu::Color.argb(color)
+    @raw_color = color
+    @factional_relations = factional_relations
     @emblem = Gosu::Image.new("#{MEDIA_DIRECTORY}/factions/#{@id}.png")
     @emblem_info = @emblem.gl_tex_info
     @emblem_width  = (@emblem.width  / 2.0) / height_scale
@@ -91,15 +92,50 @@ class Faction
   end
   # Can move to script
   def self.init_factions height_scale = 1
+    save_file_path = CURRENT_SAVE_FILE
+
     factions = []
-    [
-      {displayed_name: "USSR",    name: 'faction_1', color: Gosu::Color.argb(0xff_FF0000)},
-      {displayed_name: "Bandits", name: 'faction_2', color: Gosu::Color.argb(0xff_ffffff)},
-      {displayed_name: "Fortune's Horizon", name: 'player',    color: Gosu::Color.argb(0xff_00ff00)}
-    ].each do |value|
-      factions << Faction.new(value[:name], value[:displayed_name], value[:color], height_scale)
+    raw_factions_datas = ConfigSetting.get_setting(save_file_path, "factions")
+    if raw_factions_datas.nil? && raw_factions_datas != ''
+      [
+        {displayed_name: "USSR",    name: 'faction_1', color: 0xff_FF0000},
+        {displayed_name: "Bandits", name: 'faction_2', color: 0xff_ffffff},
+        {displayed_name: "Fortune's Horizon", name: 'player',    color: 0xff_00ff00}
+      ].each do |value|
+        factions << Faction.new(value[:name], value[:displayed_name], value[:color], height_scale)
+      end
+    else
+      factions_datas = JSON.parse(raw_factions_datas)
+      factions_datas.each do |faction_data|
+        puts "PARSING FACTION DATA: #{faction_data}"
+        factions << Faction.new(
+          faction_data['name'],
+          faction_data['displayed_name'],
+          faction_data['color'],
+          height_scale,
+          faction_data['factional_relations']
+        )
+      end
     end
 
     return factions
+  end
+
+  def self.save_factions factions
+    save_file_path = CURRENT_SAVE_FILE
+
+    factions_datas = []
+    # :id, :displayed_name, :color, :raw_color, :factional_relations
+    factions.each do |faction|
+      factions_datas << {
+        'name' => faction.id,
+        'displayed_name' => faction.displayed_name,
+        'color' => faction.raw_color,
+        'factional_relations' => faction.factional_relations,
+      }
+    end
+    puts "SAVING FACTION DATAS"
+    puts factions_datas
+    ConfigSetting.set_setting(save_file_path, "factions", factions_datas.to_json)
   end
 end

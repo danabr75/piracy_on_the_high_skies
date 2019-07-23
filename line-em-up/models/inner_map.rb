@@ -270,6 +270,7 @@ class InnerMap
   def save_inner_map_data
     puts "save_inner_map_data"
     @gl_background.store_background_data(@buildings)
+    Faction.save_factions(@factions)    
   end
 
   def save_game
