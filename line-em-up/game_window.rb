@@ -161,23 +161,19 @@ class GameWindow < Gosu::Window
   end
 
   def load_save
+    puts "load_game here"
     delete_current_save_file
     FileUtils.cp(@backup_save_path, @current_save_path)
-    GC.start
-    sleep 2
-    puts "load_game here"
   end
 
   def start_new
     puts "STArt new"
     delete_current_save_file
     init_current_save_file
-    GC.start
-    sleep 2
   end
 
   def activate_inner_map map_name
-    GC.start
+    puts "ACTIVATING INNER MAP"
     @inner_map = InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
     @outer_map.disable
     @in_game_menu.disable
@@ -185,20 +181,18 @@ class GameWindow < Gosu::Window
   end
 
   def activate_outer_map
-    # puts "ACTIVATING OUTER MAP"
-    GC.start
+    puts "ACTIVATING OUTER MAP"
     @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
     @in_game_menu.disable
     @outer_map.enable
   end
 
   def activate_main_menu
-    GC.start
-    # puts "activate_main_menu"
-    @outer_map.disable if @outer_map
+    # @outer_map.disable if @outer_map
     @outer_map = nil
-    @inner_map.disable if @inner_map
+    # @inner_map.disable if @inner_map
     @inner_map = nil
+    GC.start
     @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
     @in_game_menu.enable
   end
