@@ -30,7 +30,7 @@ module Buildings
 
     # For radius size calculations
     def self.get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/building.png", :tileable => true)
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/building.png")
     end
     
     # attr_reader :inited

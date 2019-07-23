@@ -18,6 +18,7 @@ module GlobalConstants
   SAVE_FILE_DIRECTORY           = File.join(APP_DIRECTORY, "save_files")
 
   CURRENT_SAVE_FILE           = File.join(SAVE_FILE_DIRECTORY, "current.txt")
+  BACKUP_SAVE_FILE           = File.join(SAVE_FILE_DIRECTORY, "save1.txt")
 
   CONFIG_FILE           = File.join(SAVE_FILE_DIRECTORY, "config.txt")
 

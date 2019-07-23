@@ -58,14 +58,14 @@ module OuterMapObjects
       @menu.add_item(
         :save_game, "Save",
         0, 0,
-        lambda {|window, menu, id| window.save_game },
+        lambda {|window, menu, id| window.save_game; menu.disable },
         nil,
         {is_button: true}
       )
       @menu.add_item(
         :load_game, "Load",
         0, 0,
-        lambda {|window, menu, id| window.load_game },
+        lambda {|window, menu, id| window.load_save; menu.disable },
         nil,
         {is_button: true}
       )
@@ -84,6 +84,10 @@ module OuterMapObjects
         {is_button: true}
       )
 
+    end
+
+    def load_save
+      @window.load_save
     end
 
     def refresh

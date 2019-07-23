@@ -1,32 +1,10 @@
 require_relative 'outer_map_objects/cursor.rb'
+# require 'fileutils'
 
 class InGameMenu
-  attr_reader :active, :current_save_file_path
+  attr_reader :active, :current_save_file_path, :backup_save_path
 
-  def delete_current_save_file(save_file_path)
-    File.delete(save_file_path) if File.file?(save_file_path)
-  end
-
-  def init_current_save_file(save_file_path)
-    # if !File.file?(save_file_path)
-      ConfigSetting.set_setting(save_file_path, "current_ship_index", "0")
-      ConfigSetting.set_mapped_setting(save_file_path, ["player_fleet", "0", "klass"], "BasicShip")
-      init_data = {
-        "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
-        "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",
-        "5":"HardpointObjects::DumbMissileHardpoint","2":"HardpointObjects::BulletHardpoint",
-        "10":"HardpointObjects::BasicEngineHardpoint",
-        "6":"HardpointObjects::MinigunHardpoint","8":"HardpointObjects::BasicEngineHardpoint",
-        "12":"HardpointObjects::BasicSteamCoreHardpoint",
-      }
-      init_data.each do |key, value|
-        ConfigSetting.set_mapped_setting(save_file_path, ["player_fleet", "0", "hardpoint_locations", key], value)
-      end
-      ConfigSetting.set_setting(save_file_path, "Credits", "500")
-    # end
-  end
-
-  def initialize window, width, height, width_scale, height_scale, config_path, current_save_file_path
+  def initialize window, width, height, width_scale, height_scale, config_path, current_save_file_path, backup_save_path
     @width  = width
     @height = height
     @window = window
@@ -37,6 +15,8 @@ class InGameMenu
     @cell_height = 30 * height_scale
 
     @current_save_file_path = current_save_file_path
+
+    @backup_save_path       = backup_save_path
 
     @pointer = OuterMapObjects::Cursor.new(@height_scale)
     @mouse_x = 0
@@ -60,18 +40,20 @@ class InGameMenu
     end
 
     # if loadable save is present
-    # @menu.add_item(
-    #   :load_game, "Load Last Save",
-    #   0, 0,
-    #   lambda {|window, menu, id| window.load_game },
-    #   nil,
-    #   {is_button: true}
-    # )
+    if File.file?(@backup_save_path)
+      @menu.add_item(
+        :load_game, "Load Last Save",
+        0, 0,
+        lambda {|window, menu, id| window.load_save; menu.disable; window.activate_outer_map },
+        nil,
+        {is_button: true}
+      )
+    end
 
     @menu.add_item(
       :in_game_menu_start_new_game, File.file?(@current_save_file_path) ? "Start New Game (will overwrite your old save)" : "Start New Game",
       0, 0,
-      lambda {|window, menu, id| window.delete_current_save_file(window.current_save_file_path); window.init_current_save_file(window.current_save_file_path); menu.disable; window.activate_outer_map },
+      lambda {|window, menu, id|  window.start_new; menu.disable; window.activate_outer_map },
       nil,
       {is_button: true}
     )
@@ -86,6 +68,10 @@ class InGameMenu
     # @menu.enable
   end
 
+  def start_new
+    @window.start_new
+  end
+
   def refresh
     LUIT.config({window: @window})
   end
@@ -94,9 +80,14 @@ class InGameMenu
     @window.close
   end
 
-  def load_game
-    @window.load_game
+  # window.load_save_file(window.backup_save_path)
+  def load_save
+    @window.load_save
   end
+  # def load_save_file backup_save_path, current_save_file_path
+  #   # @window.load_game
+  #   FileUtils.cp(backup_save_path, current_save_file_path)
+  # end
 
   # def save_game
   #   @window.save_game
