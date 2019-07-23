@@ -15,5 +15,10 @@ module GlobalConstants
 
   VENDOR_LIB_DIRECTORY  = File.join(CONTENT_DIRECTORY, "vendors", "lib")
 
-  CONFIG_FILE           = File.join(APP_DIRECTORY, "config.txt")
+  SAVE_FILE_DIRECTORY           = File.join(APP_DIRECTORY, "save_files")
+
+  CURRENT_SAVE_FILE           = File.join(SAVE_FILE_DIRECTORY, "current.txt")
+
+  CONFIG_FILE           = File.join(SAVE_FILE_DIRECTORY, "config.txt")
+
 end

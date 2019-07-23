@@ -65,7 +65,7 @@ class Player < ScreenFixedObject
     @current_map_tile_x  = current_map_tile_x
     @current_map_tile_y  = current_map_tile_y
 
-
+    @save_file_path   = CURRENT_SAVE_FILE
     # run_pixel_to_tile_validations
     # puts "current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y"
     # puts "#{current_map_pixel_x}, #{current_map_pixel_y}, #{current_map_tile_x}, #{current_map_tile_y}"
@@ -74,7 +74,8 @@ class Player < ScreenFixedObject
     # Can't get x and y until we know the screen size... hmmm
 
     # Have to get ship image before super, to get image size..
-    ship_klass_name = ConfigSetting.get_setting(CONFIG_FILE, 'ship', BasicShip.name.to_s)
+    ship_index = ConfigSetting.get_setting(@save_file_path, "current_ship_index")
+    ship_klass_name = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", ship_index, "klass"])
     raise "Did not get Ship Class from config" if ship_klass_name.nil?
     ship_klass = eval(ship_klass_name)
   
@@ -124,7 +125,7 @@ class Player < ScreenFixedObject
 
     # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"starboard_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"port_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
 
-    hardpoint_data = self.class.get_hardpoint_data(ship_klass_name)
+    hardpoint_data = self.class.get_hardpoint_data
 
     if ship_klass
       # from_player is for debugging only
@@ -213,7 +214,7 @@ class Player < ScreenFixedObject
   end
 
   def refresh_ship options = {}
-    hardpoint_data = self.class.get_hardpoint_data(@ship.class.name)
+    hardpoint_data = self.class.get_hardpoint_data
     # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
     @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, ZOrder::HardpointBase, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum, health: @ship.health}))
     # @ship.mass = @ship.mass# * 3 # speed here?
@@ -235,8 +236,9 @@ class Player < ScreenFixedObject
     return @ship.use_steam(usage)
   end
 
-  def self.get_hardpoint_data ship_klass_name
-    hardpoint_data = ConfigSetting.get_mapped_setting(CONFIG_FILE, [ship_klass_name, 'hardpoint_locations'])
+  def self.get_hardpoint_data
+    ship_index     = ConfigSetting.get_setting(CURRENT_SAVE_FILE, "current_ship_index")
+    hardpoint_data = ConfigSetting.get_mapped_setting(CURRENT_SAVE_FILE, ["player_fleet", ship_index, "hardpoint_locations"])
     return {hardpoint_data: hardpoint_data}
   end
 

@@ -10,12 +10,17 @@ require_relative '../models/basic_ship.rb'
 require_relative '../models/ship_inventory.rb'
 require_relative '../models/object_inventory.rb'
 
+require_relative "global_constants.rb"
+require_relative "global_variables.rb"
+
 require 'gosu'
 # require "#{MODEL_DIRECTORY}/basic_ship.rb"
 # require_relative "config_settings.rb"
 
 # THIS IS THE MAIN INVENTORY CONTROLLER, controls the player inventory, hardpoint inventory, and any other container that opens up on the screen.
 class ShipLoadoutSetting < Setting
+  include GlobalVariables
+  include GlobalConstants
   # MEDIA_DIRECTORY
   # SELECTION = ::Launcher.descendants
   NAME = "ship_loadout"
@@ -36,7 +41,7 @@ class ShipLoadoutSetting < Setting
 
   # attr_accessor :cursor_object
 
-  def initialize window, max_width, max_height, current_height, config_file_path, width_scale, height_scale, options = {}
+  def initialize window, max_width, max_height, current_height, width_scale, height_scale, options = {}
     @width_scale  = width_scale
     @height_scale = height_scale
     @average_scale = (@width_scale + @height_scale) / 2.0
@@ -57,7 +62,7 @@ class ShipLoadoutSetting < Setting
     @max_height = max_height
     # @next_x = 5 * @scale
     @prev_x = @max_width - 5 * @scale - @font.text_width('>')
-    @selection = []
+    # @selection = []
 
     @ship_inventory = ShipInventory.new(window)
     # @launchers = ::Launcher.descendants.collect{|d| d.name}
@@ -74,13 +79,17 @@ class ShipLoadoutSetting < Setting
     @hardpoint_image_z = 50
     # puts "SELECTION: #{@selection}"
     # puts "INNITING #{config_file_path}"
-    @config_file_path = config_file_path
-    @name = self.class::NAME
+    @config_file_path = CONFIG_FILE
+    @save_file_path   = CURRENT_SAVE_FILE
+    # @name = self.class::NAME
     # @ship_value = ship_value
     # implement hide_hardpoints on pilotable ship class
 
     # Used to come from loadout window
-    @ship_value = ConfigSetting.get_setting(@config_file_path, "ship", @selection[0])
+    @ship_index = ConfigSetting.get_setting(@save_file_path, "current_ship_index")
+    raise "missing ship index" if @ship_index.nil? || @ship_index == ''
+    @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
+    raise "missing ship value" if @ship_value.nil? || @ship_value == ''
     begin
       klass = eval(@ship_value)
     rescue Exception => e
@@ -91,7 +100,7 @@ class ShipLoadoutSetting < Setting
       puts @ship_value
     end
 
-    hardpoint_data = Player.get_hardpoint_data(@ship_value)
+    hardpoint_data = Player.get_hardpoint_data
     @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
 
     # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
@@ -99,7 +108,7 @@ class ShipLoadoutSetting < Setting
     # puts "RIGHT HERE!@!!!"
     # puts "@ship.starboard_hard_points"
     # puts @ship.starboard_hard_points
-    @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
+    # @value = ConfigSetting.get_setting(@config_file_path, @name, @selection[0])
     # @window = window
     # first array is rows at the top, 2nd goes down through the rows
     # @inventory_matrix = []
@@ -353,7 +362,7 @@ class ShipLoadoutSetting < Setting
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         hardpoint_element[:item] = @window.cursor_object
        # puts "CONFIG SETTING 1"
-        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         hardpoint_element[:item][:key] = id
         @window.cursor_object = nil
       else
@@ -364,7 +373,7 @@ class ShipLoadoutSetting < Setting
         hardpoint_element[:item] = @window.cursor_object
         hardpoint_element[:item][:key] = id
        # puts "CONFIG SETTING 2 "
-        ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
         @window.cursor_object = temp_element
         @window.cursor_object[:key] = nil # Original home lost, no last home of key present
         # @window.cursor_object[:follow_cursor] = true
@@ -379,7 +388,7 @@ class ShipLoadoutSetting < Setting
        # puts "CONFIG SETTING 3 "
         # Not working.. 
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
-      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], nil)
+      ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "hardpoint_locations", i.to_s], nil)
     elsif @window.cursor_object
       # Placeing something new in inventory
       hardpoint_element[:item] = @window.cursor_object
@@ -387,18 +396,18 @@ class ShipLoadoutSetting < Setting
         # puts "CONFIG SETTING 4 "
       # puts [@ship.class.name, "#{port}_hardpoint_locations", i.to_s].to_s
       # puts hardpoint_element[:item][:klass]
-      ConfigSetting.set_mapped_setting(@config_file_path, [@ship.class.name, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
+      ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "hardpoint_locations", i.to_s], hardpoint_element[:item][:klass])
       hardpoint_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
       @window.cursor_object = nil
     end
   end
 
-  def get_values
-    if @value
-      @value
-    end
-  end
+  # def get_values
+  #   if @value
+  #     @value
+  #   end
+  # end
 
   def hardpoint_update
     hover_object = nil
@@ -619,7 +628,7 @@ class ShipLoadoutSetting < Setting
       # @steam_core_usage_button.draw(0, 0)
       @buttons.each {|b| b.draw(0,0)}
 
-      @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw(@name, ((@max_width / 2) - @font.text_width(@name) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 
       @ship.draw
       # @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)

@@ -40,6 +40,7 @@ class ShipInventory
     # @hardpoint_image_z = ZOrder::Hardpoint # Used to be 50
     @hardpoint_image_z = 50
     @config_file_path = CONFIG_FILE
+    @save_file_path   = CURRENT_SAVE_FILE
     @inventory_matrix_max_width = 4
     @inventory_matrix_max_height = 7
     @inventory_matrix = []
@@ -57,7 +58,7 @@ class ShipInventory
     @font = Gosu::Font.new(@font_height)
     # @window.cursor_object = nil
     @mouse_x, @mouse_y = [0,0]
-    @credits = JSON.parse(ConfigSetting.get_setting(@config_file_path, 'Credits', '0'))
+    @credits = JSON.parse(ConfigSetting.get_setting(@save_file_path, 'Credits', '0'))
     raise "INVALID CREDIT TYPE: #{@credits.class}" if !@credits.kind_of?(Integer)
     init_matrix
   end
@@ -76,7 +77,7 @@ class ShipInventory
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "matrix_#{x}_#{y}"
         click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
-        klass_name = ConfigSetting.get_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s])
+        klass_name = ConfigSetting.get_mapped_setting(@save_file_path, ['Inventory', x.to_s, y.to_s])
         item = nil
         if klass_name
           klass = eval(klass_name)
@@ -99,11 +100,11 @@ class ShipInventory
   def add_credits new_credits
    # puts "ADDING CREDITS #{@credits.class} w new credits #{new_credits.class} on ShipInventory"
     @credits += new_credits
-    ConfigSetting.set_setting(@config_file_path, 'Credits', @credits)
+    ConfigSetting.set_setting(@save_file_path, 'Credits', @credits)
   end
   def subtract_credits new_credits
     @credits -= new_credits
-    ConfigSetting.set_setting(@config_file_path, 'Credits', @credits)
+    ConfigSetting.set_setting(@save_file_path, 'Credits', @credits)
   end
 
   def onClick element_id
@@ -191,7 +192,7 @@ class ShipInventory
         # element[:follow_cursor] = false
         # @inventory_matrix[x][y][:item][:follow_cursor] =
         matrix_element[:item] = @window.cursor_object
-        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@save_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
         matrix_element[:item][:key] = id
         @window.cursor_object = nil
       else
@@ -201,7 +202,7 @@ class ShipInventory
         temp_element = element
         matrix_element[:item] = @window.cursor_object
         matrix_element[:item][:key] = id
-        ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
+        ConfigSetting.set_mapped_setting(@save_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
         @window.cursor_object = temp_element
         @window.cursor_object[:key] = nil # Original home lost, no last home of key present
         # @window.cursor_object[:follow_cursor] = true
@@ -213,11 +214,11 @@ class ShipInventory
       # element[:follow_cursor] = true
       @window.cursor_object = element
       matrix_element[:item] = nil
-      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], nil)
+      ConfigSetting.set_mapped_setting(@save_file_path, ['Inventory', x.to_s, y.to_s], nil)
     elsif @window.cursor_object
       # Placeing something new in inventory
       matrix_element[:item] = @window.cursor_object
-      ConfigSetting.set_mapped_setting(@config_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
+      ConfigSetting.set_mapped_setting(@save_file_path, ['Inventory', x.to_s, y.to_s], matrix_element[:item][:klass])
       matrix_element[:item][:key] = id
       # matrix_element[:item][:follow_cursor] = false
       @window.cursor_object = nil

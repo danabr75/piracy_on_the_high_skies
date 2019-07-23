@@ -1,4 +1,5 @@
 # pry -r ./irb_requirements.rb
+# pry -r ./line-em-up/generators/irb_requirements.rb
 # require 'ruby_parser'
 # require 'ruby2c'
   # sexp_processor, ruby_parser, ruby2c

@@ -10,7 +10,6 @@ Dir["#{VENDOR_LIB_DIRECTORY}/**/*.rb"].each { |f| require f }
 
 class InnerMap
   include GlobalConstants
-  # CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
 
   attr_accessor :width, :height, :block_all_controls, :ship_loadout_menu, :menu, :cursor_object
 
@@ -28,41 +27,6 @@ class InnerMap
 
   include GlobalVariables
 
-  def init_player_ship_data_if_necessary(config_path)
-    ship_value = ConfigSetting.get_setting(config_path, "ship")
-    if ship_value.nil? || ship_value == ''
-      ConfigSetting.set_setting(config_path, "ship", "BasicShip")
-      ship_value = "BasicShip"
-    end
-
-    # ship_hardpoint_values = ConfigSetting.get_setting(config_file_path, ship_value)
-
-    ship_hardpoint_values = ConfigSetting.get_mapped_setting(config_path, [ship_value, "hardpoint_locations"])
-    if ship_hardpoint_values.nil? || ship_hardpoint_values == ''
-
-      init_data = {
-        "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
-        "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",
-        "5":"HardpointObjects::DumbMissileHardpoint","2":"HardpointObjects::BulletHardpoint",
-        "10":"HardpointObjects::BasicEngineHardpoint",
-        # "7":"HardpointObjects::BasicEngineHardpoint",
-        "6":"HardpointObjects::MinigunHardpoint","8":"HardpointObjects::BasicEngineHardpoint",
-        # "9":"HardpointObjects::BasicEngineHardpoint",
-        "12":"HardpointObjects::BasicSteamCoreHardpoint",
-        # "11":"HardpointObjects::BasicEngineHardpoint"
-      }
-      init_data.each do |key, value|
-        ConfigSetting.set_mapped_setting(config_path, [ship_value, "hardpoint_locations", key], value)
-      end
-    end
-
-
-    credit_value = ConfigSetting.get_setting(config_path, "Credits")
-    if credit_value.nil? || credit_value == ''
-      ConfigSetting.set_setting(config_path, "Credits", "500")
-      # ship_value = "BasicShip"
-    end
-  end
 
 
   def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, config_path, options = {}
@@ -71,8 +35,6 @@ class InnerMap
     @map_name = map_name
 
     @config_path = self.class::CONFIG_FILE
-
-    init_player_ship_data_if_necessary(@config_path)
 
     @open_gl_executer = ExecuteOpenGl.new
 
@@ -284,7 +246,7 @@ class InnerMap
     # START SHIP LOADOUT INIT.
     # @refresh_player_ship = false
     @cursor_object = nil
-    @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, get_center_font_ui_y, @config_path, @height_scale, @height_scale, {scale: @average_scale})
+    @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, get_center_font_ui_y, @height_scale, @height_scale, {scale: @average_scale})
     # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu, @exit_map_menu]

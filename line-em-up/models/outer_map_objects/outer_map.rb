@@ -63,6 +63,13 @@ module OuterMapObjects
         {is_button: true}
       )
       @menu.add_item(
+        :load_game, "Load",
+        0, 0,
+        lambda {|window, menu, id| window.load_game },
+        nil,
+        {is_button: true}
+      )
+      @menu.add_item(
         :exit_to_main_menu, "Exit to Main Menu",
         0, 0,
         lambda {|window, menu, id| menu.disable; window.activate_main_menu }, 

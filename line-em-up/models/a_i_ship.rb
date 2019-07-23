@@ -12,7 +12,6 @@ require 'glut'
 
 class AIShip < ScreenMapFixedObject
   prepend Factionable
-  # CONFIG_FILE = "#{CURRENT_DIRECTORY}/../config.txt"
   attr_accessor :grapple_hook_cooldown_wait
   attr_accessor :drawable_items_near_self
   attr_accessor :special_target_focus
