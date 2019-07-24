@@ -1,24 +1,23 @@
 require_relative 'hardpoint_object'
 
 module HardpointObjects
-  class SteamCoreHardpoint < HardpointObjects::HardpointObject
+  class ArmorHardpoint < HardpointObjects::HardpointObject
     ABSTRACT_CLASS = true
     HARDPOINT_NAME = "replace_me"  
     PROJECTILE_CLASS   = nil 
     FIRING_GROUP_NUMBER = nil # Passive
 
-    STEAM_MAX_CAPACITY  = nil
-    STEAM_RATE_INCREASE = nil
+    PERMANENT_STEAM_USE       = nil
+    TILES_PER_SECOND_MODIFIER = nil
+    ROTATION_MODIFIER         = nil
 
     SHOW_HARDPOINT = false
 
-    SLOT_TYPE = :steam_core
+    SHOW_HARDPOINT_BASE = false
+
+    SLOT_TYPE = :armor
 
     def self.get_hardpoint_image
-      raise "OVERRIDE ME"
-    end
-
-    def self.name
       raise "OVERRIDE ME"
     end
 
@@ -31,3 +30,4 @@ module HardpointObjects
     end
   end
 end
+

@@ -111,7 +111,12 @@ class BasicShip < PilotableShip
     {
       angle_offset: 0, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
       slot_type: :steam_core, 
-      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| 0 }
+      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| -(66 * scale) }
+    },
+    {
+      angle_offset: 0, # Not sure if this offest is necessary for the engine - Yes! To calculate image rotation
+      slot_type: :armor, 
+      x_offset: lambda { |image, scale| 0}, y_offset: lambda { |image, scale| (66 * scale) }
     }
     # {y_offset: lambda { |image| 0 } , x_offset: lambda { |image| 0 } }
   ]

@@ -159,6 +159,8 @@ class Hardpoint < GeneralObject
       color, hover_color = [Gosu::Color.argb(0xff_2e63bf), Gosu::Color.argb(0xff_7fbbff)]
     elsif slot_type == :steam_core
       color, hover_color = [Gosu::Color.argb(0xff_d4ce55), Gosu::Color.argb(0xff_fff36b)]
+    elsif slot_type == :armor
+      color, hover_color = [Gosu::Color.argb(0xff_ff9900), Gosu::Color.argb(0xff_ffc266)]
     end
     return [color, hover_color]
   end
@@ -169,14 +171,15 @@ class Hardpoint < GeneralObject
     case hp_slot_type
     when :generic
       is_acceptable = true if [:offensive, :engine].include?(item_slot_type)
-    when :offensive
-      is_acceptable = true if item_slot_type == hp_slot_type
-    when :engine
-      is_acceptable = true if item_slot_type == hp_slot_type
-    when :steam_core
-      is_acceptable = true if item_slot_type == hp_slot_type
+    # when :offensive
+    #   is_acceptable = true if item_slot_type == hp_slot_type
+    # when :engine
+    #   is_acceptable = true if item_slot_type == hp_slot_type
+    # when :steam_core
+    #   is_acceptable = true if item_slot_type == hp_slot_type
     else
-      raise "invalid slot type"
+      is_acceptable = true if item_slot_type == hp_slot_type
+      # raise "invalid slot type"
     end
 
     return is_acceptable
@@ -383,7 +386,7 @@ class Hardpoint < GeneralObject
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
     @item.draw(new_angle, new_x, new_y, @z, @z_base, @z_projectile) if @item
-    @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item && @slot_type != :engine
+    # @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item && @slot_type != :engine
   end
 
   def draw_gl

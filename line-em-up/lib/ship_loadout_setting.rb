@@ -170,9 +170,12 @@ class ShipLoadoutSetting < Setting
     button_height += @legend_4.h
     color, hover_color = Hardpoint.get_hardpoint_colors(:generic)
     @legend_5    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Green: Offensive/Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    button_height += @legend_5.h
+    color, hover_color = Hardpoint.get_hardpoint_colors(:armor)
+    @legend_6    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Orange: Armor", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
 
 
-    @buttons = [@steam_core_capacity_button, @steam_core_usage_button, @legend_1, @legend_2, @legend_3, @legend_4, @legend_5]
+    @buttons = [@steam_core_capacity_button, @steam_core_usage_button, @legend_1, @legend_2, @legend_3, @legend_4, @legend_5, @legend_6]
   end
 
   def add_to_ship_inventory_credits new_credits

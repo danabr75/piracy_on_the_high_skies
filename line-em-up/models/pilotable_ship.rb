@@ -150,6 +150,7 @@ class PilotableShip < GeneralObject
     # ConfigSetting.get_mapped_setting(PilotableShip::CONFIG_FILE, ['BasicShip', 'front_hardpoint_locations', '1'])
 
     # Update hardpoints location
+    @armor_hardpoints      = {}
     @engine_hardpoints     = {}
     @steam_core_hardpoints = []
     @hardpoints = Array.new(self.class::HARDPOINT_LOCATIONS.length) {nil}
@@ -192,6 +193,15 @@ class PilotableShip < GeneralObject
         # puts "FOUND SCREAM CORE HERE: #{location_dup[:slot_type]} - #{item_klass::SLOT_TYPE}"
         @steam_core_hardpoints << item_klass
       end
+
+      if [:armor].include?(location_dup[:slot_type]) && !item_klass.nil? && item_klass::SLOT_TYPE == :armor
+        # puts 'ADIDNG ITEM KLASS HERE: ' 
+        # puts item_klass.inspect
+        # puts item_klass.to_s
+        # puts "item_klass::SLOT_TYPE: #{item_klass::SLOT_TYPE}"
+        @armor_hardpoints[index] = item_klass
+      end
+
       # Always point engines toward the rear
       if (location_dup[:slot_type] == :engine || location_dup[:slot_type] == :generic) && !item_klass.nil? &&  item_klass::SLOT_TYPE == :engine
         # puts "SETTING ENGINE TYPE ANGLE OFFSET"
@@ -241,16 +251,12 @@ class PilotableShip < GeneralObject
     engine_permanent_steam_usage     = 0.0
     engine_tiles_per_second_modifier = 1.0
     engine_rotation_modifier         = 1.0
-    # puts "@engine_hardpoints.count: #{@engine_hardpoints.count}"
-    @engine_hardpoints.reject! do |index, engine_klass|
-      if (@current_steam_capacity - engine_klass::PERMANENT_STEAM_USE) >= 0
-        # puts "(@current_steam_capacity - engine_klass::PERMANENT_STEAM_USE) >= 0"
-        # puts "(#{@current_steam_capacity} - #{engine_klass::PERMANENT_STEAM_USE}) >= 0"
-        # puts "COUNTING UP: #{engine_klass}"
-        engine_permanent_steam_usage += engine_klass::PERMANENT_STEAM_USE
-        engine_rotation_modifier     = engine_rotation_modifier * engine_klass::ROTATION_MODIFIER
-        engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * engine_klass::TILES_PER_SECOND_MODIFIER
-        @current_steam_capacity -= engine_klass::PERMANENT_STEAM_USE
+    @engine_hardpoints.reject! do |index, klass|
+      if (@current_steam_capacity - klass::PERMANENT_STEAM_USE) >= 0
+        engine_permanent_steam_usage += klass::PERMANENT_STEAM_USE
+        engine_rotation_modifier     = engine_rotation_modifier * klass::ROTATION_MODIFIER
+        engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * klass::TILES_PER_SECOND_MODIFIER
+        @current_steam_capacity -= klass::PERMANENT_STEAM_USE
         false
       else
         # puts "NOT COUNTING ENGINE"
@@ -258,19 +264,29 @@ class PilotableShip < GeneralObject
         true
       end
     end
+    # puts @armor_hardpoints.inspect
+    @armor_hardpoints.reject! do |index, klass|
+      # puts "kalss: #{klass}"
+      if (@current_steam_capacity - klass::PERMANENT_STEAM_USE) >= 0
+        engine_permanent_steam_usage += klass::PERMANENT_STEAM_USE
+        engine_rotation_modifier     = engine_rotation_modifier * klass::ROTATION_MODIFIER
+        engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * klass::TILES_PER_SECOND_MODIFIER
+        @current_steam_capacity -= klass::PERMANENT_STEAM_USE
+        false
+      else
+        # puts "NOT COUNTING ENGINE"
+        @hardpoints[index].disable
+        true
+      end
+    end
+
+
     @current_steam_capacity = 0
 
 
     @engine_permanent_steam_usage     = engine_permanent_steam_usage
     @engine_tiles_per_second_modifier = engine_tiles_per_second_modifier
     @engine_rotation_modifier         = engine_rotation_modifier
-    # @engine_steam_usage_increment = engine_steam_usage_increment
-    # @boost_speed_modifier         = boost_speed_modifier
-    # @boost_steam_usage            = boost_steam_usage
-    # puts "ENGINE STATS"
-    # puts [@engine_permanent_steam_usage, @engine_tiles_per_second_modifier, @engine_rotation_modifier]
-
-   # puts "@engine_hardpoints: #{@engine_hardpoints.count}"
 
     options.delete(:hardpoint_data)
 
@@ -288,45 +304,14 @@ class PilotableShip < GeneralObject
     @momentum_rate    = self.class::MOMENTUM_RATE
     @current_momentum = options[:current_momentum] || 0
 
-    # puts "@engine_tiles_per_second_modifier: #{@engine_tiles_per_second_modifier}"
-    # puts " @engine_hardpoints.count: #{ @engine_hardpoints.count}"
     if @engine_hardpoints.count > 0
       @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @height_scale
       @rotation_speed    = self.class::ROTATION_SPEED * @engine_rotation_modifier #+ rotation_boost
-      # puts "@tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @height_scale"
-      # puts "#{@tiles_per_second} = (#{self.class::TILES_PER_SECOND} * #{@engine_tiles_per_second_modifier}) * #{@height_scale}"
     else
       @rotation_speed    = self.class::ROTATION_SPEED #+ rotation_boost
       @tiles_per_second = (self.class::TILES_PER_SECOND / 10.0) * @height_scale
     end
-    # puts "@tiles_per_second: #{@tiles_per_second}"
-    # @engine_hardpoints: 2
-    # @engine_tiles_per_second_modifier: 2.25
-    #  @engine_hardpoints.count: 2
-    # @tiles_per_second = (self.class::TILES_PER_SECOND * @engine_tiles_per_second_modifier) * @height_scale
-    # 0.84375 = (0.2 * 2.25) * 1.875
-    # @tiles_per_second: 0.84375
 
-
-    # @speed             = ((self.class::SPEED * @average_scale) + (acceleration_boost  * @average_scale)) / 3.0
-    # puts "SPEED #{@speed}" if owner.class == Player
-    # @speed_steam_usage = @engine_steam_usage_increment
-    # @boost_speed       = ((self.class::SPEED * @average_scale) + ((acceleration_boost * boost_speed_modifier)  * @average_scale)) / 3.0
-    # puts "BOOST SPEED #{@boost_speed}" if owner.class == Player
-    # @boost_speed_steam_usage = @engine_steam_usage_increment + @boost_steam_usage
-
-    # # HERE22: 4.125 = 4.125
-    # @mass           = (self.class::MASS  + mass_boost) * @average_scale
-    # puts "@MASS JERE: #{@mass}   =   (#{self.class::MASS}  + #{mass_boost}) * #{ @average_scale}" if owner.class == Player
-    # @boost_mass = @mass * boost_mass_modifier
-    # puts "@boost_mass JERE: #{@boost_mass}   =#{ @mass} * #{boost_mass_modifier}" if owner.class == Player
-    # puts "MASS #{@mass}" if owner.class == Player
-    # puts "BOOST MASS #{@boost_mass}" if owner.class == Player
-
-    # @current_map_pixel_x = current_map_pixel_x
-    # owner.current_map_pixel_y = current_map_pixel_y
-    # @current_map_tile_x  = current_map_tile_x
-    # @current_map_tile_y  = current_map_tile_y
     @block_momentum_increase = false
     @block_momentum_decrease = false
 
