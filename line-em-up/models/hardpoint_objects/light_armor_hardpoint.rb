@@ -1,14 +1,14 @@
 require_relative 'armor_hardpoint.rb'
 
 module HardpointObjects
-  class BasicArmorHardpoint < HardpointObjects::ArmorHardpoint
+  class LightArmorHardpoint < HardpointObjects::ArmorHardpoint
     ABSTRACT_CLASS = false
-    HARDPOINT_NAME = "basic_armor"
+    HARDPOINT_NAME = "light_armor"
 
     PERMANENT_STEAM_USE       = 0
-    TILES_PER_SECOND_MODIFIER = 0.7
-    ROTATION_MODIFIER         = 0.8
-    DAMAGE_REDUCTION          = 0.5
+    TILES_PER_SECOND_MODIFIER = 0.9
+    ROTATION_MODIFIER         = 1
+    DAMAGE_REDUCTION          = 0.7
     # SHOW_HARDPOINT = false
 
     # SHOW_HARDPOINT_BASE = false
@@ -19,7 +19,7 @@ module HardpointObjects
     end
 
     def self.description
-      "Basic Armor"
+      "Light Armor"
     end
 
     def self.value
