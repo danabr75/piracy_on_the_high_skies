@@ -9,13 +9,13 @@ module OuterMapObjects
       @window, @height_scale, @width, @height = [window, height_scale, width, height]
       # @local_window = local_window
       @menu = Menu.new(@window, @width / 2.0, @height - (20 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20, is_horizontal: true})
-      # @menu.add_item(
-      #   :inventory_hotbar, "I",
-      #   0, 0,
-      #   lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
-      #   nil,
-      #   {is_button: true}
-      # )
+      @menu.add_item(
+        :inventory_hotbar, "I",
+        0, 0,
+        lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
+        nil,
+        {is_button: true}
+      )
       # @menu.add_item(
       #   :minimap_hotbar, "M",
       #   0, 0,

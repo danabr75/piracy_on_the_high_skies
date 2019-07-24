@@ -451,7 +451,7 @@ class InnerMap
 
     @menu.update
     @exit_map_menu.update
-    @ship_loadout_menu.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y) if @ship_loadout_menu.active
+    @ship_loadout_menu.update(mouse_x, mouse_y) if @ship_loadout_menu.active
 
     if !@game_pause && !menus_active && !@menu_open && !@menu.active
       @effects.reject! do |effect_group|

@@ -443,7 +443,7 @@ class ShipLoadoutSetting < Setting
     return hover_object
   end
 
-  def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+  def update mouse_x, mouse_y
     if @active
       # puts "SHIP LOADOUT SETTING - HAD CURSOR OJBECT" if @window.cursor_object
       # if @window.cursor_object.nil? && @ship_inventory
@@ -456,11 +456,11 @@ class ShipLoadoutSetting < Setting
 
       # hover_object = matrix_update
       if @object_inventory && @object_inventory.holding_type == :store
-        hover_object = @ship_inventory.update(mouse_x,   mouse_y, player_map_pixel_x, player_map_pixel_y)
-        hover_object = @object_inventory.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, @ship_inventory.credits) if !hover_object
+        hover_object = @ship_inventory.update(mouse_x,   mouse_y)
+        hover_object = @object_inventory.update(mouse_x, mouse_y, @ship_inventory.credits) if !hover_object
       else
-        hover_object = @ship_inventory.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
-        hover_object = @object_inventory.update(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y) if !hover_object && @object_inventory
+        hover_object = @ship_inventory.update(mouse_x, mouse_y)
+        hover_object = @object_inventory.update(mouse_x, mouse_y) if !hover_object && @object_inventory
       end
       # puts "GOT OBJECT FROM " if hover_object
 

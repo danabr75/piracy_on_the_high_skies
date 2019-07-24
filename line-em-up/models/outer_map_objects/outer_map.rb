@@ -3,8 +3,10 @@ require_relative 'cursor.rb'
 
 module OuterMapObjects
   class OuterMap
-    attr_reader :active, :block_all_controls
+    attr_reader :active, :block_all_controls, :ship_loadout_menu
     attr_accessor :game_pause
+
+    attr_accessor :cursor_object
 
     ICON_IMAGE_SCALER = 4.0
 
@@ -89,6 +91,17 @@ module OuterMapObjects
       @font = Gosu::Font.new(@font_height)
       @game_pause = false
       @footer_bar = OuterMapObjects::FooterBar.new(self, @height_scale, @width, @height)
+      @cursor_object = nil
+      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
+      @menus = [@ship_loadout_menu, @menu]
+    end
+
+    def menus_active
+      @menus.collect{|menu| menu.active }.include?(true)
+    end
+
+    def menus_disable
+      @menus.each{|menu| menu.disable }
     end
 
     def block_all_controls= value
@@ -174,6 +187,14 @@ module OuterMapObjects
       if Gosu.button_down?(Gosu::KB_P) && key_id_lock(Gosu::KB_P)
         @game_pause = !@game_pause
       end
+      if Gosu.button_down?(Gosu::KB_I) && key_id_lock(Gosu::KB_I)
+        if @ship_loadout_menu.active
+          @ship_loadout_menu.disable
+        else
+          @ship_loadout_menu.enable
+        end
+      end
+      @ship_loadout_menu.update(mouse_x, mouse_y) if @ship_loadout_menu.active
       @footer_bar.update
       @mouse_x = mouse_x
       @mouse_y = mouse_y
@@ -190,14 +211,17 @@ module OuterMapObjects
     end
 
     def draw
-      Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_b3b3b3), ZOrder::MenuBackground)
-      @font.draw("Paused", (@width / 2) - @font.text_width("Paused"), @height / 2, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
+      Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_b3b3b3), ZOrder::Background)
+      @ship_loadout_menu.draw
       @pointer.draw
       @menu.draw
-      @map_clickable_locations.each do |value|
-        value[:image].draw(value[:x] - @icon_image_width_half, value[:y] - @icon_image_height_half, ZOrder::MiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler)
-        # value[:click_area].draw(0,0)
-      end
+      # if !@ship_loadout_menu.active
+        @font.draw("Paused", (@width / 2) - @font.text_width("Paused"), @height / 2, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
+        @map_clickable_locations.each do |value|
+          value[:image].draw(value[:x] - @icon_image_width_half, value[:y] - @icon_image_height_half, ZOrder::Building, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler)
+          # value[:click_area].draw(0,0)
+        end
+      # end
       @footer_bar.draw
     end
 
@@ -205,6 +229,8 @@ module OuterMapObjects
       puts "ONClick Outer - #{element_id}"
       if @menu.active
         @menu.onClick(element_id)
+      elsif @ship_loadout_menu.active
+        @ship_loadout_menu.onClick(element_id)
       else
         button_clicked_exists = @button_id_mapping.key?(element_id)
         if button_clicked_exists
