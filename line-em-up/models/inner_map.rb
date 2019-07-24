@@ -30,6 +30,7 @@ class InnerMap
 
 
   def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, options = {}
+    LUIT.config({window: window}) # not really necessary logically speaking ,but this appears to have fixed a bug where the background tiles were the wrong image, after using the outer map ship loadout screen.
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height]
     # @local_window = self
     @map_name = map_name

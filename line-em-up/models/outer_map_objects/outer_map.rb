@@ -178,8 +178,8 @@ module OuterMapObjects
 
     def update mouse_x, mouse_y
       if Gosu.button_down?(Gosu::KbEscape) && key_id_lock(Gosu::KbEscape)
-        if @menu.active
-          @menu.disable
+        if menus_active
+          menus_disable
         else
           @menu.enable
         end
