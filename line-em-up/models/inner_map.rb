@@ -48,8 +48,8 @@ class InnerMap
     @center_ui_y = 0
     @center_ui_x = 0
     
-    graphics_value = ConfigSetting.get_setting(@config_path, "Graphics Setting", GraphicsSetting::SELECTION[0])
-    @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
+    # graphics_value = ConfigSetting.get_setting(@config_path, "Graphics Setting", GraphicsSetting::SELECTION[0])
+    # @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
 
 
     @collision_counter = 0
@@ -81,17 +81,24 @@ class InnerMap
     # @can_toggle_fullscreen_b = true
 
 
-    
+    @graphics_setting = GlobalVariables.graphics_setting
     @gl_background = GLBackground.new(@map_name, @height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
 
-    @factions = Faction.init_factions(@height_scale)
+    # @factions = Faction.init_factions(@height_scale)
+    @factions = GlobalVariables.factions
 
-    GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+    GlobalVariables.set_inner_map(
       @gl_background.map_pixel_width, @gl_background.map_pixel_height,
       @gl_background.map_tile_width, @gl_background.map_tile_height,
       @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-      @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
     )
+
+    # GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+    #   @gl_background.map_pixel_width, @gl_background.map_pixel_height,
+    #   @gl_background.map_tile_width, @gl_background.map_tile_height,
+    #   @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
+    #   @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
+    # )
 
     @buildings = {}
     @projectiles = {}

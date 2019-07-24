@@ -121,6 +121,14 @@ class GameWindow < Gosu::Window
     super(@width, @height, {update_interval: @target_fps_interval, fullscreen: fullscreen})
     self.caption = "Piracy on the High Skies!"
 
+
+    graphics_value = ConfigSetting.get_setting(@config_path, "Graphics Setting", GraphicsSetting::SELECTION[0])
+    @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
+    @factions = Faction.init_factions(@height_scale)
+    GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+      @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
+    )
+
     @inner_map = nil#InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
     @outer_map = nil#OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
     # @outer_map.enable

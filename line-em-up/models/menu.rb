@@ -1,7 +1,7 @@
 require_relative 'menu_item.rb'
 class Menu
   attr_accessor :current_height, :x, :y
-  attr_reader :active, :window, :width, :height, :button_size, :button_size_half, :button_size_quarter
+  attr_reader :active, :window, :width, :height, :button_size, :button_size_half, :button_size_quarter, :cell_padding
   def initialize(window, x, y, z = ZOrder::UI, scale = 1, options = {})
     # LUIT.config({window: self, z: 25})
     LUIT.config({window: window})

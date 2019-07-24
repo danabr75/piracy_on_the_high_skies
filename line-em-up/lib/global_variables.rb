@@ -5,7 +5,8 @@ module GlobalVariables
     attr_reader  :average_tile_size, :effects_volume, :music_volume, :fps_scaler, :graphics_setting, :factions, :resolution_scale
   end
 
-  def self.set_config(width_scale, height_scale, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height, fps_scaler, graphics_setting, factions, resolution_scale, debug)
+
+  def self.set_inner_map map_pixel_width, map_pixel_height, map_tile_width, map_tile_height, tile_pixel_width, tile_pixel_height
     @tile_pixel_width  = tile_pixel_width
     @tile_pixel_height = tile_pixel_height
 
@@ -16,6 +17,9 @@ module GlobalVariables
 
     @map_tile_width = map_tile_width
     @map_tile_height = map_tile_height
+  end
+
+  def self.set_config(width_scale, height_scale, screen_pixel_width, screen_pixel_height, fps_scaler, graphics_setting, factions, resolution_scale, debug)
 
     @width_scale  = width_scale
     @height_scale = height_scale

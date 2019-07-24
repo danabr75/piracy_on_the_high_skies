@@ -190,7 +190,7 @@ module OuterMapObjects
     end
 
     def draw
-      Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_595959), ZOrder::MenuBackground)
+      Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_b3b3b3), ZOrder::MenuBackground)
       @font.draw("Paused", (@width / 2) - @font.text_width("Paused"), @height / 2, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
       @pointer.draw
       @menu.draw

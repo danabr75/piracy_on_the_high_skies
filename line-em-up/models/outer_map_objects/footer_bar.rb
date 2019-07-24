@@ -9,13 +9,13 @@ module OuterMapObjects
       @window, @height_scale, @width, @height = [window, height_scale, width, height]
       # @local_window = local_window
       @menu = Menu.new(@window, @width / 2.0, @height - (20 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20, is_horizontal: true})
-      @menu.add_item(
-        :inventory_hotbar, "I",
-        0, 0,
-        lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
-        nil,
-        {is_button: true}
-      )
+      # @menu.add_item(
+      #   :inventory_hotbar, "I",
+      #   0, 0,
+      #   lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
+      #   nil,
+      #   {is_button: true}
+      # )
       # @menu.add_item(
       #   :minimap_hotbar, "M",
       #   0, 0,
@@ -70,7 +70,7 @@ module OuterMapObjects
       @menu.draw
 
       # This could use some work, but will probably replace with better graphics anyway.
-      Gosu::draw_rect(@menu.x - @menu.width / 2.0 - @menu.button_size, @menu.y - (@menu.button_size * 0.75), @menu.width + @menu.button_size_half, @menu.height - (@menu.button_size * 0.5), Gosu::Color.argb(0xff_ffcc00), ZOrder::MenuBackground)
+      Gosu::draw_rect(@menu.x - @menu.width / 2.0 - @menu.button_size, @menu.y - (@menu.button_size * 0.75), @menu.width + @menu.button_size_half, @menu.height + @menu.cell_padding, Gosu::Color.argb(0xff_ffcc00), ZOrder::MenuBackground)
 
     end
 
