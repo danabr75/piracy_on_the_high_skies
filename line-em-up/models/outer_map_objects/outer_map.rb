@@ -3,7 +3,8 @@ require_relative 'cursor.rb'
 
 module OuterMapObjects
   class OuterMap
-    attr_reader :active
+    attr_reader :active, :block_all_controls
+    attr_accessor :game_pause
 
     ICON_IMAGE_SCALER = 4.0
 
@@ -84,6 +85,14 @@ module OuterMapObjects
         {is_button: true}
       )
 
+      @font_height = (10 * @height_scale).to_i
+      @font = Gosu::Font.new(@font_height)
+      @game_pause = false
+      @footer_bar = OuterMapObjects::FooterBar.new(self, @height_scale, @width, @height)
+    end
+
+    def block_all_controls= value
+      @window.block_all_controls = value
     end
 
     def load_save
@@ -162,27 +171,34 @@ module OuterMapObjects
           @menu.enable
         end
       end
-
-      # puts "PUTER UPDATE: #{mouse_x} - #{mouse_y}"
+      if Gosu.button_down?(Gosu::KB_P) && key_id_lock(Gosu::KB_P)
+        @game_pause = !@game_pause
+      end
+      @footer_bar.update
       @mouse_x = mouse_x
       @mouse_y = mouse_y
-      @player.update
       @pointer.update(mouse_x, mouse_y)
       @menu.update
-      @map_clickable_locations.each do |value|
-        value[:click_area].update(0,0)
+
+      if !@game_pause
+        @player.update
+        @map_clickable_locations.each do |value|
+          value[:click_area].update(0,0)
+        end
+        return @activated_inner_map
       end
-      return @activated_inner_map
     end
 
     def draw
       Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_595959), ZOrder::MenuBackground)
+      @font.draw("Paused", (@width / 2) - @font.text_width("Paused"), @height / 2, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
       @pointer.draw
       @menu.draw
       @map_clickable_locations.each do |value|
         value[:image].draw(value[:x] - @icon_image_width_half, value[:y] - @icon_image_height_half, ZOrder::MiniMapIcon, @height_scale_with_icon_image_scaler, @height_scale_with_icon_image_scaler)
         # value[:click_area].draw(0,0)
       end
+      @footer_bar.draw
     end
 
     def onClick element_id
@@ -194,7 +210,8 @@ module OuterMapObjects
         if button_clicked_exists
           @button_id_mapping[element_id].call(@window, self, element_id)
         else
-          puts "Clicked button that is not mapped: #{element_id}"
+          @footer_bar.onClick(element_id)
+          puts "Clicked button that might not mapped: #{element_id}"
         end
         return button_clicked_exists
       end

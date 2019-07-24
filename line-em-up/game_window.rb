@@ -68,11 +68,10 @@ class GameWindow < Gosu::Window
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
   DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
-
-
+  attr_accessor :block_all_controls
 
   def initialize options = {}
-    @block_all_controls = true
+    @block_all_controls = options[:block_all_controls] || false
 
 
     @config_path = self.class::CONFIG_FILE

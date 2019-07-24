@@ -134,7 +134,7 @@ class GeneralObject
     # @height_scale  = @height_scale
     # @width_scale   = @width_scale
     # @average_scale = @average_scale
-
+    # puts "@height_scale: #{@height_scale}"
     @height_scale_with_image_scaler  = @height_scale  / self.class::IMAGE_SCALER
     @width_scale_with_image_scaler   = @width_scale   / self.class::IMAGE_SCALER
     @average_scale_with_image_scaler = @average_scale / self.class::IMAGE_SCALER

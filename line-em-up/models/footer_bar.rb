@@ -1,21 +1,18 @@
 # Move to UI subfolder
 
 require_relative 'general_object.rb'
+# require_relative "../lib/global_constants.rb"
+# require_relative "../lib/global_variables.rb"
 
 class FooterBar < ScreenFixedObject
+  # include GlobalConstants
+  # include GlobalVariables
 
   # `outer_window` is for mouse clicks. Local window is for actions.
   def initialize(window, options = {})
     @window = window
     # @local_window = local_window
     super(options)
-
-    # @screen_pixel_width = screen_pixel_width
-    # @screen_pixel_height = screen_pixel_height
-    # @width_scale = width_scale
-    # @height_scale = height_scale
-    puts "@screen_pixel_height: #{@screen_pixel_height}"
-
     @menu = Menu.new(@window, @screen_pixel_width / 2.0, @screen_pixel_height - (20 * @height_scale), ZOrder::UI, @height_scale, {button_size: 20, is_horizontal: true})
     @menu.add_item(
       :inventory_hotbar, "I",

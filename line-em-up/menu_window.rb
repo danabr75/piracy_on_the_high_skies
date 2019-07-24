@@ -42,7 +42,7 @@ class MenuWindow < Gosu::Window
     @menu.add_item(
       :launcher_resume, "Play Piracy on the High Skies!",
       0, 0,
-      lambda {|window, menu, id| self.close; GameWindow.start(); },
+      lambda {|window, menu, id| self.close; GameWindow.start({block_all_controls: true}); },
       nil,
       {is_button: true}
     )

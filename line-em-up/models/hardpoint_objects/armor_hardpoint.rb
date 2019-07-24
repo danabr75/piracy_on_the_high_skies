@@ -33,7 +33,6 @@ module HardpointObjects
     end
 
     def initialize options
-      super(options)
       media_dir = options[:owner_klass]::ITEM_MEDIA_DIRECTORY
       # Ex: Should be MEDIA_DIRECTORY + pilotable_ships/basic_ship/basic_armor.png
       outer_shell_image_path = "#{media_dir}/#{self.class::HARDPOINT_NAME}.png"
@@ -41,7 +40,10 @@ module HardpointObjects
         @outer_shell_image = Gosu::Image.new(outer_shell_image_path)
       else
         puts "Couldn't find file: #{outer_shell_image_path}"
+        # Maybe ship doesn't have an armor port? 
+        options[:is_invalid] = true
       end
+      super(options)
     end
 
     def draw angle, x, y, z, z_base, z_projectile, options = {} #{originating_x: @x, originating_y: @y}
