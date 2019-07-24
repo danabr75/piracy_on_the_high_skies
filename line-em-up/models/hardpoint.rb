@@ -24,7 +24,7 @@ class Hardpoint < GeneralObject
     @image_radius / 5
   end
 
-  def initialize(x, y, z, z_base, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, z_projectile, options = {})
+  def initialize(x, y, z, z_base, x_offset, y_offset, item_klass, slot_type, current_ship_angle, angle_offset, owner, ship, z_projectile, options = {})
     # raise "MISSING OPTIONS HERE #{width_scale}, #{height_scale}, #{map_width}, #{map_height}" if [width_scale, height_scale, map_pixel_width, map_pixel_height].include?(nil)
     # @group_number = group_number
 
@@ -130,7 +130,7 @@ class Hardpoint < GeneralObject
     # end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
-    @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self, is_invalid: !has_valid_slot_type? }) if @item_klass
+    @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self, is_invalid: !has_valid_slot_type?, owner_klass: ship.class}) if @item_klass
 
     # puts "END HARDPOINT #{@id}"
     @owner = owner
@@ -385,7 +385,7 @@ class Hardpoint < GeneralObject
 
     @drawable_items_near_self.each { |di| di.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
 
-    @item.draw(new_angle, new_x, new_y, @z, @z_base, @z_projectile) if @item
+    @item.draw(new_angle, new_x, new_y, @z, @z_base, @z_projectile, {originating_x: center_x, originating_y: center_y}) if @item
     # @image_hardpoint_empty.draw_rot(new_x, new_y, @z, new_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if !@item && @slot_type != :engine
   end
 

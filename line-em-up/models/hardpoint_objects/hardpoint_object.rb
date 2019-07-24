@@ -468,7 +468,7 @@ module HardpointObjects
     #   return last_active_particle
     # end
 
-    def draw angle, x, y, z, z_base, z_projectile
+    def draw angle, x, y, z, z_base, z_projectile, options = {}
       # raise "missing z_base: #{self.class}" if z_base.nil?
       # puts "HARDPOINT DRAW: #{self.class::SHOW_READY_PROJECTILE} - #{SHOW_READY_PROJECTILE}"
       if self.class::SHOW_READY_PROJECTILE
@@ -485,7 +485,6 @@ module HardpointObjects
       if z_base && self.class::SHOW_HARDPOINT_BASE
         @image_base.draw_rot(x, y, z_base, angle - @firing_angle_offset, 0.5, 0.5, @hp_reference.height_scale_with_image_scaler, @hp_reference.height_scale_with_image_scaler, @colors)
       end
-
     end
 
     # def draw_gl

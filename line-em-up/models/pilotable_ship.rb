@@ -219,14 +219,20 @@ class PilotableShip < GeneralObject
       end
       if owner.class == Player
         z_projectile = ZOrder::PlayerProjectile
+        if location_dup[:slot_type] == :armor && item_klass && item_klass::SLOT_TYPE == :armor
+          hb_z = ZOrder::PlayerShipArmor
+        end
       else
         z_projectile = ZOrder::AIProjectile
+        if location_dup[:slot_type] == :armor && item_klass && item_klass::SLOT_TYPE == :armor
+          hb_z = ZOrder::AIShipArmor
+        end
       end
       
       # raise "Missing hb_z" if hb_z.nil?
       hp = Hardpoint.new(
         x, y, h_z, hb_z, location_dup[:x_offset].call(get_image, @height_scale_with_image_scaler),
-        location_dup[:y_offset].call(get_image, @height_scale_with_image_scaler), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, z_projectile, options
+        location_dup[:y_offset].call(get_image, @height_scale_with_image_scaler), item_klass, location_dup[:slot_type], @angle, location_dup[:angle_offset], owner, self, z_projectile, options
       )
       @hardpoints[index] = hp
     end
@@ -265,9 +271,11 @@ class PilotableShip < GeneralObject
       end
     end
     # puts @armor_hardpoints.inspect
+    @armor_damage_reduce = 1
     @armor_hardpoints.reject! do |index, klass|
       # puts "kalss: #{klass}"
       if (@current_steam_capacity - klass::PERMANENT_STEAM_USE) >= 0
+        @armor_damage_reduce = @armor_damage_reduce * klass::DAMAGE_REDUCTION
         engine_permanent_steam_usage += klass::PERMANENT_STEAM_USE
         engine_rotation_modifier     = engine_rotation_modifier * klass::ROTATION_MODIFIER
         engine_tiles_per_second_modifier = engine_tiles_per_second_modifier * klass::TILES_PER_SECOND_MODIFIER
@@ -553,7 +561,7 @@ class PilotableShip < GeneralObject
   end
 
   def take_damage damage
-    @health -= damage * @damage_reduction
+    @health -= damage * @damage_reduction * @armor_damage_reduce
   end
 
 

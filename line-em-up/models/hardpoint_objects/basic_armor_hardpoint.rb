@@ -8,6 +8,7 @@ module HardpointObjects
     PERMANENT_STEAM_USE       = 0
     TILES_PER_SECOND_MODIFIER = 0.5
     ROTATION_MODIFIER         = 0.8
+    DAMAGE_REDUCTION          = 0.7
     # SHOW_HARDPOINT = false
 
     # SHOW_HARDPOINT_BASE = false
