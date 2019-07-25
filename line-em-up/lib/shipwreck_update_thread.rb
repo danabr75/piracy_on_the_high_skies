@@ -3,11 +3,11 @@ module ShipWreckUpdateThread
   def self.update window, shipwreck, args
     result = shipwreck.update(*args)
     if result[:building]
-      building = result[:building]
-      building.set_window(window)
-      window.add_buildings.push(building)
+      window.add_buildings.push(result[:building])
     end
-    window.remove_shipwreck_ids << shipwreck.id  if !result[:is_alive]
+    if !result[:is_alive]
+      window.remove_shipwreck_ids << shipwreck.id
+    end
   end
 
 end

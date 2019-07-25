@@ -35,13 +35,13 @@ class ShipSetting < Setting
     @fullscreen_height = fullscreen_height
     # LUIT.config(window, nil, nil, 1)
     LUIT.config({window: @window, z: 25})
-    @next_button = LUIT::Button.new(self, :next, @next_x, @y, ZOrder::UI, "Next", 0, 1)
+    @next_button = LUIT::Button.new(@window, self, :next, @next_x, @y, ZOrder::UI, "Next", 0, 1)
     # puts "CREATING NEXT BUTTON WINDOW HERE"
     # puts @window.class.name
     # raise "STOP HERRE"
     # @next_button.x = @next_x - (@next_button.w / 2)
 
-    @prev_button = LUIT::Button.new(self, :previous, @prev_x, @y, ZOrder::UI, "Previous", 0, 1)
+    @prev_button = LUIT::Button.new(@window, self, :previous, @prev_x, @y, ZOrder::UI, "Previous", 0, 1)
     @button_id_mapping = self.class.get_id_button_mapping
     # puts "SHIP SETTING MAPPING"
     # puts @button_id_mapping 

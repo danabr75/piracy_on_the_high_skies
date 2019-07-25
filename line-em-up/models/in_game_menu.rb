@@ -3,6 +3,7 @@ require_relative 'outer_map_objects/cursor.rb'
 
 class InGameMenu
   attr_reader :active, :current_save_file_path, :backup_save_path
+  attr_reader :mouse_x, :mouse_y
 
   def initialize window, width, height, width_scale, height_scale, config_path, current_save_file_path, backup_save_path
     @width  = width
@@ -73,7 +74,7 @@ class InGameMenu
   end
 
   def refresh
-    LUIT.config({window: @window})
+    # LUIT.config({window: @window})
   end
 
   def exit_game

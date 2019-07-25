@@ -84,7 +84,7 @@ class ObjectInventory
     if @allow_credit_collection
       collect_credits_button_x = (@screen_pixel_width + (@cell_width_padding / 2.0) - @inventory_width - (@cell_width / 2.0)) + (@inventory_width + @cell_width_padding) / 2.0
       collect_credits_button_y = ((@screen_pixel_height / 2) - (@inventory_height / 2) - @cell_height_padding - @font_height) + (@inventory_height + @cell_height_padding + @font_height)
-      @collect_credits_button  = LUIT::Button.new(@window, :collect_credits, collect_credits_button_x, collect_credits_button_y, ZOrder::UI, "Collect Credits", (12 * @height_scale).to_i , (12 * @height_scale).to_i)
+      @collect_credits_button  = LUIT::Button.new(@window, @window, :collect_credits, collect_credits_button_x, collect_credits_button_y, ZOrder::UI, "Collect Credits", (12 * @height_scale).to_i , (12 * @height_scale).to_i)
       @button_id_mapping[:collect_credits] = lambda { |window, menu, id| window.ship_loadout_menu.add_to_ship_inventory_credits(menu.credits); menu.subtract_credits(menu.credits) }
     end
 
@@ -133,7 +133,7 @@ class ObjectInventory
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "oi_matrix_#{x}_#{y}"
-        click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
+        click_area = LUIT::ClickArea.new(@window, @window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
         klass_name = @item_list.shift if @item_list.count > 0
         item = nil
         if klass_name

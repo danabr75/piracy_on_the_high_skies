@@ -4,6 +4,7 @@ require_relative 'cursor.rb'
 module OuterMapObjects
   class OuterMap
     attr_reader :active, :block_all_controls, :ship_loadout_menu
+    attr_reader :mouse_x, :mouse_y
     attr_accessor :game_pause
 
     attr_accessor :cursor_object
@@ -40,13 +41,14 @@ module OuterMapObjects
       @icon_image_width_half  = (@icon_image_width  / 2.0)
       @icon_image_height_half = (@icon_image_height / 2.0)
 
-
+      @ship_loadout_menu = nil
+      @mouse_x = 0
+      @mouse_y = 0
       refresh
 
       @player  = OuterMapObjects::Player.new(@height_scale)
       @pointer = OuterMapObjects::Cursor.new(@height_scale)
-      @mouse_x = 0
-      @mouse_y = 0
+
       
       @active = false
 
@@ -91,17 +93,15 @@ module OuterMapObjects
       @font = Gosu::Font.new(@font_height)
       @game_pause = false
       @footer_bar = OuterMapObjects::FooterBar.new(self, @height_scale, @width, @height)
-      @cursor_object = nil
-      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
       @menus = [@ship_loadout_menu, @menu]
     end
 
     def menus_active
-      @menus.collect{|menu| menu.active }.include?(true)
+      @menus.collect{|menu| menu.active if menu }.include?(true)
     end
 
     def menus_disable
-      @menus.each{|menu| menu.disable }
+      @menus.each{|menu| menu.disable if menu }
     end
 
     def block_all_controls= value
@@ -114,15 +114,18 @@ module OuterMapObjects
 
     def refresh
       # puts "REFRESH MAP"
-      LUIT.config({window: @window})
+      # LUIT.config({window: @window})
       @activated_inner_map = nil
       @button_id_mapping = {}
       @map_clickable_locations = []
       @key_pressed_map = {}
       @block_all_controls = false
+      @cursor_object = nil
+      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
       @map_location_datas.each do |key, value|
         button_key = key.to_sym
-        click_area = LUIT::ClickArea.new(self, button_key, value[:x], value[:y], ZOrder::UI, @icon_image_width, @icon_image_height)
+        # puts "NEW cLICK AREA: #{value[:x]} - #{value[:y]}"
+        click_area = LUIT::ClickArea.new(@window, self, button_key, value[:x], value[:y], ZOrder::UI, @icon_image_width, @icon_image_height)
         @button_id_mapping[button_key] = lambda { |window, menu, id| menu.activate_inner_map(id) }
         image = Gosu::Image.new("#{MEDIA_DIRECTORY}/outer_map/#{value[:outer_map_icon]}.png")
         @map_clickable_locations << {click_area: click_area, displayed_name: value[:displayed_name], image: image, x: value[:x], y: value[:y]}
@@ -188,13 +191,13 @@ module OuterMapObjects
         @game_pause = !@game_pause
       end
       if Gosu.button_down?(Gosu::KB_I) && key_id_lock(Gosu::KB_I)
-        if @ship_loadout_menu.active
+        if @ship_loadout_menu && @ship_loadout_menu.active
           @ship_loadout_menu.disable
-        else
+        elsif @ship_loadout_menu
           @ship_loadout_menu.enable
         end
       end
-      @ship_loadout_menu.update(mouse_x, mouse_y) if @ship_loadout_menu.active
+      @ship_loadout_menu.update(mouse_x, mouse_y) if @ship_loadout_menu && @ship_loadout_menu.active
       @footer_bar.update
       @mouse_x = mouse_x
       @mouse_y = mouse_y
@@ -212,7 +215,7 @@ module OuterMapObjects
 
     def draw
       Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_b3b3b3), ZOrder::Background)
-      @ship_loadout_menu.draw
+      @ship_loadout_menu.draw if @ship_loadout_menu
       @pointer.draw
       @menu.draw
       # if !@ship_loadout_menu.active
@@ -229,7 +232,7 @@ module OuterMapObjects
       puts "ONClick Outer - #{element_id}"
       if @menu.active
         @menu.onClick(element_id)
-      elsif @ship_loadout_menu.active
+      elsif @ship_loadout_menu && @ship_loadout_menu.active
         @ship_loadout_menu.onClick(element_id)
       else
         button_clicked_exists = @button_id_mapping.key?(element_id)

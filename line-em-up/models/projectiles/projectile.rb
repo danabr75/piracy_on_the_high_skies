@@ -68,6 +68,7 @@ module Projectiles
       # puts "current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options"
       # puts "#{[current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options]}"
       # validate_not_nil([current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
+      options[:no_image] = true
       super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
       @hit_objects_class_filter = self.class::HIT_OBJECT_CLASS_FILTER

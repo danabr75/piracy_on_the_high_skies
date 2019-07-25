@@ -76,7 +76,7 @@ class ShipInventory
     (0..@inventory_matrix_max_height - 1).each do |y|
       (0..@inventory_matrix_max_width - 1).each do |x|
         key = "matrix_#{x}_#{y}"
-        click_area = LUIT::ClickArea.new(@window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
+        click_area = LUIT::ClickArea.new(@window, @window, key, current_x, current_y, ZOrder::HardPointClickableLocation, @cell_width, @cell_height)
         klass_name = ConfigSetting.get_mapped_setting(@save_file_path, ['Inventory', x.to_s, y.to_s])
         item = nil
         if klass_name

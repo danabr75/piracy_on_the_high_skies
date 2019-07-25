@@ -26,6 +26,13 @@ module Projectiles
     AOE = 0
 
     IMAGE_SCALER = 4.0
+
+
+    def self.pre_load_setup
+      @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
+      @init_sound = Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
+      @init_sound_path = "#{SOUND_DIRECTORY}/bullet.ogg"
+    end
     
     # MAX_CURSOR_FOLLOW = 4
     # ADVANCED_HIT_BOX_DETECTION = true
@@ -41,24 +48,24 @@ module Projectiles
     #   ]
     # end
 
-    def get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
-    end
+    # def get_image
+    #   Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
+    # end
 
-    def self.get_init_sound
-      Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
-    end
+    # def self.get_init_sound
+    #   Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
+    # end
 
-    def self.get_init_sound_path
-      "#{SOUND_DIRECTORY}/bullet.ogg"
-    end
+    # def self.get_init_sound_path
+    #   "#{SOUND_DIRECTORY}/bullet.ogg"
+    # end
 
-    def drops
-      [
-        # Add back in once SE has been updated to display on map, not on screen.
-        # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
-      ]
-    end
+    # def drops
+    #   [
+    #     # Add back in once SE has been updated to display on map, not on screen.
+    #     # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+    #   ]
+    # end
 
     
     # def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y

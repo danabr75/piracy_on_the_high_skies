@@ -6,9 +6,10 @@ module Buildings
     attr_accessor :drops
     attr_reader :credits
 
-    def initialize current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, drops = [], options = {}
+    def initialize window, current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, drops = [], options = {}
      # puts "LANDWRECK SCALE: #{current_scale}"
       @item = item
+      @window = window
 
       super(current_map_tile_x, current_map_tile_y, nil, options.merge({drops: drops}))
       @image = @item.class.get_tilable_image(@item.class::ITEM_MEDIA_DIRECTORY)
@@ -39,14 +40,14 @@ module Buildings
       # @opengl_increment_x = result[:o_w]
       # @opengl_increment_y = result[:o_h]
       @health = 1
-      @window = nil
+      # @window = nil
 
       @image_width  = @image.width  * @current_scale#(@width_scale) /  (@item.class::IMAGE_SCALER)
       @image_height = @image.height * @current_scale#(@height_scale) / (@item.class::IMAGE_SCALER)
       @image_width_half  = @image_width  / 2.0
       @image_height_half = @image_height / 2.0
 
-      @click_area = LUIT::ClickArea.new(self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
+      @click_area = LUIT::ClickArea.new(@window, self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
       @button_id_mapping = {}
       @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
         if !window.ship_loadout_menu.active
@@ -77,9 +78,9 @@ module Buildings
       @drops = drops
       @interactible = true if @drops.any? || @credits > 0
     end
-    def set_window window
-      @window = window
-    end
+    # def set_window window
+    #   @window = window
+    # end
 
     def onClick element_id
       # puts "ONCLICK mappuing"

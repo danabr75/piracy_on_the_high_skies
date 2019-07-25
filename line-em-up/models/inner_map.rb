@@ -30,7 +30,7 @@ class InnerMap
 
 
   def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, options = {}
-    LUIT.config({window: window}) # not really necessary logically speaking ,but this appears to have fixed a bug where the background tiles were the wrong image, after using the outer map ship loadout screen.
+    # LUIT.config({window: window}) # not really necessary logically speaking ,but this appears to have fixed a bug where the background tiles were the wrong image, after using the outer map ship loadout screen.
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height]
     # @local_window = self
     @map_name = map_name
@@ -133,19 +133,20 @@ class InnerMap
     @footer_bar = FooterBar.new(self)
     reset_font_ui_y
 
-    if rand(2) == 0
-      if rand(2) == 0
-        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
-      else
-        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
-      end
-    else
-      if rand(2) == 0
-        @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
-      else
-        @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
-      end
-    end
+    @player = Player.new(nil, nil, 0, 110)
+    # if rand(2) == 0
+    #   if rand(2) == 0
+    #     @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
+    #   else
+    #     @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
+    #   end
+    # else
+    #   if rand(2) == 0
+    #     @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
+    #   else
+    #     @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
+    #   end
+    # end
 
     raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
     raise "@player.current_map_pixel_y.nil" if @player.current_map_pixel_y.nil?

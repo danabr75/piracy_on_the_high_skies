@@ -48,7 +48,7 @@ class ShipLoadoutSetting < Setting
 
     @refresh_player_ship = false
     # @z = ZOrder::HardPointClickableLocation
-    LUIT.config({window: window})
+    # LUIT.config({window: window})
     # @window = window # Want relative to self, not window. Can't do that from settting, not a window.
     @mouse_x, @mouse_y = [0,0]
     @window = window # ignoring outer window here? Want actions relative to this window.
@@ -130,7 +130,7 @@ class ShipLoadoutSetting < Setting
     @hardpoints_height = nil
     @hardpoints_width  = nil
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
-    @button = LUIT::Button.new(@window, :back, max_width / 2, 30 * @height_scale, ZOrder::UI, "Return to Game", 15 * @height_scale, 15 * @height_scale)
+    @button = LUIT::Button.new(@window, @window, :back, max_width / 2, 30 * @height_scale, ZOrder::UI, "Return to Game", 15 * @height_scale, 15 * @height_scale)
     @font_height  = (12 * @height_scale).to_i
     @font_padding = (4 * @height_scale).to_i
     @font = Gosu::Font.new(@font_height)
@@ -150,29 +150,29 @@ class ShipLoadoutSetting < Setting
     @ship_steam_core_usage    = 0
     @steam_core_capacity_text = "  Steam Core Capacity: "
     @steam_core_usage_text    = "  Steam Core Usage: "
-    @steam_core_capacity_button = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale, ZOrder::UI, @message_stub, 15 * @height_scale, 15 * @height_scale)
-    @steam_core_usage_button    = LUIT::Button.new(@window, nil, max_width / 1.5, 50 * @height_scale + @steam_core_capacity_button.h, ZOrder::UI, @message_stub, 15 * @height_scale, 15 * @height_scale)
+    @steam_core_capacity_button = LUIT::Button.new(@window, @window, nil, max_width / 1.5, 50 * @height_scale, ZOrder::UI, @message_stub, 15 * @height_scale, 15 * @height_scale)
+    @steam_core_usage_button    = LUIT::Button.new(@window, @window, nil, max_width / 1.5, 50 * @height_scale + @steam_core_capacity_button.h, ZOrder::UI, @message_stub, 15 * @height_scale, 15 * @height_scale)
 
     font_color = 0xff_000000
     button_height = 5 * @height_scale
     button_width  = 5 * @height_scale # max_width  - 50
-    @legend_1 = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Hardpoint Legend", 15 * @height_scale, 15 * @height_scale)
+    @legend_1 = LUIT::Button.new(@window, @window, nil, button_width, button_height, ZOrder::UI, "Hardpoint Legend", 15 * @height_scale, 15 * @height_scale)
     button_height += @legend_1.h
     color, hover_color = Hardpoint.get_hardpoint_colors(:offensive)
     # puts "HOVER COLOR: #{[color, hover_color]}"
-    @legend_2    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Red: Offensive", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    @legend_2    = LUIT::Button.new(@window, @window, nil, button_width, button_height, ZOrder::UI, "Red: Offensive", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
     button_height += @legend_2.h
     color, hover_color = Hardpoint.get_hardpoint_colors(:engine)
-    @legend_3    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Blue: Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    @legend_3    = LUIT::Button.new(@window, @window, nil, button_width, button_height, ZOrder::UI, "Blue: Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
     button_height += @legend_3.h
     color, hover_color = Hardpoint.get_hardpoint_colors(:steam_core)
-    @legend_4    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Yellow: Power", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    @legend_4    = LUIT::Button.new(@window, @window, nil, button_width, button_height, ZOrder::UI, "Yellow: Power", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
     button_height += @legend_4.h
     color, hover_color = Hardpoint.get_hardpoint_colors(:generic)
-    @legend_5    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Green: Offensive/Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    @legend_5    = LUIT::Button.new(@window, @window, nil, button_width, button_height, ZOrder::UI, "Green: Offensive/Engine", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
     button_height += @legend_5.h
     color, hover_color = Hardpoint.get_hardpoint_colors(:armor)
-    @legend_6    = LUIT::Button.new(@window, nil, button_width, button_height, ZOrder::UI, "Orange: Armor", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
+    @legend_6    = LUIT::Button.new(@window, @window, nil, button_width, button_height, ZOrder::UI, "Orange: Armor", 15 * @height_scale, 15 * @height_scale, color, hover_color, font_color)
 
 
     @buttons = [@steam_core_capacity_button, @steam_core_usage_button, @legend_1, @legend_2, @legend_3, @legend_4, @legend_5, @legend_6]
@@ -299,7 +299,7 @@ class ShipLoadoutSetting < Setting
       button_key = "hardpoint_#{index}"
 
       color, hover_color = hp.hardpoint_colors
-      click_area = LUIT::ClickArea.new(@window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
+      click_area = LUIT::ClickArea.new(@window, @window, button_key, hp.x - @cell_width  / 2, hp.y - @cell_width  / 2, ZOrder::HardPointClickableLocation, @cell_width, @cell_height, color, hover_color)
       @button_id_mapping[button_key] = lambda { |window, menu, id| menu.click_ship_hardpoint(id) if !window.block_all_controls }
       if hp.assigned_weapon_class
         if @buy_rate_from_store.nil? || @sell_rate_from_store.nil?
