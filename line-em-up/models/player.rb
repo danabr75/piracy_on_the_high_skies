@@ -722,7 +722,7 @@ class Player < ScreenFixedObject
     result = {is_alive: is_alive}
     # Add result buildings at some point.
     if !is_alive
-      result[:shipwreck] = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @ship.current_momentum, @angle, [], {persist: true})
+      result[:shipwreck] = Shipwreck.new(nil, @current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @ship.current_momentum, @angle, [], {persist: true})
       # @ship = nil
     end
     return result

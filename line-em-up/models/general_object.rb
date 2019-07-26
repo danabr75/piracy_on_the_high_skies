@@ -44,6 +44,8 @@ class GeneralObject
 
   IS_A_FACTIONABLE = false
 
+  USING_CLASS_IMAGE_ATTRIBUTES = false
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -153,6 +155,7 @@ class GeneralObject
     end
 
     @id    = options[:id] || SecureRandom.uuid
+    @time_alive = 0
     # @class = self.class.name
     if !options[:no_image]
       @image = options[:image] || get_image
@@ -163,27 +166,36 @@ class GeneralObject
     #   raise "DIDN't GET IMAGE from player" if @image.nil?
     # end
 
-    @time_alive = 0
     @last_updated_at = @time_alive
     # For objects that don't take damage, they'll never get hit by anything due to having 0 health
-    if @image
-      @image_width  = @image.width  * (@height_scale || @scale)# / self.class::IMAGE_SCALER
-      @image_height = @image.height * (@height_scale || @scale)# / self.class::IMAGE_SCALER
-      @image_size   = @image_width  * @image_height / 2
-      @image_radius = (@image_width  + @image_height) / 4
+    if !self.class::USING_CLASS_IMAGE_ATTRIBUTES
+      if @image
+        @image_width  = @image.width  * (@height_scale || @scale)# / self.class::IMAGE_SCALER
+        @image_height = @image.height * (@height_scale || @scale)# / self.class::IMAGE_SCALER
+        @image_size   = @image_width  * @image_height / 2
+        @image_radius = (@image_width  + @image_height) / 4
 
-      @image_width_half  = @image_width  / 2.0
-      @image_height_half = @image_height / 2.0
-    end
+        @image_width_half  = @image_width  / 2.0
+        @image_height_half = @image_height / 2.0
+      end
 
-    if self.class::IMAGE_SCALER != 1.0
-      @image_width  = @image_width  / self.class::IMAGE_SCALER
-      @image_height = @image_height / self.class::IMAGE_SCALER
-      @image_size   = @image_size   / self.class::IMAGE_SCALER
-      @image_radius = @image_radius / self.class::IMAGE_SCALER
+      if @image && self.class::IMAGE_SCALER != 1.0
+        @image_width  = @image_width  / self.class::IMAGE_SCALER
+        @image_height = @image_height / self.class::IMAGE_SCALER
+        @image_size   = @image_size   / self.class::IMAGE_SCALER
+        @image_radius = @image_radius / self.class::IMAGE_SCALER
 
-      @image_width_half  = @image_width_half  / self.class::IMAGE_SCALER
-      @image_height_half = @image_height_half / self.class::IMAGE_SCALER
+        @image_width_half  = @image_width_half  / self.class::IMAGE_SCALER
+        @image_height_half = @image_height_half / self.class::IMAGE_SCALER
+      end
+    else
+      @image_width  = self.class.image_width
+      @image_height = self.class.image_height
+      @image_size   = self.class.image_size
+      @image_radius = self.class.image_radius
+
+      @image_width_half  = self.class.image_width_half
+      @image_height_half = self.class.image_height_half
     end
 
     @inited = true
@@ -218,6 +230,7 @@ class GeneralObject
       @mini_map_image_height_half = @mini_map_image_height / 2.0
     end
     @hover = false
+    @is_on_screen = false
   end   
 
   def get_minimap_image
@@ -276,13 +289,17 @@ class GeneralObject
 
   def draw
     # Will generate error if class name is not listed on ZOrder
-    @image.draw(@x - @image_width_half, @y - @image_height, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+    if @is_on_screen
+      @image.draw(@x - @image_width_half, @y - @image_height, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+    end
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
   def draw_rot
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+    if @is_on_screen
+      @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+    end
   end
 
   def get_height
@@ -353,9 +370,11 @@ class GeneralObject
     get_map_tile_location_from_map_pixel_location unless options[:block_tile_from_pixel_update]
     # end
     # return is_on_screen?
+    @is_on_screen = is_on_screen?
     return is_alive
   end
 
+  # Now unsupported
   def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
     # Inherit, add logic, then call this to calculate whether it's still visible.
     # @time_alive ||= 0 # Temp solution
@@ -380,15 +399,14 @@ class GeneralObject
   end
 
   def is_on_screen?
-    y_buffer = (@screen_pixel_height * 1.2 - @screen_pixel_height)
-    x_buffer = (@screen_pixel_width * 1.2 - @screen_pixel_width)
-    # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
+    y_buffer = (@screen_pixel_height * 0.2)
+    x_buffer = (@screen_pixel_width  * 0.2)
     @y > -y_buffer && @y < @screen_pixel_height + y_buffer && @x > -x_buffer && @x < @screen_pixel_width + x_buffer
   end
 
   def self.async_is_on_screen? x, y, screen_pixel_width, screen_pixel_height
-    y_buffer = (screen_pixel_height * 1.2 - screen_pixel_height)
-    x_buffer = (screen_pixel_width * 1.2 - screen_pixel_width)
+    y_buffer = (screen_pixel_height * 0.2)
+    x_buffer = (screen_pixel_width  * 0.2)
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
     y > -y_buffer && y < screen_pixel_height + y_buffer && x > -x_buffer && x < screen_pixel_width + x_buffer
   end

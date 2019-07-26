@@ -36,6 +36,38 @@ module Projectiles
     POST_DESTRUCTION_EFFECTS = false
     POST_COLLISION_EFFECTS = false
 
+    BLOCK_PROJ_DRAW = false
+    class << self
+      attr_reader :image, :init_sound, :init_sound_path
+      attr_reader :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half
+    end
+
+    def self.pre_load_setup(height_scale)
+      # puts "RIGHT HERE22 - #{self.name}"
+      @image = get_image
+      @init_sound = get_init_sound
+      @init_sound_path = get_init_sound_path
+
+      # the follwing would be useful for collisions
+      @image_width  = @image.width  * (height_scale)
+      @image_height = @image.height * (height_scale)
+      @image_size   = @image_width  * @image_height / 2
+      @image_radius = (@image_width  + @image_height) / 4
+
+      @image_width_half  = @image_width  / 2.0
+      @image_height_half = @image_height / 2.0
+
+      if IMAGE_SCALER
+        @image_width  = @image_width  / IMAGE_SCALER
+        @image_height = @image_height / IMAGE_SCALER
+        @image_size   = @image_size   / IMAGE_SCALER
+        @image_radius = @image_radius / IMAGE_SCALER
+
+        @image_width_half  = @image_width_half  / IMAGE_SCALER
+        @image_height_half = @image_height_half / IMAGE_SCALER
+      end
+    end
+
     def get_post_destruction_effects
       raise 'override me!'
     end
@@ -68,7 +100,7 @@ module Projectiles
       # puts "current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options"
       # puts "#{[current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, options]}"
       # validate_not_nil([current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y], self.class.name, __callee__)
-      # options[:no_image] = true
+      options[:no_image] = true
       super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
 
       @hit_objects_class_filter = self.class::HIT_OBJECT_CLASS_FILTER
@@ -397,8 +429,11 @@ module Projectiles
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
       # limiting angle extreme by 2
-      if is_on_screen?
+      if @is_on_screen && !self.class::BLOCK_PROJ_DRAW
         @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      end
+      if @is_on_screen && self.class::DRAW_CLASS_IMAGE
+        self.class.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
       end
     end
 

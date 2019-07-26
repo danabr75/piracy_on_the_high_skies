@@ -102,48 +102,50 @@ module Buildings
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y, colors = @basic_color
       # @object3D.draw
-      if @hover
-        # @faction.emblem.draw_rot(
-        #   @x, @y, ZOrder::AIFactionEmblem,
-        #   360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
-        # )
-        @faction.emblem.draw(@x - @faction.emblem_width_half, @y - @faction.emblem_height_half, ZOrder::FactionEmblem, @faction.emblem_scaler, @faction.emblem_scaler)
-        @faction_font.draw(@faction.displayed_name, @x - (@faction_font.text_width(@faction.displayed_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
+      if @is_on_screen
+        if @hover
+          # @faction.emblem.draw_rot(
+          #   @x, @y, ZOrder::AIFactionEmblem,
+          #   360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
+          # )
+          @faction.emblem.draw(@x - @faction.emblem_width_half, @y - @faction.emblem_height_half, ZOrder::FactionEmblem, @faction.emblem_scaler, @faction.emblem_scaler)
+          @faction_font.draw(@faction.displayed_name, @x - (@faction_font.text_width(@faction.displayed_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
 
-        if !@invulnerable
-          health_counter = 0.0
-          # current_angle  = 11.0
-          # Lower is counter clockwise
-          # Higher is clockwise
-          current_angle  = 155.0
-          # while max_health != health && health > 0 && health_counter <= health
-          while @health > 0 && health_counter <= @health
-            # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-            @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
+          if !@invulnerable
+            health_counter = 0.0
+            # current_angle  = 11.0
+            # Lower is counter clockwise
+            # Higher is clockwise
+            current_angle  = 155.0
+            # while max_health != health && health > 0 && health_counter <= health
+            while @health > 0 && health_counter <= @health
+              # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+              @health_unit_image.draw_rot(@x, @y, ZOrder::AIShip, current_angle, 0.5, 9, @height_scaler_with_health_unit_image, @height_scaler_with_health_unit_image)
 
-            health_counter += @health_angle_increment
-            current_angle  += 6
+              health_counter += @health_angle_increment
+              current_angle  += 6
+            end
           end
         end
-      end
 
 
-      # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
-      if @graphics_setting == :basic
-        if @interactible
-          if @is_hovering && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
-            # colors = [0.5, 1, 0.5, 1]
-            colors = Gosu::Color.argb(0xff_80ff00)
-          elsif @is_hovering
-            # colors = [1, 0.5, 0.5, 1]
-            colors = Gosu::Color.argb(0xff_ff0000)
+        # Doesn't exactly match terrain, kinda does now, when we use the `update_from_3D` function, from gl_background.
+        if @graphics_setting == :basic
+          if @interactible
+            if @is_hovering && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
+              # colors = [0.5, 1, 0.5, 1]
+              colors = Gosu::Color.argb(0xff_80ff00)
+            elsif @is_hovering
+              # colors = [1, 0.5, 0.5, 1]
+              colors = Gosu::Color.argb(0xff_ff0000)
+            else
+              colors = colors || Gosu::Color.argb(0xff_ffffff)
+            end
           else
             colors = colors || Gosu::Color.argb(0xff_ffffff)
           end
-        else
-          colors = colors || Gosu::Color.argb(0xff_ffffff)
+          @image.draw((@x - @image_width_half), (@y - @image_height_half), ZOrder::Building, @height_scale, @height_scale, colors)
         end
-        @image.draw((@x - @image_width_half), (@y - @image_height_half), ZOrder::Building, @height_scale, @height_scale, colors)
       end
     end
 
@@ -162,42 +164,44 @@ module Buildings
     # end
 
     def tile_draw_gl v1, v2, v3, v4, colors = @color
-      info = @info
+      if @is_on_screen
+        info = @info
 
-      if @interactible
-        if @is_hovering && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
-          colors = [0.5, 1, 0.5, 1]
-        elsif @is_hovering
-          colors = [1, 0.5, 0.5, 1]
+        if @interactible
+          if @is_hovering && @is_close_enough_to_open && @interactable_object && !is_hostile_to?(@interactable_object.get_faction_id)
+            colors = [0.5, 1, 0.5, 1]
+          elsif @is_hovering
+            colors = [1, 0.5, 0.5, 1]
+          else
+            colors = colors || [1, 1, 1, 1]
+          end
         else
           colors = colors || [1, 1, 1, 1]
         end
-      else
-        colors = colors || [1, 1, 1, 1]
+
+        glBindTexture(GL_TEXTURE_2D, info.tex_name)
+        glBegin(GL_TRIANGLE_STRIP)
+          # bottom left 
+          glTexCoord2d(info.left, info.bottom)
+          glColor4d(colors[0], colors[1], colors[2], colors[3])
+          glVertex3d(v1[0], v1[1], v1[2])
+
+          # Top Left
+          glTexCoord2d(info.left, info.top)
+          glColor4d(colors[0], colors[1], colors[2], colors[3])
+          glVertex3d(v2[0], v2[1], v2[2])
+
+          # bottom Right
+          glTexCoord2d(info.right, info.bottom)
+          glColor4d(colors[0], colors[1], colors[2], colors[3])
+          glVertex3d(v3[0], v3[1], v3[2])
+
+          # top right
+          glTexCoord2d(info.right, info.top)
+          glColor4d(colors[0], colors[1], colors[2], colors[3])
+          glVertex3d(v4[0], v4[1], v4[2])
+        glEnd
       end
-
-      glBindTexture(GL_TEXTURE_2D, info.tex_name)
-      glBegin(GL_TRIANGLE_STRIP)
-        # bottom left 
-        glTexCoord2d(info.left, info.bottom)
-        glColor4d(colors[0], colors[1], colors[2], colors[3])
-        glVertex3d(v1[0], v1[1], v1[2])
-
-        # Top Left
-        glTexCoord2d(info.left, info.top)
-        glColor4d(colors[0], colors[1], colors[2], colors[3])
-        glVertex3d(v2[0], v2[1], v2[2])
-
-        # bottom Right
-        glTexCoord2d(info.right, info.bottom)
-        glColor4d(colors[0], colors[1], colors[2], colors[3])
-        glVertex3d(v3[0], v3[1], v3[2])
-
-        # top right
-        glTexCoord2d(info.right, info.top)
-        glColor4d(colors[0], colors[1], colors[2], colors[3])
-        glVertex3d(v4[0], v4[1], v4[2])
-      glEnd
     end
 
     # def self.tile_draw_gl v1, v2, v3, v4

@@ -59,6 +59,7 @@ module Projectiles
         @chain_image_size   = @chain_image_width  * @chain_image_height / 2
         @chain_image_radius = (@chain_image_width  + @chain_image_height) / 4
       end
+      raise "@chain_image_radius is nil" if @chain_image_radius.nil?
       @player_reference = nil
       @hp_reference     = options[:hp_reference]
       @dissengage = false
@@ -215,6 +216,8 @@ module Projectiles
         # end
         step = (Math::PI/180 * (angle_to_origin + 90))
         base = @chain_image_radius #* 1.2
+
+        # puts "new_x = Math.cos(step) * base + #{@current_map_pixel_x}"
         new_x = Math.cos(step) * base + @current_map_pixel_x
         new_y = Math.sin(step) * base + @current_map_pixel_y
         # puts "@hp_reference: RIGHT HERE: #{@hp_reference.current_map_pixel_x} - #{@hp_reference.current_map_pixel_y}"

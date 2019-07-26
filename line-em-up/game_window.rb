@@ -112,6 +112,8 @@ class GameWindow < Gosu::Window
 
       @resolution_scale = @width.to_f / (@height.to_f)
     end
+    puts "Loading in projectile pre_load_setup"
+    Projectiles::Projectile.descendants.each{|d| d.pre_load_setup(@height_scale) if d.respond_to?(:pre_load_setup)}
 
     @default_fps_interval = 16.666666
     fps_value = ConfigSetting.get_setting(@config_path, "Frames Per Second", FpsSetting::SELECTION[-1])

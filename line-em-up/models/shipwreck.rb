@@ -34,6 +34,7 @@ class Shipwreck < ScreenMapFixedObject
   end
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
+    @ship.switch_to_destroyed_image(@ship.class::ITEM_MEDIA_DIRECTORY) if @current_scale == @scale_end
     super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
     building = nil
     @ship.x = @x
@@ -64,8 +65,9 @@ class Shipwreck < ScreenMapFixedObject
   end
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
-    @ship.switch_to_destroyed_image(@ship.class::ITEM_MEDIA_DIRECTORY) if @current_scale == @scale_end
-    @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y, @current_scale)
+    if @is_on_screen
+      @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y, @current_scale)
+    end
   end
 
   def update_momentum

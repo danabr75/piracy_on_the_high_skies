@@ -54,6 +54,8 @@ class PilotableShip < GeneralObject
   attr_accessor :angle
   # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
   def initialize(x, y, z, hardpoint_z, hardpoint_z_base, angle, owner, options = {})
+
+    @always_show = options[:always_show] || false
     # puts "SHIP OWNER HERE"
     # puts owner.inspect
     # puts owner.class
@@ -648,27 +650,29 @@ class PilotableShip < GeneralObject
   end
 
   def draw viewable_pixel_offset_x = 0, viewable_pixel_offset_y = 0, scale_offset = 1, options = {}
-    if @owner_faction
-      @owner_faction.emblem.draw_rot(
-        @x, @y, @faction_z,
-        360 - @angle, 0.5, 0.5, @owner_faction.emblem_scaler, @owner_faction.emblem_scaler
-      )
-    end
+    if @is_on_screen || @always_show
+      if @owner_faction
+        @owner_faction.emblem.draw_rot(
+          @x, @y, @faction_z,
+          360 - @angle, 0.5, 0.5, @owner_faction.emblem_scaler, @owner_faction.emblem_scaler
+        )
+      end
 
-    @drawable_items_near_self.reject! { |item| item.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
-    # puts "DRAWING HARDPOINTS"
-    # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
-    if !@hide_hardpoints
-      # puts "AI DRAWING HARDPOINT HERE" if options[:test]
-      # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
-      # puts "WHAT IS GOING ON HERE"
-      # puts [@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y]
-      @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
+      @drawable_items_near_self.reject! { |item| item.draw(viewable_pixel_offset_x, viewable_pixel_offset_y) }
+      # puts "DRAWING HARDPOINTS"
+      # puts "@starboard_hard_points: #{@starboard_hard_points.count}"
+      if !@hide_hardpoints
+        # puts "AI DRAWING HARDPOINT HERE" if options[:test]
+        # puts "@front_hard_points.first x-y #{@front_hard_points.first.x} - #{@front_hard_points.first.y}" if options[:test]
+        # puts "WHAT IS GOING ON HERE"
+        # puts [@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y]
+        @hardpoints.each { |item| item.draw(@x, @y, @angle, viewable_pixel_offset_x, viewable_pixel_offset_y) }
+      end
+      # puts "SHIP DRAW: #{@width_scale} - #{@height_scale} - #{scale_offset}"
+                                                                                                  # SHIP DRAW: 2.6666666666666665 - 1.5 - 1
+      @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @height_scale_with_image_scaler * scale_offset, @height_scale_with_image_scaler * scale_offset)
+      # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
     end
-    # puts "SHIP DRAW: #{@width_scale} - #{@height_scale} - #{scale_offset}"
-                                                                                                # SHIP DRAW: 2.6666666666666665 - 1.5 - 1
-    @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@angle, 0.5, 0.5, @height_scale_with_image_scaler * scale_offset, @height_scale_with_image_scaler * scale_offset)
-    # @image.draw_rot(@x, @y, ZOrder::Projectile, @current_image_angle, 0.5, 0.5, @height_scale, @height_scale)
   end
 
   def draw_gl_list
@@ -732,6 +736,9 @@ class PilotableShip < GeneralObject
 
     update_current_map_pixel_coords(owner.current_map_pixel_x, owner.current_map_pixel_y)
 
+    # Don't care about it alive or not, it's the owner that counts
+    super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, {block_tile_from_pixel_update: true})
+
     # hp.attack(initial_ship_angle, current_map_pixel_x, current_map_pixel_y, pointer) 
 
 
@@ -783,22 +790,6 @@ class PilotableShip < GeneralObject
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0
     # @time_alive += 1 if self.is_alive
   end
-
-  # def collect_pickups(pickups)
-  #   pickups.reject! do |pickup|
-  #     if Gosu.distance(@x, @y, pickup.x, pickup.y) < ((self.get_radius) + (pickup.get_radius)) * 1.2 && pickup.respond_to?(:collected_by_player)
-  #       pickup.collected_by_player(self)
-  #       if pickup.respond_to?(:get_points)
-  #         self.score += pickup.get_points
-  #       end
-  #       # stop that!
-  #       # @beep.play
-  #       true
-  #     else
-  #       false
-  #     end
-  #   end
-  # end
 
 
 end

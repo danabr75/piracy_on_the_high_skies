@@ -82,18 +82,20 @@ module Buildings
     end
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
-      if @current_take_over_time > 0 #@being_taken_over && @take_over_block == false
-        take_over_counter = 0.0
-        # current_angle  = 11.0
-        current_angle  = 0
-        while @current_take_over_time > 0 && take_over_counter <= @current_take_over_time
-          # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-          @take_over_image.draw_rot(@x, @y, ZOrder::UI, current_angle, 0.5, 8, @height_scaler_with_take_over_image, @height_scaler_with_take_over_image, @take_over_colors)
+      if @is_on_screen
+        if @current_take_over_time > 0 #@being_taken_over && @take_over_block == false
+          take_over_counter = 0.0
+          # current_angle  = 11.0
+          current_angle  = 0
+          while @current_take_over_time > 0 && take_over_counter <= @current_take_over_time
+            # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
+            @take_over_image.draw_rot(@x, @y, ZOrder::UI, current_angle, 0.5, 8, @height_scaler_with_take_over_image, @height_scaler_with_take_over_image, @take_over_colors)
 
-          take_over_counter += 3
-          current_angle     += 3
+            take_over_counter += 3
+            current_angle     += 3
+          end
+          # puts "ENDING ANGLE: #{current_angle}"
         end
-        # puts "ENDING ANGLE: #{current_angle}"
       end
       super(viewable_pixel_offset_x, viewable_pixel_offset_y)
     end

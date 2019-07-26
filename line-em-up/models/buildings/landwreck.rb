@@ -47,7 +47,12 @@ module Buildings
       @image_width_half  = @image_width  / 2.0
       @image_height_half = @image_height / 2.0
 
-      @click_area = LUIT::ClickArea.new(@window, self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
+      if @window
+        @click_area = LUIT::ClickArea.new(@window, self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
+        @interactible = true
+      else
+        @interactible = false
+      end
       @button_id_mapping = {}
       @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
         if !window.ship_loadout_menu.active
@@ -58,7 +63,6 @@ module Buildings
       @is_close_enough_to_open = false
       @max_lootable_pixel_distance = 2 * @average_tile_size
       @credits = rand(50) # in the future, grab from AIShip.. or whatever the original owner was
-      @interactible = true
       @persist = options[:persist] || false
       # @block_map_pixel_from_tile_update = true
     end
@@ -124,16 +128,18 @@ module Buildings
     def draw viewable_pixel_offset_x,  viewable_pixel_offset_y
       # Why is this here?
       # @click_area.draw(@x - @image_width_half, @y - @image_height_half) if @drops.any?
-      color = Gosu::Color.argb(0xff_ffffff)
-      if @drops.any?
-        if @is_hovering && @is_close_enough_to_open
-          color = Gosu::Color.argb(0xff_e1ffcd)
-        elsif @is_hovering
-          color = Gosu::Color.argb(0xff_ff9479)
+      if @is_on_screen
+        color = Gosu::Color.argb(0xff_ffffff)
+        if @drops.any?
+          if @is_hovering && @is_close_enough_to_open
+            color = Gosu::Color.argb(0xff_e1ffcd)
+          elsif @is_hovering
+            color = Gosu::Color.argb(0xff_ff9479)
+          end
         end
-      end
-      if @item.image
-        @item.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, -@current_angle, 0.5, 0.5, @current_scale, @current_scale, color)
+        if @item.image
+          @item.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, ZOrder::Building, -@current_angle, 0.5, 0.5, @current_scale, @current_scale, color)
+        end
       end
     end
 

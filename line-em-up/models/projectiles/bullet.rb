@@ -27,52 +27,21 @@ module Projectiles
 
     IMAGE_SCALER = 4.0
 
+    BLOCK_PROJ_DRAW = true
+    DRAW_CLASS_IMAGE = true
+    USING_CLASS_IMAGE_ATTRIBUTES = true
 
-    def self.pre_load_setup
-      @image = Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
-      @init_sound = Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
-      @init_sound_path = "#{SOUND_DIRECTORY}/bullet.ogg"
+    def self.get_image
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
     end
-    
-    # MAX_CURSOR_FOLLOW = 4
-    # ADVANCED_HIT_BOX_DETECTION = true
 
-    # POST_DESTRUCTION_EFFECTS = true
-    # def get_post_destruction_effects overriding_map_pixel_x = nil, overriding_map_pixel_y = nil
-    #   return [
-    #     Graphics::SmallExplosion.new(
-    #       # point_map_pixel_x, point_map_pixel_y, @width_scale,
-    #       overriding_map_pixel_x || @current_map_pixel_x, overriding_map_pixel_y || @current_map_pixel_y, @width_scale,
-    #       @height_scale, @screen_pixel_width, @screen_pixel_height, @fps_scaler
-    #     )
-    #   ]
-    # end
+    def self.get_init_sound
+      Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
+    end
 
-    # def get_image
-    #   Gosu::Image.new("#{MEDIA_DIRECTORY}/bullet-mini.png")
-    # end
-
-    # def self.get_init_sound
-    #   Gosu::Sample.new("#{SOUND_DIRECTORY}/bullet.ogg")
-    # end
-
-    # def self.get_init_sound_path
-    #   "#{SOUND_DIRECTORY}/bullet.ogg"
-    # end
-
-    # def drops
-    #   [
-    #     # Add back in once SE has been updated to display on map, not on screen.
-    #     # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
-    #   ]
-    # end
-
-    
-    # def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
-    #   # puts "MISSILE: #{@health}"
-    #   return super(mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y)
-    # end
-
+    def self.get_init_sound_path
+      "#{SOUND_DIRECTORY}/bullet.ogg"
+    end
 
   end
 end

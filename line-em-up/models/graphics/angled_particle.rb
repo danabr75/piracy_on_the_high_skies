@@ -74,7 +74,7 @@ module Graphics
         # 21 + -8.000000000000014
         # ANGLE ON NEW PARTICLE: 42.99999999999998
 
-        @points << [current_map_pixel_x, current_map_pixel_y, speed, angle, -50, -50]
+        @points << [current_map_pixel_x, current_map_pixel_y, speed, angle, -50, -50, false]
       end
       @is_alive = true
       @image = self.class.get_image
@@ -102,12 +102,14 @@ module Graphics
 
         p[4] = x
         p[5] = y
+        p[6] = GeneralObject.async_is_on_screen?(p[4], p[5], @screen_pixel_width, @screen_pixel_height)
       end
       return @is_alive
     end
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
       @points.each do |p|
+        next if !p[6]
         if @time_alive > 0.0
           scale = @time_alive / 100.0
         else
