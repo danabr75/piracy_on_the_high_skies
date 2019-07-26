@@ -1,3 +1,5 @@
+# NEEDS REWRITE!!!!!!! AI SHIP NEEDS ACCESS TO WINDOW
+
 require_relative '../lib/config_setting.rb'
 require_relative '../models/message_flash.rb'
 
@@ -12,9 +14,9 @@ module QuestInterface
       # Need to keep these strings around. We can eval them, but then can't convert them back to strings.
       "starting_level_quest" => {
         "init_ships_string" => [
-            "AIShip.new(nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player', special_ship_enemy_icon: true})",
-            "AIShip.new(nil, nil, 60, 120, {id: 'starting_level_quest_ship_10', special_target_focus_id: 'player', close_range: true})",
-            "AIShip.new(nil, nil, 20, 116, {id: 'starting_level_quest_ship_11', special_target_focus_id: 'player', long_range: true})",
+            "AIShip.new(window, nil, nil, 124, 124, {id: 'starting_level_quest_ship_1', special_target_focus_id: 'player', special_ship_enemy_icon: true})",
+            "AIShip.new(window, nil, nil, 60, 120, {id: 'starting_level_quest_ship_10', special_target_focus_id: 'player', close_range: true})",
+            "AIShip.new(window, nil, nil, 20, 116, {id: 'starting_level_quest_ship_11', special_target_focus_id: 'player', long_range: true})",
             # "AIShip.new(nil, nil, 124, 114, {id: 'starting_level_quest_ship_12', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 130, 135, {id: 'starting_level_quest_ship_7', special_target_focus_id: 'player'})",
             # "AIShip.new(nil, nil, 130, 140, {id: 'starting_level_quest_ship_8', special_target_focus_id: 'player'})",
@@ -75,7 +77,7 @@ module QuestInterface
 
       },
       "followup-level-quest" => {
-        "init_ships_string" =>     ["AIShip.new(nil, nil, 118, 118, {id: 'starting_level_quest-ship-2', special_target_focus_id: 'player'})", "AIShip.new(nil, nil, 118, 119, {id: 'starting_level_quest-ship-3', special_target_focus_id: 'player'})", "AIShip.new(nil, nil, 118, 120, {id: 'starting_level_quest-ship-4', special_target_focus_id: 'player'})"],
+        "init_ships_string" =>     ["AIShip.new(window, nil, nil, 118, 118, {id: 'starting_level_quest-ship-2', special_target_focus_id: 'player'})", "AIShip.new(window, nil, nil, 118, 119, {id: 'starting_level_quest-ship-3', special_target_focus_id: 'player'})", "AIShip.new(window, nil, nil, 118, 120, {id: 'starting_level_quest-ship-4', special_target_focus_id: 'player'})"],
         "init_buildings_string" => [],
         "init_effects" =>   [], # earth_quakes?, trigger dialogue
         # "init_effects" =>   [["focus" => {"id" => 'starting_level_quest-ship-2', "time" => 100, type: 'ship'}]], # earth_quakes?, trigger dialogue
@@ -129,29 +131,30 @@ module QuestInterface
 
 
   def self.validate_inital_lambdas
-    found_errors = true
-    initial_quests_data.each do |quest_key, quest_data|
-      QUEST_KEYS_TO_EVAL.each do |string_key, values|
-        begin
-          if values['type'] == 'array'
-            quest_data[values["new_key"]] = []
-            quest_data[string_key].each do |element|
-              quest_data[values["new_key"]] << eval(element)
-            end
-          else
-            quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
-          end
-        rescue SyntaxError, NoMethodError => e
-          found_errors = false
-         # puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
-        end
-      end
-    end
+    # found_errors = true
+    # initial_quests_data.each do |quest_key, quest_data|
+    #   QUEST_KEYS_TO_EVAL.each do |string_key, values|
+    #     begin
+    #       if values['type'] == 'array'
+    #         quest_data[values["new_key"]] = []
+    #         quest_data[string_key].each do |element|
+    #           quest_data[values["new_key"]] << eval(element)
+    #         end
+    #       else
+    #         quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
+    #       end
+    #     rescue SyntaxError, NoMethodError => e
+    #       found_errors = false
+    #      # puts "ISSUE WITH: #{quest_key} on key: #{string_key} - #{e.class}"
+    #     end
+    #   end
+    # end
     return found_errors
   end
 
-
-  def self.get_quests config_path
+  # NEED TO PASS WINDOW- AI ship- HERE!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  def self.get_quests window, config_path
+    raise "no window" if window.nil?
     found_errors = false
     raw_data = get_quests_data(config_path)
     quest_datas = JSON.parse(raw_data)
@@ -163,10 +166,12 @@ module QuestInterface
             quest_data[values["new_key"]] = []
             quest_data[string_key].each do |element|
               raw_data = element
+              puts "START EVAl1: #{element}"
               quest_data[values["new_key"]] << eval(element)
             end
           else
             raw_data = quest_data[string_key]
+            puts "START EVAl2"
             quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
           end
         rescue NameError, SyntaxError, NoMethodError => e

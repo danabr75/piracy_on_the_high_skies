@@ -129,9 +129,18 @@ class GameWindow < Gosu::Window
       @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
     )
 
-    @inner_map = nil#InnerMap.new(self, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height, @config_path)
-    @outer_map = nil#OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
-    # @outer_map.enable
+    # TEST HERE
+    GlobalVariables.set_inner_map(
+      1, 1,
+      1, 1,
+      1, 1,
+    )
+
+
+    @inner_map = InnerMap.new(self, nil, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
+    @inner_map.disable
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @outer_map.disable
     @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
     @in_game_menu.enable
     @key_pressed_map = {}
@@ -181,26 +190,31 @@ class GameWindow < Gosu::Window
 
   def activate_inner_map map_name
     puts "ACTIVATING INNER MAP"
-    @inner_map = InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
+    # require 'gosu'
+    # GC.start
+    @inner_map.load_map(map_name) #= InnerMap.new(self, map_name, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
+    # GC.start
     @outer_map.disable
+    # GC.start
     @in_game_menu.disable
+    # GC.start
     @inner_map.enable
+    # GC.start
   end
 
   def activate_outer_map
     puts "ACTIVATING OUTER MAP"
-    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @outer_map.enable
     @in_game_menu.disable
     @outer_map.enable
   end
 
   def activate_main_menu
     # @outer_map.disable if @outer_map
-    @outer_map = nil
+    @outer_map.disable
     # @inner_map.disable if @inner_map
-    @inner_map = nil
-    GC.start
-    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
+    @inner_map.disable
+    # GC.starta
     @in_game_menu.enable
   end
 
@@ -353,7 +367,7 @@ class GameWindow < Gosu::Window
         exiting_map = @inner_map.update(self.mouse_x, self.mouse_y)
         if exiting_map
           # puts "EXITING MAP HERE"
-          @inner_map = nil
+          @inner_map.disable
           @outer_map.enable
         end
 

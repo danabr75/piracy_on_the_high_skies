@@ -33,7 +33,6 @@ class InnerMap
     # LUIT.config({window: window}) # not really necessary logically speaking ,but this appears to have fixed a bug where the background tiles were the wrong image, after using the outer map ship loadout screen.
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height]
     # @local_window = self
-    @map_name = map_name
 
     @config_path = self.class::CONFIG_FILE
     @save_file_path = self.class::CURRENT_SAVE_FILE
@@ -55,17 +54,17 @@ class InnerMap
 
     @collision_counter = 0
     @destructable_collision_counter = 1
-    @projectile_collision_manager              = AsyncProcessManager.new(ProjectileCollisionThread, 16, true)
-    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true)
-    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true)
-    @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 6, true)
+    @projectile_collision_manager              = AsyncProcessManager.new(ProjectileCollisionThread, 16, true, :joined_threads)
+    @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true, :joined_threads)
+    @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true, :joined_threads)
+    @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 6, true, :joined_threads)
     if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
-      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true)
+      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true, :joined_threads)
       @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :joined_threads)
       # Building update needs to be joined, or else ships are updated with missing images
       @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
-      @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true) # , :joined_threads
+      @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true, :joined_threads) # , :joined_threads
     else
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
       @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
@@ -83,16 +82,9 @@ class InnerMap
 
 
     @graphics_setting = GlobalVariables.graphics_setting
-    @gl_background = GLBackground.new(@map_name, @height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
-
-    # @factions = Faction.init_factions(@height_scale)
     @factions = GlobalVariables.factions
 
-    GlobalVariables.set_inner_map(
-      @gl_background.map_pixel_width, @gl_background.map_pixel_height,
-      @gl_background.map_tile_width, @gl_background.map_tile_height,
-      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
-    )
+    load_map(map_name) if map_name
 
     # GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
     #   @gl_background.map_pixel_width, @gl_background.map_pixel_height,
@@ -127,55 +119,36 @@ class InnerMap
     @add_shipwrecks = []
     @remove_shipwreck_ids = []
     
+    @effects = []
+    @graphical_effects = []
+    @add_graphical_effects = []
+
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
     @ui_y = 0
     @footer_bar = FooterBar.new(self)
     reset_font_ui_y
 
-    @player = Player.new(nil, nil, 0, 110)
-    # if rand(2) == 0
-    #   if rand(2) == 0
-    #     @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
-    #   else
-    #     @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
-    #   end
-    # else
-    #   if rand(2) == 0
-    #     @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
-    #   else
-    #     @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
-    #   end
-    # end
+    @key_pressed_map = {}
 
-    raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
-    raise "@player.current_map_pixel_y.nil" if @player.current_map_pixel_y.nil?
+    # raise "@player.current_map_pixel_x.nil" if @player.current_map_pixel_x.nil?
+    # raise "@player.current_map_pixel_y.nil" if @player.current_map_pixel_y.nil?
 
 
-    @center_target = @player
+    # @center_target = @player
     
-    @pointer = Cursor.new(@width, @height, @height_scale, @height_scale, @player)
+    
 
-    @quest_data = QuestInterface.get_quests(@save_file_path)
+    @quest_data = QuestInterface.get_quests(@window, @save_file_path)
 
-    values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
-    values[:buildings].each do |b|
-      @buildings[b.id] = b
-    end
-    values[:ships].each do |ship|
-      @ship[ship.id] = ship
-    end
     # @pickups = values[:pickups]
 
     @messages = []
-    @effects = []
-    @graphical_effects = []
-    @add_graphical_effects = []
+
 
     @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
     viewable_center_target = nil
 
-    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
 
     @viewable_offset_x = 0
     @viewable_offset_y = 0
@@ -264,12 +237,91 @@ class InnerMap
     # LUIT.config({window: @window, z: 25})
     # @button = LUIT::Button.new(@window, :test, 450, 450, "test", 30, 30)
     @show_minimap = true
-    @mini_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
+    @mini_map = nil# ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
 
-    @key_pressed_map = {}
     @mouse_x = 0
     @mouse_y = 0
     @active = true
+  end
+
+  # Load new map, reset what needs to be reset.
+  def load_map map_name
+    @map_name = map_name
+    @gl_background = GLBackground.new(@map_name, @height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
+
+    # @factions = Faction.init_factions(@height_scale)
+
+    GlobalVariables.set_inner_map(
+      @gl_background.map_pixel_width, @gl_background.map_pixel_height,
+      @gl_background.map_tile_width, @gl_background.map_tile_height,
+      @gl_background.tile_pixel_width, @gl_background.tile_pixel_height,
+    )
+    @mini_map = ScreenMap.new(@gl_background.map_name, @gl_background.map_tile_width, @gl_background.map_tile_height)
+
+    @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
+
+    # @player = Player.new(nil, nil, 0, 110)
+    if rand(2) == 0
+      if rand(2) == 0
+        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
+      else
+        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
+      end
+    else
+      if rand(2) == 0
+        @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
+      else
+        @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
+      end
+    end
+    @center_target = @player
+    values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
+
+    @buildings = {}
+    @projectiles = {}
+
+    @add_projectiles = []
+    @remove_projectile_ids = []
+
+    @add_destructable_projectiles = []
+    @remove_destructable_projectile_ids = []
+    @destructable_projectiles = {}
+
+    @add_ships = []
+    @ships = {}
+    @remove_ship_ids = []
+
+    @add_buildings    = []
+    @remove_building_ids = []
+
+    @shipwrecks = {}
+    @add_shipwrecks = []
+    @remove_shipwreck_ids = []
+    
+    @effects = []
+    @graphical_effects = []
+    @add_graphical_effects = []
+    
+    # puts "got values back from map:"
+    # puts values[:buildings].first
+    values[:buildings].each do |b|
+      @buildings[b.id] = b
+    end
+    values[:ships].each do |ship|
+      @ship[ship.id] = ship
+    end
+
+
+    @pointer = Cursor.new(@width, @height, @height_scale, @height_scale, @player)
+    
+    @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
+
+    @ui_y = 0
+    @footer_bar = FooterBar.new(self)
+    reset_font_ui_y
+
+    @key_pressed_map = {}
+
   end
 
   def exit_game
@@ -295,6 +347,8 @@ class InnerMap
   end
 
   def disable
+    @exit_map = false
+    @exit_map_menu.disable
     @active = false
   end
 

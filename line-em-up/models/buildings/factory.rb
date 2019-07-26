@@ -49,7 +49,7 @@ module Buildings
         # new_ship = AIShip.new(nil, nil, @current_map_tile_x, @current_map_tile_y, {special_target_focus_id: 'player', long_range: true, angle: 0.0, faction_id: self.get_faction_id})
         # @ships << new_ship
         @thread = Thread.new do
-          @creating_ships << AIShip.new(nil, nil, @current_map_tile_x, @current_map_tile_y, {special_target_focus_id: 'player', long_range: true, angle: 0.0, faction_id: self.get_faction_id, no_drops: true})
+          @creating_ships << AIShip.new(@window, nil, nil, @current_map_tile_x, @current_map_tile_y, {special_target_focus_id: 'player', long_range: true, angle: 0.0, faction_id: self.get_faction_id, no_drops: true})
           # pid, status = Process.wait2(pid)
           # Thread.current[:status] = status
           # Thread.current[:pid]    = pid

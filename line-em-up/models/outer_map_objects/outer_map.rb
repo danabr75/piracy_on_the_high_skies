@@ -41,10 +41,9 @@ module OuterMapObjects
       @icon_image_width_half  = (@icon_image_width  / 2.0)
       @icon_image_height_half = (@icon_image_height / 2.0)
 
-      @ship_loadout_menu = nil
+      # @ship_loadout_menu = nil
       @mouse_x = 0
       @mouse_y = 0
-      refresh
 
       @player  = OuterMapObjects::Player.new(@height_scale)
       @pointer = OuterMapObjects::Cursor.new(@height_scale)
@@ -92,8 +91,11 @@ module OuterMapObjects
       @font_height = (10 * @height_scale).to_i
       @font = Gosu::Font.new(@font_height)
       @game_pause = false
+      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
+      @ship_loadout_menu.disable
       @footer_bar = OuterMapObjects::FooterBar.new(self, @height_scale, @width, @height)
       @menus = [@ship_loadout_menu, @menu]
+      refresh
     end
 
     def menus_active
@@ -121,7 +123,7 @@ module OuterMapObjects
       @key_pressed_map = {}
       @block_all_controls = false
       @cursor_object = nil
-      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
+      menus_disable
       @map_location_datas.each do |key, value|
         button_key = key.to_sym
         # puts "NEW cLICK AREA: #{value[:x]} - #{value[:y]}"
@@ -215,7 +217,7 @@ module OuterMapObjects
 
     def draw
       Gosu::draw_rect(0, 0, @width, @height, Gosu::Color.argb(0xff_b3b3b3), ZOrder::Background)
-      @ship_loadout_menu.draw if @ship_loadout_menu
+      @ship_loadout_menu.draw if @ship_loadout_menu.active
       @pointer.draw
       @menu.draw
       # if !@ship_loadout_menu.active

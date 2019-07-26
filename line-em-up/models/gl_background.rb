@@ -243,11 +243,13 @@ class GLBackground
 
     existing_map_data = ConfigSetting.get_mapped_setting(@save_file_path, [@map_name, 'map_objects'])
     if existing_map_data
-      puts "existing map data"
+      # puts "existing map data"
       @map_objects = existing_map_data
     else
-      puts "GETTING NEW MAP DATA"
+      # puts "GETTING NEW MAP DATA"
       @map_objects = JSON.parse(File.readlines("#{MAP_DIRECTORY}/#{@map_name}_map_objects.txt").join('').gsub("\n", ''))
+      # puts "BMAP Aobjects"
+      # puts @map_objects.inspect
     end
 
 
@@ -423,7 +425,7 @@ class GLBackground
 
     buildings = []
     ships = []
-    pickups = []
+    # pickups = []
     # projectiles = []
     # puts "@map_objects"
     # puts @map_objects.inspect
@@ -453,14 +455,29 @@ class GLBackground
     if @map_objects["buildings"]
       datas = @map_objects["buildings"]
       datas.each do |y_value, data|
+        if @map_data[y_value.to_i].nil?
+          puts "Could not create building. Y VALUE EXCEEDS MAP LENGTH - #{@map_data.length} < #{y_value}"
+          puts data.inspect
+          raise "Could not create building. Y VALUE EXCEEDS MAP LENGTH - #{@map_data.length} < #{y_value}"
+        end
         # puts "building DATA - #{y_index} - #{x_index}"
         # puts "y_value: #{y_value}, data: #{data}"
         data.each do |x_value, elements|
+          if @map_data[y_value.to_i][x_value.to_i].nil?
+            puts "Could not create building. X VALUE EXCEEDS MAP LENGTH - #{@map_data[y_value.to_i].length} < #{x_value}"
+            puts elements.inspect
+            raise "Could not create building. X VALUE EXCEEDS MAP LENGTH - #{@map_data[y_value.to_i].length} < #{x_value}"
+          end
           elements.each do |element|
             klass = eval(element["klass_name"])
             data  = element["data"]
             # puts "DATA HERE"
             # puts data.inspect
+            # puts "MAP DATA NIL" if @map_data.nil?
+            # puts "@map_data[y_value.to_i] NIL" if @map_data[y_value.to_i].nil?
+            # puts "@map_data.length: #{@map_data.length} - y_value: #{y_value.to_i}" if @map_data[y_value.to_i].nil?
+            # puts "@map_data[y_value.to_i][x_value.to_i] NIL" if @map_data[y_value.to_i][x_value.to_i].nil?
+
             options = {z: @map_data[y_value.to_i][x_value.to_i]['height']}
             if data
               converted_data = {}
@@ -502,7 +519,7 @@ class GLBackground
     # Except enemies, cause they can have movement outside of the visible map?
    # puts "RETURING BUILDINGS: #{buildings.count}"
    # puts "RETURING ships: #{ships.count}"
-    return {ships: ships, pickups: pickups, buildings: buildings}
+    return {ships: ships, buildings: buildings}
   end
 
   # def convert_gps_to_screen

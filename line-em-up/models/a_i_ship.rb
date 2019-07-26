@@ -36,7 +36,9 @@ class AIShip < ScreenMapFixedObject
   # attr_reader :inited
 
   # Just test out the tile part first.. or whatever
-  def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
+  def initialize(window, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
+    @window = window
+    validate_not_nil([window],  self.class.name, __callee__)
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
 
@@ -713,7 +715,7 @@ class AIShip < ScreenMapFixedObject
     buildings = []
     shipwreck = nil
     if !result
-      shipwreck = Shipwreck.new(@current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle, @drops)
+      shipwreck = Shipwreck.new(@window, @current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle, @drops)
     end
 
 
