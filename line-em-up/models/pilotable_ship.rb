@@ -394,6 +394,7 @@ class PilotableShip < GeneralObject
         group.each do |object_id, object|
           break if hit_object
           next if owner.id == object.id
+          next if !object.is_alive
           # puts "OBJECTCLASS: #{object.class.name} against #{owner.class.name}"
           # puts "OBJECT.CLASS: #{object.class.name} - #{object.current_map_pixel_x} - #{object.current_map_pixel_y}"
           # puts "#{self.class.name} - #{@current_map_pixel_x} - #{owner.current_map_pixel_y}"
