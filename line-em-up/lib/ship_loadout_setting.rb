@@ -101,7 +101,7 @@ class ShipLoadoutSetting < Setting
     end
 
     hardpoint_data = Player.get_hardpoint_data
-    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
+    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
 
     # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
