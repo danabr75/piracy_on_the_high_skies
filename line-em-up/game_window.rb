@@ -185,6 +185,14 @@ class GameWindow < Gosu::Window
     delete_current_save_file
     # GC.start
     FileUtils.cp(@backup_save_path, @current_save_path)
+    
+    @inner_map = InnerMap.new(self, nil, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
+    @inner_map.disable
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @outer_map.disable
+    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
+    @in_game_menu.enable
+
     GC.start
   end
 
