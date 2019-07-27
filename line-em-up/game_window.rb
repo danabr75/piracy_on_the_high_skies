@@ -157,7 +157,7 @@ class GameWindow < Gosu::Window
   def init_current_save_file
     # if !File.file?(save_file_path)
       ConfigSetting.set_setting(@current_save_path, "current_ship_index", "0")
-      ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "klass"], "BasicShip")
+      ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "klass"], "PilotableShips::BasicShip")
       init_data = {
         "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
         "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",

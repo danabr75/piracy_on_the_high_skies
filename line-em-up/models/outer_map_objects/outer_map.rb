@@ -93,6 +93,8 @@ module OuterMapObjects
       @game_pause = false
       @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
       @ship_loadout_menu.disable
+      # @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
+      # @ship_loadout_menu.disable
       @footer_bar = OuterMapObjects::FooterBar.new(self, @height_scale, @width, @height)
       @menus = [@ship_loadout_menu, @menu]
       refresh

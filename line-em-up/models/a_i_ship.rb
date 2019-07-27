@@ -42,7 +42,7 @@ class AIShip < ScreenMapFixedObject
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
 
-    options[:image] = BasicShip.get_image(BasicShip::ITEM_MEDIA_DIRECTORY)
+    options[:image] = PilotableShips::BasicShip.get_image(PilotableShips::BasicShip::ITEM_MEDIA_DIRECTORY)
     super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
     # puts "NEW SHIP HJERE: "
     # puts @faction
@@ -155,7 +155,7 @@ class AIShip < ScreenMapFixedObject
     #   }
     # }
 
-    @ship = BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, ZOrder::AIHardpointBase, @angle, self, hardpoint_data)
+    @ship = PilotableShips::BasicShip.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, ZOrder::AIHardpointBase, @angle, self, hardpoint_data)
     @ship.x = @x
     @ship.y = @y
     @current_momentum = 0

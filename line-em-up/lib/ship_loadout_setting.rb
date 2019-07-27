@@ -5,7 +5,7 @@
 
 
 require_relative 'setting.rb'
-require_relative '../models/basic_ship.rb'
+# require_relative '../models/basic_ship.rb'
 # require_relative '../models/launcher.rb'
 require_relative '../models/ship_inventory.rb'
 require_relative '../models/object_inventory.rb'
