@@ -11,13 +11,14 @@ require 'glut'
 
 module PilotableShips
   class PilotableShip < GeneralObject
-
+    RARITY_MAX   = 100
     ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
     SPEED = 1
     ROTATION_SPEED = 1
     MAX_ATTACK_SPEED = 3.0
 
     IMAGE_SCALER = 5.0
+    ABSTRACT_CLASS = true
 
     attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
     attr_reader :max_health

@@ -11,6 +11,8 @@ require 'glut'
 # include GLUT
 module PilotableShips
   class BasicShip < PilotableShips::PilotableShip
+    ABSTRACT_CLASS = false
+    STORE_RARITY = 1 # lower is more frequent. Higher is more rare.. I think..
     ITEM_MEDIA_DIRECTORY = "#{MEDIA_DIRECTORY}/pilotable_ships/basic_ship"
     # SPEED = 7
     MAX_ATTACK_SPEED = 3.0

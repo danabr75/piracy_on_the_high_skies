@@ -19,7 +19,7 @@
         {"klass_name":"Buildings::RepairArea","data":{"faction_id":"faction_1"}}
       ],
       "2":[
-        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
+        {"klass_name":"Buildings::Shipyard","data":{"faction_id":"faction_1"}}
       ],
       "3":[
         {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_1"}}
