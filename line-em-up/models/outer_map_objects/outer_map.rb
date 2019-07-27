@@ -91,7 +91,7 @@ module OuterMapObjects
       @font_height = (10 * @height_scale).to_i
       @font = Gosu::Font.new(@font_height)
       @game_pause = false
-      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
+      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale, allow_current_ship_change: true})
       @ship_loadout_menu.disable
       # @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale})
       # @ship_loadout_menu.disable
@@ -126,6 +126,8 @@ module OuterMapObjects
       @block_all_controls = false
       @cursor_object = nil
       menus_disable
+      @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale, allow_current_ship_change: true})
+      @ship_loadout_menu.disable
       @map_location_datas.each do |key, value|
         button_key = key.to_sym
         # puts "NEW cLICK AREA: #{value[:x]} - #{value[:y]}"

@@ -125,7 +125,7 @@ class Player < ScreenFixedObject
 
     # BasicShip: {"front_hardpoint_locations":{"1":"BulletLauncher","0":"BulletLauncher"},"starboard_hardpoint_locations":{"2":"BulletLauncher","1":"BulletLauncher","0":"BulletLauncher"},"port_hardpoint_locations":{"0":"DumbMissileLauncher","1":"DumbMissileLauncher","2":"DumbMissileLauncher"}};
 
-    hardpoint_data = self.class.get_hardpoint_data
+    hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data
 
     if ship_klass
       # from_player is for debugging only
@@ -214,7 +214,7 @@ class Player < ScreenFixedObject
   end
 
   def refresh_ship options = {}
-    hardpoint_data = self.class.get_hardpoint_data
+    hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data
     # if actually refreshing ship type. Need to refresh GeneralObject init for image changes.
     @ship = @ship.class.new(@ship.x, @ship.y, get_draw_ordering, ZOrder::Hardpoint, ZOrder::HardpointBase, @angle, self, options.merge(hardpoint_data).merge({current_momentum: @ship.current_momentum, health: @ship.health}))
     # @ship.mass = @ship.mass# * 3 # speed here?
@@ -236,11 +236,6 @@ class Player < ScreenFixedObject
     return @ship.use_steam(usage)
   end
 
-  def self.get_hardpoint_data
-    ship_index     = ConfigSetting.get_setting(CURRENT_SAVE_FILE, "current_ship_index")
-    hardpoint_data = ConfigSetting.get_mapped_setting(CURRENT_SAVE_FILE, ["player_fleet", ship_index, "hardpoint_locations"])
-    return {hardpoint_data: hardpoint_data}
-  end
 
   # def get_kill_count_max
   #   self.class::SPECIAL_POWER_KILL_MAX

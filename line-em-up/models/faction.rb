@@ -107,7 +107,7 @@ class Faction
     else
       factions_datas = JSON.parse(raw_factions_datas)
       factions_datas.each do |faction_data|
-        puts "PARSING FACTION DATA: #{faction_data}"
+        # puts "PARSING FACTION DATA: #{faction_data}"
         factions << Faction.new(
           faction_data['name'],
           faction_data['displayed_name'],

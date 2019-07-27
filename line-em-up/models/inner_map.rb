@@ -250,8 +250,9 @@ class InnerMap
   # Load new map, reset what needs to be reset.
   def load_map map_name
     @map_name = map_name
+    @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, get_center_font_ui_y, @height_scale, @height_scale, {scale: @average_scale})
     @gl_background = GLBackground.new(@map_name, @height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
-
+    @menus = [@ship_loadout_menu, @menu, @exit_map_menu]
     # @factions = Faction.init_factions(@height_scale)
 
     GlobalVariables.set_inner_map(

@@ -16,13 +16,13 @@ module OuterMapObjects
         nil,
         {is_button: true}
       )
-      @menu.add_item(
-        :minimap_hotbar, "F",
-        0, 0,
-        lambda {|window, menu, id| window.block_all_controls = true; window.show_minimap = !window.show_minimap},
-        nil,
-        {is_button: true}
-      )
+      # @menu.add_item(
+      #   :minimap_hotbar, "F",
+      #   0, 0,
+      #   lambda {|window, menu, id| window.block_all_controls = true; window.show_minimap = !window.show_minimap},
+      #   nil,
+      #   {is_button: true}
+      # )
       # @menu.add_item(
       #   :factions_hotbar, "R",
       #   0, 0,

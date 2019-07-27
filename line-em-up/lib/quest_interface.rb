@@ -166,12 +166,12 @@ module QuestInterface
             quest_data[values["new_key"]] = []
             quest_data[string_key].each do |element|
               raw_data = element
-              puts "START EVAl1: #{element}"
+              # puts "START EVAl1: #{element}"
               quest_data[values["new_key"]] << eval(element)
             end
           else
             raw_data = quest_data[string_key]
-            puts "START EVAl2"
+            # puts "START EVAl2"
             quest_data[values["new_key"]] = eval(quest_data[string_key]) if quest_data[string_key]
           end
         rescue NameError, SyntaxError, NoMethodError => e

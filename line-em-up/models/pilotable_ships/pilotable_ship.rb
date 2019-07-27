@@ -53,6 +53,12 @@ module PilotableShips
     CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
     CONFIG_FILE = "#{CURRENT_DIRECTORY}/../../config.txt"
     attr_accessor :angle
+
+    def self.get_hardpoint_data ship_index_string = ConfigSetting.get_setting(CURRENT_SAVE_FILE, "current_ship_index")
+      hardpoint_data = ConfigSetting.get_mapped_setting(CURRENT_SAVE_FILE, ["player_fleet", ship_index_string, "hardpoint_locations"])
+      return {hardpoint_data: hardpoint_data}
+    end
+
     # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
     def initialize(x, y, z, hardpoint_z, hardpoint_z_base, angle, owner, options = {})
 
