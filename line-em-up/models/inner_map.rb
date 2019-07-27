@@ -34,6 +34,9 @@ class InnerMap
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height]
     # @local_window = self
 
+    @fps_log = []
+    @fps_counter = 0
+
     @config_path = self.class::CONFIG_FILE
     @save_file_path = self.class::CURRENT_SAVE_FILE
 
@@ -436,6 +439,16 @@ class InnerMap
   end
 
   def update mouse_x, mouse_y
+    if @fps_counter < 60
+      @fps_log << Gosu.fps if Gosu.fps < 59
+      @fps_counter += 1
+    else
+      if @fps_log.count > 0
+        puts "FPS Logger: " + @fps_log.join(', ')
+        @fps_log = []
+      end
+      @fps_counter = 0
+    end
     @mouse_x = mouse_x
     @mouse_y = mouse_y
     
@@ -721,11 +734,10 @@ class InnerMap
     end
     @graphical_effects.each { |effect| effect.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
 
-    @font.draw("FPS: #{Gosu.fps}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    @font.draw("Faction Relations:", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    @factions.each do |faction|
-      @font.draw("#{faction.id.upcase}: #{faction.display_factional_relation(@player.get_faction_id)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    end
+    # @font.draw("Faction Relations:", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # @factions.each do |faction|
+    #   @font.draw("#{faction.id.upcase}: #{faction.display_factional_relation(@player.get_faction_id)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # end
     if false &&@debug
       @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
