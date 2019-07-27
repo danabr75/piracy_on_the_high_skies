@@ -59,6 +59,22 @@ module PilotableShips
       return {hardpoint_data: hardpoint_data}
     end
 
+    def self.get_displayable_name
+      raise "override this interface method"
+    end
+
+    def self.get_hardpoint_image
+      raise "OVERRIDE ME"
+    end
+
+    def self.description
+      raise "OVERRIDE ME"
+    end
+
+    def self.value
+      raise "OVERRIDE ME"
+    end
+    
     # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)
     def initialize(x, y, z, hardpoint_z, hardpoint_z_base, angle, owner, options = {})
 

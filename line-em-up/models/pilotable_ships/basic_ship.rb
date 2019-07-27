@@ -122,7 +122,21 @@ module PilotableShips
     ]
 
 
+    def self.get_displayable_name
+      "Bumble Bee"
+    end
 
+    def self.get_hardpoint_image
+      "OVERRIDE ME"
+    end
+
+    def self.description
+      "A General Purpose Airship. Good on speed and health."
+    end
+
+    def self.value
+      5000
+    end
 
     # Rocket Launcher, Rocket launcher, yannon, Cannon, Bomb Launcher
     # FRONT_HARD_POINTS_MAX = 1

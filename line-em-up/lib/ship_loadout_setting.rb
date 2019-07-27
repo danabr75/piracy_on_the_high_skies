@@ -55,7 +55,8 @@ class ShipLoadoutSetting < Setting
     # @local_window = local_window
     @scale = options[:scale] || 1
     # puts "SHIP LOADOUT SETTING SCALE: #{@scale}"
-    @font = Gosu::Font.new(20)
+    @font = Gosu::Font.new((11 * @height_scale).to_i)
+    @small_font = Gosu::Font.new((8 * @height_scale).to_i)
     # @x = width
     @y = current_height
     @max_width = max_width
@@ -212,6 +213,8 @@ class ShipLoadoutSetting < Setting
 
           fleet_data[:x] = current_x
           fleet_data[:y] = current_y
+
+          fleet_data[:name] = klass.get_displayable_name
 
           fleet_data[:button_key] = "fleet_index_#{fleet_index.to_s}"
           puts "fleet_data[:button_key] = #{fleet_data[:button_key]}"
@@ -615,6 +618,8 @@ class ShipLoadoutSetting < Setting
       if @flagship_index != key.to_s
         fleet_data[:make_primary_ship_button].draw(0,0)
       end
+
+      @small_font.draw(fleet_data[:name], fleet_data[:x], fleet_data[:y] + fleet_data[:image_height], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
     end
   end
