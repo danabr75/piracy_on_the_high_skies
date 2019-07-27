@@ -258,27 +258,55 @@ class GLBackground
 
 
     @terrains = @map["terrains"]
-    @images = []
-    @infos = []
+    puts "TERRAINS HEREL:"
+    puts @terrains.inspect
+    
+    
     # @image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth.png", :tileable => true)
     # @info = @image.gl_tex_info
 
     # image = Gosu::Image.new("/Users/bendana/projects/line-em-up/line-em-up/media/earth_0.png", :tileable => true)
     # @images << image
     # @infos << image.gl_tex_info
-    @alt_infos = {}
-    @terrains.each_with_index do |terrain_path, index|
-      image = Gosu::Image.new(MEDIA_DIRECTORY + '/' + terrain_path, :tileable => true)
+
+    first_run = true
+    found_fault = false
+    while first_run || found_fault
+      found_fault = false
+      @infos = []
+      @images = []
+      gl_tex_info_ids = []
+      @alt_infos = {}
+
+      @terrains.each_with_index do |terrain_path, index|
+        image = Gosu::Image.new(MEDIA_DIRECTORY + '/' + terrain_path, :tileable => true)
+        @images << image
+        test = image.gl_tex_info
+        puts "test jere infos: #{test}"
+        puts "2 jere: #{test.tex_name}"
+        gl_tex_info_ids << test.tex_name
+        @infos  << test
+        @alt_infos[index.to_s] = test
+      end
+
+      out_of_bounds_path = @map["out_of_bounds_terrain_path"]
+      image = Gosu::Image.new(MEDIA_DIRECTORY + '/' + out_of_bounds_path, :tileable => true)
       @images << image
-      @infos  << image.gl_tex_info
-      @alt_infos[index.to_s] = image.gl_tex_info
+      test = image.gl_tex_info
+      gl_tex_info_ids << test.tex_name
+      puts "3 here: #{test.tex_name}"
+      @infos  << test
+      @alt_infos[@alt_infos.count.to_s] = test
+
+      first_id_value = gl_tex_info_ids[0]
+      gl_tex_info_ids.each do |id|
+        found_fault = true if first_id_value != id
+        puts "FOUND FAULT IN GL TEX INFO HERE. IF THE IDs DONT MATCH, then the wrong tiles will be loaded." if found_fault
+        break if found_fault == true
+      end
+      first_run = false
     end
 
-    out_of_bounds_path = @map["out_of_bounds_terrain_path"]
-    image = Gosu::Image.new(MEDIA_DIRECTORY + '/' + out_of_bounds_path, :tileable => true)
-    @images << image
-    @infos  << image.gl_tex_info
-    @alt_infos[@alt_infos.count.to_s] = image.gl_tex_info
     @out_of_bounds_terrain_index = @infos.count - 1
 
     @off_edge_map_value = {'height' => 3, 'terrain_index' => @out_of_bounds_terrain_index }
@@ -1160,7 +1188,7 @@ class GLBackground
     glClearDepth(0)
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT)
 
-    player_x, player_y = [player_x.to_i, player_y.to_i]
+    # player_x, player_y = [player_x.to_i, player_y.to_i]
     glDepthFunc(GL_GEQUAL)
     glEnable(GL_DEPTH_TEST)
 
@@ -1281,68 +1309,68 @@ class GLBackground
     #   glLightfv(GL_LIGHT1, GL_POSITION, [100, 100, 100,1])
   
     # @enable_dark_mode = true
-    @enable_dark_mode = false
+    # @enable_dark_mode = false
 
-    if @enable_dark_mode
-      # glLightfv(GL_LIGHT6, GL_AMBIENT, [0.5, 0.5, 0.5, 1])
-      # glLightfv(GL_LIGHT6, GL_DIFFUSE, [0.5, 0.5, 0.5, 1])
-      # # Dark lighting effect?
-      # glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
-      # glEnable(GL_LIGHT6)
-    else
-      # glLightfv(GL_LIGHT6, GL_AMBIENT, [1, 1, 1, 1])
-      # glLightfv(GL_LIGHT6, GL_DIFFUSE, [1, 1, 1, 1])
-      # # Dark lighting effect?
-      # glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
-      # glEnable(GL_LIGHT6)
-    end
+    # if @enable_dark_mode
+    #   # glLightfv(GL_LIGHT6, GL_AMBIENT, [0.5, 0.5, 0.5, 1])
+    #   # glLightfv(GL_LIGHT6, GL_DIFFUSE, [0.5, 0.5, 0.5, 1])
+    #   # # Dark lighting effect?
+    #   # glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
+    #   # glEnable(GL_LIGHT6)
+    # else
+    #   # glLightfv(GL_LIGHT6, GL_AMBIENT, [1, 1, 1, 1])
+    #   # glLightfv(GL_LIGHT6, GL_DIFFUSE, [1, 1, 1, 1])
+    #   # # Dark lighting effect?
+    #   # glLightfv(GL_LIGHT6, GL_POSITION, [0, 0, 0,-1])
+    #   # glEnable(GL_LIGHT6)
+    # end
 
-    @test = false
-    if @test
-
-
-
-      # glEnable(GL_LIGHT0)
-      # glEnable(GL_LIGHT1)
-      if true
-
-        glLightfv(GL_LIGHT1, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
-        glLightfv(GL_LIGHT1, GL_POSITION, [0, 0, 1.0, 1.0])
-        glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.5)
-        glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5)
-        glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2)
+   #  @test = false
+   #  if @test
 
 
-        glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15.0)
-        glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, [-1.0, -1.0, 0.0])
-        glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0)
-        glEnable(GL_LIGHT1)
-      end
-      glMaterialfv(GL_FRONT, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
-      glMaterialfv(GL_FRONT, GL_SHININESS, [50.0])
+
+   #    # glEnable(GL_LIGHT0)
+   #    # glEnable(GL_LIGHT1)
+   #    if true
+
+   #      glLightfv(GL_LIGHT1, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+   #      glLightfv(GL_LIGHT1, GL_POSITION, [0, 0, 1.0, 1.0])
+   #      glLightf(GL_LIGHT1, GL_CONSTANT_ATTENUATION, 1.5)
+   #      glLightf(GL_LIGHT1, GL_LINEAR_ATTENUATION, 0.5)
+   #      glLightf(GL_LIGHT1, GL_QUADRATIC_ATTENUATION, 0.2)
 
 
-      glShadeModel( GL_SMOOTH )
+   #      glLightf(GL_LIGHT1, GL_SPOT_CUTOFF, 15.0)
+   #      glLightfv(GL_LIGHT1, GL_SPOT_DIRECTION, [-1.0, -1.0, 0.0])
+   #      glLightf(GL_LIGHT1, GL_SPOT_EXPONENT, 2.0)
+   #      glEnable(GL_LIGHT1)
+   #    end
+   #    glMaterialfv(GL_FRONT, GL_SPECULAR, [1.0, 1.0, 1.0, 1.0])
+   #    glMaterialfv(GL_FRONT, GL_SHININESS, [50.0])
 
-      # // Renormalize scaled normals so that lighting still works properly.
-      glEnable( GL_NORMALIZE )
-      glEnable(GL_COLOR_MATERIAL)
 
-     glBegin(GL_TRIANGLES);
-      # glTexCoord2d(info.left, info.top)
-      glColor4d(0, 0, 1, 1)
-      glVertex3f(-0.2, 0.2, 1); 
-      # glTexCoord2d(info.left, info.bottom)
-      glColor4d(0, 1, 0, 1)
-      glVertex3f(-0.2, -0.2, 1); 
-      # glTexCoord2d(info.right, info.top)
-      glColor4d(1, 0, 1, 1)
-      glVertex3f(0.2, 0, 3); 
-      # glTexCoord2d(info.right, info.bottom)
-      # glColor4d(1, 1, 1, 1)
-      # glVertex3f(0.5, -0.5, 3); 
-     glEnd
-   end
+   #    glShadeModel( GL_SMOOTH )
+
+   #    # // Renormalize scaled normals so that lighting still works properly.
+   #    glEnable( GL_NORMALIZE )
+   #    glEnable(GL_COLOR_MATERIAL)
+
+   #   glBegin(GL_TRIANGLES);
+   #    # glTexCoord2d(info.left, info.top)
+   #    glColor4d(0, 0, 1, 1)
+   #    glVertex3f(-0.2, 0.2, 1); 
+   #    # glTexCoord2d(info.left, info.bottom)
+   #    glColor4d(0, 1, 0, 1)
+   #    glVertex3f(-0.2, -0.2, 1); 
+   #    # glTexCoord2d(info.right, info.top)
+   #    glColor4d(1, 0, 1, 1)
+   #    glVertex3f(0.2, 0, 3); 
+   #    # glTexCoord2d(info.right, info.bottom)
+   #    # glColor4d(1, 1, 1, 1)
+   #    # glVertex3f(0.5, -0.5, 3); 
+   #   glEnd
+   # end
 
     # START Documentation!
     #                                    # 3 These change colors. 
@@ -1373,7 +1401,7 @@ class GLBackground
     # modelview.data(), projection.data(),
     # screen_coords.data(), screen_coords.data() + 1, screen_coords.data() + 2);
 
-    if !@test
+    if true #!@test
       glEnable(GL_TEXTURE_2D)
       glEnable(GL_BLEND)
 
@@ -1435,18 +1463,18 @@ class GLBackground
 
 
 
-          if @debug
-            # puts "x_element: #{x_element}"
-            # puts "CONVERTING OPENGL TO SCREEN"
-            # puts "OX: #{opengl_coord_x - opengl_offset_x} = #{opengl_coord_x} - #{opengl_offset_x}"
-            # puts "OY: #{opengl_coord_y - opengl_offset_y} = #{opengl_coord_y} - #{opengl_offset_y}"
-            # x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
-            # puts "@font: x, y = #{x}, #{y}"
+          # if @debug
+          #   # puts "x_element: #{x_element}"
+          #   # puts "CONVERTING OPENGL TO SCREEN"
+          #   # puts "OX: #{opengl_coord_x - opengl_offset_x} = #{opengl_coord_x} - #{opengl_offset_x}"
+          #   # puts "OY: #{opengl_coord_y - opengl_offset_y} = #{opengl_coord_y} - #{opengl_offset_y}"
+          #   # x, y = convert_opengl_to_screen(opengl_coord_x - opengl_offset_x, opengl_coord_y - opengl_offset_y)
+          #   # puts "@font: x, y = #{x}, #{y}"
 
-            # get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
-            # result = get2dPoint(x, y , x_element["height"], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), @screen_pixel_width, @screen_pixel_height)
-            # @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", result[0], @screen_pixel_height - result[1], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-          end
+          #   # get2dPoint(o_x, o_y, o_z, viewMatrix, projectionMatrix, screen_pixel_width, screen_pixel_height)
+          #   # result = get2dPoint(x, y , x_element["height"], glGetFloatv(GL_MODELVIEW_MATRIX), glGetFloatv(GL_PROJECTION_MATRIX), @screen_pixel_width, @screen_pixel_height)
+          #   # @font.draw("X #{x_element["gps_x"]} & Y #{x_element["gps_y"]}", result[0], @screen_pixel_height - result[1], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+          # end
 
 
 
@@ -1579,7 +1607,6 @@ class GLBackground
           buildings.each do |building_id, building|
             # puts "NEXTING BUILDING: #{building.current_map_tile_x} - to #{x_element['gps_x']} and maybe: #{x_element[:gps_x]}" if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
             # puts x_element.inspect
-# {"height"=>2.464469126412455, "terrain_type"=>"dirt", "terrain_index"=>0, "corner_heights"=>{"top_left"=>2.583977320907705, "top_right"=>3, "bottom_left"=>2.9365365230516582, "bottom_right"=>3}, "terrain_paths_and_weights"=>{"top_left"=>{"0"=>1.0}, "top_right"=>{"0"=>0.5}, "bottom_left"=>{"0"=>1.0}, "bottom_right"=>{"0"=>0.5}}}
             next if building.current_map_tile_x != x_element['gps_x'] || building.current_map_tile_y != x_element['gps_y']
 
             # @local_map_movement_y

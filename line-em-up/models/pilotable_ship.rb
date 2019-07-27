@@ -681,55 +681,56 @@ class PilotableShip < GeneralObject
   end
 
   def draw_gl
-    # draw gl stuff
-    @drawable_items_near_self.each {|item| item.draw_gl }
+    raise "is this being used? maybe not"
+    # # draw gl stuff
+    # @drawable_items_near_self.each {|item| item.draw_gl }
 
-    @hardpoints.each { |item| item.draw_gl }
+    # @hardpoints.each { |item| item.draw_gl }
 
-    info = @image.gl_tex_info
+    # info = @image.gl_tex_info
 
-    # glDepthFunc(GL_GEQUAL)
-    # glEnable(GL_DEPTH_TEST)
-    # glEnable(GL_BLEND)
+    # # glDepthFunc(GL_GEQUAL)
+    # # glEnable(GL_DEPTH_TEST)
+    # # glEnable(GL_BLEND)
 
-    # glMatrixMode(GL_PROJECTION)
-    # glLoadIdentity
-    # perspective matrix
-    # glFrustum(-0.10, 0.10, -0.075, 0.075, 1, 100)
+    # # glMatrixMode(GL_PROJECTION)
+    # # glLoadIdentity
+    # # perspective matrix
+    # # glFrustum(-0.10, 0.10, -0.075, 0.075, 1, 100)
 
-    # glMatrixMode(GL_MODELVIEW)
-    # glLoadIdentity
-    # glTranslated(0, 0, -4)
+    # # glMatrixMode(GL_MODELVIEW)
+    # # glLoadIdentity
+    # # glTranslated(0, 0, -4)
   
-    z = @z
+    # z = @z
     
-    # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
-    # offs_y = 1
-    new_width1, new_height1, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
-    new_width2, new_height2, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
-    new_width3, new_height3, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
-    new_width4, new_height4, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    # # offs_y = 1.0 * @scrolls / SCROLLS_PER_STEP
+    # # offs_y = 1
+    # new_width1, new_height1, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    # new_width2, new_height2, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x - @image_width_half/2, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    # new_width3, new_height3, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y - @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
+    # new_width4, new_height4, increment_x, increment_y = Player.convert_x_and_y_to_opengl_coords(@x + @image_width_half/2, @y + @image_height_half/2, @screen_pixel_width, @screen_pixel_height)
 
-    glEnable(GL_TEXTURE_2D)
-    glBindTexture(GL_TEXTURE_2D, info.tex_name)
+    # glEnable(GL_TEXTURE_2D)
+    # glBindTexture(GL_TEXTURE_2D, info.tex_name)
 
-    glBegin(GL_TRIANGLE_STRIP)
-      # glColor4d(1, 1, 1, get_draw_ordering)
-      glTexCoord2d(info.left, info.top)
-      # glVertex3f(new_width1, new_height1, z)
+    # glBegin(GL_TRIANGLE_STRIP)
+    #   # glColor4d(1, 1, 1, get_draw_ordering)
+    #   glTexCoord2d(info.left, info.top)
+    #   # glVertex3f(new_width1, new_height1, z)
 
-      # glColor4d(1, 1, 1, get_draw_ordering)
-      glTexCoord2d(info.left, info.bottom)
-      # glVertex3f(new_width2, new_height2, z)
+    #   # glColor4d(1, 1, 1, get_draw_ordering)
+    #   glTexCoord2d(info.left, info.bottom)
+    #   # glVertex3f(new_width2, new_height2, z)
     
-      # glColor4d(1, 1, 1, get_draw_ordering)
-      glTexCoord2d(info.right, info.top)
-      # glVertex3f(new_width3, new_height3, z)
+    #   # glColor4d(1, 1, 1, get_draw_ordering)
+    #   glTexCoord2d(info.right, info.top)
+    #   # glVertex3f(new_width3, new_height3, z)
 
-      # glColor4d(1, 1, 1, get_draw_ordering)
-      glTexCoord2d(info.right, info.bottom)
-      # glVertex3f(new_width4, new_height4, z)
-    glEnd
+    #   # glColor4d(1, 1, 1, get_draw_ordering)
+    #   glTexCoord2d(info.right, info.bottom)
+    #   # glVertex3f(new_width4, new_height4, z)
+    # glEnd
   end
   
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, owner, target_map_pixel_x, target_map_pixel_y

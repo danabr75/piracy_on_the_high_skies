@@ -81,6 +81,7 @@ class GameWindow < Gosu::Window
     @backup_save_path  = self.class::BACKUP_SAVE_FILE
 
     
+    init_current_save_file if !File.file?(@current_save_path)
 
     value = ConfigSetting.get_setting(@config_path, 'resolution', ResolutionSetting::SELECTION[0])
     # puts "VALUE: #{value}"
@@ -168,7 +169,7 @@ class GameWindow < Gosu::Window
       init_data.each do |key, value|
         ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "hardpoint_locations", key], value)
       end
-      ConfigSetting.set_setting(@current_save_path, "Credits", "500")
+      ConfigSetting.set_setting(@current_save_path, "Credits", "50000")
     # end
   end
 
@@ -180,14 +181,20 @@ class GameWindow < Gosu::Window
 
   def load_save
     puts "load_game here"
+    # GC.start
     delete_current_save_file
+    # GC.start
     FileUtils.cp(@backup_save_path, @current_save_path)
+    GC.start
   end
 
   def start_new
     puts "STArt new"
+    # GC.start
     delete_current_save_file
+    # GC.start
     init_current_save_file
+    GC.start
   end
 
   def activate_inner_map map_name
@@ -201,23 +208,31 @@ class GameWindow < Gosu::Window
     @in_game_menu.disable
     # GC.start
     @inner_map.enable
-    # GC.start
+    GC.start
   end
 
   def activate_outer_map
     puts "ACTIVATING OUTER MAP"
+    # GC.start
     @outer_map.enable
+    # GC.start
     @in_game_menu.disable
+    # GC.start
     @outer_map.enable
+    GC.start
   end
 
   def activate_main_menu
     # @outer_map.disable if @outer_map
+    # GC.start
     @outer_map.disable
+    # GC.start
     # @inner_map.disable if @inner_map
     @inner_map.disable
+    # GC.start
     # GC.starta
     @in_game_menu.enable
+    GC.start
   end
 
   # def key_id_combo_lock_3 id, id2, id3
