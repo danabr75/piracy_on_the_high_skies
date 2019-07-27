@@ -182,9 +182,14 @@ class ShipLoadoutSetting < Setting
     @buttons = [@steam_core_capacity_button, @steam_core_usage_button, @legend_1, @legend_2, @legend_3, @legend_4, @legend_5, @legend_6]
 
     @allow_current_ship_change = options[:allow_current_ship_change] || false
+    @allow_ship_access_until_close = options[:allow_ship_access_until_close] || false
     # @fleet = {}
 
-    if @allow_current_ship_change
+    init_fleet_data
+  end
+
+  def init_fleet_data
+    if @allow_current_ship_change || @allow_ship_access_until_close
       raw_fleet_data = ConfigSetting.get_setting(@save_file_path, "player_fleet")
       unconverted_fleet_data = JSON.parse(raw_fleet_data) if raw_fleet_data && raw_fleet_data != ''
       @fleet_data = Util.symbolize_all_keys(unconverted_fleet_data)
@@ -214,7 +219,7 @@ class ShipLoadoutSetting < Setting
           fleet_data[:x] = current_x
           fleet_data[:y] = current_y
 
-          fleet_data[:name] = klass.get_displayable_name
+          fleet_data[:name] = klass.display_name
 
           fleet_data[:button_key] = "fleet_index_#{fleet_index.to_s}"
           puts "fleet_data[:button_key] = #{fleet_data[:button_key]}"
@@ -238,8 +243,6 @@ class ShipLoadoutSetting < Setting
         @fleet_data = {}
       end
     end
-    # puts "FLEET PARRSED"
-    # puts @fleet_data
   end
 
   def change_flagship fleet_index
@@ -287,7 +290,7 @@ class ShipLoadoutSetting < Setting
   def loading_object_inventory object, drops = [], credits = 0, holding_type = :not_available, options = {}
    # puts "LAODING OJECT INVENTORY #{drops}"
    # puts "WHAT WAS ON THE OBHECT: #{object.drops}"
-    @object_inventory = ObjectInventory.new(@window, object.class.to_s, drops, credits, object, holding_type, options)
+    @object_inventory = ObjectInventory.new(@window, object.class.display_name, drops, credits, object, holding_type, options)
 
     @buy_rate_from_store  = @object_inventory.buy_rate
     @sell_rate_from_store = @object_inventory.sell_rate
@@ -298,6 +301,8 @@ class ShipLoadoutSetting < Setting
     # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     @ship_inventory = ShipInventory.new(@window, {sell_rate: @sell_rate_from_store, buy_rate: @buy_rate_from_store})
     @object_inventory_holding_type = holding_type
+    @allow_ship_access_until_close = options[:allow_ship_access_until_close] || false
+    init_fleet_data
   end 
 
   def unloading_object_inventory
@@ -310,6 +315,7 @@ class ShipLoadoutSetting < Setting
       @ship_inventory = ShipInventory.new(@window)
       @object_inventory_holding_type = :none
       # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
+      @allow_ship_access_until_close = false
     end
   end 
 
@@ -327,9 +333,7 @@ class ShipLoadoutSetting < Setting
 
   def self.get_id_button_mapping
     values = {
-      # next:     lambda { |window, menu, id| menu.next_clicked },
-      # previous: lambda { |window, menu, id| menu.previous_clicked },
-      back:     lambda { |window, menu, id| window.block_all_controls = true; window.cursor_object.nil? ? menu.disable : nil }
+      back: lambda { |window, menu, id| window.block_all_controls = true; window.cursor_object.nil? ? menu.disable : nil }
     }
   end
 
@@ -545,7 +549,7 @@ class ShipLoadoutSetting < Setting
       @button.update(-(@button.w / 2), -(@button.h / 2))
       @buttons.each {|b| b.update(0,0)}
 
-      fleet_update if @allow_current_ship_change
+      fleet_update if @allow_current_ship_change || @allow_ship_access_until_close
 
       return true
     else
@@ -575,8 +579,8 @@ class ShipLoadoutSetting < Setting
           value_text = "Value: $#{object[:value]}"
         end
 
-        if object[:klass].name
-          texts << object[:klass].name
+        if object[:klass].display_name
+          texts << object[:klass].display_name
         end
         if object[:klass].description
           if object[:klass].description.is_a?(String)
@@ -617,7 +621,7 @@ class ShipLoadoutSetting < Setting
         Gosu::draw_rect(fleet_data[:x], fleet_data[:y], fleet_data[:image_width], fleet_data[:image_height], Gosu::Color.argb(0xff_595959), ZOrder::MenuBackground)
       end
 
-      if @flagship_index != key.to_s
+      if @flagship_index != key.to_s && @allow_current_ship_change
         fleet_data[:make_primary_ship_button].draw(0,0)
       end
 
@@ -630,7 +634,7 @@ class ShipLoadoutSetting < Setting
     @fleet_data.each do |key, fleet_data|
       fleet_data[:click_area].update(0,0)
 
-      if @flagship_index != key.to_s
+      if @flagship_index != key.to_s && @allow_current_ship_change
         fleet_data[:make_primary_ship_button].update(0,0)
       end
 
@@ -642,7 +646,7 @@ class ShipLoadoutSetting < Setting
       @ship_inventory.draw
       @object_inventory.draw if @object_inventory
 
-      fleet_draw if @allow_current_ship_change
+      fleet_draw if @allow_current_ship_change || @allow_ship_access_until_close
 
       detail_box_draw
 

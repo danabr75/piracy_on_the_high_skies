@@ -55,10 +55,10 @@ module Buildings
     end
 
     def add_credits new_credits
-      @credits += credits
+      @credits += new_credits
     end
     def subtract_credits new_credits
-      @credits -= credits
+      @credits -= new_credits
     end
     # Not needed on OffensiveStore
     def set_window window

@@ -100,6 +100,10 @@ module Buildings
       @color = GeneralObject.convert_gosu_color_to_opengl(gosu_color)
     end
 
+    def self.display_name
+      name.split('::').last
+    end
+
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y, colors = @basic_color
       # @object3D.draw
       if @is_on_screen
@@ -109,7 +113,7 @@ module Buildings
           #   360 - @angle, 0.5, 0.5, @faction.emblem_scaler, @faction.emblem_scaler
           # )
           @faction.emblem.draw(@x - @faction.emblem_width_half, @y - @faction.emblem_height_half, ZOrder::FactionEmblem, @faction.emblem_scaler, @faction.emblem_scaler)
-          @faction_font.draw(@faction.displayed_name, @x - (@faction_font.text_width(@faction.displayed_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
+          @faction_font.draw(@faction.display_name, @x - (@faction_font.text_width(@faction.display_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
 
           if !@invulnerable
             health_counter = 0.0

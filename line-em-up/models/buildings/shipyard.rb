@@ -29,7 +29,7 @@ module Buildings
       # Also need to cost credits, add credits to player.
       @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
         if !window.ship_loadout_menu.active
-          window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits, :store); window.ship_loadout_menu.enable
+          window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits, :store, {allow_ship_access_until_close: true}); window.ship_loadout_menu.enable
         end
       }
       @is_hovering = false
@@ -55,10 +55,10 @@ module Buildings
     end
 
     def add_credits new_credits
-      @credits += credits
+      @credits += new_credits
     end
     def subtract_credits new_credits
-      @credits -= credits
+      @credits -= new_credits
     end
     # Not needed on OffensiveStore
     def set_window window
@@ -81,7 +81,7 @@ module Buildings
     end
 
     def self.get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/offensive_store.png", :tileable => true)
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/shipyard.png", :tileable => true)
     end
 
     def random_weighted(weighted)

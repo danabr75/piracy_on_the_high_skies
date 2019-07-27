@@ -20,6 +20,8 @@ module PilotableShips
     IMAGE_SCALER = 5.0
     ABSTRACT_CLASS = true
 
+    SLOT_TYPE = :ship
+
     attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
     attr_reader :max_health
 
@@ -60,20 +62,21 @@ module PilotableShips
       return {hardpoint_data: hardpoint_data}
     end
 
-    def self.get_displayable_name
-      raise "override this interface method"
+    def self.display_name
+      name.split("::").last
+      # raise "PilotableShip1 override this interface method"
     end
 
     def self.get_hardpoint_image
-      raise "OVERRIDE ME"
+      raise "PilotableShip2 OVERRIDE ME"
     end
 
     def self.description
-      raise "OVERRIDE ME"
+      raise "PilotableShip3 OVERRIDE ME"
     end
 
     def self.value
-      raise "OVERRIDE ME"
+      raise "PilotableShip4 OVERRIDE ME"
     end
     
     # BasicShip.new(width_scale, height_scale, screen_pixel_width, screen_pixel_height, options)

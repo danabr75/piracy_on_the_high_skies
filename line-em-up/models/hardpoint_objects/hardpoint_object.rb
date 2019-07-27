@@ -259,6 +259,10 @@ module HardpointObjects
       raise "OVERRIDE ME"
     end
 
+    def self.display_name
+      name.split("::").last
+    end
+
     def get_hardpoint_image
       # default
       self.class.get_hardpoint_image

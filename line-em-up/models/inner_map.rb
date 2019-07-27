@@ -441,7 +441,7 @@ class InnerMap
 
   def update mouse_x, mouse_y
     if @fps_counter < 60
-      @fps_log << Gosu.fps if Gosu.fps < 59
+      @fps_log << Gosu.fps if Gosu.fps < 55
       @fps_counter += 1
     else
       if @fps_log.count > 0

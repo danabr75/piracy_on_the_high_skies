@@ -124,12 +124,13 @@ module PilotableShips
     ]
 
 
-    def self.get_displayable_name
-      "Bumble Bee"
-    end
+    # def self.display_name
+    #   "Bumble Bee"
+    # end
 
     def self.get_hardpoint_image
-      "OVERRIDE ME"
+      "BasicShip1: OVERRIDE ME"
+      Gosu::Image.new("#{ITEM_MEDIA_DIRECTORY}/icon.png")
     end
 
     def self.description
