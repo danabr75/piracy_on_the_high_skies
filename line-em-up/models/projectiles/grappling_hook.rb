@@ -39,34 +39,48 @@ module Projectiles
     attr_reader :dissengage
     attr_reader :attached_target
 
+
+    def self.get_image
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
+    end
+    
+    def self.get_chain_image
+      Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/grappling_hook_launcher/chain.png")
+    end
+
+    def self.get_init_sound_path
+      "#{SOUND_DIRECTORY}/bullet.ogg"
+    end
+
+    class << self
+      attr_reader :chain_image, :chain_image_width, :chain_image_height, :chain_image_size, :chain_image_radius, :pull_strength
+    end
+
+    def self.pre_load_setup(height_scale)
+      @chain_image = get_chain_image
+      @chain_image_width  = @chain_image.width  * (height_scale)
+      @chain_image_height = @chain_image.height * (height_scale)
+      @chain_image_size   = @chain_image_width  * @chain_image_height / 2
+      @chain_image_radius = (@chain_image_width  + @chain_image_height) / 4
+      @pull_strength = PULL_STRENGTH * height_scale
+      super(height_scale)
+    end
+
+    BLOCK_PROJ_DRAW = true
+    DRAW_CLASS_IMAGE = true
+    USING_CLASS_IMAGE_ATTRIBUTES = true
+
     # Might not be necessary to override
     def initialize(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, z_projectile, options = {})
       super(current_map_pixel_x, current_map_pixel_y, destination_angle, start_point, end_point, angle_min, angle_max, angle_init, current_map_tile_x, current_map_tile_y, owner, z_projectile, options)
-      # @image_radius = @image_radius  * 16.0
-      # @image_width  = @image_width * 4.0
-      # @image_height = @image_height * 4.0
-      # @image_size   = @image_size * 4.0
-      # @image_radius = @image_radius * 4.0
-      # @image_width_half  = @image_width_half * 4.0
-      # @image_height_half = @image_height_half * 4.0
-
-      # @image_radius = @image_radius * 4.0
-
-      @chain_image = get_chain_image
-      if @image
-        @chain_image_width  = @chain_image.width  * (@width_scale)
-        @chain_image_height = @chain_image.height * (@height_scale)
-        @chain_image_size   = @chain_image_width  * @chain_image_height / 2
-        @chain_image_radius = (@chain_image_width  + @chain_image_height) / 4
-      end
-      raise "@chain_image_radius is nil" if @chain_image_radius.nil?
+      # raise "@chain_image_radius is nil" if @chain_image_radius.nil?
       @player_reference = nil
       @hp_reference     = options[:hp_reference]
       @dissengage = false
       @returning_to_player  = false
       @attached_target = nil
       @boarding_tile_distance = nil# self.class::BOARDING_TILE_DISTANCE * @average_tile_size
-      @pull_strength = self.class::PULL_STRENGTH * @average_scale
+      # @pull_strength = self.class::PULL_STRENGTH * @average_scale
       @breaking_point_tile_length = self.class::BREAKING_POINT_TILE_LENGTH * @average_tile_size
       @z_projectile = z_projectile
     end
@@ -74,25 +88,21 @@ module Projectiles
     def detach_hook
       @dissengage = true
     end
+
     def self.get_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
     end
-    def get_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/grappling_hook.png")
-    end
-    def get_chain_image
-      Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/grappling_hook_launcher/chain.png")
-    end
+
     def self.get_chain_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/grappling_hook_launcher/chain.png")
     end
 
-    def drops
-      [
-        # Add back in once SE has been updated to display on map, not on screen.
-        # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
-      ]
-    end
+    # def drops
+    #   [
+    #     # Add back in once SE has been updated to display on map, not on screen.
+    #     # SmallExplosion.new(@scale, @screen_pixel_width, @screen_pixel_height, @x, @y, nil, {ttl: 2, third_scale: true}),
+    #   ]
+    # end
 
     def is_alive
       @health > 0 || !@attached_target.nil?
@@ -203,7 +213,7 @@ module Projectiles
       # disable chain
       if @player_map_pixel_x
         returning_to_object = @hp_reference || @owner
-        start_point = OpenStruct.new(:x => current_map_pixel_x,     :y => current_map_pixel_y)
+        start_point = OpenStruct.new(:x => current_map_pixel_x, :y => current_map_pixel_y)
         end_point   = OpenStruct.new(:x => returning_to_object.current_map_pixel_x, :y => returning_to_object.current_map_pixel_y)
         angle_to_origin = self.class.angle_1to360(180.0 - calc_angle(start_point, end_point) - 90)
         # Reversing direction
@@ -215,7 +225,7 @@ module Projectiles
         #   end
         # end
         step = (Math::PI/180 * (angle_to_origin + 90))
-        base = @chain_image_radius #* 1.2
+        base = self.class.chain_image_radius
 
         # puts "new_x = Math.cos(step) * base + #{@current_map_pixel_x}"
         new_x = Math.cos(step) * base + @current_map_pixel_x
@@ -223,9 +233,9 @@ module Projectiles
         # puts "@hp_reference: RIGHT HERE: #{@hp_reference.current_map_pixel_x} - #{@hp_reference.current_map_pixel_y}"
         i = 0
         # puts "returning_to_object.get_radius: #{returning_to_object.get_radius} - #{returning_to_object.class}"
-        while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius + self.get_radius)#* 4.0)
+        while i < 300 && Gosu.distance(returning_to_object.current_map_pixel_x, returning_to_object.current_map_pixel_y, new_x, new_y) > (returning_to_object.get_radius + self.class.image_radius)#* 4.0)
           x, y = GeneralObject.convert_map_pixel_location_to_screen(@player_map_pixel_x, @player_map_pixel_y, new_x, new_y, @screen_pixel_width, @screen_pixel_height)
-          @chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, @z_projectile, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+          self.class.chain_image.draw_rot(x + viewable_pixel_offset_x, y - viewable_pixel_offset_y, @z_projectile, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
           #
           step = (Math::PI/180 * (angle_to_origin + 90))
           new_x = Math.cos(step) * base + new_x

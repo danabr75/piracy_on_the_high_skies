@@ -350,7 +350,7 @@ class AIShip < ScreenMapFixedObject
     @ship.draw(viewable_pixel_offset_x, viewable_pixel_offset_y)
 
     if @hover
-      @faction_font.draw(@faction.displayed_name, @x - (@faction_font.text_width(@faction.displayed_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
+      @faction_font.draw(@faction.display_name, @x - (@faction_font.text_width(@faction.display_name) / 2), @y + @image_height_half + @faction_font_height, ZOrder::UI, 1.0, 1.0, @faction.color) if @faction_font
 
       health_counter = 0.0
       # current_angle  = 11.0

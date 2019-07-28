@@ -452,6 +452,14 @@ module Projectiles
       # return test
     end
 
+    def get_radius
+      if self.class::USING_CLASS_IMAGE_ATTRIBUTES
+        return self.class.image_radius
+      else
+        super
+      end
+    end
+
     # require 'benchmark'
 
     def hit_objects air_object_groups, ground_object_groups#, options = {}

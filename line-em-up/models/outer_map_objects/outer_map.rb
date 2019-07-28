@@ -23,11 +23,11 @@ module OuterMapObjects
       @map_location_datas = {
         desert_v14_small: {
           outer_map_icon: 'desert',
-          displayed_name: 'desert', x: (225 * height_scale), y: (225 * height_scale)
+          display_name: 'desert', x: (225 * height_scale), y: (225 * height_scale)
         },
         snow_v15_very_small: {
           outer_map_icon: 'snow',
-          displayed_name: 'snow', x: (100 * height_scale), y: (200 * height_scale)
+          display_name: 'snow', x: (100 * height_scale), y: (200 * height_scale)
         }
       }
 
@@ -134,7 +134,7 @@ module OuterMapObjects
         click_area = LUIT::ClickArea.new(@window, self, button_key, value[:x], value[:y], ZOrder::UI, @icon_image_width, @icon_image_height)
         @button_id_mapping[button_key] = lambda { |window, menu, id| menu.activate_inner_map(id) }
         image = Gosu::Image.new("#{MEDIA_DIRECTORY}/outer_map/#{value[:outer_map_icon]}.png")
-        @map_clickable_locations << {click_area: click_area, displayed_name: value[:displayed_name], image: image, x: value[:x], y: value[:y]}
+        @map_clickable_locations << {click_area: click_area, display_name: value[:display_name], image: image, x: value[:x], y: value[:y]}
       end
     end
 

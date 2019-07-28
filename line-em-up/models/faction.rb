@@ -6,7 +6,7 @@ class Faction
   # include GlobalVariables
   include GlobalConstants
 
-  attr_reader :id, :displayed_name, :color, :raw_color, :factional_relations
+  attr_reader :id, :display_name, :color, :raw_color, :factional_relations
   attr_reader :emblem, :emblem_scaler, :emblem_width_half, :emblem_height_half, :emblem_info
 
   MIN_FACTIONAL_RELATION = -100
@@ -18,9 +18,9 @@ class Faction
 
   EMBLEM_SCALER = 16.0
 
-  def initialize id, displayed_name, color, height_scale, factional_relations = {}
+  def initialize id, display_name, color, height_scale, factional_relations = {}
     @id = id
-    @displayed_name = displayed_name
+    @display_name = display_name
     @color = Gosu::Color.argb(color)
     @raw_color = color
     @factional_relations = factional_relations
@@ -98,11 +98,11 @@ class Faction
     raw_factions_datas = ConfigSetting.get_setting(save_file_path, "factions")
     if raw_factions_datas.nil? && raw_factions_datas != ''
       [
-        {displayed_name: "USSR",    name: 'faction_1', color: 0xff_FF0000},
-        {displayed_name: "Bandits", name: 'faction_2', color: 0xff_ffffff},
-        {displayed_name: "Fortune's Horizon", name: 'player',    color: 0xff_00ff00}
+        {display_name: "USSR",    name: 'faction_1', color: 0xff_FF0000},
+        {display_name: "Bandits", name: 'faction_2', color: 0xff_ffffff},
+        {display_name: "Fortune's Horizon", name: 'player',    color: 0xff_00ff00}
       ].each do |value|
-        factions << Faction.new(value[:name], value[:displayed_name], value[:color], height_scale)
+        factions << Faction.new(value[:name], value[:display_name], value[:color], height_scale)
       end
     else
       factions_datas = JSON.parse(raw_factions_datas)
@@ -110,7 +110,7 @@ class Faction
         # puts "PARSING FACTION DATA: #{faction_data}"
         factions << Faction.new(
           faction_data['name'],
-          faction_data['displayed_name'],
+          faction_data['display_name'],
           faction_data['color'],
           height_scale,
           faction_data['factional_relations']
@@ -125,11 +125,11 @@ class Faction
     save_file_path = CURRENT_SAVE_FILE
 
     factions_datas = []
-    # :id, :displayed_name, :color, :raw_color, :factional_relations
+    # :id, :display_name, :color, :raw_color, :factional_relations
     factions.each do |faction|
       factions_datas << {
         'name' => faction.id,
-        'displayed_name' => faction.displayed_name,
+        'display_name' => faction.display_name,
         'color' => faction.raw_color,
         'factional_relations' => faction.factional_relations,
       }
