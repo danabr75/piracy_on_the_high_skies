@@ -22,7 +22,7 @@ module Projectiles
 
     MAX_TILE_TRAVEL = 6
 
-    BLOCK_PROJ_DRAW = true
+    BLOCK_IMAGE_DRAW = true
     DRAW_CLASS_IMAGE = true
     USING_CLASS_IMAGE_ATTRIBUTES = true
 

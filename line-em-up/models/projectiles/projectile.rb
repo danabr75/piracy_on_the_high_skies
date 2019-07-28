@@ -36,7 +36,7 @@ module Projectiles
     POST_DESTRUCTION_EFFECTS = false
     POST_COLLISION_EFFECTS = false
 
-    BLOCK_PROJ_DRAW = false
+    # BLOCK_IMAGE_DRAW = false
     class << self
       attr_reader :image, :init_sound, :init_sound_path
       attr_reader :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half
@@ -428,17 +428,18 @@ module Projectiles
 
 
     def draw viewable_pixel_offset_x, viewable_pixel_offset_y
+      draw_rot(viewable_pixel_offset_x, viewable_pixel_offset_y)
       # limiting angle extreme by 2
-      if @is_on_screen && !self.class::BLOCK_PROJ_DRAW
-        @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
-      end
-      if @is_on_screen && self.class::DRAW_CLASS_IMAGE
-        self.class.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
-      end
+      # if @is_on_screen && !self.class::BLOCK_IMAGE_DRAW
+      #   @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      # end
+      # if @is_on_screen && self.class::DRAW_CLASS_IMAGE
+      #   self.class.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      # end
     end
 
     def get_draw_ordering
-      ZOrder::Projectile
+      @z
     end
 
     def destructable?

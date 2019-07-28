@@ -46,6 +46,10 @@ class GeneralObject
 
   USING_CLASS_IMAGE_ATTRIBUTES = false
 
+
+  BLOCK_IMAGE_DRAW = false
+  DRAW_CLASS_IMAGE = false
+
   def self.get_image
     Gosu::Image.new("#{MEDIA_DIRECTORY}/question.png")
   end
@@ -287,18 +291,27 @@ class GeneralObject
     return bearing
   end
 
-  def draw
+  def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # Will generate error if class name is not listed on ZOrder
     if @is_on_screen
-      @image.draw(@x - @image_width_half, @y - @image_height, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+      if !self.class::BLOCK_IMAGE_DRAW
+        @image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      elsif self.class::DRAW_CLASS_IMAGE
+        self.class.image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      end
     end
+
     # @image.draw(@xΩ - @image.width / 2, @y - @image.height / 2, get_draw_ordering)
   end
 
-  def draw_rot
+  def draw_rot viewable_pixel_offset_x, viewable_pixel_offset_y
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
     if @is_on_screen
-      @image.draw_rot(@x, @y, get_draw_ordering, @y, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler) if @image
+      if !self.class::BLOCK_IMAGE_DRAW
+        @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      elsif self.class::DRAW_CLASS_IMAGE
+        self.class.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
+      end
     end
   end
 
