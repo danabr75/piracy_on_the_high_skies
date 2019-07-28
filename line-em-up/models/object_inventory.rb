@@ -258,7 +258,7 @@ class ObjectInventory
     element = matrix_element ? matrix_element[:item] : nil
 
     # Resave new key when dropping element in.
-    if @window.cursor_object && element && @holding_type == :store
+    if @window.cursor_object && element && (@holding_type == :store || @holding_type == :shipyard)
       # Do nothing, not a use case that is supposed to work for the store.
     elsif @window.cursor_object && element
      # puts "@window.cursor_object[:key]: #{@window.cursor_object[:key]}"
@@ -289,7 +289,7 @@ class ObjectInventory
     elsif element # Buying from Store, if store
       # Pick up element, no current object
       # element[:follow_cursor] = true
-      if @holding_type == :store
+      if @holding_type == :store || @holding_type == :shipyard
         element_value = (element[:value] * (element[:sell_rate] || @sell_rate)).to_i
         if @window.ship_loadout_menu.get_ship_inventory_credits >= element_value
           @window.ship_loadout_menu.subtract_from_ship_inventory_credits(element_value)
@@ -305,7 +305,7 @@ class ObjectInventory
       end
     elsif @window.cursor_object # Selling to store, if store,
       # Placeing something new in inventory
-      if @holding_type == :store
+      if @holding_type == :store || @holding_type == :shipyard
        # puts "CURSOR OBJECT"
        # puts @window.cursor_object
         element_value = (@window.cursor_object[:value] * @window.cursor_object[:buy_rate]).to_i

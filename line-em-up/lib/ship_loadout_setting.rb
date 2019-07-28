@@ -198,6 +198,7 @@ class ShipLoadoutSetting < Setting
 
     @allow_current_ship_change = options[:allow_current_ship_change] || false
     @allow_ship_access_until_close = options[:allow_ship_access_until_close] || false
+    @allow_ship_sell = options[:allow_ship_sell] || false
     # @fleet = {}
     @fleet_max = 4
 
@@ -209,6 +210,9 @@ class ShipLoadoutSetting < Setting
       raw_fleet_data = ConfigSetting.get_setting(@save_file_path, "player_fleet")
       unconverted_fleet_data = JSON.parse(raw_fleet_data) if raw_fleet_data && raw_fleet_data != ''
       @fleet_data = Util.symbolize_all_keys(unconverted_fleet_data)
+
+
+      @fleet_data.reject! {|f_key, f_data| f_data.nil?}
 
       # Pad fleet data, to show empty cells
       while @fleet_data.count < @fleet_max
@@ -235,6 +239,7 @@ class ShipLoadoutSetting < Setting
           # end
           if fleet_data[:klass]
             klass = eval(fleet_data[:klass])
+            fleet_data[:eval_klass] = klass
             image = klass.get_image(klass::ITEM_MEDIA_DIRECTORY)
 
             fit_image_into_cell_ratio = fleet_item_max_width / ((image.width / klass::IMAGE_SCALER) * @height_scale).to_f
@@ -248,6 +253,16 @@ class ShipLoadoutSetting < Setting
 
             fleet_data[:name] = klass.display_name
             fleet_data[:item_exists] = true
+
+            button_key = "make_primary_fleet_index_#{fleet_index.to_s}"
+            fleet_data[:make_primary_ship_button] = LUIT::Button.new(@window, @window, button_key, current_x, current_y - (15 * @height_scale), ZOrder::UI, "Switch", 15 * @height_scale, 15 * @height_scale)
+            @button_id_mapping[button_key] = lambda { |window, menu, id| menu.change_flagship(id.sub('make_primary_fleet_index_', '')) if !window.block_all_controls }
+
+            # @buy_rate_from_store  = 1.0
+            # @sell_rate_from_store = 1.0
+            button_key = "sell_fleet_index_#{fleet_index.to_s}"
+            fleet_data[:sell_ship_button] = LUIT::Button.new(@window, @window, button_key, current_x, current_y - (15 * @height_scale), ZOrder::UI, "Sell $#{(klass.value * @buy_rate_from_store).to_i}", 15 * @height_scale, 15 * @height_scale)
+            @button_id_mapping[button_key] = lambda { |window, menu, id| menu.sell_ship(id.sub('sell_fleet_index_', '')) if !window.block_all_controls }
           else
             fleet_data[:image_scaler] = (@height_scale / klass::IMAGE_SCALER)
             fleet_data[:image_width]  = (fleet_item_max_width)
@@ -264,14 +279,9 @@ class ShipLoadoutSetting < Setting
           # @click_area = LUIT::ClickArea.new(@window, self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
           click_area = LUIT::ClickArea.new(@window, @window, fleet_data[:button_key], current_x, current_y, ZOrder::HardPointClickableLocation, fleet_data[:image_width], fleet_data[:image_height], nil, nil, {hide_rect_draw: true})
           fleet_data[:click_area] = click_area
-
           @button_id_mapping[fleet_data[:button_key]] = lambda { |window, menu, id| menu.click_fleet_ship(id.sub('fleet_index_', '')) if !window.block_all_controls }
 
-          button_key = "make_primary_fleet_index_#{fleet_index.to_s}"
-          fleet_data[:make_primary_ship_button] = LUIT::Button.new(@window, @window, button_key, current_x, current_y - (15 * @height_scale), ZOrder::UI, "Switch", 15 * @height_scale, 15 * @height_scale)
-          @button_id_mapping[button_key] = lambda { |window, menu, id| menu.change_flagship(id.sub('make_primary_fleet_index_', '')) if !window.block_all_controls }
-          # fleet_data[:image].draw(current_x, current_y, ZOrder::UI, fleet_data[:image_scaler], fleet_data[:image_scaler], 0xff_ffffff)
-          current_x += fleet_data[:image_width] + @cell_width_padding
+          current_x += fleet_data[:image_width] + @cell_width
         end
 
         delete_bad_data_at.each do |key|
@@ -281,6 +291,19 @@ class ShipLoadoutSetting < Setting
         # No current ship? Not a case.
         @fleet_data = {}
       end
+    end
+  end
+
+  def sell_ship fleet_index
+    puts "SELLING SHIP: #{fleet_index}"
+    if @fleet_data[fleet_index.to_sym][:item_exists]
+      puts 'FOUND IT'
+      value = @fleet_data[fleet_index.to_sym][:eval_klass].value
+      add_to_ship_inventory_credits(value)
+      ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", fleet_index.to_s], nil)
+    else
+      puts "DIDNt FINT IT:"
+      # puts @fleet_data[fleet_index.to_sym]
     end
   end
 
@@ -298,7 +321,8 @@ class ShipLoadoutSetting < Setting
       @window.cursor_object = nil
       init_fleet_data
     elsif @fleet_data[fleet_index.to_sym][:item_exists]
-
+      puts "ITEM EXISTING HERE"
+      @ship_index = fleet_index
       @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
       raise "missing ship value at #{@ship_index}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
       begin
@@ -317,6 +341,7 @@ class ShipLoadoutSetting < Setting
       @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
 
       @current_fleet_index = "fleet_index_#{@ship_index}"
+      puts "setting new fleet index: #{}"
       @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     end
   end
@@ -346,6 +371,7 @@ class ShipLoadoutSetting < Setting
     @ship_inventory = ShipInventory.new(@window, {sell_rate: @sell_rate_from_store, buy_rate: @buy_rate_from_store})
     @object_inventory_holding_type = holding_type
     @allow_ship_access_until_close = options[:allow_ship_access_until_close] || false
+    @allow_ship_sell = options[:allow_ship_sell] || false
     init_fleet_data
   end 
 
@@ -360,6 +386,7 @@ class ShipLoadoutSetting < Setting
       @object_inventory_holding_type = :none
       # @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
       @allow_ship_access_until_close = false
+      @allow_ship_sell = false
     end
   end 
 
@@ -629,6 +656,7 @@ class ShipLoadoutSetting < Setting
   def fleet_draw
     @fleet_data.each do |key, fleet_data|
       fleet_data[:image].draw(fleet_data[:x], fleet_data[:y], ZOrder::UI, fleet_data[:image_scaler], fleet_data[:image_scaler], 0xff_ffffff) if fleet_data[:image]
+      # puts "@current_fleet_index: #{@current_fleet_index} against fleet_data[:button_key]: #{fleet_data[:button_key]}"
       if @current_fleet_index == fleet_data[:button_key]
         Gosu::draw_rect(fleet_data[:x], fleet_data[:y], fleet_data[:image_width], fleet_data[:image_height], Gosu::Color.argb(0xff_99ff33), ZOrder::MenuBackground)
       else
@@ -637,6 +665,9 @@ class ShipLoadoutSetting < Setting
 
       if @flagship_index != key.to_s && @allow_current_ship_change && fleet_data[:item_exists]
         fleet_data[:make_primary_ship_button].draw(0,0)
+      end
+      if @flagship_index != key.to_s && @allow_ship_sell && fleet_data[:item_exists]
+        fleet_data[:sell_ship_button].draw(0,0)
       end
 
       @small_font.draw(fleet_data[:name], fleet_data[:x], fleet_data[:y] + fleet_data[:image_height], ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
@@ -650,6 +681,9 @@ class ShipLoadoutSetting < Setting
 
       if @flagship_index != key.to_s && @allow_current_ship_change && fleet_data[:item_exists]
         fleet_data[:make_primary_ship_button].update(0,0)
+      end
+      if @flagship_index != key.to_s && @allow_ship_sell && fleet_data[:item_exists]
+        fleet_data[:sell_ship_button].update(0,0)
       end
 
     end
