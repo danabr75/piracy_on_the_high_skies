@@ -9,6 +9,8 @@ class ShipInventory
 
   # attr_accessor :cursor_object
 
+  FORBIDDEN_ITEM_CLASSES = [:ship]
+
   def init_global_vars
     @tile_pixel_width    = GlobalVariables.tile_pixel_width
     @tile_pixel_height   = GlobalVariables.tile_pixel_height

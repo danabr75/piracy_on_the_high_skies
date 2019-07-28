@@ -128,6 +128,7 @@ module OuterMapObjects
       menus_disable
       @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, 0, @height_scale, @height_scale, {scale: @average_scale, allow_current_ship_change: true})
       @ship_loadout_menu.disable
+      @menus = [@ship_loadout_menu, @menu]
       @map_location_datas.each do |key, value|
         button_key = key.to_sym
         # puts "NEW cLICK AREA: #{value[:x]} - #{value[:y]}"

@@ -38,6 +38,7 @@ class ShipLoadoutSetting < Setting
 
   HARDPOINT_DIR = MEDIA_DIRECTORY + "/hardpoints"
   INVALID_HARDPOINT_IMAGE = HARDPOINT_DIR + "/invalid_hardpoint.png"
+  FORBIDDEN_ITEM_CLASSES = [:ship]
 
   # attr_accessor :cursor_object
 
@@ -291,28 +292,33 @@ class ShipLoadoutSetting < Setting
 
   def click_fleet_ship fleet_index
     puts "click_fleet_ship: #{fleet_index}"
-    puts fleet_index.class
-    @ship_index = fleet_index
 
-    @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
-    raise "missing ship value at #{@ship_index}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
-    begin
-      klass = eval(@ship_value)
-    rescue Exception => e
-      puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
-      puts e.message
-      puts e.backtrace.join("\n")
-      puts "EVAL DATA:"
-      puts @ship_value
+    if @window.cursor_object && @window.cursor_object[:hardpoint_item_slot_type] == :ship
+      ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", fleet_index.to_s, "klass"], @window.cursor_object[:klass])
+      @window.cursor_object = nil
+      init_fleet_data
+    elsif @fleet_data[fleet_index.to_sym][:item_exists]
+
+      @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
+      raise "missing ship value at #{@ship_index}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
+      begin
+        klass = eval(@ship_value)
+      rescue Exception => e
+        puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
+        puts e.message
+        puts e.backtrace.join("\n")
+        puts "EVAL DATA:"
+        puts @ship_value
+      end
+
+      hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data(fleet_index)
+      puts "hardpoint data"
+      puts hardpoint_data
+      @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
+
+      @current_fleet_index = "fleet_index_#{@ship_index}"
+      @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     end
-
-    hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data(fleet_index)
-    puts "hardpoint data"
-    puts hardpoint_data
-    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
-
-    @current_fleet_index = "fleet_index_#{@ship_index}"
-    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
   end
 
   def add_to_ship_inventory_credits new_credits
@@ -376,7 +382,16 @@ class ShipLoadoutSetting < Setting
   end
 
   def onClick element_id
-    found_button = @ship_inventory.onClick(element_id)
+    puts "SHIP LOADOUT ON CLICK:"
+    puts "@window.cursor_object[:hardpoint_item_slot_type]: #{@window.cursor_object[:hardpoint_item_slot_type]}" if @window.cursor_object && @window.cursor_object[:hardpoint_item_slot_type]
+    # puts @window.cursor_object
+    # Don't place shipyard items in inventory
+    if @window.cursor_object && ShipInventory::FORBIDDEN_ITEM_CLASSES.include?(@window.cursor_object[:hardpoint_item_slot_type])
+      # Do not accept inventory check
+    else
+      found_button = @ship_inventory.onClick(element_id)
+    end
+    # Add onclick fleet section ... maybe
     found_button = @object_inventory.onClick(element_id) if !found_button && @object_inventory
     super(element_id) if !found_button
   end
@@ -451,6 +466,9 @@ class ShipLoadoutSetting < Setting
     # left_hardpoint_0
     # current_object = @window.cursor_object || @ship_inventory.cursor_object
 
+    if @window.cursor_object && FORBIDDEN_ITEM_CLASSES.include?(@window.cursor_object[:hardpoint_item_slot_type])
+      return false
+    end
 
     result = id.scan(/hardpoint_(\d+)/).first
     raise "Could not find hardpoint ID" if result.nil?
@@ -628,7 +646,7 @@ class ShipLoadoutSetting < Setting
 
   def fleet_update
     @fleet_data.each do |key, fleet_data|
-      fleet_data[:click_area].update(0,0) if fleet_data[:item_exists]
+      fleet_data[:click_area].update(0,0) #if fleet_data[:item_exists]
 
       if @flagship_index != key.to_s && @allow_current_ship_change && fleet_data[:item_exists]
         fleet_data[:make_primary_ship_button].update(0,0)
