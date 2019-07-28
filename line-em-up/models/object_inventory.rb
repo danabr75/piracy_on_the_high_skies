@@ -74,6 +74,9 @@ class ObjectInventory
     if @holding_type == :store
       @buy_rate  = 0.1
       @sell_rate = 1.2
+    elsif @holding_type == :shipyard
+      @buy_rate  = 0.1
+      @sell_rate = 1.0
     else
       @buy_rate  = 1.0
       @sell_rate = 1.0

@@ -29,7 +29,7 @@ module Buildings
       # Also need to cost credits, add credits to player.
       @button_id_mapping[:object_inventory] = lambda { |window, menu, id|
         if !window.ship_loadout_menu.active
-          window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits, :store, {allow_ship_access_until_close: true}); window.ship_loadout_menu.enable
+          window.block_all_controls = true; window.ship_loadout_menu.loading_object_inventory(menu, menu.drops, menu.credits, :shipyard, {allow_ship_access_until_close: true, allow_ship_sell: true}); window.ship_loadout_menu.enable
         end
       }
       @is_hovering = false
