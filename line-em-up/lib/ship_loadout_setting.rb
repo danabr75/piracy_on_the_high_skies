@@ -88,39 +88,6 @@ class ShipLoadoutSetting < Setting
     # implement hide_hardpoints on pilotable ship class
 
     # Used to come from loadout window
-    @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
-    if @ship_index.nil? || @ship_index == ''
-      puts "missing ship index - setting to zero"
-      ConfigSetting.set_setting(@save_file_path, "current_ship_index", 0)
-      @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
-    end
-      
-    @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
-    if @ship_value.nil? || @ship_value == ''
-      puts "missing ship value - trying fleet index zero"
-      ConfigSetting.set_setting(@save_file_path, "current_ship_index", 0)
-      @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
-      @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
-      raise "Still didn't find a ship at fleet 0" if @ship_value.nil? || @ship_value == ''
-    end
-
-
-    @flagship_index = @ship_index
-    @current_fleet_index = "fleet_index_#{@ship_index}"
-    puts "FLEET INDEX: #{@current_fleet_index}"
-    # raise "missing ship value at #{@ship_index} - #{@ship_index.class}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
-    begin
-      klass = eval(@ship_value)
-    rescue Exception => e
-      puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
-      puts e.message
-      puts e.backtrace.join("\n")
-      puts "EVAL DATA:"
-      puts @ship_value
-    end
-
-    hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data
-    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
 
     # puts "SHIP HERE: #{@ship.x} - #{@ship.y}"
 
@@ -159,7 +126,6 @@ class ShipLoadoutSetting < Setting
     @object_inventory_holding_type = :none
     @buy_rate_from_store  = 1.0
     @sell_rate_from_store = 1.0
-    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     @active = false
 
     @invalid_hardpoint_image = Gosu::Image.new(INVALID_HARDPOINT_IMAGE)
@@ -206,17 +172,67 @@ class ShipLoadoutSetting < Setting
   end
 
   def init_fleet_data
-    if @allow_current_ship_change || @allow_ship_access_until_close
+
+    @fleet_data = {}
+    if @allow_current_ship_change || @allow_ship_access_until_close || @allow_ship_sell
       raw_fleet_data = ConfigSetting.get_setting(@save_file_path, "player_fleet")
       unconverted_fleet_data = JSON.parse(raw_fleet_data) if raw_fleet_data && raw_fleet_data != ''
-      @fleet_data = Util.symbolize_all_keys(unconverted_fleet_data)
+      unclean_fleet_data = Util.symbolize_all_keys(unconverted_fleet_data)
+
+      puts "GOT UNCLEAN FLEET DATA"
+      puts unclean_fleet_data
 
 
-      @fleet_data.reject! {|f_key, f_data| f_data.nil?}
+      unclean_fleet_data.reject! {|f_key, f_data| f_data.nil?}
+      puts "rejected empty unclean_fleet_data here: #{unclean_fleet_data}"
+
+      # puts "START"
+      checking_ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
+      unclean_fleet_data.each_with_index do |(key, value), index|
+        # puts "KEY WAS"
+        # puts key.inspect
+        # puts key.class
+        # puts "INDEx was:"
+        # puts index.inspect
+        # puts index.class
+        # if key != index.to_sym
+
+        # Resetting the current_ship_index value       
+        if checking_ship_index == key.to_s #probably don't need to `.to_s` the keys
+          ConfigSetting.set_setting(@save_file_path, "current_ship_index", index)
+        end
+
+        @fleet_data[index.to_s.to_sym] = value
+        # else
+        # end
+      end
+
+      puts "PRE-recommit FLEET DATA"
+      puts @fleet_data.keys.inspect
+      puts @fleet_data.values.collect{|v| v[:klass]}
+      puts "END-recommit FLEET DATA"
+
+      # Cleaning up data, assuming not in good state.
+      # Clearing data
+      puts "CLEARING PlAYER FLEET"
+      ConfigSetting.set_setting(@save_file_path, "player_fleet", {}.to_json)
+      test_val = ConfigSetting.get_setting(@save_file_path, "player_fleet")
+      puts test_val.inspect
+      # Setting data
+      @fleet_data.each do |key, data|
+        puts "SETTING FLEET DAT FOR KEYL #{key}"
+        ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", key.to_s, 'klass'], data[:klass])
+        ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", key.to_s, 'hardpoint_locations'], data[:hardpoint_locations])
+      end
+      puts "DID WE Set the values correctly?"
+      test_val = ConfigSetting.get_setting(@save_file_path, "player_fleet", nil)
+      puts test_val.inspect
+
+      # @fleet_data.reject! {|f_key, f_data| f_data.nil?}
 
       # Pad fleet data, to show empty cells
       while @fleet_data.count < @fleet_max
-        @fleet_data[@fleet_data.count] = {}
+        @fleet_data[@fleet_data.count.to_s.to_sym] = {}
       end
 
       # puts "pre fl;eet data"
@@ -262,7 +278,12 @@ class ShipLoadoutSetting < Setting
             # @sell_rate_from_store = 1.0
             button_key = "sell_fleet_index_#{fleet_index.to_s}"
             fleet_data[:sell_ship_button] = LUIT::Button.new(@window, @window, button_key, current_x, current_y - (15 * @height_scale), ZOrder::UI, "Sell $#{(klass.value * @buy_rate_from_store).to_i}", 15 * @height_scale, 15 * @height_scale)
-            @button_id_mapping[button_key] = lambda { |window, menu, id| menu.sell_ship(id.sub('sell_fleet_index_', '')) if !window.block_all_controls }
+            @button_id_mapping[button_key] = lambda do |window, menu, id|
+              if !window.block_all_controls
+                window.block_all_controls = true
+                menu.sell_ship(id.sub('sell_fleet_index_', ''))
+              end
+            end
           else
             fleet_data[:image_scaler] = (@height_scale / klass::IMAGE_SCALER)
             fleet_data[:image_width]  = (fleet_item_max_width)
@@ -279,7 +300,12 @@ class ShipLoadoutSetting < Setting
           # @click_area = LUIT::ClickArea.new(@window, self, :object_inventory, 0, 0, ZOrder::HardPointClickableLocation, @image_width, @image_height, nil, nil, {hide_rect_draw: true, key_id: Gosu::KB_E})
           click_area = LUIT::ClickArea.new(@window, @window, fleet_data[:button_key], current_x, current_y, ZOrder::HardPointClickableLocation, fleet_data[:image_width], fleet_data[:image_height], nil, nil, {hide_rect_draw: true})
           fleet_data[:click_area] = click_area
-          @button_id_mapping[fleet_data[:button_key]] = lambda { |window, menu, id| menu.click_fleet_ship(id.sub('fleet_index_', '')) if !window.block_all_controls }
+          @button_id_mapping[fleet_data[:button_key]] = lambda do |window, menu, id|
+            if !window.block_all_controls
+              window.block_all_controls = true
+              menu.click_fleet_ship(id.sub('fleet_index_', ''))
+            end
+          end
 
           current_x += fleet_data[:image_width] + @cell_width
         end
@@ -292,6 +318,49 @@ class ShipLoadoutSetting < Setting
         @fleet_data = {}
       end
     end
+
+    @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
+    if @ship_index.nil? || @ship_index == ''
+      raise "missing ship index - setting to zero"
+      # ConfigSetting.set_setting(@save_file_path, "current_ship_index", 0)
+      # @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
+    end
+      
+    @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
+    if @ship_value.nil? || @ship_value == ''
+      # puts "missing ship value - trying fleet index zero"
+      # ConfigSetting.set_setting(@save_file_path, "current_ship_index", 0)
+      # @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
+      # @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
+      raise "Didn't find a ship at fleet 0"# if @ship_value.nil? || @ship_value == ''
+    end
+
+
+    @flagship_index = @ship_index
+    @current_fleet_index = "fleet_index_#{@ship_index}"
+    puts "FLEET INDEX: #{@current_fleet_index}"
+    # raise "missing ship value at #{@ship_index} - #{@ship_index.class}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
+    begin
+      klass = eval(@ship_value)
+    rescue Exception => e
+      puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
+      puts e.message
+      puts e.backtrace.join("\n")
+      puts "EVAL DATA:"
+      puts @ship_value
+    end
+
+    hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data
+    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
+    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
+
+
+    puts "FINAL FLEET DATA"
+    puts @fleet_data.keys.inspect
+    puts @fleet_data.values.collect{|v| v[:klass]}
+    puts "@flagship_index: #{@flagship_index}"
+    puts "@current_fleet_index: #{@current_fleet_index}"
+    puts "@ship_index: #{@ship_index}"
   end
 
   def sell_ship fleet_index
@@ -300,7 +369,17 @@ class ShipLoadoutSetting < Setting
       puts 'FOUND IT'
       value = @fleet_data[fleet_index.to_sym][:eval_klass].value
       add_to_ship_inventory_credits(value)
+      puts "SETTING the following to nil: #{fleet_index.to_s}"
       ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", fleet_index.to_s], nil)
+      testval = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", fleet_index.to_s])
+      puts "TEST VAL GOT BACK WAS: #{testval}"
+
+      if fleet_index == @current_fleet_index
+        @ship_index = @flagship_index
+        @current_fleet_index = "fleet_index_#{@ship_index}"
+      end
+
+      init_fleet_data
     else
       puts "DIDNt FINT IT:"
       # puts @fleet_data[fleet_index.to_sym]
