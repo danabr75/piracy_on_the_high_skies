@@ -16,6 +16,11 @@ class GeneralObject
   attr_reader :mini_map_image_width_half, :mini_map_image_height_half, :optional_icon_z
   attr_reader :height_scale_with_image_scaler
 
+  class << self
+    attr_reader :image, :init_sound, :init_sound_path
+    attr_reader :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half
+  end
+
   # attr_accessor :x_offset_base, :y_offset_base
   LEFT  = 'left'
   RIGHT = 'right'

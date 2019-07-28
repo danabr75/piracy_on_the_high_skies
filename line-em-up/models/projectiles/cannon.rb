@@ -30,7 +30,11 @@ module Projectiles
     AOE = 0
 
     IMAGE_SCALER = 4.0
-    
+
+    BLOCK_IMAGE_DRAW = true
+    DRAW_CLASS_IMAGE = true
+    USING_CLASS_IMAGE_ATTRIBUTES = true
+
     # MAX_CURSOR_FOLLOW = 4
     # ADVANCED_HIT_BOX_DETECTION = true
 
@@ -49,7 +53,7 @@ module Projectiles
       return (self.class::DAMAGE * @damage_increase / MAX_SPEED) * @speed
     end
 
-    def get_image
+    def self.get_image
       Gosu::Image.new("#{MEDIA_DIRECTORY}/cannon_ball.png")
     end
 

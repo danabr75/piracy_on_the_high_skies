@@ -37,10 +37,6 @@ module Projectiles
     POST_COLLISION_EFFECTS = false
 
     # BLOCK_IMAGE_DRAW = false
-    class << self
-      attr_reader :image, :init_sound, :init_sound_path
-      attr_reader :image_width, :image_height, :image_size, :image_radius, :image_width_half, :image_height_half
-    end
 
     def self.pre_load_setup(height_scale)
       # puts "RIGHT HERE22 - #{self.name}"

@@ -153,10 +153,10 @@ module Projectiles
         # angle_to_origin = self.class.angle_1to360(angle_to_origin - 180)
 
         if @attached_target.class::IS_MOVABLE_OBJECT
-          @attached_target.movement(@pull_strength, angle_to_origin) if @attached_target.is_alive
-          @owner.movement(@pull_strength, angle_to_origin + 180)     if @owner.is_alive
+          @attached_target.movement(self.class.pull_strength, angle_to_origin) if @attached_target.is_alive
+          @owner.movement(self.class.pull_strength, angle_to_origin + 180)     if @owner.is_alive
         else
-          @owner.movement(@pull_strength * 2.0, angle_to_origin + 180) if @owner.is_alive
+          @owner.movement(self.class.pull_strength * 2.0, angle_to_origin + 180) if @owner.is_alive
         end
 
         @current_map_pixel_x = @attached_target.current_map_pixel_x
