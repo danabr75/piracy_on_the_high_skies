@@ -42,8 +42,6 @@ class AIShip < ScreenMapFixedObject
     validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
     validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
 
-    options[:image] = PilotableShips::BasicShip.get_image(PilotableShips::BasicShip::ITEM_MEDIA_DIRECTORY)
-    super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
     # puts "NEW SHIP HJERE: "
     # puts @faction
 
@@ -77,11 +75,15 @@ class AIShip < ScreenMapFixedObject
       when :pillbug
         ship_class = PilotableShips::Pillbug
       else
-        ship_class = PilotableShips::BasicShip
+        ship_class = PilotableShips::Bobcat
       end
     else
-      ship_class = PilotableShips::BasicShip
+      ship_class = PilotableShips::Bobcat
     end
+
+    options[:image] = ship_class.get_image(ship_class::ITEM_MEDIA_DIRECTORY)
+    super(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options)
+    
     preferred_weapon, preferred_engine, preferred_power = Array.new(3) {nil}
     current_engine_count = 0
     if options[:short_range]   == true
@@ -113,6 +115,7 @@ class AIShip < ScreenMapFixedObject
       elsif data[:slot_type] == :engine
         if current_engine_count == 0
           item = preferred_engine.reject{|v| v.nil?}.first
+          current_engine_count += 1
         else
           item = preferred_engine[rand(preferred_engine.count)]
         end

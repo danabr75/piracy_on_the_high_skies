@@ -159,21 +159,58 @@ class GameWindow < Gosu::Window
 
   def init_current_save_file
     # if !File.file?(save_file_path)
+    raw_ship_class = "PilotableShips::Pillbug"
+    ship_class     = PilotableShips::Pillbug
       ConfigSetting.set_setting(@current_save_path, "current_ship_index", "0")
-      ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "klass"], "PilotableShips::BasicShip")
-      init_data = {
-        "0":"HardpointObjects::GrapplingHookHardpoint","1":"HardpointObjects::BulletHardpoint",
-        "4":"HardpointObjects::BulletHardpoint","3":"HardpointObjects::BulletHardpoint",
-        "5":"HardpointObjects::DumbMissileHardpoint","2":"HardpointObjects::BulletHardpoint",
-        "10":"HardpointObjects::BasicEngineHardpoint",
-        "6":"HardpointObjects::MinigunHardpoint","8":"HardpointObjects::BasicEngineHardpoint",
-        "12":"HardpointObjects::BasicSteamCoreHardpoint",
-      }
-      init_data.each do |key, value|
-        ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "hardpoint_locations", key], value)
+      ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "klass"], raw_ship_class)
+
+
+    preferred_weapon, preferred_engine, preferred_power = Array.new(3) {nil}
+    current_engine_count = 0
+    if rand(3) == 0
+      preferred_weapon = ["HardpointObjects::CannonHardpoint"]
+      preferred_engine = ["HardpointObjects::BasicEngineHardpoint", nil]
+      preferred_power  = ["HardpointObjects::BasicSteamCoreHardpoint"]
+    elsif rand(3) == 0
+      preferred_weapon = ["HardpointObjects::BulletHardpoint", "HardpointObjects::DumbMissileHardpoint"]
+      preferred_engine = ["HardpointObjects::BasicEngineHardpoint", nil]
+      preferred_power  = ["HardpointObjects::BasicSteamCoreHardpoint"]
+    else
+      preferred_weapon = ["HardpointObjects::BulletHardpoint", "HardpointObjects::MinigunHardpoint"]
+      preferred_engine = ["HardpointObjects::BasicEngineHardpoint", nil]
+      preferred_power  = ["HardpointObjects::BasicSteamCoreHardpoint"]
+    end
+    ship_data = {}
+    ship_class::HARDPOINT_LOCATIONS.each_with_index do |data, index|
+      item = nil
+      if data[:slot_type] == :generic
+        if rand(2) == 0
+          item = preferred_weapon[rand(preferred_weapon.count)]
+        else
+          item = preferred_engine[rand(preferred_engine.count)]
+          current_engine_count += 1 if item
+        end
+      elsif data[:slot_type] == :offensive
+        item = preferred_weapon[rand(preferred_weapon.count)]
+      elsif data[:slot_type] == :engine
+        if current_engine_count == 0
+          item = preferred_engine.reject{|v| v.nil?}.first
+          current_engine_count += 1
+        else
+          item = preferred_engine[rand(preferred_engine.count)]
+        end
+      elsif data[:slot_type] == :steam_core
+        item = preferred_power[rand(preferred_power.count)]
       end
-      ConfigSetting.set_setting(@current_save_path, "Credits", "50000")
-    # end
+      if item
+        ship_data[index.to_s] = item
+      end
+    end
+
+    ship_data.each do |key, value|
+      ConfigSetting.set_mapped_setting(@current_save_path, ["player_fleet", "0", "hardpoint_locations", key], value)
+    end
+    ConfigSetting.set_setting(@current_save_path, "Credits", "5000000")
   end
 
   # @current_save_path = self.class::CURRENT_SAVE_FILE

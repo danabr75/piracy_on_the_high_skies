@@ -130,6 +130,7 @@ class Hardpoint < GeneralObject
     # end
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
+    # puts "WAS INVALID? #{!has_valid_slot_type?}"
     @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self, is_invalid: !has_valid_slot_type?, owner_klass: ship.class}) if @item_klass
 
     # puts "END HARDPOINT #{@id}"
@@ -165,6 +166,29 @@ class Hardpoint < GeneralObject
     return [color, hover_color]
   end
 
+  def self.has_valid_slot_instance hp_slot_type, item_hardpoint_klass, owner_class
+    is_acceptable = true
+
+    case hp_slot_type
+    when :armor
+      # puts "has_valid_slot_instance: #{hp_slot_type} - #{item_hardpoint_klass} - #{owner_class} - #{hp_slot_type}"
+      # puts "owner_class::ALLOWED_ARMOR_TYPES: #{owner_class::ALLOWED_ARMOR_TYPES}"
+      is_acceptable = false if !owner_class::ALLOWED_ARMOR_TYPES.include?(item_hardpoint_klass::HARDPOINT_NAME.to_sym)
+    # when :offensive
+    #   is_acceptable = true if item_slot_type == hp_slot_type
+    # when :engine
+    #   is_acceptable = true if item_slot_type == hp_slot_type
+    # when :steam_core
+    #   is_acceptable = true if item_slot_type == hp_slot_type
+      # puts "RETURNING: #{is_acceptable}"
+    else
+      # is_acceptable = true if item_slot_type == hp_slot_type
+      # raise "invalid slot type"
+    end
+
+    return is_acceptable
+  end
+
   def self.is_valid_slot_type hp_slot_type, item_slot_type
     is_acceptable = false
 
@@ -192,6 +216,22 @@ class Hardpoint < GeneralObject
   def has_valid_slot_type?
     if @item_klass
       return self.class.is_valid_slot_type(@slot_type, @item_klass::SLOT_TYPE)
+    else
+      return true
+    end
+  end
+
+  def is_valid_slot_instance item_klass, item_slot_type, owner_class
+    if @item_klass
+      return self.class.has_valid_slot_instance(@slot_type, item_klass, owner_class)
+    else
+      return true
+    end
+  end
+
+  def has_valid_slot_instance? owner_class
+    if @item_klass
+      return self.class.has_valid_slot_instance(@slot_type, @item_klass, owner_class)
     else
       return true
     end

@@ -8,7 +8,6 @@
 
 # class ShipSetting < Setting
 #   # MEDIA_DIRECTORY
-#   SELECTION = ["MiteShip", "BasicShip"]
 #   NAME = "ship"
 
 #   # attr_accessor :mouse_x, :mouse_y, :window

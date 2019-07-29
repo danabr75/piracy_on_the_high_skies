@@ -22,6 +22,8 @@ module PilotableShips
 
     SLOT_TYPE = :ship
 
+    ALLOWED_ARMOR_TYPES = [:basic_armor, :light_armor]
+
     attr_accessor :cooldown_wait, :secondary_cooldown_wait, :attack_speed, :health, :armor, :x, :y, :rockets, :score, :time_alive
     attr_reader :max_health
 
@@ -334,7 +336,7 @@ module PilotableShips
 
 
       @hardpoints.each_with_index do |hp, hp_index|
-        hp.disable if hp.item && !hp.has_valid_slot_type?
+        hp.disable if hp.item && (!hp.has_valid_slot_type? || !hp.has_valid_slot_instance?(self.class))
       end
 
       @theta = nil

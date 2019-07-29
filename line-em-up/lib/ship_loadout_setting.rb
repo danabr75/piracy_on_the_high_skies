@@ -199,6 +199,7 @@ class ShipLoadoutSetting < Setting
 
         # Resetting the current_ship_index value       
         if checking_ship_index == key.to_s #probably don't need to `.to_s` the keys
+          puts "RESETTING CURRENT sHIP INDEX. WAS: #{checking_ship_index}, and now: #{index}"
           ConfigSetting.set_setting(@save_file_path, "current_ship_index", index)
         end
 
@@ -237,7 +238,7 @@ class ShipLoadoutSetting < Setting
 
       # puts "pre fl;eet data"
       # puts @fleet_data
-      # {"0"=>{"klass"=>"PilotableShips::BasicShip", "hardpoint_locations"=>{"0"=>"HardpointObjects::GrapplingHookHardpoint", "1"=>"HardpointObjects::BulletHardpoint", "4"=>"HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::DumbMissileHardpoint", "2"=>"HardpointObjects::BulletHardpoint", "10"=>"HardpointObjects::BasicEngineHardpoint", "6"=>"HardpointObjects::MinigunHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint", "12"=>"HardpointObjects::BasicSteamCoreHardpoint"}}}
+      # {"0"=>{"klass"=>"PilotableShips::Bobcat", "hardpoint_locations"=>{"0"=>"HardpointObjects::GrapplingHookHardpoint", "1"=>"HardpointObjects::BulletHardpoint", "4"=>"HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::DumbMissileHardpoint", "2"=>"HardpointObjects::BulletHardpoint", "10"=>"HardpointObjects::BasicEngineHardpoint", "6"=>"HardpointObjects::MinigunHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint", "12"=>"HardpointObjects::BasicSteamCoreHardpoint"}}}
       fleet_item_max_width  = 30  * @height_scale
       fleet_item_max_height = 80 * @height_scale
       if @fleet_data
@@ -341,6 +342,7 @@ class ShipLoadoutSetting < Setting
       # raise "missing ship value at #{@ship_index} - #{@ship_index.class}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
       begin
         klass = eval(@ship_value)
+        @klass = klass
       rescue Exception => e
         puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
         puts e.message
@@ -393,35 +395,39 @@ class ShipLoadoutSetting < Setting
   end
 
   def click_fleet_ship fleet_index
-    puts "click_fleet_ship: #{fleet_index}"
+    raise "no fleet index" if fleet_index.nil?
+    # puts "click_fleet_ship: #{fleet_index}"
+    # puts @fleet_data[@fleet_data.keys[0]].keys
 
     if @window.cursor_object && @window.cursor_object[:hardpoint_item_slot_type] == :ship
       ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", fleet_index.to_s, "klass"], @window.cursor_object[:klass])
       @window.cursor_object = nil
       init_fleet_data
-    elsif @fleet_data[fleet_index.to_sym][:item_exists]
+    elsif @fleet_data.keys.any? && @fleet_data[fleet_index.to_sym][:item_exists]
       puts "ITEM EXISTING HERE"
       @ship_index = fleet_index
       @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
-      raise "missing ship value at #{@ship_index}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
-      begin
-        klass = eval(@ship_value)
-      rescue Exception => e
-        puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
-        puts e.message
-        puts e.backtrace.join("\n")
-        puts "EVAL DATA:"
-        puts @ship_value
+      if @ship_value
+        # raise "missing ship value at #{@ship_index}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
+        begin
+          klass = eval(@ship_value)
+        rescue Exception => e
+          puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
+          puts e.message
+          puts e.backtrace.join("\n")
+          puts "EVAL DATA:"
+          puts @ship_value
+        end
+
+        hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data(fleet_index)
+        puts "hardpoint data"
+        puts hardpoint_data
+        @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
+
+        @current_fleet_index = "fleet_index_#{@ship_index}"
+        puts "setting new fleet index: #{}"
+        @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
       end
-
-      hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data(fleet_index)
-      puts "hardpoint data"
-      puts hardpoint_data
-      @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
-
-      @current_fleet_index = "fleet_index_#{@ship_index}"
-      puts "setting new fleet index: #{}"
-      @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
     end
   end
 
@@ -473,13 +479,15 @@ class ShipLoadoutSetting < Setting
     # puts "ENABLING SHIP LOaDING: STARTING FLEET INDEX: #{@ship_index} and flagsship index: #{@flagship_index}"
     # @ship_index = @flagship_index
     if @allow_current_ship_change || @allow_ship_access_until_close || @allow_ship_sell
-      click_fleet_ship(@flagship_index)
+      # No flagship index if the player is dead w/ no ships
+      click_fleet_ship(@flagship_index) if @flagship_index
     end
     @active = true
   end
   def disable
     if @allow_current_ship_change || @allow_ship_access_until_close || @allow_ship_sell
-      click_fleet_ship(@flagship_index)
+      # No flagship index if the player is dead w/ no ships
+      click_fleet_ship(@flagship_index) if @flagship_index
     end
     unloading_object_inventory
     @refresh_player_ship = true
@@ -529,7 +537,9 @@ class ShipLoadoutSetting < Setting
               @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
             )
           end
-          if !value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type])
+          # puts "RIGHT HERE"
+          # item = {image: image, key: button_key, klass: hp.assigned_weapon_class
+          if (!value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type]) || !value[:hp].is_valid_slot_instance(item[:klass], item[:hardpoint_item_slot_type], @klass))
             @invalid_hardpoint_image.draw(
               value[:x] - (image.width / 2) / IMAGE_SCALER * @height_scale,
               value[:y] - (image.height / 2) / IMAGE_SCALER * @height_scale,
