@@ -168,13 +168,25 @@ class InnerMap
       nil,
       {is_button: true}
     )
-    # @menu.add_item(
-    #   :save_game, "Save",
-    #   0, 0,
-    #   lambda {|window, menu, id| window.save_game; },
-    #   nil,
-    #   {is_button: true}
-    # )
+    @menu.add_item(
+      :save_game, "Leave Map",
+      0, 0,
+      lambda do |window, menu, id|
+        if !window.block_all_controls
+          if are_enemies_near_player?
+            @messages << MessageFlash.new("Enemies are too close!")
+            menu.disable
+          else
+            window.block_all_controls = true
+            window.save_inner_map_data
+            window.exit_map = true
+            menu.disable
+          end
+        end
+      end,
+      nil,
+      {is_button: true}
+    )
     @menu.add_item(
       :exit_to_main_menu, "Exit to Main Menu (lose partial progress!)",
       0, 0,
@@ -245,6 +257,26 @@ class InnerMap
     @mouse_x = 0
     @mouse_y = 0
     @active = true
+  end
+
+  def are_enemies_near_player?
+    found_enemies_near_player = false
+    @ships.each do |ship_id, ship|
+      # Next if ship is not hostile to player
+      next if !ship.is_hostile_to?(@player.get_faction_id)
+      found_enemies_near_player = true if Gosu.distance(@player.current_map_tile_x, @player.current_map_tile_y, ship.current_map_tile_x, ship.current_map_tile_y) < 5
+      break if found_enemies_near_player
+    end
+    if found_enemies_near_player == false
+      @buildings.each do |b_id, b|
+        # Next if ship is not hostile to player
+        next if !b.is_hostile_to?(@player.get_faction_id)
+        found_enemies_near_player = true if Gosu.distance(@player.current_map_tile_x, @player.current_map_tile_y, b.current_map_tile_x, b.current_map_tile_y) < 5
+        break if found_enemies_near_player
+      end
+    end
+
+    return found_enemies_near_player
   end
 
   # Load new map, reset what needs to be reset.
