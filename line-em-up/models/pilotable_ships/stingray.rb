@@ -30,7 +30,7 @@ module PilotableShips
     MOMENTUM_RATE = 0.2
     # NOT LITERALY TPS
     TILES_PER_SECOND = 0.2
-    ROTATION_SPEED = 0.5
+    ROTATION_SPEED = 0.35
     # HEALTH = 100
     HEALTH = 400
 
@@ -68,14 +68,14 @@ module PilotableShips
     # # RIGHT SIDE
     # STARBOARD_HARDPOINT_LOCATIONS = [
       {
-        angle_offset: 180,
+        angle_offset: 90,
         slot_type: :engine, 
-        x_offset: lambda { |image, scale| ((image.width * scale) / 2.5) },  y_offset: lambda { |image, scale| ((image.height * scale) / 3.5) },
+        x_offset: lambda { |image, scale| ((image.width * scale) / 1.8) },  y_offset: lambda { |image, scale| 0 },
       },
       {
-        angle_offset: 180,
+        angle_offset: -90,
         slot_type: :engine, 
-        x_offset: lambda { |image, scale| -((image.width * scale) / 2.5) },  y_offset: lambda { |image, scale| ((image.height * scale) / 3.5) },
+        x_offset: lambda { |image, scale| -((image.width * scale) / 1.8) },  y_offset: lambda { |image, scale| 0 },
       },
       {
         angle_offset: 180,

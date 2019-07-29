@@ -30,7 +30,7 @@ module PilotableShips
     MOMENTUM_RATE = 0.4
     # NOT LITERALY TPS
     TILES_PER_SECOND = 0.25
-    ROTATION_SPEED = 1.2
+    ROTATION_SPEED = 1.0
     # HEALTH = 100
     HEALTH = 300
 

@@ -46,6 +46,8 @@ module HardpointObjects
 
     PERMANENT_STEAM_USE = 0
 
+    OVERRIDING_HARDPOINT_ANGLE = nil
+
     # POST_DESTRUCTION_EFFECTS = false
 
     # def get_post_destruction_effects

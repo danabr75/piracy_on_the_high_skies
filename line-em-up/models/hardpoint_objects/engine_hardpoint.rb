@@ -16,20 +16,21 @@ module HardpointObjects
     BOOST_SPEED_MODIFIER  = nil
     BOOST_STEAM_USAGE     = nil
 
-    ANIMATED_HARDPOINT_IMAGE_LENGTH = 15
 
     SLOT_TYPE = :engine
 
     IMAGE_SCALER = 16.0
+
+    OVERRIDING_HARDPOINT_ANGLE = 180
 
     def self.get_hardpoint_image
       raise "OVERRIDE ME"
       # Gosu::Image.new("#{MEDIA_DIRECTORY}/hardpoints/#{HARDPOINT_NAME}/hardpoint.png")
     end
 
-    def self.name
-      raise "OVERRIDE ME"
-    end
+    # def self.name
+    #   raise "OVERRIDE ME"
+    # end
 
     def self.description
       raise "OVERRIDE ME"

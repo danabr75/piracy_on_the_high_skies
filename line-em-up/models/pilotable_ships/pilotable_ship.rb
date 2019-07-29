@@ -232,10 +232,14 @@ module PilotableShips
         end
 
         # Always point engines toward the rear
-        if (location_dup[:slot_type] == :engine || location_dup[:slot_type] == :generic) && !item_klass.nil? &&  item_klass::SLOT_TYPE == :engine
-          # puts "SETTING ENGINE TYPE ANGLE OFFSET"
-          location_dup[:angle_offset] = 180
+        # if (location_dup[:slot_type] == :engine || location_dup[:slot_type] == :generic) && !item_klass.nil? &&  item_klass::SLOT_TYPE == :engine
+        #   location_dup[:angle_offset] = 180
+        # end
+
+        if !item_klass.nil? && !item_klass::OVERRIDING_HARDPOINT_ANGLE.nil?
+          location_dup[:angle_offset] = item_klass::OVERRIDING_HARDPOINT_ANGLE
         end
+
         # puts "ITEM CLASS " if owner.class == Player
        # puts "@engine_hardpoints.count: #{@engine_hardpoints.count}" if owner.class == Player
         options[:block_initial_angle] = true if disable_hardpoint_angles
