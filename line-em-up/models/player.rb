@@ -54,7 +54,7 @@ class Player < ScreenFixedObject
   # def initialize(scale, x, y, width_scale, height_scale, screen_pixel_width, screen_pixel_height, location_x, location_y, map_pixel_width, map_pixel_height, options = {})
  # def initialize(width_scale, height_scale, screen_pixel_width, screen_pixel_height, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, map_pixel_width, map_pixel_height, options = {})
   def initialize(current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
-    # puts "PLAYER NEW"
+    puts "PLAYER NEW"
     if @debug
       validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
       validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)

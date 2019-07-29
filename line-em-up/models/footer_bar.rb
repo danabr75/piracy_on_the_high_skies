@@ -17,7 +17,14 @@ class FooterBar < ScreenFixedObject
     @menu.add_item(
       :inventory_hotbar, "I",
       0, 0,
-      lambda {|window, menu, id| window.block_all_controls = true; (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable) },
+      lambda do |window, menu, id|
+        window.block_all_controls = true
+        if window.player.is_alive
+          (window.ship_loadout_menu.active ? window.menus_disable : window.menus_disable && window.ship_loadout_menu.enable)
+        else
+          window.add_messages << MessageFlash.new("Dead Men touch no inventories!")
+        end
+      end,
       nil,
       {is_button: true}
     )

@@ -14,10 +14,11 @@ module OuterMapObjects
     ICON_IMAGE_WIDTH  = 128
     ICON_IMAGE_HEIGHT = 128
 
-    def initialize window, width, height, height_scale, config_path
+    def initialize window, width, height, height_scale, save_path, config_path
       @width  = width
       @height = height
       @window = window
+      @save_path = save_path
       @height_scale = height_scale
       # LUIT.config({window: window})
       @map_location_datas = {
@@ -179,7 +180,19 @@ module OuterMapObjects
     end
 
     def activate_inner_map id
-      @activated_inner_map = id
+      ship_index = (ConfigSetting.get_setting(@save_path, "current_ship_index")).to_s
+      data = ConfigSetting.get_mapped_setting(@save_path, ["player_fleet", ship_index])
+
+      puts "DATA INSPECT"
+      puts data.inspect
+
+      if data.nil? || data['klass'].nil?
+        @window.add_messages << MessageFlash.new("No Ship is selected as Flagship")
+        @window.add_messages << MessageFlash.new("If you have no ships, please load or restart game.")
+        # raise 'stop'
+      else
+        @activated_inner_map = id
+      end
     end
 
     def post_activated_inner_map

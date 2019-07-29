@@ -365,6 +365,7 @@ class GLBackground
   def store_background_data buildings
     map_data = {buildings: {}}
     buildings.each do |b_id, b|
+      next if b.class::PRESERVE_ON_MAP_EXIT == false
       map_data[:buildings][b.current_map_tile_y.to_s] ||= {}
       map_data[:buildings][b.current_map_tile_y.to_s][b.current_map_tile_x.to_s] ||= []
       map_data[:buildings][b.current_map_tile_y.to_s][b.current_map_tile_x.to_s] << {klass_name: b.class.to_s, data: {faction_id: b.get_faction_id }}

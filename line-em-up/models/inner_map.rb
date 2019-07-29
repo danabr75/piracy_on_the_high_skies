@@ -23,7 +23,7 @@ class InnerMap
   attr_accessor :show_minimap, :game_pause
   attr_reader :active
 
-  attr_accessor :exit_map
+  attr_accessor :exit_map, :add_messages
 
   include GlobalVariables
 
@@ -147,6 +147,7 @@ class InnerMap
     # @pickups = values[:pickups]
 
     @messages = []
+    @add_messages = []
 
 
     @viewable_pixel_offset_x, @viewable_pixel_offset_y = [0, 0]
@@ -173,7 +174,7 @@ class InnerMap
       0, 0,
       lambda do |window, menu, id|
         if !window.block_all_controls
-          if are_enemies_near_player?
+          if are_enemies_near_player? && @player.is_alive
             @messages << MessageFlash.new("Enemies are too close!")
             menu.disable
           else
@@ -246,6 +247,51 @@ class InnerMap
     # @refresh_player_ship = false
     @cursor_object = nil
     @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, get_center_font_ui_y, @height_scale, @height_scale, {scale: @average_scale})
+
+
+    @player_death_logic_activated = false
+    # @death_menu = Menu.new(self, @width / 2, 10 * @height_scale, ZOrder::UI, @height_scale, {add_top_padding: true})
+    # @exit_map_menu.add_item(
+    #   nil, "You have died",
+    #   0, 0,
+    #   nil,
+    #   nil,
+    #   {is_button: true}
+    # )
+    # @exit_map_menu.add_item(
+    #   :exit_map, "Yes",
+    #   0, 0,
+    #   # Might be the reason why the mapping has to exist in the game window scope. Might not have access to ship loadout menu here.
+    #   lambda do |window, menu, id|
+    #     if !window.block_all_controls
+    #       window.block_all_controls = true
+    #       window.save_inner_map_data
+    #       window.exit_map = true
+    #     end
+    #   end,
+    #   nil,
+    #   {is_button: true}
+    # )
+    # # This will close the window... which i guess is fine.
+    # @exit_map_menu.add_item(
+    #   :cancel_map_exit, "No",
+    #   0, 0,
+    #   lambda do |window, menu, id|
+    #     if !window.block_all_controls 
+    #       window.block_all_controls = true
+    #       window.player.cancel_map_exit
+    #       menu.disable
+    #     end
+    #   end, 
+    #   nil,
+    #   {is_button: true}
+    # )
+
+
+
+
+
+
     # @object_attached_to_cursor = nil
     # END  SHIP LOADOUT INIT.
     @menus = [@ship_loadout_menu, @menu, @exit_map_menu]
@@ -281,6 +327,7 @@ class InnerMap
 
   # Load new map, reset what needs to be reset.
   def load_map map_name
+    puts "LOAD MAP : #{map_name}"
     @map_name = map_name
     @ship_loadout_menu = ShipLoadoutSetting.new(self, @width, @height, get_center_font_ui_y, @height_scale, @height_scale, {scale: @average_scale})
     @gl_background = GLBackground.new(@map_name, @height_scale, @height_scale, @width, @height, @resolution_scale, @graphics_setting)
@@ -296,20 +343,22 @@ class InnerMap
 
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
 
-    # @player = Player.new(nil, nil, 0, 110)
-    if rand(2) == 0
-      if rand(2) == 0
-        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
-      else
-        @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
-      end
-    else
-      if rand(2) == 0
-        @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
-      else
-        @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
-      end
-    end
+    @player_perma_death = false
+    @player = Player.new(nil, nil, 0, 120)
+    @player_death_logic_activated = false
+    # if rand(2) == 0
+    #   if rand(2) == 0
+    #     @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), 0)
+    #   else
+    #     @player = Player.new(nil, nil, rand(@gl_background.map_tile_width), @gl_background.map_tile_height - 2)
+    #   end
+    # else
+    #   if rand(2) == 0
+    #     @player = Player.new(nil, nil, 0, rand(@gl_background.map_tile_height))
+    #   else
+    #     @player = Player.new(nil, nil, @gl_background.map_tile_width - 2, rand(@gl_background.map_tile_height))
+    #   end
+    # end
     @center_target = @player
     values = @gl_background.init_map(@center_target.current_map_tile_x, @center_target.current_map_tile_y, self)
 
@@ -366,6 +415,9 @@ class InnerMap
 
   def save_inner_map_data
     puts "save_inner_map_data"
+    # Can save ship data as well.
+    # if !@player.is_alive
+    # end
     @gl_background.store_background_data(@buildings)
     Faction.save_factions(@factions)    
   end
@@ -471,7 +523,21 @@ class InnerMap
     return @center_ui_x
   end
 
+  def activate_player_death_logic
+    ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
+    ConfigSetting.set_mapped_setting(@save_file_path, ["player_fleet", ship_index], nil)
+    @messages << MessageFlash.new("You have died. You can leave map, and keep playing if you have spare ships.")
+  end
+
   def update mouse_x, mouse_y
+    # puts "@player.is_alive: #{@player.is_alive} and @player_death_logic_activated: #{@player_death_logic_activated}"
+    @add_messages.reject! {|m| @messages << m; true }
+    if @player_death_logic_activated == false && !@player.is_alive
+      @player_death_logic_activated = true
+      activate_player_death_logic
+    end
+
+
     if @fps_counter < 60
       @fps_log << Gosu.fps if Gosu.fps < 55
       @fps_counter += 1
@@ -606,7 +672,11 @@ class InnerMap
         if @ship_loadout_menu.active
           @ship_loadout_menu.disable
         else
-          @ship_loadout_menu.enable
+          if @player.is_alive
+            @ship_loadout_menu.enable
+          else
+            @add_messages << MessageFlash.new("Dead Men touch no inventories!")            
+          end
         end
       end
 
@@ -751,11 +821,11 @@ class InnerMap
     @footer_bar.draw
 
     @player.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) if @player.is_alive && !@ship_loadout_menu.active
-    if !menus_active && !@player.is_alive
-      @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    end
+    # if !menus_active && !@player.is_alive
+      # @font.draw("You are dead!", @width / 2 - 50, @height / 2 - 55, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Press ESC to quit", @width / 2 - 50, @height / 2 - 40, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+      # @font.draw("Press M to Restart", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # end
     @font.draw("Paused", @width / 2 - 50, @height / 2 - 25, ZOrder::UI, 1.0, 1.0, 0xff_ffff00) if @game_pause
     @ships.each { |key, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }
     @shipwrecks.each { |ship_id, ship| ship.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) }

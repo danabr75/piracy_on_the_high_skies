@@ -25,6 +25,8 @@ module Buildings
 
     ENABLE_FACTION_COLORS = false
 
+    PRESERVE_ON_MAP_EXIT = true
+
     # Still used?
     attr_accessor :drops
 

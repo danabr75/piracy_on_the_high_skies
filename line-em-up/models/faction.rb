@@ -97,12 +97,13 @@ class Faction
     factions = []
     raw_factions_datas = ConfigSetting.get_setting(save_file_path, "factions")
     if raw_factions_datas.nil? && raw_factions_datas != ''
+      puts "CREATING NEW FACTION DATA"
       [
         {display_name: "USSR",    name: 'faction_1', color: 0xff_FF0000},
         {display_name: "Bandits", name: 'faction_2', color: 0xff_ffffff},
         {display_name: "Fortune's Horizon", name: 'player',    color: 0xff_00ff00}
       ].each do |value|
-        factions << Faction.new(value[:name], value[:display_name], value[:color], height_scale)
+        factions << Faction.new(value[:name], value[:display_name], value[:color], height_scale, {})
       end
     else
       factions_datas = JSON.parse(raw_factions_datas)

@@ -6,6 +6,8 @@ module Buildings
     attr_accessor :drops
     attr_reader :credits
 
+    PRESERVE_ON_MAP_EXIT = false
+
     def initialize window, current_map_tile_x, current_map_tile_y, item, current_scale, angle = 0, drops = [], options = {}
      # puts "LANDWRECK SCALE: #{current_scale}"
       @item = item

@@ -332,35 +332,35 @@ class ShipLoadoutSetting < Setting
       # ConfigSetting.set_setting(@save_file_path, "current_ship_index", 0)
       # @ship_index = (ConfigSetting.get_setting(@save_file_path, "current_ship_index")).to_s
       # @ship_value = ConfigSetting.get_mapped_setting(@save_file_path, ["player_fleet", @ship_index, "klass"])
-      raise "Didn't find a ship at fleet 0"# if @ship_value.nil? || @ship_value == ''
+      puts "Didn't find a ship at fleet 0"# if @ship_value.nil? || @ship_value == ''
+    else
+
+      @flagship_index = @ship_index
+      @current_fleet_index = "fleet_index_#{@ship_index}"
+      puts "FLEET INDEX: #{@current_fleet_index}"
+      # raise "missing ship value at #{@ship_index} - #{@ship_index.class}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
+      begin
+        klass = eval(@ship_value)
+      rescue Exception => e
+        puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
+        puts e.message
+        puts e.backtrace.join("\n")
+        puts "EVAL DATA:"
+        puts @ship_value
+      end
+
+      hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data
+      @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
+      @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
+
+
+      puts "FINAL FLEET DATA"
+      puts @fleet_data.keys.inspect
+      puts @fleet_data.values.collect{|v| v[:klass]}
+      puts "@flagship_index: #{@flagship_index}"
+      puts "@current_fleet_index: #{@current_fleet_index}"
+      puts "@ship_index: #{@ship_index}"
     end
-
-
-    @flagship_index = @ship_index
-    @current_fleet_index = "fleet_index_#{@ship_index}"
-    puts "FLEET INDEX: #{@current_fleet_index}"
-    # raise "missing ship value at #{@ship_index} - #{@ship_index.class}. GOT: #{@ship_value.inspect}" if @ship_value.nil? || @ship_value == ''
-    begin
-      klass = eval(@ship_value)
-    rescue Exception => e
-      puts "Caught Error in Eval: #{e.class} when trying to access 'ship' "
-      puts e.message
-      puts e.backtrace.join("\n")
-      puts "EVAL DATA:"
-      puts @ship_value
-    end
-
-    hardpoint_data = PilotableShips::PilotableShip.get_hardpoint_data
-    @ship = klass.new(@max_width / 2, @max_height / 2, ZOrder::Player, ZOrder::Hardpoint, ZOrder::HardpointBase, 0, "INVENTORY_WINDOW", {always_show: true, use_large_image: true, hide_hardpoints: true, block_initial_angle: true}.merge(hardpoint_data))
-    @ship_hardpoints = init_hardpoints_clickable_areas(@ship)
-
-
-    puts "FINAL FLEET DATA"
-    puts @fleet_data.keys.inspect
-    puts @fleet_data.values.collect{|v| v[:klass]}
-    puts "@flagship_index: #{@flagship_index}"
-    puts "@current_fleet_index: #{@current_fleet_index}"
-    puts "@ship_index: #{@ship_index}"
   end
 
   def sell_ship fleet_index
@@ -470,9 +470,17 @@ class ShipLoadoutSetting < Setting
   end 
 
   def enable
+    # puts "ENABLING SHIP LOaDING: STARTING FLEET INDEX: #{@ship_index} and flagsship index: #{@flagship_index}"
+    # @ship_index = @flagship_index
+    if @allow_current_ship_change || @allow_ship_access_until_close || @allow_ship_sell
+      click_fleet_ship(@flagship_index)
+    end
     @active = true
   end
   def disable
+    if @allow_current_ship_change || @allow_ship_access_until_close || @allow_ship_sell
+      click_fleet_ship(@flagship_index)
+    end
     unloading_object_inventory
     @refresh_player_ship = true
     @active = false
@@ -503,30 +511,32 @@ class ShipLoadoutSetting < Setting
   end
 
   def hardpoint_draw
-    @ship_hardpoints.each do |value|
-      click_area = value[:click_area]
-      if click_area
-        click_area.draw(0, 0)
-      else
-      end
-      item = value[:item]
-      if item
-        image = item[:image]
-        if image
-          image.draw(
-            value[:x] - (image.width  / 2 ) / IMAGE_SCALER * @height_scale,
-            value[:y] - (image.height / 2 ) / IMAGE_SCALER * @height_scale,
-            @hardpoint_image_z,
-            @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
-          )
+    if @ship_hardpoints
+      @ship_hardpoints.each do |value|
+        click_area = value[:click_area]
+        if click_area
+          click_area.draw(0, 0)
+        else
         end
-        if !value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type])
-          @invalid_hardpoint_image.draw(
-            value[:x] - (image.width / 2) / IMAGE_SCALER * @height_scale,
-            value[:y] - (image.height / 2) / IMAGE_SCALER * @height_scale,
-            @hardpoint_image_z,
-            @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
-          )
+        item = value[:item]
+        if item
+          image = item[:image]
+          if image
+            image.draw(
+              value[:x] - (image.width  / 2 ) / IMAGE_SCALER * @height_scale,
+              value[:y] - (image.height / 2 ) / IMAGE_SCALER * @height_scale,
+              @hardpoint_image_z,
+              @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
+            )
+          end
+          if !value[:hp].is_valid_slot_type(item[:hardpoint_item_slot_type])
+            @invalid_hardpoint_image.draw(
+              value[:x] - (image.width / 2) / IMAGE_SCALER * @height_scale,
+              value[:y] - (image.height / 2) / IMAGE_SCALER * @height_scale,
+              @hardpoint_image_z,
+              @height_scale / IMAGE_SCALER, @height_scale / IMAGE_SCALER
+            )
+          end
         end
       end
     end
@@ -617,25 +627,27 @@ class ShipLoadoutSetting < Setting
     hover_object = nil
     ship_steam_core_capacity = 0
     ship_steam_core_usage    = 0
-    @ship_hardpoints.each do |value|
-      click_area = value[:click_area]
-      # puts "CLICK AREA: #{click_area.y}"
-      if click_area
-        is_hover = click_area.update(0, 0)
-        # puts "WAS HARDPOINT HOVER? #{is_hover}"
-        # puts "Value item"
-        if value[:item] && value[:hp].is_valid_slot_type(value[:item][:hardpoint_item_slot_type])
-          if value[:item][:hardpoint_item_slot_type] == :steam_core
-            ship_steam_core_capacity += value[:item][:klass]::STEAM_MAX_CAPACITY
-          # elsif value[:item][:hardpoint_item_slot_type] == :engine
-          else
-            ship_steam_core_usage += value[:item][:klass]::PERMANENT_STEAM_USE
+    if @ship_hardpoints
+      @ship_hardpoints.each do |value|
+        click_area = value[:click_area]
+        # puts "CLICK AREA: #{click_area.y}"
+        if click_area
+          is_hover = click_area.update(0, 0)
+          # puts "WAS HARDPOINT HOVER? #{is_hover}"
+          # puts "Value item"
+          if value[:item] && value[:hp].is_valid_slot_type(value[:item][:hardpoint_item_slot_type])
+            if value[:item][:hardpoint_item_slot_type] == :steam_core
+              ship_steam_core_capacity += value[:item][:klass]::STEAM_MAX_CAPACITY
+            # elsif value[:item][:hardpoint_item_slot_type] == :engine
+            else
+              ship_steam_core_usage += value[:item][:klass]::PERMANENT_STEAM_USE
+            end
           end
+
+
+          hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp] } if is_hover
+          # raise "GOT HERE" if is_hover
         end
-
-
-        hover_object = {item: value[:item], holding_type: :hardpoint, holding_slot: value[:hp] } if is_hover
-        # raise "GOT HERE" if is_hover
       end
     end
     @ship_steam_core_capacity = ship_steam_core_capacity.round
@@ -793,7 +805,7 @@ class ShipLoadoutSetting < Setting
 
       # @font.draw(@name, ((@max_width / 2) - @font.text_width(@name) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
 
-      @ship.draw
+      @ship.draw if @ship
       # @font.draw(@value, ((@max_width / 2) - @font.text_width(@value) / 2), @y, 1, 1.0, 1.0, 0xff_ffff00)
       # @font.draw(">", @prev_x, @y, 1, 1.0, 1.0, 0xff_ffff00)
     end

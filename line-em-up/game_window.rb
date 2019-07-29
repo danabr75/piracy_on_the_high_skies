@@ -68,9 +68,11 @@ class GameWindow < Gosu::Window
   RESOLUTIONS = [[640, 480], [800, 600], [960, 720], [1024, 768], [1280, 960], [1400, 1050], [1440, 1080], [1600, 1200], [1856, 1392], [1920, 1440], [2048, 1536]]
   DEFAULT_WIDTH, DEFAULT_HEIGHT = 640, 480
 
-  attr_accessor :block_all_controls
+  attr_accessor :block_all_controls, :add_messages
 
   def initialize options = {}
+    @messages = []
+    @add_messages = []
     @block_all_controls = options[:block_all_controls] || false
 
 
@@ -142,11 +144,12 @@ class GameWindow < Gosu::Window
 
     @inner_map = InnerMap.new(self, nil, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
     @inner_map.disable
-    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @current_save_path, @config_path)
     @outer_map.disable
     @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
     @in_game_menu.enable
     @key_pressed_map = {}
+    # @messages << MessageFlash.new("Game Launched")
   end
 
   def save_game
@@ -185,13 +188,19 @@ class GameWindow < Gosu::Window
     delete_current_save_file
     # GC.start
     FileUtils.cp(@backup_save_path, @current_save_path)
+    @factions = Faction.init_factions(@height_scale)
+    GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+      @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
+    )
     
     @inner_map = InnerMap.new(self, nil, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
     @inner_map.disable
-    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @config_path)
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @current_save_path, @config_path)
     @outer_map.disable
     @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
     @in_game_menu.enable
+
+
 
     GC.start
   end
@@ -202,6 +211,18 @@ class GameWindow < Gosu::Window
     delete_current_save_file
     # GC.start
     init_current_save_file
+    @factions = Faction.init_factions(@height_scale)
+    GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
+      @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
+    )
+
+    @inner_map = InnerMap.new(self, nil, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
+    @inner_map.disable
+    @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @current_save_path, @config_path)
+    @outer_map.disable
+    @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)
+    @in_game_menu.enable
+
     GC.start
   end
 
@@ -384,6 +405,8 @@ class GameWindow < Gosu::Window
   end
 
   def update
+    @add_messages.reject! {|m| @messages << m; true }
+    @messages.reject! { |message| !message.update(mouse_x, mouse_y, nil, nil) }
     # puts "@outer_map && @outer_map.active: #{@outer_map && @outer_map.active}"
     # puts "@in_game_menu: #{@in_game_menu.active}"
     if !@block_all_controls
@@ -414,6 +437,9 @@ class GameWindow < Gosu::Window
   end
 
   def draw
+    @messages.each_with_index do |message, index|
+      message.draw(index)
+    end
     if @inner_map && @inner_map.active
       # puts "DRAWING INNER MAP"
       @inner_map.draw
