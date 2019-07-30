@@ -239,7 +239,7 @@ class ShipLoadoutSetting < Setting
       # puts "pre fl;eet data"
       # puts @fleet_data
       # {"0"=>{"klass"=>"PilotableShips::Bobcat", "hardpoint_locations"=>{"0"=>"HardpointObjects::GrapplingHookHardpoint", "1"=>"HardpointObjects::BulletHardpoint", "4"=>"HardpointObjects::BulletHardpoint", "3"=>"HardpointObjects::BulletHardpoint", "5"=>"HardpointObjects::DumbMissileHardpoint", "2"=>"HardpointObjects::BulletHardpoint", "10"=>"HardpointObjects::BasicEngineHardpoint", "6"=>"HardpointObjects::MinigunHardpoint", "8"=>"HardpointObjects::BasicEngineHardpoint", "12"=>"HardpointObjects::BasicSteamCoreHardpoint"}}}
-      fleet_item_max_width  = 30  * @height_scale
+      fleet_item_max_width  = 30 * @height_scale
       fleet_item_max_height = 80 * @height_scale
       if @fleet_data
         current_x = @cell_width_padding
@@ -260,13 +260,25 @@ class ShipLoadoutSetting < Setting
             image = klass.get_image(klass::ITEM_MEDIA_DIRECTORY)
 
             fit_image_into_cell_ratio = fleet_item_max_width / ((image.width / klass::IMAGE_SCALER) * @height_scale).to_f
-            puts "fit_image_into_cell_ratio: #{fit_image_into_cell_ratio} from #{fleet_item_max_width} / #{(image.width / klass::IMAGE_SCALER).to_f}"
+
+            # If image height is bigger than the click area height
+            if (image.height * (@height_scale / klass::IMAGE_SCALER) * fit_image_into_cell_ratio) > fleet_item_max_height
+              # puts "IMAGE WAS TOO BIG:"
+              # puts "fleet_item_max_height / ((image.height / klass::IMAGE_SCALER) * @height_scale).to_f"
+              # puts "#{fleet_item_max_height} / ((#{image.height / klass::IMAGE_SCALER}) * #{@height_scale}).to_f"
+              additional_scaler = fleet_item_max_height / (image.height * (@height_scale / klass::IMAGE_SCALER) * fit_image_into_cell_ratio)
+              # puts "additional_scaler: #{additional_scaler}"
+              fit_image_into_cell_ratio = fit_image_into_cell_ratio * additional_scaler
+              # puts "IMAGE WAS AFTER: fit_image_into_cell_ratio: #{fit_image_into_cell_ratio}"
+            end
 
             fleet_data[:image_scaler] = (@height_scale / klass::IMAGE_SCALER) * fit_image_into_cell_ratio
             # puts "image.height: #{image.height}"
             fleet_data[:image_width]  = (fleet_item_max_width)
             fleet_data[:image_height] = (fleet_item_max_height)
             fleet_data[:image] = image
+            # puts "ClickArea Heighta   #{fleet_data[:image_height]}"
+            # puts "IMAGE HEIGHT #{fleet_data[:image].height * fleet_data[:image_scaler]}"
 
             fleet_data[:name] = klass.display_name
             fleet_data[:item_exists] = true
