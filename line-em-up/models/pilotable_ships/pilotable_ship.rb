@@ -102,7 +102,8 @@ module PilotableShips
       # validate_float([], self.class.name, __callee__)
       # validate_int([], self.class.name, __callee__)
       if @debug
-        validate_not_nil([x, y, angle], self.class.name, __callee__)
+        # validate_not_nil([x, y, angle], self.class.name, __callee__)
+        validate_not_nil([angle], self.class.name, __callee__)
       end
 
       # validate_int([x, y, screen_pixel_width, screen_pixel_height, map_pixel_width, map_pixel_height, angle], self.class.name, __callee__)
@@ -684,7 +685,7 @@ module PilotableShips
     end
 
     def draw viewable_pixel_offset_x = 0, viewable_pixel_offset_y = 0, scale_offset = 1, options = {}
-      if @is_on_screen || @always_show
+      if @x && (@is_on_screen || @always_show)
         if @owner_faction
           @owner_faction.emblem.draw_rot(
             @x, @y, @faction_z,

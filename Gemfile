@@ -8,6 +8,8 @@ source 'https://rubygems.org'
   # sudo apt install pulseaudio
 gem 'gosu'
 
+gem 'oj'
+
 gem 'ruby-progressbar'
 
 gem 'benchmark-ips'

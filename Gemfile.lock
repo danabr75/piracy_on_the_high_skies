@@ -9,6 +9,7 @@ GEM
     glut (8.3.0)
     gosu (0.14.5)
     method_source (0.9.2)
+    oj (3.8.1)
     opengl-bindings (1.6.9)
     parallel (1.17.0)
     pry (0.12.2)
@@ -37,6 +38,7 @@ DEPENDENCIES
   concurrent-ruby
   glut
   gosu
+  oj
   opengl-bindings
   parallel
   pry

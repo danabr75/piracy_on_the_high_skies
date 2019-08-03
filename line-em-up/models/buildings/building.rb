@@ -295,7 +295,7 @@ module Buildings
         update_colors(get_faction_color)
       end
 
-      if @interactible
+      if @x && @interactible
         @interactable_object = player if @interactable_object.nil?
         @is_hovering = @click_area.update(@x - @image_width_half, @y - @image_height_half) #if @drops.any?
         # puts "BUILDING UPDATE HERE: #{[player_map_pixel_x, player_map_pixel_y, @current_map_tile_x, @current_map_tile_y]}"
@@ -315,7 +315,7 @@ module Buildings
         @is_close_enough_to_open = false
       end
 
-      if is_on_screen?
+      if @x && is_on_screen?
         # Update from gl_background
       else
         # lol don't need to update x and y if off screen.

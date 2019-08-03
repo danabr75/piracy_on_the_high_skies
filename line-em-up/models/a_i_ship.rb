@@ -37,10 +37,14 @@ class AIShip < ScreenMapFixedObject
 
   # Just test out the tile part first.. or whatever
   def initialize(window, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, options = {})
+    @x = @x || -50
+    @y = @y || -50
     @window = window
-    validate_not_nil([window],  self.class.name, __callee__)
-    validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
-    validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
+    if @debug
+      validate_not_nil([window],  self.class.name, __callee__)
+      validate_int([current_map_tile_x, current_map_tile_y],  self.class.name, __callee__)
+      validate_float([current_map_pixel_x, current_map_pixel_y],  self.class.name, __callee__)
+    end
 
     # puts "NEW SHIP HJERE: "
     # puts @faction
@@ -143,6 +147,7 @@ class AIShip < ScreenMapFixedObject
     @ship = ship_class.new(@x, @y, get_draw_ordering, ZOrder::AIHardpoint, ZOrder::AIHardpointBase, @angle, self, ship_data)
     @ship.x = @x
     @ship.y = @y
+
     @current_momentum = 0
     # @max_momentum = @ship.mass # speed here?
 
@@ -161,10 +166,11 @@ class AIShip < ScreenMapFixedObject
     @firing_angle_preferences = [[240.0,300.0], [60.0,120.0]]
     # Find angle preference range here..
     # override default
+
     # Maybe implement calculations in the future here, to get most of hardpoint damage
-    @ship.hardpoints.each do |hp|
-      # hp.inspect
-    end
+    # @ship.hardpoints.each do |hp|
+    #   # hp.inspect
+    # end
 
 
 

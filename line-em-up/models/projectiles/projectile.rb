@@ -328,6 +328,11 @@ module Projectiles
     end
 
     def set_data data
+      # puts "SETTING DATA"
+      # puts data.inspect
+# DATA HERE:
+# {"id"=>"a6d82162-894d-413d-919d-f6c0f2bc03a1", "graphical_effects"=>[], "sounds"=>[], "change_map_pixel_x"=>-1.2543415592118417, "change_map_pixel_y"=>-11.934262744420266, "health_change"=>-1, "time_alive"=>100, "change_map_tile_x"=>-0.39996632579804725, "change_map_tile_y"=>18047.9794329952, "is_alive"=>true, "change_x"=>-4.604579138824885e+32, "change_y"=>-3.1788695486682216e+32}
+
       @health              += data['change_health']      if data.key?('change_health')
 
       @current_map_pixel_x += data['change_map_pixel_x'] if data.key?('change_map_pixel_x')
@@ -337,10 +342,13 @@ module Projectiles
       @current_map_tile_y += data['change_map_tile_y']   if data.key?('change_map_tile_y')
       @current_image_angle += data['change_image_angle'] if data.key?('change_image_angle')
       @speed               += data['change_speed']       if data.key?('change_speed')
-      @x                   += data['change_x']           if data.key?('change_x')
-      @y                   += data['change_y']           if data.key?('change_y')
+      @x                   -= data['change_x']           if data.key?('change_x')
+      @x                   = data['x']                   if data.key?('x')
+      @y                   -= data['change_y']           if data.key?('change_y')
+      @y                   = data['y']                   if data.key?('y')
       @time_alive          =  data['time_alive']         if data.key?('time_alive')
       @play_init_sound     =  data['play_init_sound']    if data.key?('play_init_sound')
+      @is_on_screen        =  data['is_on_screen']
     end
 
     # return {
@@ -354,7 +362,7 @@ module Projectiles
       # change_y: ..
     # }
     def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
-      # raise "ISSIUE HERE: #{data}"
+      # raise "ISSIUE HERE: #{data.inspect}"
       results['id'] = data['id']
       results['graphical_effects'] ||= []
       results['sounds'] ||= []
@@ -402,7 +410,7 @@ module Projectiles
 
       results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
 
-      if data['play_init_sound'] && data['init_sound_path'] && async_is_on_screen?(data['x'], data['y'], data['screen_pixel_width'], data['screen_pixel_height'])
+      if data['play_init_sound'] && data['init_sound_path'] && data['is_on_screen']
         results['sounds'] << data['init_sound_path']
         results['play_init_sound'] = false
       end

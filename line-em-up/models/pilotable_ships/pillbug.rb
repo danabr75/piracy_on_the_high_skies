@@ -32,7 +32,7 @@ module PilotableShips
     TILES_PER_SECOND = 0.25
     ROTATION_SPEED = 1.0
     # HEALTH = 100
-    HEALTH = 300
+    HEALTH = 200
 
     HARDPOINT_LOCATIONS = [
       #Front

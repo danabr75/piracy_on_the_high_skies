@@ -5,6 +5,7 @@ module Buildings
   class Factory < Buildings::Building
 
     SHIP_LIMIT = 1
+    SHIP_SPAWN_INTERVAL = 1500
 
     attr_reader :credits
 
@@ -19,10 +20,11 @@ module Buildings
       @open_image = Gosu::Image.new("#{MEDIA_DIRECTORY}/buildings/factory_open.png", :tileable => true)
       @open_info  = @open_image.gl_tex_info
       @ships = []
-      @create_ship_every   = rand(50) + 1500
+      @create_ship_every   = SHIP_SPAWN_INTERVAL
+      # @time_alive = 1500
       @open_factory_length = 30
       @factory_opened_at   = nil
-      @last_created_ship_at = @create_ship_every
+      @last_created_ship_at = -SHIP_SPAWN_INTERVAL + rand(50) #@create_ship_every - SHIP_SPAWN_INTERVAL
 
       @creating_ships = []
       @thread = nil

@@ -64,7 +64,8 @@ class InnerMap
     if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true, :joined_threads)
-      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :joined_threads)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :test_processes)
+      # @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :processes)
       # Building update needs to be joined, or else ships are updated with missing images
       @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
       @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true, :joined_threads) # , :joined_threads

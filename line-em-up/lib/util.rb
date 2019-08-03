@@ -16,9 +16,17 @@ module Util
 
   # recursive
   def self.symbolize_all_keys(hash)
+    symbolized_hash = {}
+    hash.each do |k, v|
+      symbolized_hash[k.to_sym] = v.is_a?(Hash) ? symbolize_all_keys(v) : v
+    end
+    return symbolized_hash
+  end
+
+  def self.stringify_all_keys(hash)
     stringified_hash = {}
     hash.each do |k, v|
-      stringified_hash[k.to_sym] = v.is_a?(Hash) ? symbolize_all_keys(v) : v
+      stringified_hash[k.to_s] = v.is_a?(Hash) ? stringify_all_keys(v) : v
     end
     return stringified_hash
   end

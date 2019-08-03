@@ -160,7 +160,9 @@ class GeneralObject
       validate_float_or_int([@tile_pixel_width, @tile_pixel_height],  self.class.name, __callee__)
       validate_float_or_int([@height_scale, @height_scale],  self.class.name, __callee__)
       validate_int([@screen_pixel_width, @screen_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+      puts "TEST1"
       validate_not_nil([@height_scale, @height_scale, @screen_pixel_width, @screen_pixel_height, @tile_pixel_width, @tile_pixel_height, @map_pixel_width, @map_pixel_height, @map_tile_width, @map_tile_height], self.class.name, __callee__)
+      puts "test2"
     end
 
     @id    = options[:id] || SecureRandom.uuid
@@ -209,8 +211,8 @@ class GeneralObject
 
     @inited = true
     # Don't need these values assigned.
-    @x = @x || -50
-    @y = @y || -50
+    # @x = @x || -50
+    # @y = @y || -50
     # Not sure if keeping these
     # Used for hardpoints, objects relative to other objects
     @x_offset = @x_offset || 0
@@ -298,7 +300,7 @@ class GeneralObject
 
   def draw viewable_pixel_offset_x, viewable_pixel_offset_y
     # Will generate error if class name is not listed on ZOrder
-    if @is_on_screen
+    if @x && @is_on_screen
       if !self.class::BLOCK_IMAGE_DRAW
         @image.draw(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, @z, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
       elsif self.class::DRAW_CLASS_IMAGE
@@ -311,7 +313,7 @@ class GeneralObject
 
   def draw_rot viewable_pixel_offset_x, viewable_pixel_offset_y
     # draw_rot(x, y, z, angle, center_x = 0.5, center_y = 0.5, scale_x = 1, scale_y = 1, color = 0xff_ffffff, mode = :default) ⇒ void
-    if @is_on_screen
+    if @x && @is_on_screen
       if !self.class::BLOCK_IMAGE_DRAW
         @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
       elsif self.class::DRAW_CLASS_IMAGE
@@ -357,7 +359,9 @@ class GeneralObject
   end
 
   def is_mouse_hovering_over? mouse_x, mouse_y
-    mouse_x > @x - @image_width_half && mouse_x < @x + @image_width_half && mouse_y > @y - @image_height_half && mouse_y < @y + @image_height_half
+    if @x
+      mouse_x > @x - @image_width_half && mouse_x < @x + @image_width_half && mouse_y > @y - @image_height_half && mouse_y < @y + @image_height_half
+    end
   end
 
   def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, options = {}
@@ -392,6 +396,10 @@ class GeneralObject
     return is_alive
   end
 
+  # def async_is_on_screen
+
+  # end
+
   # Now unsupported
   def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
     # Inherit, add logic, then call this to calculate whether it's still visible.
@@ -407,6 +415,8 @@ class GeneralObject
     results['change_map_tile_y'] = change_map_tile_y
     # results['is_alive'] = results.key?('change_health') ? (data['health'] + results['change_health'] > 0) : (data['health'] > 0)
     results['is_alive'] = async_is_alive(data['health'], results['change_health'])
+    results['is_on_screen'] = async_is_on_screen?(data['x'] || results['x'], data['y'] || results['y'], data['screen_pixel_width'], data['screen_pixel_height'])
+    puts "results['is_on_screen']: #{results['is_on_screen']}"
     # end
     # return is_on_screen?
     return results
@@ -417,12 +427,15 @@ class GeneralObject
   end
 
   def is_on_screen?
-    y_buffer = (@screen_pixel_height * 0.2)
-    x_buffer = (@screen_pixel_width  * 0.2)
-    @y > -y_buffer && @y < @screen_pixel_height + y_buffer && @x > -x_buffer && @x < @screen_pixel_width + x_buffer
+    if @x
+      y_buffer = (@screen_pixel_height * 0.2)
+      x_buffer = (@screen_pixel_width  * 0.2)
+      @y > -y_buffer && @y < @screen_pixel_height + y_buffer && @x > -x_buffer && @x < @screen_pixel_width + x_buffer
+    end
   end
 
   def self.async_is_on_screen? x, y, screen_pixel_width, screen_pixel_height
+    puts [x, y, screen_pixel_width, screen_pixel_height].join(', ')
     y_buffer = (screen_pixel_height * 0.2)
     x_buffer = (screen_pixel_width  * 0.2)
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
@@ -965,8 +978,10 @@ class GeneralObject
 
 
   def self.async_convert_map_pixel_location_to_screen player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
+    # puts [player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height]
     x = (player_map_pixel_x - current_map_pixel_x) + (screen_pixel_width / 2)
     y = (current_map_pixel_y - player_map_pixel_y) + (screen_pixel_height / 2)
+    # puts "NEW X AND Y: #{x} - #{y}"
     # return {x: x, y: y}
     return [x, y]
   end

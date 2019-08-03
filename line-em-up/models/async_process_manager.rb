@@ -4,6 +4,10 @@ require 'parallel'
 # require 'time'
 # require 'benchmark/ips'
 # require 'open3'
+require 'oj'
+
+# TEMP
+require_relative 'projectiles/projectile.rb'
 
 require "thwait"
 
@@ -15,13 +19,28 @@ class AsyncProcessManager
     @processor_count = threads
     @list_is_hash = list_is_hash
     @use_processes = use_type == :processes
+    @test_use_processes = use_type == :test_processes
     @use_threads   = use_type == :threads
     @use_joined_threads   = use_type == :joined_threads
     @use_nothing   = use_type == :none
     Thread.abort_on_exception = true
+
+    if @use_processes
+      @processors_count = 1
+      @child_read, @child_write = IO.pipe
+      # @child_read, @child_write = IO.pipe
+
+      @pids = []
+      @processors_count.times do
+        # pids << Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
+        @pids << Process.spawn({"PARENT_PID" => Process.pid.to_s}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :in => @child_read, :out => @child_write, :err => [:child, :out])
+      end
+    end
+
   end
 
   def update window, items, *args
+    items_count = items.count
     if @use_nothing
       if @list_is_hash
         items.each do |key, item|
@@ -62,88 +81,61 @@ class AsyncProcessManager
       end
     end
 
+    if @test_use_processes
+      final_data = []
+      # parameter_threads = []
+      t = Thread.new do
+        items.each do |key, item|
+          # puts "item.get_data"
+          # puts item.get_data.inspect
+
+          # Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
+          result = Projectiles::Projectile.async_update(Util.stringify_all_keys(item.get_data), args[0], args[1], args[2], args[3])
+          final_data << result
+        end
+        Thread.exit
+      end
+
+      t.join
+
+      t = Thread.new do
+        final_data.each do |f_data|
+          items[f_data['id']].set_data(f_data)
+          window.remove_projectile_ids.push(f_data['id']) if !items[f_data['id']].is_alive
+        end
+      end
+
+      t.join
+    end
+
     # Marshal.load
     # Just don't work.. SLOW FPS, projectiles aren't being updated.
-    if @use_processes
+    if false #@use_processes
       final_data = []
-      r, w = IO.pipe
-
-      pids = []
-
-      # parameter_datas = [{fun1: 123}, {fun2: 234}]
-      parameter_threads = []
-      items.each do |key, item|
-        t = Thread.new do
-          Thread.current[:pid] = Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
-          Thread.exit
+      # parameter_threads = []
+      t = Thread.new do
+        items.each do |key, item|
+          # Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
+          @r.write( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
         end
-        parameter_threads << t
-      end
-
-      ThreadsWait.all_waits(parameter_threads) do |t|
-        pids << t[:pid]
-      end
-
-      w.close
-
-      pid_threads = []
-
-      pids.each do |pid|
-        t = Thread.new do
-          pid, status = Process.wait2(pid)
-          Thread.current[:status] = status
-          # Thread.current[:pid]    = pid
-          # data = Marshal.load(r.gets)
-          Thread.exit
-        end
-        pid_threads << t
-      end
-
-      child_process_raw_data = []
-
-      puts "pid_threads.count: #{pid_threads.count}"
-
-      # ThreadsWait.all_waits(pid_threads)
-      ThreadsWait.all_waits(pid_threads) do |t|
-        # puts "#{t} complete."
-        if t[:status] == 0
-          puts "THREAD ENDED SUCCESSFULLY"
-        else
-          puts "THREAD EXITED WITH FAILURE"
-        end
-      end
-
-
-      File.open('testoutput', 'w') do |file|
-        while (line = r.read) && line != ''
-          puts "INCOMING DATA:"
-          puts line.inspect
-          puts line.class
-          file.write(line)
-          begin
-            data = JSON.parse(line)
-            puts 'FOUND DATA'
-            puts data.inspect
+        while items_count < final_data.count
+          while (line = r.read) && line != ''
+            data = Oj.load(line)
             final_data << data
-          rescue JSON::ParserError => e  
-            # Random issues with parsing..
           end
         end
-        puts "Ending While Loop"
+        Thread.exit
       end
 
-      r.close
+      t.join
 
-
-
-
-      puts "What did we get?"
-      puts final_data.inspect
-      final_data.each do |f_data|
-        puts "DOES ITEMS HAVE KEY? #{items.key?(f_data["id"])}  --- #{f_data}"
-        items[f_data['id']].set_data(f_data)
+      t = Thread.new do
+        final_data.each do |f_data|
+          items[f_data['id']].set_data(f_data)
+        end
       end
-      puts "EDN HERE"
+
+      t.join
 
     end
 

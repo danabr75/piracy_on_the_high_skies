@@ -64,11 +64,13 @@ end
 @map_pixel_width  = (@map_tile_width  * @tile_pixel_width ).to_i
 @map_pixel_height = (@map_tile_height * @tile_pixel_height).to_i
 
-GlobalVariables.set_config(1, 1, 450, 450,
-  @map_pixel_width, @map_pixel_height,
-  @map_tile_width, @map_tile_height,
-  @tile_pixel_width, @tile_pixel_height, 16.666, :basic, Faction.init_factions, 1, true
+GlobalVariables.set_inner_map(
+  1, 1,
+  1, 1,
+  1, 1,
 )
+
+GlobalVariables.set_config(1, 1, 450, 450, 16.666, :basic, Faction.init_factions, 1, true)
 
 
 
