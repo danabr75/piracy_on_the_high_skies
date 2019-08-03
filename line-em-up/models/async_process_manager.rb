@@ -16,6 +16,7 @@ class AsyncProcessManager
 
   def initialize thread_type_klass, threads, list_is_hash = false, use_type = :threads #, :processes, :none
     @thread_type_klass = thread_type_klass
+    @debug = false
     # @processor_count = 2
     @processor_count = threads
     @list_is_hash = list_is_hash
@@ -30,13 +31,10 @@ class AsyncProcessManager
       @processors_count = 1
       @child_read, @child_write = IO.pipe
       @parent_read, @parent_write = IO.pipe
-      puts "parents here:"
-      puts @parent_read.inspect
-      puts @parent_write.inspect
+      # puts "parents here:"
+      # puts @parent_read.inspect
+      # puts @parent_write.inspect
       # @child_read, @child_write = IO.pipe
-# parents here:
-#<IO:fd 12>
-#<IO:fd 13>
 
       @pids = []
       @processors_count.times do
@@ -121,48 +119,51 @@ class AsyncProcessManager
     if @use_processes
       final_data = []
       # parameter_threads = []
-      # t = Thread.new do
+      t = Thread.new do
         items.each do |key, item|
           # Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
           # @child_read, @child_write = IO.pipe
           # @parent_read, @parent_write = IO.pipe
           # @parent_write.write( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
-          # @parent_write.write( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
-          @parent_write.puts( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
+          @parent_write.puts( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
+          # @parent_write.puts( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
           @parent_write.flush
         end
         while final_data.count < items_count
-          puts "WAITING FOR COUNT #{final_data.count} < #{items_count}"
+          puts "WAITING FOR COUNT #{final_data.count} < #{items_count}" if @debug
           begin
-            puts "BEGINNING AGAIN"
+            puts "BEGINNING AGAIN" if @debug
             while final_data.count < items_count && lines = @child_read.read_nonblock(MAX_BYTE_LENGTH)
-              puts lines.inspect
-              puts "REALING LINES IF ANY - #{lines}"
+              puts lines.inspect if @debug
+              puts "REALING LINES IF ANY - #{lines}" if @debug
               lines.split("\n").each do |line|
-                # data = Oj.load(line)
-                data = JSON.parse(line)
+                puts "READING LINE" if @debug
+                puts line.inspect if @debug
+                data = Oj.load(line)
+                # data = JSON.parse(line)
                 final_data << data
               end
             end
           rescue IO::WaitReadable
-            puts "SERVER IO WAITING"
+            puts "SERVER IO WAITING" if @debug
             IO.select([@child_read])
             retry
           end
         end
-        # Thread.exit
-      # end
+        Thread.exit
+      end
 
-      # t.join
+      t.join
       if items_count > 0
-        puts 'PROCESS ENDED'
-        puts "items_count < final_data.count: #{items_count} < #{final_data.count}"
-        puts final_data.join(', ')
+        puts 'PROCESS ENDED' if @debug
+        puts "items_count < final_data.count: #{items_count} < #{final_data.count}" if @debug
+        puts final_data.join(', ') if @debug
       end
 
       t = Thread.new do
         final_data.each do |f_data|
           items[f_data['id']].set_data(f_data)
+          window.remove_projectile_ids.push(f_data['id']) if !items[f_data['id']].is_alive
         end
       end
 

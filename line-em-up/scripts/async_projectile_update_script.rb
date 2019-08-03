@@ -5,53 +5,67 @@ require_relative '../models/projectiles/projectile.rb'
 require 'json'
 require 'oj'
 
+
+require_relative '../lib/util.rb'
+
 class AsyncProjectileUpdateScript
   # def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   MAX_BYTE_LENGTH   = 65535
   LOGGER_FILE = "#{CURRENT_DIRECTORY}/../../proj_update_logger.txt"
   def self.async_update(stdin, stdout)
+    debug = false
     file = File.open(LOGGER_FILE, "w")
     file.write("start - pid: #{Process.pid} \n")
     file.flush
     file.write("stdin #{stdin.inspect.to_s} \n")
     file.flush
+    # shut_down = false
     begin
-      file.write("#{Time.now.to_s}\n")
-      file.flush
-      # file.write(Time.now.to_s)
-      # file.flush
-      # data = ENV['MARSHALLED_DATA']
+      file.write("#{Time.now.to_s}\n") if debug
+      file.flush if debug
       begin
         pid = ENV['PARENT_PID'].to_i
         while Process.getpgid(pid)
-          file.write("PARENT IS ALIVE - #{pid} \n")
-          file.flush
-          file.write("#{STDIN.lineno}\n")
-          file.flush
+          file.write("PARENT IS ALIVE - #{pid} \n") if debug
+          file.flush if debug
+          file.write("#{STDIN.lineno}\n") if debug
+          file.flush if debug
           begin
-            while lines = stdin.read_nonblock(MAX_BYTE_LENGTH)
-              file.write("GOT LINE: #{lines}\n")
-              file.flush
+            # If read_nonblock does hold.. need to send exit command? Need to send kill command in the read_non_block.
+            while lines = stdin.read_nonblock(MAX_BYTE_LENGTH) # need to move this here,  and preceed, Process.getpgid(pid)
+              file.write("GOT LINES: #{lines}\n") if debug
+              file.flush if debug
               # next if line != ''
               # file.write("READLING LINE: #{line}\n")
               # file.flush
               # parsed_data = Oj.load(line)
               lines.split("\n").each do |line|
-                parsed_data = JSON.parse(line)
-                file.write("GOT parsed_data: #{parsed_data}\n")
-                file.flush
+                file.write("GOT LINE: #{line}\n") if debug
+                file.flush if debug
+                file.write("GOT CLASS: #{line.class}\n") if debug
+                file.flush if debug
+                parsed_data = Oj.load(line)
+                parsed_data = Util.stringify_all_keys(parsed_data)
+                # parsed_data = JSON.parse(line)
+                file.write("GOT parsed_data: #{parsed_data}\n") if debug
+                file.flush if debug
                 results = Projectiles::Projectile.async_update(parsed_data['data'], parsed_data['mouse_x'], parsed_data['mouse_y'], parsed_data['player_map_pixel_x'], parsed_data['player_map_pixel_y'])
-                raise "BAD RESULTS" if results['current_map_pixel_x'].class == String
-                file.write("RETURNING:\n")
-                file.flush
-                # file.write(Oj.dump(results)) 
-                file.write( (results).to_json.to_s ) 
-                file.flush
+                if results['current_map_pixel_x'].class == String
+                  file.write("BAD RESULTS:\n")
+                  file.flush
+                  raise "BAD RESULTS"
+                end
+                file.write("RETURNING:\n") if debug
+                file.flush if debug
+                file.write(Oj.dump(results).to_s)  if debug
+                # file.write( (results).to_json.to_s ) 
+                file.flush if debug
                 # stdout.write(Oj.dump(results))
-                file.write( "sending bakc data" ) 
-                file.flush
-                stdout.puts( (results).to_json )
+                file.write( "sending bakc data" )  if debug
+                file.flush if debug
+                stdout.puts( Oj.dump(results) )
+                # stdout.puts( (results).to_json )
                 stdout.flush
               end
             end
@@ -61,11 +75,11 @@ class AsyncProjectileUpdateScript
             IO.select([stdin])
             retry
           end
-          file.write("GOT HERE1?\n")
-          file.flush
+          file.write("GOT HERE1?\n") if debug
+          file.flush if debug
         end
-        file.write("GOT HERE2?\n")
-        file.flush
+        file.write("GOT HERE2?\n") if debug
+        file.flush if debug
 
       rescue Errno::ESRCH => e
         file.write("Error - parent is dead")
@@ -76,9 +90,9 @@ class AsyncProjectileUpdateScript
       end
     rescue Exception => e
       file.flush
-      file.write("ERROR-#{e.class}\n")
+      file.write("ERROR-#{e.class}-#{e.message}\n")
       file.flush
-      file.write(e.message)
+      file.write("#{e.message}\n")
       file.flush
       file.write( e.backtrace.join("\n") )
       file.flush

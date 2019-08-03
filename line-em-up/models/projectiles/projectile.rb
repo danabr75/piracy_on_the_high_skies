@@ -287,8 +287,9 @@ module Projectiles
       return {is_alive: is_alive, graphical_effects: graphical_effects}
     end
 
-    def get_data 
-      return {
+    def get_data
+      # puts "GET DATA"
+      test = {
         time_alive: @time_alive,
         # last_updated_at: @last_updated_at,
         refresh_angle_on_updates: @refresh_angle_on_updates,
@@ -315,7 +316,7 @@ module Projectiles
         screen_pixel_width: @screen_pixel_width,
         screen_pixel_height: @screen_pixel_height,
         id: @id,
-        klass: self.class,
+        klass: self.class.name,
         initial_delay: self.class::INITIAL_DELAY,
         speed_increase_factor: self.class::SPEED_INCREASE_FACTOR,
         max_speed: self.class::MAX_SPEED,
@@ -325,10 +326,11 @@ module Projectiles
         start_current_map_pixel_y: @start_current_map_pixel_y
 
       }
+      # puts test.inspect
+      return test
     end
 
     def set_data data
-      puts "BEFORE DATA ON PROJ, new x and y #{@x} - #{@y} - #{data['change_x']} - #{data['change_y']}"
       # puts "SETTING DATA" 
       # puts data.inspect
 # DATA HERE:
@@ -351,7 +353,8 @@ module Projectiles
       @time_alive          =  data['time_alive']         if data.key?('time_alive')
       @play_init_sound     =  data['play_init_sound']    if data.key?('play_init_sound')
       @is_on_screen        =  data['is_on_screen']
-      puts "SET DATA ON PROJ, new x and y #{@x} - #{@y}"
+      @is_alive            = data['is_alive']
+      # puts "SET DATA ON PROJ, new x and y #{@x} - #{@y}"
     end
 
     # return {

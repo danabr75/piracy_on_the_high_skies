@@ -39,6 +39,9 @@
       ]
     },
     "120":{
+      "0":[
+        {"klass_name":"Buildings::OffensiveStore","data":{"faction_id":"faction_2"}}
+      ],
       "1":[
         {"klass_name":"Buildings::CommandCenter","data":{"faction_id":"faction_2"}}
       ],
@@ -57,6 +60,21 @@
         {"klass_name":"Buildings::RepairArea","data":{"faction_id":"faction_2"}}
       ],
       "2":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ],
+      "3":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ],
+      "4":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ],
+      "5":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ],
+      "6":[
+        {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
+      ],
+      "7":[
         {"klass_name":"Buildings::Factory","data":{"faction_id":"faction_2"}}
       ]
     },
