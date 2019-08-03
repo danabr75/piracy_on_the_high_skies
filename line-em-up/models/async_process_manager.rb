@@ -12,6 +12,7 @@ require_relative 'projectiles/projectile.rb'
 require "thwait"
 
 class AsyncProcessManager
+  MAX_BYTE_LENGTH   = 65535
 
   def initialize thread_type_klass, threads, list_is_hash = false, use_type = :threads #, :processes, :none
     @thread_type_klass = thread_type_klass
@@ -28,12 +29,19 @@ class AsyncProcessManager
     if @use_processes
       @processors_count = 1
       @child_read, @child_write = IO.pipe
+      @parent_read, @parent_write = IO.pipe
+      puts "parents here:"
+      puts @parent_read.inspect
+      puts @parent_write.inspect
       # @child_read, @child_write = IO.pipe
+# parents here:
+#<IO:fd 12>
+#<IO:fd 13>
 
       @pids = []
       @processors_count.times do
         # pids << Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
-        @pids << Process.spawn({"PARENT_PID" => Process.pid.to_s}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :in => @child_read, :out => @child_write, :err => [:child, :out])
+        @pids << Process.spawn({"PARENT_PID" => Process.pid.to_s, "TRIGGER_PROCESS" => 'true'}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :in => @parent_read, :out => @child_write, :err => [:child, :out])
       end
     end
 
@@ -110,24 +118,47 @@ class AsyncProcessManager
 
     # Marshal.load
     # Just don't work.. SLOW FPS, projectiles aren't being updated.
-    if false #@use_processes
+    if @use_processes
       final_data = []
       # parameter_threads = []
-      t = Thread.new do
+      # t = Thread.new do
         items.each do |key, item|
           # Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
-          @r.write( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
+          # @child_read, @child_write = IO.pipe
+          # @parent_read, @parent_write = IO.pipe
+          # @parent_write.write( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
+          # @parent_write.write( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
+          @parent_write.puts( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
+          @parent_write.flush
         end
-        while items_count < final_data.count
-          while (line = r.read) && line != ''
-            data = Oj.load(line)
-            final_data << data
+        while final_data.count < items_count
+          puts "WAITING FOR COUNT #{final_data.count} < #{items_count}"
+          begin
+            puts "BEGINNING AGAIN"
+            while final_data.count < items_count && lines = @child_read.read_nonblock(MAX_BYTE_LENGTH)
+              puts lines.inspect
+              puts "REALING LINES IF ANY - #{lines}"
+              lines.split("\n").each do |line|
+                # data = Oj.load(line)
+                data = JSON.parse(line)
+                final_data << data
+              end
+            end
+          rescue IO::WaitReadable
+            puts "SERVER IO WAITING"
+            IO.select([@child_read])
+            retry
           end
         end
-        Thread.exit
-      end
+        # Thread.exit
+      # end
 
-      t.join
+      # t.join
+      if items_count > 0
+        puts 'PROCESS ENDED'
+        puts "items_count < final_data.count: #{items_count} < #{final_data.count}"
+        puts final_data.join(', ')
+      end
 
       t = Thread.new do
         final_data.each do |f_data|

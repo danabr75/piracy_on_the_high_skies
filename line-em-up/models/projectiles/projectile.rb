@@ -299,10 +299,10 @@ module Projectiles
         height_scale:  @height_scale,
         angle: @angle,
         health: @health,
-        current_map_pixel_x: @current_map_pixel_x,
-        current_map_pixel_y: @current_map_pixel_y,
-        current_map_tile_x: @current_map_pixel_x,
-        current_map_tile_y: @current_map_pixel_y,
+        current_map_pixel_x: @current_map_pixel_x.round(2),
+        current_map_pixel_y: @current_map_pixel_y.round(2),
+        current_map_tile_x: @current_map_tile_x,
+        current_map_tile_y: @current_map_tile_y,
         current_image_angle: @current_image_angle,
         image_angle_incrementor: @image_angle_incrementor,
         x: @x,
@@ -328,7 +328,8 @@ module Projectiles
     end
 
     def set_data data
-      # puts "SETTING DATA"
+      puts "BEFORE DATA ON PROJ, new x and y #{@x} - #{@y} - #{data['change_x']} - #{data['change_y']}"
+      # puts "SETTING DATA" 
       # puts data.inspect
 # DATA HERE:
 # {"id"=>"a6d82162-894d-413d-919d-f6c0f2bc03a1", "graphical_effects"=>[], "sounds"=>[], "change_map_pixel_x"=>-1.2543415592118417, "change_map_pixel_y"=>-11.934262744420266, "health_change"=>-1, "time_alive"=>100, "change_map_tile_x"=>-0.39996632579804725, "change_map_tile_y"=>18047.9794329952, "is_alive"=>true, "change_x"=>-4.604579138824885e+32, "change_y"=>-3.1788695486682216e+32}
@@ -336,20 +337,21 @@ module Projectiles
       @health              += data['health_change']      if data.key?('health_change')
       # puts "NEW HEALTH: #{@health}"
 
-      @current_map_pixel_x += data['change_map_pixel_x'] if data.key?('change_map_pixel_x')
-      @current_map_pixel_y += data['change_map_pixel_y'] if data.key?('change_map_pixel_y')
+      @current_map_pixel_x = (@current_map_pixel_x + data['change_map_pixel_x']).round(4) if data.key?('change_map_pixel_x')
+      @current_map_pixel_y = (@current_map_pixel_y + data['change_map_pixel_y']).round(4) if data.key?('change_map_pixel_y')
 
       @current_map_tile_x += data['change_map_tile_x']   if data.key?('change_map_tile_x')
       @current_map_tile_y += data['change_map_tile_y']   if data.key?('change_map_tile_y')
       @current_image_angle += data['change_image_angle'] if data.key?('change_image_angle')
       @speed               += data['change_speed']       if data.key?('change_speed')
-      @x                   -= data['change_x']           if data.key?('change_x')
+      @x                   = (@x - data['change_x']).round(4)           if data.key?('change_x')
       @x                   = data['x']                   if data.key?('x')
-      @y                   -= data['change_y']           if data.key?('change_y')
+      @y                   = (@y - data['change_y']).round(4)           if data.key?('change_y')
       @y                   = data['y']                   if data.key?('y')
       @time_alive          =  data['time_alive']         if data.key?('time_alive')
       @play_init_sound     =  data['play_init_sound']    if data.key?('play_init_sound')
       @is_on_screen        =  data['is_on_screen']
+      puts "SET DATA ON PROJ, new x and y #{@x} - #{@y}"
     end
 
     # return {
@@ -363,6 +365,11 @@ module Projectiles
       # change_y: ..
     # }
     def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
+      data['current_map_pixel_x'] = data['current_map_pixel_x'].to_i if data['current_map_pixel_x'].class == String
+      data['current_map_pixel_y'] = data['current_map_pixel_y'].to_i if data['current_map_pixel_y'].class == String
+      data['x'] = data['x'].to_i if data['x'].class == String
+      data['y'] = data['y'].to_i if data['y'].class == String
+
       # raise "ISSIUE HERE: #{data.inspect}"
       results['id'] = data['id']
       results['graphical_effects'] ||= []

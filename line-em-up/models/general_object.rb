@@ -317,6 +317,7 @@ class GeneralObject
       if !self.class::BLOCK_IMAGE_DRAW
         @image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
       elsif self.class::DRAW_CLASS_IMAGE
+        # puts [@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler].join(', ')
         self.class.image.draw_rot(@x + viewable_pixel_offset_x, @y - viewable_pixel_offset_y, get_draw_ordering, -@current_image_angle, 0.5, 0.5, @height_scale_with_image_scaler, @height_scale_with_image_scaler)
       end
     end

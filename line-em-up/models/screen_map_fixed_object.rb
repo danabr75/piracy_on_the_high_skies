@@ -85,12 +85,12 @@ class ScreenMapFixedObject < GeneralObject
 
     if data['x']
       # puts "CHANGE X HERE: #{data['x']} - #{x}"
-      results['change_x'] = data['x'] - x
+      results['change_x'] = (data['x'] - x).round(4)
       # puts "CHANGE Y HERE: #{data['y']} - #{y}"
-      results['change_y'] = data['y'] - y
+      results['change_y'] = (data['y'] - y).round(4)
     else
-      results['x'] = x
-      results['y'] = y
+      results['x'] = x.round(4)
+      results['y'] = y.round(4)
     end
 
     results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
