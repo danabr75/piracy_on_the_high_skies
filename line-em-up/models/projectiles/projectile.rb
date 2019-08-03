@@ -333,7 +333,8 @@ module Projectiles
 # DATA HERE:
 # {"id"=>"a6d82162-894d-413d-919d-f6c0f2bc03a1", "graphical_effects"=>[], "sounds"=>[], "change_map_pixel_x"=>-1.2543415592118417, "change_map_pixel_y"=>-11.934262744420266, "health_change"=>-1, "time_alive"=>100, "change_map_tile_x"=>-0.39996632579804725, "change_map_tile_y"=>18047.9794329952, "is_alive"=>true, "change_x"=>-4.604579138824885e+32, "change_y"=>-3.1788695486682216e+32}
 
-      @health              += data['change_health']      if data.key?('change_health')
+      @health              += data['health_change']      if data.key?('health_change')
+      # puts "NEW HEALTH: #{@health}"
 
       @current_map_pixel_x += data['change_map_pixel_x'] if data.key?('change_map_pixel_x')
       @current_map_pixel_y += data['change_map_pixel_y'] if data.key?('change_map_pixel_y')
@@ -402,21 +403,22 @@ module Projectiles
         results['change_map_pixel_x'], results['change_map_pixel_y'] = async_movement(data['current_map_pixel_x'], data['current_map_pixel_y'], factor_in_scale_speed, data['angle'], data['height_scale']) if factor_in_scale_speed != 0
       end
 
-      results['health_change'] = 0 - data['health'] if data['max_time_alive'] && data['time_alive'] >= data['max_time_alive']
+      results['health_change'] = -data['health'] if data['max_time_alive'] && data['time_alive'] >= data['max_time_alive']
 
-      if data['max_distance'] && data['max_distance'] < Gosu.distance(data['current_map_pixel_x'], data['current_map_pixel_y'], data['start_current_map_pixel_x'], data['start_current_map_pixel_y'])
-        results['health_change'] = 0 - data['health']
-      end
 
       results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
+
+      if data['max_distance'] && data['max_distance'] < Gosu.distance(data['current_map_pixel_x'], data['current_map_pixel_y'], data['start_current_map_pixel_x'], data['start_current_map_pixel_y'])
+        # puts "should have gotten here."
+        results['health_change'] = -data['health']
+      end
 
       if data['play_init_sound'] && data['init_sound_path'] && data['is_on_screen']
         results['sounds'] << data['init_sound_path']
         results['play_init_sound'] = false
       end
 
-
-      if !async_is_alive(data['health'], results['change_health'])
+      if !async_is_alive(data['health'], results['health_change'])
         if data['post_destruction_effects']
           get_post_destruction_effects.each do |effect|
             results['graphical_effects'] << effect

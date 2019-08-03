@@ -342,8 +342,12 @@ class GeneralObject
     @health > 0
   end
 
-  def self.async_is_alive health, health_change
-    (!health_change.nil? && health_change != 0) ? (health + health_change > 0) : (health > 0)
+  def self.async_is_alive health, health_change = nil
+    if health_change
+      health + health_change > 0
+    else
+      health > 0
+    end
   end
 
   def take_damage damage, owner = nil
@@ -414,9 +418,9 @@ class GeneralObject
     results['change_map_tile_x'] = change_map_tile_x
     results['change_map_tile_y'] = change_map_tile_y
     # results['is_alive'] = results.key?('change_health') ? (data['health'] + results['change_health'] > 0) : (data['health'] > 0)
-    results['is_alive'] = async_is_alive(data['health'], results['change_health'])
+    results['is_alive'] = async_is_alive(data['health'], results['health_change'])
     results['is_on_screen'] = async_is_on_screen?(data['x'] || results['x'], data['y'] || results['y'], data['screen_pixel_width'], data['screen_pixel_height'])
-    puts "results['is_on_screen']: #{results['is_on_screen']}"
+    # puts "results['is_on_screen']: #{results['is_on_screen']}"
     # end
     # return is_on_screen?
     return results
@@ -435,7 +439,7 @@ class GeneralObject
   end
 
   def self.async_is_on_screen? x, y, screen_pixel_width, screen_pixel_height
-    puts [x, y, screen_pixel_width, screen_pixel_height].join(', ')
+    # puts [x, y, screen_pixel_width, screen_pixel_height].join(', ')
     y_buffer = (screen_pixel_height * 0.2)
     x_buffer = (screen_pixel_width  * 0.2)
     # @image.draw(@x - @image.width / 2, @y - @image.height / 2, ZOrder::Player)
