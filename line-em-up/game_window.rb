@@ -157,6 +157,18 @@ class GameWindow < Gosu::Window
     FileUtils.cp(@current_save_path, @backup_save_path)
   end
 
+  # deprecated sure.
+  def exit_game
+    self.close
+  end
+
+  def close
+    puts "closing the game"
+    @inner_map.exit_hooks
+    @outer_map.exit_hooks
+    super
+  end
+
   def init_current_save_file
     # if !File.file?(save_file_path)
     raw_ship_class = "PilotableShips::Pillbug"

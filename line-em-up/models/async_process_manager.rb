@@ -27,23 +27,47 @@ class AsyncProcessManager
     @use_nothing   = use_type == :none
     Thread.abort_on_exception = true
 
+    @pids = []
     if @use_processes
-      @processors_count = 1
-      @child_read, @child_write = IO.pipe
-      @parent_read, @parent_write = IO.pipe
+      @parent_write_current_pipe = 0
+      @parent_write_pipes = []
+      @processors_count = 30
+      # @processors_count_indexed_at_zero = @processors_count - 1
+      # @parent_read, @parent_write = IO.pipe
+      # Try to share out child_read pipe
+      @child_read, child_write = IO.pipe
       # puts "parents here:"
       # puts @parent_read.inspect
       # puts @parent_write.inspect
       # @child_read, @child_write = IO.pipe
 
-      @pids = []
       @processors_count.times do
+        parent_read, parent_write = IO.pipe
+        @parent_write_pipes << parent_write
         # pids << Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
-        @pids << Process.spawn({"PARENT_PID" => Process.pid.to_s, "TRIGGER_PROCESS" => 'true'}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :in => @parent_read, :out => @child_write, :err => [:child, :out])
+        @pids << Process.spawn({"PARENT_PID" => Process.pid.to_s, "TRIGGER_PROCESS" => 'true'}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :in => parent_read, :out => child_write, :err => [:child, :out])
       end
     end
 
   end
+
+  def exit_hooks
+    @pids.each do |pid|
+      Process.kill("SIGALRM", pid)
+    end
+  end
+
+  def parent_write_get_pipe
+    @parent_write_current_pipe += 1
+    if @parent_write_current_pipe == @processors_count
+      @parent_write_current_pipe = 0
+    end
+    # puts "Current pipe: #{@parent_write_current_pipe} - Total Pipe count: #{@parent_write_pipes.count} && @processors_count: #{@processors_count}"
+    # puts "2Current pipe: #{@parent_write_current_pipe.class} - Total Pipe count: #{@parent_write_pipes.count.class} && @processors_count: #{@processors_count.class}"
+    @parent_write_pipes[@parent_write_current_pipe]
+  end
+  
+
 
   def update window, items, *args
     items_count = items.count
@@ -125,9 +149,11 @@ class AsyncProcessManager
           # @child_read, @child_write = IO.pipe
           # @parent_read, @parent_write = IO.pipe
           # @parent_write.write( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
-          @parent_write.puts( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
           # @parent_write.puts( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
-          @parent_write.flush
+          # @parent_write.puts( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
+          write_pipe = parent_write_get_pipe
+          write_pipe.puts( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
+          write_pipe.flush
         end
         while final_data.count < items_count
           puts "WAITING FOR COUNT #{final_data.count} < #{items_count}" if @debug
@@ -150,10 +176,11 @@ class AsyncProcessManager
             retry
           end
         end
+
         Thread.exit
       end
-
       t.join
+
       if items_count > 0
         puts 'PROCESS ENDED' if @debug
         puts "items_count < final_data.count: #{items_count} < #{final_data.count}" if @debug

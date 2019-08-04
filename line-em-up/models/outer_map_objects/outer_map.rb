@@ -140,8 +140,11 @@ module OuterMapObjects
       end
     end
 
+    def exit_hooks
+    end
+  
     def exit_game
-      @window.close
+      @window.exit_game
     end
 
     def save_game

@@ -410,8 +410,23 @@ class InnerMap
 
   end
 
+  def exit_hooks
+    [
+      @projectile_collision_manager,
+      @destructable_projectile_collision_manager,
+      @destructable_projectile_update_manager,
+      @ship_collision_manager,
+      @ship_update_manager,
+      @projectile_update_manager,
+      @building_update_manager,
+      @shipwreck_update_manager
+    ].each do |manager|
+      manager.exit_hooks
+    end
+  end
+
   def exit_game
-    @window.close
+    @window.exit_game
   end
 
   def save_inner_map_data
