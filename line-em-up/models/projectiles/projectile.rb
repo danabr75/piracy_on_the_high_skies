@@ -211,12 +211,28 @@ module Projectiles
       return update(args[0], args[1], args[2], args[3])
     end
 
+    # no longer actively used, but keep updated with async_update
     def update mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y
       graphical_effects = []
       # puts "PROJ SPEED: #{@speed}"
       if self.is_alive
         # puts "DISTANCE TRAVLED HERE: #{[@start_current_map_pixel_x, @start_current_map_pixel_y]}   against  #{[]}"
         @distance_traveled_so_far = Gosu.distance(@start_current_map_pixel_x, @start_current_map_pixel_y, @current_map_pixel_x, @current_map_pixel_y)
+
+        if @air_to_ground
+          if @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
+            @health = 0
+          else
+            @was_collidable = true
+          end
+        elsif @ground_to_air
+          if @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
+            @health = 0
+          else
+            @was_collidable = true
+          end
+        end
+
         if @refresh_angle_on_updates && @end_image_angle && @time_alive > 10
           if @current_image_angle != @end_image_angle
             @current_image_angle = @current_image_angle + @image_angle_incrementor
@@ -319,12 +335,18 @@ module Projectiles
         klass: self.class.name,
         initial_delay: self.class::INITIAL_DELAY,
         speed_increase_factor: self.class::SPEED_INCREASE_FACTOR,
+        speed_increment: self.class::SPEED_INCREASE_INCREMENT,
         max_speed: self.class::MAX_SPEED,
         max_time_alive: self.class::MAX_TIME_ALIVE,
         post_destruction_effects: self.class::POST_DESTRUCTION_EFFECTS,
         start_current_map_pixel_x: @start_current_map_pixel_x,
-        start_current_map_pixel_y: @start_current_map_pixel_y
-
+        start_current_map_pixel_y: @start_current_map_pixel_y,
+        air_to_ground: @air_to_ground,
+        ground_to_air: @ground_to_air,
+        distance_traveled_so_far: @distance_traveled_so_far,
+        ground_distance_to_travel: @ground_distance_to_travel,
+        max_ground_distance_to_travel: @max_ground_distance_to_travel,
+        was_collidable: @was_collidable
       }
       # puts test.inspect
       return test
@@ -350,10 +372,15 @@ module Projectiles
       @x                   = data[:x]                   if data.key?(:x)
       @y                   = (@y - data[:change_y]).round(4)           if data.key?(:change_y)
       @y                   = data[:y]                   if data.key?(:y)
-      @time_alive          =  data[:time_alive]         if data.key?(:time_alive)
-      @play_init_sound     =  data[:play_init_sound]    if data.key?(:play_init_sound)
-      @is_on_screen        =  data[:is_on_screen]
-      @is_alive            = data[:is_alive]
+      @time_alive          = data[:time_alive]         if data.key?(:time_alive)
+      @play_init_sound     = data[:play_init_sound]    if data.key?(:play_init_sound)
+      @is_on_screen        = data[:is_on_screen]     if data.key?(:is_on_screen)
+      @is_alive            = data[:is_alive]         if data.key?(:is_alive)
+      @air_to_ground       = data[:air_to_ground]    if data.key?(:air_to_ground)
+      @ground_to_air       = data[:ground_to_air]    if data.key?(:ground_to_air)
+      @distance_traveled_so_far = data[:distance_traveled_so_far] if data.key?(:distance_traveled_so_far)
+      @was_collidable      = data[:was_collidable] if data.key?(:was_collidable)
+
       # puts "SET DATA ON PROJ, new x and y #{@x} - #{@y}"
     end
 
@@ -368,6 +395,7 @@ module Projectiles
       # change_y: ..
     # }
     def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
+      # There were issues that converted these to strings, but I think they're fixed now.. could remove these
       data[:current_map_pixel_x] = data[:current_map_pixel_x].to_i if data[:current_map_pixel_x].class == String
       data[:current_map_pixel_y] = data[:current_map_pixel_y].to_i if data[:current_map_pixel_y].class == String
       data[:x] = data[:x].to_i if data[:x].class == String
@@ -378,6 +406,24 @@ module Projectiles
       results[:graphical_effects] ||= []
       results[:sounds] ||= []
       # puts "PROJ SPEED: #{data[:speed]}"
+
+
+      results[:distance_traveled_so_far] = Gosu.distance(data[:current_map_pixel_x], data[:current_map_pixel_y], data[:start_current_map_pixel_x], data[:start_current_map_pixel_y])
+
+      if data[:air_to_ground]
+        if data[:was_collidable] && data[:distance_traveled_so_far] >= data[:max_ground_distance_to_travel]
+          results[:health] = 0
+        else
+          results[:was_collidable] = true
+        end
+      elsif data[:ground_to_air]
+        if data[:was_collidable] && data[:distance_traveled_so_far] >= data[:max_ground_distance_to_travel]
+          results[:health] = 0
+        else
+          results[:was_collidable] = true
+        end
+      end
+
       if data[:refresh_angle_on_updates] && data[:end_image_angle] && data[:time_alive] > 10
         if data[:current_image_angle] != data[:end_image_angle]
           data[:current_image_angle] = data[:current_image_angle] + data[:image_angle_incrementor]
@@ -397,9 +443,9 @@ module Projectiles
           if speed_factor && speed_factor > 0.0
             data[:speed] = data[:speed] + (data[:time_alive] * speed_factor)
           end
-          speed_increment = get_speed_increase_increment
-          if speed_increment && speed_increment > 0.0
-            data[:speed] = data[:speed] + speed_increment
+          # speed_increment = get_speed_increase_increment
+          if data[:speed_increment] && data[:speed_increment] > 0.0
+            data[:speed] = data[:speed] + data[:speed_increment]
           end
 
           data[:speed] = data[:max_speed] if data[:speed] > data[:max_speed]
@@ -418,7 +464,7 @@ module Projectiles
 
       results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
 
-      if data[:max_distance] && data[:max_distance] < Gosu.distance(data[:current_map_pixel_x], data[:current_map_pixel_y], data[:start_current_map_pixel_x], data[:start_current_map_pixel_y])
+      if data[:max_distance] && data[:max_distance] < results[:distance_traveled_so_far]
         # puts "should have gotten here."
         results[:health_change] = -data[:health]
       end
@@ -483,75 +529,39 @@ module Projectiles
       # puts "PROJ hit objects"
       graphical_effects = []
       if @air_to_ground
-        # puts "@distance_traveled_so_far: #{@distance_traveled_so_far} against distance to travel: #{@ground_distance_to_travel}"
         if @distance_traveled_so_far < @ground_distance_to_travel
-          # puts "Haven't git ground threshhold yet - @distance_traveled_so_far: #{@distance_traveled_so_far} < @ground_distance_to_travel: #{@ground_distance_to_travel}"
           return {graphical_effects: graphical_effects} 
         elsif @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
-          # puts "HIT MAX TRAVEL: #{@distance_traveled_so_far } >= #{@max_ground_distance_to_travel}"
-          @health = 0
-          # puts "TRAVeleld too far: @distance_traveled_so_far: #{@distance_traveled_so_far} >= @max_ground_distance_to_travel: #{@max_ground_distance_to_travel}"
           return {graphical_effects: graphical_effects}
-        else
-          # puts "HIT GROUND THREASHOLD"
-          @was_collidable = true
         end
         
-        # puts "HITTING ground obects - trying to: #{ground_object_groups.count} - and #{ground_object_groups[0].count}"
         object_groups = ground_object_groups
-      else
-        if @ground_to_air
-          # puts "@distance_traveled_so_far: #{@distance_traveled_so_far} against distance to travel: #{@ground_distance_to_travel}"
-          if @distance_traveled_so_far < @ground_distance_to_travel
-            # puts "Haven't git ground threshhold yet - @distance_traveled_so_far: #{@distance_traveled_so_far} < @ground_distance_to_travel: #{@ground_distance_to_travel}"
-            return {graphical_effects: graphical_effects} 
-          elsif @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
-            # puts "HIT MAX TRAVEL: #{@distance_traveled_so_far } >= #{@max_ground_distance_to_travel}"
-            @health = 0
-            # puts "TRAVeleld too far: @distance_traveled_so_far: #{@distance_traveled_so_far} >= @max_ground_distance_to_travel: #{@max_ground_distance_to_travel}"
-            return {graphical_effects: graphical_effects}
-          else
-            # puts "HIT GROUND THREASHOLD"
-            @was_collidable = true
-          end
+      elsif @ground_to_air
+        if @distance_traveled_so_far < @ground_distance_to_travel
+          return {graphical_effects: graphical_effects} 
+        elsif @was_collidable && @distance_traveled_so_far >= @max_ground_distance_to_travel
+          return {graphical_effects: graphical_effects}
         end
-
+        object_groups = air_object_groups
+      else
         object_groups = air_object_groups
       end
+
       hit_object    = false
       actual_hit_object = nil
       # is_thread = options[:is_thread] || false
       if @health > 0
         object_groups.each do |group|
-          # puts "PROJECTILE HIT OBJECTS #{@test_hit_max_distance}"
-          # puts "INTERNAL SERVER ERROR: projectile was dead by time it was found" if @health == 0
-          # puts "break if @health == 0" if @health == 0
           break if @health == 0
-          # puts "break if hit_object" if hit_object
           break if hit_object
           group.each do |object_id, object|
-            # Thread.exit if @health == 0 && is_thread
-            # puts "break if @health == 0" if @health == 0
             break if @health == 0
-            # puts "next if object.nil?" if object.nil?
             next if object.nil?
-            # Don't hit yourself
-            # puts "NEXT IF OBJCT ID == ID"
-            # puts "#{object.id} - #{@id}"
-            # puts 'enxting' if object.id == @id
-            # puts "next if object_id == @id" if object_id == @id
             next if object_id == @id
-            # Don't hit the ship that launched it
-            # puts "next if object_id == @owner.id" if object_id == @owner.id
             next if object_id == @owner.id
-            # if object has an owner?
-            # puts "next if object.owner && object.owner.id == @owner.id" if object.owner && object.owner.id == @owner.id
             next if object.owner && object.owner.id == @owner.id
-            # puts "next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter" if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
             next if !@hit_objects_class_filter.include?(object.class::CLASS_TYPE) if @hit_objects_class_filter
             break if hit_object
-            # puts "Got past to here"
-            # don't hit a dead object
             if object.health <= 0
               next
             end
@@ -573,10 +583,7 @@ module Projectiles
               hit_object = Gosu.distance(@current_map_pixel_x, @current_map_pixel_y, object.current_map_pixel_x, object.current_map_pixel_y) < self.get_radius + object.get_radius
             end
             if hit_object && self.class.get_aoe <= 0
-              # puts "HIT GRAPPLEHOOK HERE" if object.class.name == "GrapplingHook"
               trigger_object_collision(object) 
-              # puts "GRAPPLE HEALTH WAS: #{object.health}" if object.class.name == "GrapplingHook"
-              # drops = drops + result[:drops] if result[:drops].any?
             end
             actual_hit_object = object if hit_object
           end
@@ -596,35 +603,20 @@ module Projectiles
 
       # Drop projectile explosions
       if hit_object
-        # puts "HIT OBJECT"
-        # puts "#{self.class.name} HIT OBJECT"
-        # if self.respond_to?(:drops)
-        #   self.drops.each do |drop|
-        #     drops << drop
-        #   end
-        # end
 
         if self.class::POST_DESTRUCTION_EFFECTS
-          # puts "AADDING GRAPHICAL EEFFECTS 1"
           self.get_post_destruction_effects.each do |effect|
-            # puts "COUNT 1 herer"
             graphical_effects << effect
           end
         end
         if actual_hit_object.class::POST_COLLISION_EFFECTS
-          # puts "AADDING GRAPHICAL EEFFECTS 2"
           actual_hit_object.get_post_collided_effects(@current_map_pixel_x, @current_map_pixel_y).each do |effect|
-            # puts "COUNT 1 herer"
             graphical_effects << effect
           end
         end
       end
 
-      # @health = 0 if hit_object
       @health = self.take_damage(@health) if hit_object
-      # puts "COLLICION RETURNING DROPS: #{drops}" if drops.any?
-      # return {is_alive: @health > 0, graphical_effects: graphical_effects}
-      # raise "found graphical effects" if graphical_effects.count > 0
       return {graphical_effects: graphical_effects}
     end
 

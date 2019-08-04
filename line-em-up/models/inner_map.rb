@@ -61,19 +61,19 @@ class InnerMap
     @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true, :joined_threads)
     @destructable_projectile_update_manager    = AsyncProcessManager.new(DestructableProjectileUpdateThread, 8, true, :joined_threads)
     @ship_collision_manager                    = AsyncProcessManager.new(ShipCollisionThread, 6, true, :joined_threads)
-    if true #@graphics_setting == :basic
+    # if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true, :joined_threads)
       # @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :test_processes)
-      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 4, true, :processes)
+      @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :processes, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
       # Building update needs to be joined, or else ships are updated with missing images
       @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
       @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true, :joined_threads) # , :joined_threads
-    else
-      @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
-      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
-      @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 8, true)
-    end
+    # else
+    #   @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 8, true)
+    #   @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true)
+    #   @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 8, true)
+    # end
 
     @game_pause = false
     # @menu = nil
@@ -857,7 +857,7 @@ class InnerMap
     # @factions.each do |faction|
     #   @font.draw("#{faction.id.upcase}: #{faction.display_factional_relation(@player.get_faction_id)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # end
-    @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     if false &&@debug
       @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
       @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)

@@ -241,9 +241,10 @@ class GameWindow < Gosu::Window
     GlobalVariables.set_config(@width_scale, @height_scale, @width, @height,
       @fps_scaler, @graphics_setting, @factions, @resolution_scale, false
     )
-    
+    @inner_map.exit_hooks
     @inner_map = InnerMap.new(self, nil, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height)
     @inner_map.disable
+    @outer_map.exit_hooks
     @outer_map = OuterMapObjects::OuterMap.new(self, @width, @height, @height_scale, @current_save_path, @config_path)
     @outer_map.disable
     @in_game_menu = InGameMenu.new(self, @width, @height, @width_scale, @height_scale, @config_path, @current_save_path, @backup_save_path)

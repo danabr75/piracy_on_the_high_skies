@@ -1,3 +1,7 @@
+# KILL ASYNC SUB ZOMBIES
+# ps aux | grep ruby-2 | grep -v grep | awk '{print $2}'
+# kill -9 `ps aux | grep ruby-2 | grep -v grep | awk '{print $2}'`
+
 # require 'concurrent'
 require 'parallel'
 # require 'ruby-progressbar'
@@ -17,7 +21,11 @@ class AsyncProcessManager
   ERROR_PREFIX                        = 'ERROR_FOUND_ON_SUB_PROCESS_'
   SUB_PROCESS_ENCOUNTER_ERROR_PATTERN = /#{ERROR_PREFIX}([^\n]*)/
 
-  def initialize thread_type_klass, threads_or_processor_count, list_is_hash = false, use_type = :threads #, :processes, :none
+  def initialize thread_type_klass, threads_or_processor_count, list_is_hash = false, use_type = :threads, async_method = nil, gather_data_method = nil, setter_data_method = nil, thread_type_full_path = nil #, :processes, :none
+    @thread_type_full_path = thread_type_full_path
+    @async_method = async_method
+    @gather_data_method = gather_data_method
+    @setter_data_method = setter_data_method
     @thread_type_klass = thread_type_klass
     @thread_type_klass_name = thread_type_klass.name
     @debug = false
@@ -35,7 +43,7 @@ class AsyncProcessManager
     if @use_processes
       @parent_write_current_pipe = 0
       @parent_write_pipes = []
-      @processors_count = 30
+      # @processors_count = 30
       # @processors_count_indexed_at_zero = @processors_count - 1
       # @parent_read, @parent_write = IO.pipe
       # Try to share out child_read pipe
@@ -45,14 +53,25 @@ class AsyncProcessManager
       # puts @parent_write.inspect
       # @child_read, @child_write = IO.pipe
 
-      @processors_count.times do
+      raise "INVALID INPUT" if @thread_type_klass.nil? || @thread_type_full_path.nil? || @gather_data_method.nil?
+
+      @threads_or_processor_count.times do
         parent_read, parent_write = IO.pipe
         @parent_write_pipes << parent_write
         # pids << Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])S
         # How to find the PIDs of zombies.
         # ps aux | grep ruby-2 | grep -v grep | awk '{print $2}'
         # kill -9 ...
-        @pids << Process.spawn({"ERROR_PREFIX" => ERROR_PREFIX, "PARENT_PID" => Process.pid.to_s, "TRIGGER_SUB_PROCESS_BY_PARENT_#{Process.pid}" => 'true'}, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :in => parent_read, :out => child_write, :err => [:child, :out])
+        @pids << Process.spawn(
+          {
+            "ERROR_PREFIX" => ERROR_PREFIX,
+            "PARENT_PID" => Process.pid.to_s,
+            "TRIGGER_SUB_PROCESS_BY_PARENT_#{Process.pid}" => 'true',
+            "THREAD_TYPE_KLASS_NAME" => @thread_type_klass.name,
+            "THREAD_TYPE_FULL_PATH" => @thread_type_full_path,
+            "ASYNC_METHOD" => @async_method.to_s
+          },
+          RbConfig.ruby, "#{LIB_DIRECTORY}/async_sub_process.rb", :in => parent_read, :out => child_write, :err => [:child, :out])
       end
     end
 
@@ -67,7 +86,7 @@ class AsyncProcessManager
 
   def parent_write_get_pipe
     @parent_write_current_pipe += 1
-    if @parent_write_current_pipe == @processors_count
+    if @parent_write_current_pipe == @threads_or_processor_count
       @parent_write_current_pipe = 0
     end
     # puts "Current pipe: #{@parent_write_current_pipe} - Total Pipe count: #{@parent_write_pipes.count} && @processors_count: #{@processors_count}"
@@ -169,14 +188,15 @@ class AsyncProcessManager
         # parameter_threads = []
         t = Thread.new do
           items.each do |key, item|
-            # Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])
-            # @child_read, @child_write = IO.pipe
-            # @parent_read, @parent_write = IO.pipe
-            # @parent_write.write( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
-            # @parent_write.puts( ({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}).to_json )
-            # @parent_write.puts( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
             write_pipe = parent_write_get_pipe
-            write_pipe.puts( Oj.dump({'data' => item.get_data, 'mouse_x' => args[0], 'mouse_y' => args[1], 'player_map_pixel_x' => args[2], 'player_map_pixel_y' => args[3]}) )
+            write_pipe.puts(
+              Oj.dump(
+                {
+                  'data' => item.send(@gather_data_method),
+                  'args' => args
+                }
+              )
+            )
             write_pipe.flush
           end
           while final_data.count < items_count
@@ -190,7 +210,7 @@ class AsyncProcessManager
                   puts "READING LINE" if @debug
                   puts line.inspect if @debug
                   # REMOVE THIS SECTION IF string matching takes too long to process.
-                  # if true #@debug
+                  # if @debug
                     if line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)
                       error_data = line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)[1]
                       puts "FOUND ERROR DATA"
