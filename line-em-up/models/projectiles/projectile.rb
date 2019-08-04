@@ -336,24 +336,24 @@ module Projectiles
 # DATA HERE:
 # {"id"=>"a6d82162-894d-413d-919d-f6c0f2bc03a1", "graphical_effects"=>[], "sounds"=>[], "change_map_pixel_x"=>-1.2543415592118417, "change_map_pixel_y"=>-11.934262744420266, "health_change"=>-1, "time_alive"=>100, "change_map_tile_x"=>-0.39996632579804725, "change_map_tile_y"=>18047.9794329952, "is_alive"=>true, "change_x"=>-4.604579138824885e+32, "change_y"=>-3.1788695486682216e+32}
 
-      @health              += data['health_change']      if data.key?('health_change')
+      @health              += data[:health_change]      if data.key?(:health_change)
       # puts "NEW HEALTH: #{@health}"
 
-      @current_map_pixel_x = (@current_map_pixel_x + data['change_map_pixel_x']).round(4) if data.key?('change_map_pixel_x')
-      @current_map_pixel_y = (@current_map_pixel_y + data['change_map_pixel_y']).round(4) if data.key?('change_map_pixel_y')
+      @current_map_pixel_x = (@current_map_pixel_x + data[:change_map_pixel_x]).round(4) if data.key?(:change_map_pixel_x)
+      @current_map_pixel_y = (@current_map_pixel_y + data[:change_map_pixel_y]).round(4) if data.key?(:change_map_pixel_y)
 
-      @current_map_tile_x += data['change_map_tile_x']   if data.key?('change_map_tile_x')
-      @current_map_tile_y += data['change_map_tile_y']   if data.key?('change_map_tile_y')
-      @current_image_angle += data['change_image_angle'] if data.key?('change_image_angle')
-      @speed               += data['change_speed']       if data.key?('change_speed')
-      @x                   = (@x - data['change_x']).round(4)           if data.key?('change_x')
-      @x                   = data['x']                   if data.key?('x')
-      @y                   = (@y - data['change_y']).round(4)           if data.key?('change_y')
-      @y                   = data['y']                   if data.key?('y')
-      @time_alive          =  data['time_alive']         if data.key?('time_alive')
-      @play_init_sound     =  data['play_init_sound']    if data.key?('play_init_sound')
-      @is_on_screen        =  data['is_on_screen']
-      @is_alive            = data['is_alive']
+      @current_map_tile_x += data[:change_map_tile_x]   if data.key?(:change_map_tile_x)
+      @current_map_tile_y += data[:change_map_tile_y]   if data.key?(:change_map_tile_y)
+      @current_image_angle += data[:change_image_angle] if data.key?(:change_image_angle)
+      @speed               += data[:change_speed]       if data.key?(:change_speed)
+      @x                   = (@x - data[:change_x]).round(4)           if data.key?(:change_x)
+      @x                   = data[:x]                   if data.key?(:x)
+      @y                   = (@y - data[:change_y]).round(4)           if data.key?(:change_y)
+      @y                   = data[:y]                   if data.key?(:y)
+      @time_alive          =  data[:time_alive]         if data.key?(:time_alive)
+      @play_init_sound     =  data[:play_init_sound]    if data.key?(:play_init_sound)
+      @is_on_screen        =  data[:is_on_screen]
+      @is_alive            = data[:is_alive]
       # puts "SET DATA ON PROJ, new x and y #{@x} - #{@y}"
     end
 
@@ -368,70 +368,70 @@ module Projectiles
       # change_y: ..
     # }
     def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
-      data['current_map_pixel_x'] = data['current_map_pixel_x'].to_i if data['current_map_pixel_x'].class == String
-      data['current_map_pixel_y'] = data['current_map_pixel_y'].to_i if data['current_map_pixel_y'].class == String
-      data['x'] = data['x'].to_i if data['x'].class == String
-      data['y'] = data['y'].to_i if data['y'].class == String
+      data[:current_map_pixel_x] = data[:current_map_pixel_x].to_i if data[:current_map_pixel_x].class == String
+      data[:current_map_pixel_y] = data[:current_map_pixel_y].to_i if data[:current_map_pixel_y].class == String
+      data[:x] = data[:x].to_i if data[:x].class == String
+      data[:y] = data[:y].to_i if data[:y].class == String
 
       # raise "ISSIUE HERE: #{data.inspect}"
-      results['id'] = data['id']
-      results['graphical_effects'] ||= []
-      results['sounds'] ||= []
-      # puts "PROJ SPEED: #{data['speed']}"
-      if data['refresh_angle_on_updates'] && data['end_image_angle'] && data['time_alive'] > 10
-        if data['current_image_angle'] != data['end_image_angle']
-          data['current_image_angle'] = data['current_image_angle'] + data['image_angle_incrementor']
+      results[:id] = data[:id]
+      results[:graphical_effects] ||= []
+      results[:sounds] ||= []
+      # puts "PROJ SPEED: #{data[:speed]}"
+      if data[:refresh_angle_on_updates] && data[:end_image_angle] && data[:time_alive] > 10
+        if data[:current_image_angle] != data[:end_image_angle]
+          data[:current_image_angle] = data[:current_image_angle] + data[:image_angle_incrementor]
           # if it's negative
-          if data['image_angle_incrementor'] < 0
-            data['current_image_angle'] = data['end_image_angle'] if data['current_image_angle'] < data['end_image_angle'] 
+          if data[:image_angle_incrementor] < 0
+            data[:current_image_angle] = data[:end_image_angle] if data[:current_image_angle] < data[:end_image_angle] 
           # it's positive
-          elsif data['image_angle_incrementor'] > 0
-            data['current_image_angle'] = data['end_image_angle'] if data['current_image_angle'] > data['end_image_angle'] 
+          elsif data[:image_angle_incrementor] > 0
+            data[:current_image_angle] = data[:end_image_angle] if data[:current_image_angle] > data[:end_image_angle] 
           end
         end
       end
 
-      if data['initial_delay'] && (data['time_alive'] > (data['custom_initial_delay'] || data['initial_delay']))
-        speed_factor = data['speed_increase_factor']
-        if data['speed'] < data['max_speed']
+      if data[:initial_delay] && (data[:time_alive] > (data[:custom_initial_delay] || data[:initial_delay]))
+        speed_factor = data[:speed_increase_factor]
+        if data[:speed] < data[:max_speed]
           if speed_factor && speed_factor > 0.0
-            data['speed'] = data['speed'] + (data['time_alive'] * speed_factor)
+            data[:speed] = data[:speed] + (data[:time_alive] * speed_factor)
           end
           speed_increment = get_speed_increase_increment
           if speed_increment && speed_increment > 0.0
-            data['speed'] = data['speed'] + speed_increment
+            data[:speed] = data[:speed] + speed_increment
           end
 
-          data['speed'] = data['max_speed'] if data['speed'] > data['max_speed']
+          data[:speed] = data[:max_speed] if data[:speed] > data[:max_speed]
         end
 
-        factor_in_scale_speed = data['speed'] * data['height_scale']
-        results['change_map_pixel_x'], results['change_map_pixel_y'] = async_movement(data['current_map_pixel_x'], data['current_map_pixel_y'], factor_in_scale_speed, data['angle'], data['height_scale']) if factor_in_scale_speed != 0
+        factor_in_scale_speed = data[:speed] * data[:height_scale]
+        results[:change_map_pixel_x], results[:change_map_pixel_y] = async_movement(data[:current_map_pixel_x], data[:current_map_pixel_y], factor_in_scale_speed, data[:angle], data[:height_scale]) if factor_in_scale_speed != 0
       else
-        data['speed'] = data['max_speed'] if data['speed'].nil?
-        factor_in_scale_speed = data['speed'] * data['height_scale']
-        results['change_map_pixel_x'], results['change_map_pixel_y'] = async_movement(data['current_map_pixel_x'], data['current_map_pixel_y'], factor_in_scale_speed, data['angle'], data['height_scale']) if factor_in_scale_speed != 0
+        data[:speed] = data[:max_speed] if data[:speed].nil?
+        factor_in_scale_speed = data[:speed] * data[:height_scale]
+        results[:change_map_pixel_x], results[:change_map_pixel_y] = async_movement(data[:current_map_pixel_x], data[:current_map_pixel_y], factor_in_scale_speed, data[:angle], data[:height_scale]) if factor_in_scale_speed != 0
       end
 
-      results['health_change'] = -data['health'] if data['max_time_alive'] && data['time_alive'] >= data['max_time_alive']
+      results[:health_change] = -data[:health] if data[:max_time_alive] && data[:time_alive] >= data[:max_time_alive]
 
 
       results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
 
-      if data['max_distance'] && data['max_distance'] < Gosu.distance(data['current_map_pixel_x'], data['current_map_pixel_y'], data['start_current_map_pixel_x'], data['start_current_map_pixel_y'])
+      if data[:max_distance] && data[:max_distance] < Gosu.distance(data[:current_map_pixel_x], data[:current_map_pixel_y], data[:start_current_map_pixel_x], data[:start_current_map_pixel_y])
         # puts "should have gotten here."
-        results['health_change'] = -data['health']
+        results[:health_change] = -data[:health]
       end
 
-      if data['play_init_sound'] && data['init_sound_path'] && data['is_on_screen']
-        results['sounds'] << data['init_sound_path']
-        results['play_init_sound'] = false
+      if data[:play_init_sound] && data[:init_sound_path] && data[:is_on_screen]
+        results[:sounds] << data[:init_sound_path]
+        results[:play_init_sound] = false
       end
 
-      if !async_is_alive(data['health'], results['health_change'])
-        if data['post_destruction_effects']
+      if !async_is_alive(data[:health], results[:health_change])
+        if data[:post_destruction_effects]
           get_post_destruction_effects.each do |effect|
-            results['graphical_effects'] << effect
+            results[:graphical_effects] << effect
           end
         end
       end

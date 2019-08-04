@@ -80,17 +80,17 @@ class ScreenMapFixedObject < GeneralObject
   def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
     # player_map_pixel_x, player_map_pixel_y, current_map_pixel_x, current_map_pixel_y, screen_pixel_width, screen_pixel_height
     x, y = async_convert_map_pixel_location_to_screen(
-      player_map_pixel_x, player_map_pixel_y, data['current_map_pixel_x'], data['current_map_pixel_y'], data['screen_pixel_width'], data['screen_pixel_height']
+      player_map_pixel_x, player_map_pixel_y, data[:current_map_pixel_x], data[:current_map_pixel_y], data[:screen_pixel_width], data[:screen_pixel_height]
     )
 
-    if data['x']
-      # puts "CHANGE X HERE: #{data['x']} - #{x}"
-      results['change_x'] = (data['x'] - x).round(4)
-      # puts "CHANGE Y HERE: #{data['y']} - #{y}"
-      results['change_y'] = (data['y'] - y).round(4)
+    if data[:x]
+      # puts "CHANGE X HERE: #{data[:x]} - #{x}"
+      results[:change_x] = (data[:x] - x).round(4)
+      # puts "CHANGE Y HERE: #{data[:y]} - #{y}"
+      results[:change_y] = (data[:y] - y).round(4)
     else
-      results['x'] = x.round(4)
-      results['y'] = y.round(4)
+      results[:x] = x.round(4)
+      results[:y] = y.round(4)
     end
 
     results.merge(super(data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results))
