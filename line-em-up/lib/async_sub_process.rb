@@ -34,7 +34,7 @@ class AsyncProjectileUpdateScript
       file.write("#{Time.now.to_s}\n") if debug
       file.flush if debug
       begin
-        pid = ENV['PARENT_PID'].to_i
+        # pid = ENV['PARENT_PID'].to_i
         # while Process.getpgid(pid)
         #   file.write("PARENT IS ALIVE - #{pid} \n") if debug
         #   file.flush if debug
@@ -47,36 +47,36 @@ class AsyncProjectileUpdateScript
               # if counter > 10
                 # raise "TEST ERROR HERE"
               # end
-              file.write("GOT LINES: #{lines}\n") if debug
-              file.flush if debug
+              # file.write("GOT LINES: #{lines}\n") if debug
+              # file.flush if debug
               # next if line != ''
               # file.write("READLING LINE: #{line}\n")
               # file.flush
               # parsed_data = Oj.load(line)
               lines.split("\n").each do |line|
-                file.write("GOT LINE: #{line}\n") if debug
-                file.flush if debug
-                file.write("GOT CLASS: #{line.class}\n") if debug
-                file.flush if debug
+                # file.write("GOT LINE: #{line}\n") if debug
+                # file.flush if debug
+                # file.write("GOT CLASS: #{line.class}\n") if debug
+                # file.flush if debug
                 parsed_data = Oj.load(line)
                 # parsed_data = Util.stringify_all_keys(parsed_data)
                 # parsed_data = JSON.parse(line)
-                file.write("GOT parsed_data: #{parsed_data}\n") if debug
-                file.flush if debug
+                # file.write("GOT parsed_data: #{parsed_data}\n") if debug
+                # file.flush if debug
                 results = thread_type_klass.send(async_method, parsed_data['data'], *parsed_data['args'])
-                if results['current_map_pixel_x'].class == String
-                  file.write("BAD RESULTS:\n")
-                  file.flush
-                  raise "BAD RESULTS"
-                end
-                file.write("RETURNING:\n") if debug
-                file.flush if debug
-                file.write(Oj.dump(results).to_s)  if debug
-                # file.write( (results).to_json.to_s ) 
-                file.flush if debug
-                # stdout.write(Oj.dump(results))
-                file.write( "sending bakc data" )  if debug
-                file.flush if debug
+                # if results['current_map_pixel_x'].class == String
+                #   file.write("BAD RESULTS:\n")
+                #   file.flush
+                #   raise "BAD RESULTS"
+                # end
+                # file.write("RETURNING:\n") if debug
+                # file.flush if debug
+                # file.write(Oj.dump(results).to_s)  if debug
+                # # file.write( (results).to_json.to_s ) 
+                # file.flush if debug
+                # # stdout.write(Oj.dump(results))
+                # file.write( "sending bakc data" )  if debug
+                # file.flush if debug
                 stdout.puts( Oj.dump(results) )
                 # stdout.puts( (results).to_json )
                 stdout.flush
@@ -105,7 +105,7 @@ class AsyncProjectileUpdateScript
     rescue Exception => e
       # parent_error_prefix
       stdout.flush
-      stdout.puts("#{parent_error_prefix}#{e.class.name}:#{e.message.gsub("\n", '')}:end-of-error")
+      stdout.puts("#{parent_error_prefix}#{e.class.name}:#{e.message.gsub("\n", '')}:end-of-error:pid-#{Process.pid}")
       stdout.flush
 
       file.flush

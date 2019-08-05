@@ -32,36 +32,28 @@ class AsyncProcessManager
     # @processor_count = 2
     @threads_or_processor_count = threads_or_processor_count
     @list_is_hash = list_is_hash
+    @use_nothing_test = use_type == :none_test
     @use_processes = use_type == :processes
+    @process_manager = use_type == :process_manager
     @test_use_processes = use_type == :test_processes
     @use_threads   = use_type == :threads
     @use_joined_threads   = use_type == :joined_threads
     @use_nothing   = use_type == :none
     Thread.abort_on_exception = true
 
+    @exiting = false
+
     @pids = []
     if @use_processes
       @parent_write_current_pipe = 0
       @parent_write_pipes = []
-      # @processors_count = 30
-      # @processors_count_indexed_at_zero = @processors_count - 1
-      # @parent_read, @parent_write = IO.pipe
-      # Try to share out child_read pipe
       @child_read, child_write = IO.pipe
-      # puts "parents here:"
-      # puts @parent_read.inspect
-      # puts @parent_write.inspect
-      # @child_read, @child_write = IO.pipe
 
       raise "INVALID INPUT" if @thread_type_klass.nil? || @thread_type_full_path.nil? || @gather_data_method.nil?
 
       @threads_or_processor_count.times do
         parent_read, parent_write = IO.pipe
         @parent_write_pipes << parent_write
-        # pids << Process.spawn({"MARSHALLED_DATA" => item.get_data.to_json, "ARGS" => args.to_json }, RbConfig.ruby, "#{SCRIPT_DIRECTORY}/async_projectile_update_script.rb", :out => w, :err => [:child, :out])S
-        # How to find the PIDs of zombies.
-        # ps aux | grep ruby-2 | grep -v grep | awk '{print $2}'
-        # kill -9 ...
         @pids << Process.spawn(
           {
             "ERROR_PREFIX" => ERROR_PREFIX,
@@ -78,8 +70,10 @@ class AsyncProcessManager
   end
 
   def exit_hooks
+    @exiting = true
     # Should probably send exit code and let the subprocess shut down itself, but this works too.
     @pids.each do |pid|
+      puts "killing pids: #{pid}"
       Process.kill("SIGALRM", pid)
     end
   end
@@ -97,7 +91,28 @@ class AsyncProcessManager
 
 
   def update window, items, *args
+    outer_pid = nil
+    begin
+      @pids.each do |pid|
+        outer_pid = pid
+        Process.getpgid(pid)
+      end
+    rescue Errno::ESRCH => e
+      raise "Error - sub process is dead: #{outer_pid}"
+    end
+
+
     items_count = items.count
+    pid = nil
+
+    # specifically projectiles
+    if @use_nothing_test
+      items.each do |key, item|
+        item.update(*args)
+        window.remove_projectile_ids.push(item.id) if !item.is_alive
+      end
+    end
+
     if @use_nothing
       if @list_is_hash
         items.each do |key, item|
@@ -111,30 +126,36 @@ class AsyncProcessManager
     end
 
     if @use_joined_threads
-      # Thread.new do
+      pid = Thread.new do
         if @list_is_hash
-          Parallel.each(items, in_threads: @threads_or_processor_count) do |key, item|
+          items.each do |key, item|
+          # Parallel.each(items, in_threads: @threads_or_processor_count) do |key, item|
             @thread_type_klass.update(window, item, args)
           end
         else
-          Parallel.each(items, in_threads: @threads_or_processor_count) do |item|
+          items.each do |item|
+          # Parallel.each(items, in_threads: @threads_or_processor_count) do |item|
             @thread_type_klass.update(window, item, args)
           end
         end
-      # end
+        Thread.exit
+      end
     end
 
     if @use_threads
       Thread.new do
         if @list_is_hash
-          Parallel.each(items, in_threads: @threads_or_processor_count) do |key, item|
+          items.each do |key, item|
+          # Parallel.each(items, in_threads: @threads_or_processor_count) do |key, item|
             @thread_type_klass.update(window, item, args)
           end
         else
-          Parallel.each(items, in_threads: @threads_or_processor_count) do |item|
+          items.each do |item|
+          # Parallel.each(items, in_threads: @threads_or_processor_count) do |item|
             @thread_type_klass.update(window, item, args)
           end
         end
+        Thread.exit
       end
     end
 
@@ -167,94 +188,94 @@ class AsyncProcessManager
 
     # Marshal.load
     # Just don't work.. SLOW FPS, projectiles aren't being updated.
-    if @use_processes
-      begin
-        final_data = []
+    # Only have hashes implemented currently.
+    if @use_processes #54
+      pid = Thread.new do
+        begin
+          final_data = []
+          raw_final_data = []
+          final_data_count = 0
 
-
-        # if @debug
-          outer_pid = nil
-          begin
-            @pids.each do |pid|
-              outer_pid = pid
-              Process.getpgid(pid)
-            end
-          rescue Errno::ESRCH => e
-            raise "Error - sub process is dead: #{outer_pid}"
-          end
-        # end
-
-
-        # parameter_threads = []
-        t = Thread.new do
-          items.each do |key, item|
-            write_pipe = parent_write_get_pipe
-            write_pipe.puts(
-              Oj.dump(
-                {
-                  'data' => item.send(@gather_data_method),
-                  'args' => args
-                }
+          t1 = Thread.new do
+            items.each do |key, item|
+            # Parallel.each(items, in_threads: 8) do |key, item|
+              write_pipe = parent_write_get_pipe
+              write_pipe.puts(
+                Oj.dump(
+                  {
+                    'data' => item.send(@gather_data_method),
+                    'args' => args
+                  }
+                )
               )
-            )
-            write_pipe.flush
+              write_pipe.flush
+            end
+            Thread.exit
           end
-          while final_data.count < items_count
-            puts "WAITING FOR COUNT #{final_data.count} < #{items_count}" if @debug
+          t1.join
+
+          # Thread.pass
+
+          t2 = Thread.new do
             begin
-              puts "BEGINNING AGAIN" if @debug
-              while final_data.count < items_count && lines = @child_read.read_nonblock(MAX_BYTE_LENGTH)
-                puts lines.inspect if @debug
-                puts "REALING LINES IF ANY - #{lines}" if @debug
-                lines.split("\n").each do |line|
-                  puts "READING LINE" if @debug
-                  puts line.inspect if @debug
-                  # REMOVE THIS SECTION IF string matching takes too long to process.
-                  # if @debug
+              while final_data_count < items_count && lines = @child_read.read_nonblock(MAX_BYTE_LENGTH)
+                # puts "final_data_count against item count: #{final_data_count} < #{items_count}"
+                # puts "lines: #{lines}"
+                  lines.split("\n").each do |line|
+                    # REMOVE THIS SECTION IF string matching takes too long to process.
                     if line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)
-                      error_data = line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)[1]
-                      puts "FOUND ERROR DATA"
-                      puts error_data.inspect
-                      exit_hooks
-                      raise "Encountered error on #{@thread_type_klass_name} with #{error_data}"
+                      if !@exiting # don't care about errors if shutting down.
+                        error_data = line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)[1]
+                        puts "RIGHT HERE ERROR: #{error_data}"
+                        exit_hooks
+                        raise "Encountered error on #{@thread_type_klass_name} with #{error_data}"
+                      end
                     end
-                  # end
-                  data = Oj.load(line)
-                  # data = JSON.parse(line)
-                  final_data << data
-                end
+                    final_data_count += 1
+                    raw_final_data << line
+                    # final_data << Oj.load(line)
+                  end
               end
+              # Thread.exit
             rescue IO::WaitReadable
-              puts "SERVER IO WAITING" if @debug
               IO.select([@child_read])
+              # Thread.pass
               retry
             end
+            Thread.exit
           end
+          t2.join
 
-          Thread.exit
-        end
-        t.join
+          t3 = Thread.new do
+            raw_final_data.each do |raw_f_data|
+              # Parallel.each(raw_final_data, in_threads: 8) do |raw_f_data|
+              f_data = Oj.load(raw_f_data)
+              items[f_data[:id]].set_data(f_data)
+              window.remove_projectile_ids.push(f_data[:id]) if !items[f_data[:id]].is_alive
+            end
+            Thread.exit
+          end
+          t3.join
 
-        if items_count > 0
-          puts 'PROCESS ENDED' if @debug
-          puts "items_count < final_data.count: #{items_count} < #{final_data.count}" if @debug
-          puts final_data.join(', ') if @debug
-        end
+          # final_data.each do |f_data|
+          #   # Parallel.each(raw_final_data, in_threads: 8) do |raw_f_data|
+          #   items[f_data[:id]].set_data(f_data)
+          #   window.remove_projectile_ids.push(f_data[:id]) if !items[f_data[:id]].is_alive
+          # end
 
-        t = Thread.new do
-          final_data.each do |f_data|
-            items[f_data[:id]].set_data(f_data)
-            window.remove_projectile_ids.push(f_data[:id]) if !items[f_data[:id]].is_alive
+        rescue Exception => e
+          # kill sub processes if anything goes wrong
+          if !@exiting
+            exit_hooks
+            raise
           end
         end
-
-        t.join
-      rescue Exception => e
-        # kill sub processes if anything goes wrong
-        exit_hooks
-        raise
+        Thread.exit
       end
     end
-
+    # if @use_processes
+    #   puts "USE PROCESSES PID: #{pid}"
+    # end
+    return pid
   end
 end

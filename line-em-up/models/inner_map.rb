@@ -30,6 +30,7 @@ class InnerMap
 
 
   def initialize window, map_name, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height, options = {}
+    Thread.abort_on_exception = true
     # LUIT.config({window: window}) # not really necessary logically speaking ,but this appears to have fixed a bug where the background tiles were the wrong image, after using the outer map ship loadout screen.
     @window, @fps_scaler, @resolution_scale, @width_scale, @height_scale, @average_scale, @width, @height = [window, fps_scaler, resolution_scale, width_scale, height_scale, average_scale, width, height]
     # @local_window = self
@@ -64,8 +65,11 @@ class InnerMap
     # if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true, :joined_threads)
-      # @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 16, true, :test_processes)
-      @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :processes, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :joined_threads)
+      # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :processes, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
+      # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :process_manager, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
+      
+      # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :none_test, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
       # Building update needs to be joined, or else ships are updated with missing images
       @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
       @shipwreck_update_manager   = AsyncProcessManager.new(ShipWreckUpdateThread, 2, true, :joined_threads) # , :joined_threads
@@ -345,7 +349,7 @@ class InnerMap
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.init_quests_on_map_load(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self, {debug: @debug})
 
     @player_perma_death = false
-    @player = Player.new(nil, nil, 0, 120)
+    @player = Player.new(nil, nil, 3, 123)
     @player_death_logic_activated = false
     # if rand(2) == 0
     #   if rand(2) == 0
@@ -553,25 +557,11 @@ class InnerMap
       activate_player_death_logic
     end
 
-
-    if @fps_counter < 60
-      @fps_log << Gosu.fps if Gosu.fps < 55
-      @fps_counter += 1
-    else
-      if @fps_log.count > 0
-        puts "FPS Logger: " + @fps_log.join(', ')
-        @fps_log = []
-      end
-      @fps_counter = 0
-    end
     @mouse_x = mouse_x
     @mouse_y = mouse_y
     
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
 
-    Thread.new do
-      @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships) if @show_minimap
-    end
 
     @add_graphical_effects.reject! do |graphical_effect|
       @graphical_effects << graphical_effect
@@ -628,6 +618,15 @@ class InnerMap
       true
     end
 
+    # must be after the remove and add arrays.
+    pids = []
+
+    if @show_minimap
+      Thread.new do
+        @mini_map.update(@player.current_map_tile_x, @player.current_map_tile_y, @buildings, @ships)
+      end
+    end
+
     if @ship_loadout_menu.refresh_player_ship
       @player.refresh_ship
       @ship_loadout_menu.refresh_player_ship = false
@@ -638,6 +637,26 @@ class InnerMap
     @ship_loadout_menu.update(mouse_x, mouse_y) if @ship_loadout_menu.active
 
     if !@game_pause && !menus_active && !@menu_open && !@menu.active
+      # PIDS up front and center
+      pids << @projectile_update_manager.update(self, @projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      if @collision_counter < 2
+        @collision_counter += 1
+      else
+        pids << @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ], [@buildings])
+        @collision_counter = 0
+      end
+      if @destructable_collision_counter < 2
+        @destructable_collision_counter += 1
+      else
+        pids << @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ], [@buildings])
+        @destructable_collision_counter = 0
+      end
+      pids << @destructable_projectile_update_manager.update(self, @destructable_projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+
+      pids << @ship_update_manager.update(self, @ships, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings, {on_ground: @pointer.on_ground})
+      pids << @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
+
+
       @effects.reject! do |effect_group|
         @gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y = effect_group.update(@gl_background, @ships, @buildings, @player, @viewable_center_target, @viewable_pixel_offset_x, @viewable_pixel_offset_y)
         !effect_group.is_active
@@ -646,26 +665,6 @@ class InnerMap
       @graphical_effects.reject! do |effect|
         !effect.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
       end
-
-      if @collision_counter < 2
-        @collision_counter += 1
-      else
-        @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ], [@buildings])
-        @collision_counter = 0
-      end
-
-      if @destructable_collision_counter < 2
-        @destructable_collision_counter += 1
-      else
-        @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ], [@buildings])
-        @destructable_collision_counter = 0
-      end
-
-      @destructable_projectile_update_manager.update(self, @destructable_projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
-      @projectile_update_manager.update(self, @projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
-
-      @ship_update_manager.update(self, @ships, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings, {on_ground: @pointer.on_ground})
-      @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
     end
 
     @pointer.update(mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player, @viewable_pixel_offset_x, @viewable_pixel_offset_y) if @pointer
@@ -715,7 +714,7 @@ class InnerMap
         end
       end
       if !@game_pause && !menus_active
-        @building_update_manager.update(self, @buildings, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
+        pids << @building_update_manager.update(self, @buildings, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @player.x, @player.y, @player, @ships, @buildings, {on_ground: @pointer.on_ground})
       end
       # if Gosu.button_down?(Gosu::KB_O) && key_id_lock(Gosu::KB_O)
       #   GameWindow.resize(self, 1920, 1080, false)
@@ -817,9 +816,22 @@ class InnerMap
 
       end
       if !@game_pause && !menus_active && !@menu_open && !@menu.active
-        @shipwreck_update_manager.update(self, @shipwrecks, nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
+        pids << @shipwreck_update_manager.update(self, @shipwrecks, nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
       end
     end
+
+    if @fps_counter < 60
+      @fps_log << Gosu.fps if Gosu.fps < 55
+      @fps_counter += 1
+    else
+      if @fps_log.count > 0
+        puts "FPS Logger: " + @fps_log.join(', ')
+        @fps_log = []
+      end
+      @fps_counter = 0
+    end
+
+    pids.each {|t| t.join if t }
     return @exit_map
   end
 
