@@ -11,7 +11,7 @@ require 'oj'
 # require_relative 'util.rb'
 
 # Rename, this is the generic subprocess class... or module.. make it a module.
-class AsyncProjectileUpdateScript
+class AsyncSubProcess
   # def self.async_update data, mouse_x, mouse_y, player_map_pixel_x, player_map_pixel_y, results = {}
   CURRENT_DIRECTORY = File.expand_path('../', __FILE__)
   MAX_BYTE_LENGTH   = 65535
@@ -134,7 +134,7 @@ if ENV["TRIGGER_SUB_PROCESS_BY_PARENT_#{ENV['PARENT_PID']}"] == 'true'
   file = File.open("#{CURRENT_DIRECTORY}/../../proj_update_logger2.txt", "w")
   file.write("\n GOT IT \n")
   file.flush
-  AsyncProjectileUpdateScript.async_update(STDIN, STDOUT, ENV['ERROR_PREFIX'], ENV['THREAD_TYPE_KLASS_NAME'], ENV['THREAD_TYPE_FULL_PATH'], ENV['ASYNC_METHOD'])# if ENV['TRIGGER_PROCESS'] == 'true'
+  AsyncSubProcess.async_update(STDIN, STDOUT, ENV['ERROR_PREFIX'], ENV['THREAD_TYPE_KLASS_NAME'], ENV['THREAD_TYPE_FULL_PATH'], ENV['ASYNC_METHOD'])# if ENV['TRIGGER_PROCESS'] == 'true'
   file.write("SHUT DOWN SUCCESSFULLY \n")
   file.flush
   file.close
