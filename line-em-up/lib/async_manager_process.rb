@@ -5,6 +5,7 @@ require 'gosu'
 # require_relative '../models/projectiles/projectile.rb'
 require 'json'
 require 'oj'
+require 'parallel'
 # require 'tempfile'
 
 
@@ -35,17 +36,20 @@ class AsyncManagerProcess
           begin
             # If read_nonblock does hold.. need to send exit command? Need to send kill command in the read_non_block.
             while lines = stdin.read_nonblock(MAX_BYTE_LENGTH) # need to move this here,  and preceed, Process.getpgid(pid)
-              lines.split("\n").each do |line|
-                parsed_data = Oj.load(line)
-                items = parsed_data[:data]
-                args  = parsed_data[:args]
-                results = []
-                # Maybe threading here? probably
-                items.each do |item|
-                  results << thread_type_klass.send(async_method, item, *args)
+              Thread.new do
+                lines.split("\n").each do |line|
+                  parsed_data = Oj.load(line)
+                  items = parsed_data[:data]
+                  args  = parsed_data[:args]
+                  results = []
+                  # Maybe threading here? probably
+                  items.each do |item|
+                  # Parallel.each(items, in_threads: 8) do |item|
+                    results << thread_type_klass.send(async_method, item, *args)
+                  end
+                  stdout.puts( Oj.dump(results) )
+                  stdout.flush
                 end
-                stdout.puts( Oj.dump(results) )
-                stdout.flush
               end
             end
           rescue IO::WaitReadable, EOFError
