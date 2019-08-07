@@ -59,6 +59,7 @@ module HardpointObjects
     def initialize(options = {})
       @image = self.class.get_hardpoint_image
       @slot_type = self.class::SLOT_TYPE
+      # @fixed_angle_offset = fixed_angle_offset # not currently used anywhere
       super(options)
 
       if self.class::SHOW_READY_PROJECTILE
@@ -127,7 +128,7 @@ module HardpointObjects
       self.class::PROJECTILE_CLASS.new(
         current_map_pixel_x, current_map_pixel_y, 
         destination_angle, start_point, end_point,
-        self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle, self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle, hardpoint_firing_angle,
+        (self.class::LAUNCHER_MIN_ANGLE || 0) + hardpoint_firing_angle, (self.class::LAUNCHER_MAX_ANGLE || 0) + hardpoint_firing_angle, hardpoint_firing_angle,
         current_map_tile_x, current_map_tile_y,
         owner, z_projectile, options
       )
@@ -142,18 +143,22 @@ module HardpointObjects
       validate_not_nil([options], self.class.name, __callee__) 
       # HARDPOINT FIRING ANGLE: -90
       # puts "HARDPOINT FIRING ANGLE: #{hardpoint_firing_angle}"
-      angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
-      angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
+      if self.class::LAUNCHER_MIN_ANGLE && self.class::LAUNCHER_MAX_ANGLE
+        angle_min = self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + hardpoint_firing_angle)
+        angle_max = self.class.angle_1to360(self.class::LAUNCHER_MAX_ANGLE + hardpoint_firing_angle)
+      else
+        angle_min = hardpoint_firing_angle - 2.0
+        angle_max =hardpoint_firing_angle + 2.0
+      end
 
      # puts "OWNER: #{options[:owner]}"
      # puts "TRYING TO ATTACK: - #{self.class.name}"
-      test2 = is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
      # puts "WAS IT BETWEEN ANGLES? #{test2}"
       # if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
       projectile = nil
       destructable_projectile = nil
       graphical_effects = []
-      if test2
+      if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
        # puts "BETWEEN ANGLES"
         @within_angle = true
 
@@ -315,6 +320,7 @@ module HardpointObjects
 
     # This section is somehwat outdated.
     def update mouse_x = nil, mouse_y = nil, object = nil, hardpoint_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
+      hardpoint_angle = hardpoint_angle.round(2)
      # puts "HARDPOINT OBJECT UPDATE - #{self.class.name}"
       # return true unless self.class.name == "HardpointObjects::GrapplingHookHardpoint"
       # puts [mouse_x, mouse_y, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y]
@@ -358,7 +364,7 @@ module HardpointObjects
             end_point   = OpenStruct.new(:x => attackable_location_x, :y => attackable_location_y)
            # puts "TARGET: #{attackable_location_x} - #{attackable_location_y}"
             # Reorienting angle to make 0 north
-            @destination_angle = self.class.angle_1to360(-(self.class.calc_angle(start_point, end_point) - 90))
+            @destination_angle = (self.class.angle_1to360(-(self.class.calc_angle(start_point, end_point) - 90)))
            # puts "DESTINATIONANGLE: #{@destination_angle}"
             # puts "self.class.angle_1to360(self.class::LAUNCHER_MIN_ANGLE + ship_angle)"
             # puts "self.class.angle_1to360(#{self.class::LAUNCHER_MIN_ANGLE} + #{ship_angle})"
@@ -368,7 +374,6 @@ module HardpointObjects
            # puts "MAX - #{self.class::LAUNCHER_MAX_ANGLE} - #{hardpoint_angle}"
 
             # puts "@firing_angle_offset: #{@firing_angle_offset}"
-            test = is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
            # puts "WAS IT BBETWEEN ANGLES: #{test} - input was: #{@destination_angle} - #{angle_min} - #{angle_max}"
               # DESTINATIONANGLE: 338.1777146603222
               # MIN - -60 - 180.43599999999506
@@ -377,21 +382,29 @@ module HardpointObjects
               # WAS IT BBETWEEN ANGLES: false
               # input was: 338.1777146603222 - 120.43599999999506 - 240.43599999999506
 
-            if test
+            # CURRENT ANGLE WAS MADE UP OF: 408.0 + -392.68
+            # DESIGNATION ANGLE DID NOT MATCH: 15.32 != 15.319999999999993
+            # [42] pry(main)> 408 - 392.68
+            # => 15.319999999999993
+
+            if is_angle_between_two_angles?(@destination_angle, angle_min, angle_max)
+              # puts "ANGLE WAS BETWEEN TWO ANGLES: #{@destination_angle}, min: #{angle_min}, max: #{angle_max}"
               # if self.class::LAUNCHER_ROTATE_SPEED
               # @within_angle = true
              # puts "IS WITHIN ANGLE"
               current_angle = self.class.angle_1to360(hardpoint_angle + @firing_angle_offset)
+              # puts "CURRENT ANGLE WAS MADE UP OF: #{hardpoint_angle} + #{@firing_angle_offset}"
               # puts "DESTINATION AND CURRENT ANGLE: #{@destination_angle} - #{current_angle}"
               if @destination_angle != current_angle
+                # puts "DESIGNATION ANGLE DID NOT MATCH: #{@destination_angle} != #{current_angle}"
                 angle_diff  = GeneralObject.angle_diff(@destination_angle, current_angle)
-                # puts "ANGLED DIFF: #{angle_diff}"
+                # puts "ANGLED DIFF: #{angle_diff} - #{object.owner.id}" if object.owner.id != 'player'
 
                 # if angle_diff > 0.0 && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
                 if angle_diff > 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
-                  # @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
                   @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
 
+                  @firing_angle_offset = self.class.angle_1to360(@destination_angle - hardpoint_angle) if self.class::LAUNCHER_ROTATE_SPEED > angle_diff
                   # @firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset < @destination_angle - hardpoint_angle
 
                   # puts "CASE 1"
@@ -400,8 +413,7 @@ module HardpointObjects
                   # puts "3-#{@firing_angle_offset} = #{@destination_angle - hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle - hardpoint_angle}"
                 elsif angle_diff < 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
                   @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
-
-                  # @firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle
+                  @firing_angle_offset = self.class.angle_1to360(@destination_angle - hardpoint_angle) if self.class::LAUNCHER_ROTATE_SPEED > -angle_diff
 
                   # puts "CASE 2"
                   # puts "1-@firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle"

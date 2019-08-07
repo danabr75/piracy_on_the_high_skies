@@ -312,7 +312,8 @@ class AIShip < ScreenMapFixedObject
 
   def accelerate
    # puts "AI ACCELLERATE: #{@ship.current_momentum} - current_steam: #{@ship.current_steam_capacity}"
-    @ship.accelerate
+   # blocking for now
+    # @ship.accelerate
   end
   def brake rate = 1
     @ship.brake(rate)
@@ -369,6 +370,15 @@ class AIShip < ScreenMapFixedObject
     #   destructable_projectiles: [], graphical_effects: []
     # }
 
+    projectiles = []
+    destructable_projectiles = []
+    graphical_effects = []
+    local_max_agro = 0
+    agro_target = nil
+    agro_target_distance = nil
+    buildings = []
+    shipwreck = nil
+
     if @ship.current_momentum > 0.0
       # if @boost_active
       #   speed = @ship.boost_speed * (@current_momentum / (@ship.mass)) / 2.0
@@ -400,13 +410,6 @@ class AIShip < ScreenMapFixedObject
       @argo_target_map[target_id] = argo_level - AGRO_DECREMENT
       @argo_target_map.delete(target_id) if argo_level <= 0
     end
-
-    projectiles = []
-    destructable_projectiles = []
-    graphical_effects = []
-    local_max_agro = 0
-    agro_target = nil
-    agro_target_distance = nil
 
     if @special_target_focus && !@special_target_focus.is_alive
       @special_target_focus = nil
@@ -703,12 +706,9 @@ class AIShip < ScreenMapFixedObject
       # factor_in_scale_speed = @speed * @average_scale
 
       # movement(factor_in_scale_speed, @angle) if factor_in_scale_speed != 0
-    buildings = []
-    shipwreck = nil
     if !result
       shipwreck = Shipwreck.new(@window, @current_map_pixel_x, @current_map_pixel_y, @current_map_tile_x, @current_map_tile_y, @ship, @current_momentum, @angle, @drops)
     end
-
 
     return {
       is_alive: is_alive, projectiles: projectiles, shipwreck: shipwreck,

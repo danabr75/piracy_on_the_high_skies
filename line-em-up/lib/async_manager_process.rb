@@ -44,7 +44,8 @@ class AsyncManagerProcess
                   results = []
                   # Maybe threading here? probably
                   items.each do |item|
-                  # Parallel.each(items, in_threads: 8) do |item|
+                  # 48 max
+                  # Parallel.each(items, in_threads: 2) do |item|
                     results << thread_type_klass.send(async_method, item, *args)
                   end
                   stdout.puts( Oj.dump(results) )

@@ -216,70 +216,45 @@ class AsyncProcessManager
       pid = Thread.new do
         begin
           # only sending 1 block
-          items_count = 1
-          final_data = []
           raw_final_data = []
-          final_data_count = 0
 
           sending_data = []
-          t1 = Thread.new do
-            items.each do |key, item|
-              sending_data << item.send(@gather_data_method)
-            end
+          items.each do |key, item|
+            sending_data << item.send(@gather_data_method)
           end
-          t1.join
 
           write_pipe = parent_write_get_pipe
           write_pipe.puts( Oj.dump({data: sending_data, args: args}) )
           write_pipe.flush
 
-          t2 = Thread.new do
-            begin
-              while final_data_count < items_count && lines = @child_read.read_nonblock(MAX_BYTE_LENGTH)
-                lines.split("\n").each do |line|
-                  # REMOVE THIS SECTION IF string matching takes too long to process.
-                  if line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)
-                    if !@exiting # don't care about errors if shutting down.
-                      error_data = line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)[1]
-                      puts "RIGHT HERE ERROR: #{error_data}"
-                      exit_hooks
-                      raise "Encountered error on #{@thread_type_klass_name} with #{error_data}"
-                    end
-                  end
-                  final_data_count += 1
-                  raw_final_data << line
-                  # final_data << Oj.load(line)
+          begin
+            lines = @child_read.read_nonblock(MAX_BYTE_LENGTH)
+            lines.split("\n").each do |line|
+              # REMOVE THIS SECTION IF string matching takes too long to process.
+              if line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)
+                if !@exiting # don't care about errors if shutting down.
+                  error_data = line.match(SUB_PROCESS_ENCOUNTER_ERROR_PATTERN)[1]
+                  puts "RIGHT HERE ERROR: #{error_data}"
+                  exit_hooks
+                  raise "Encountered error on #{@thread_type_klass_name} with #{error_data}"
                 end
               end
-              # Thread.exit
-            rescue IO::WaitReadable
-              IO.select([@child_read])
-              # Thread.pass
-              retry
+              raw_final_data << line
             end
-            Thread.exit
+            # Thread.exit
+          rescue IO::WaitReadable
+            IO.select([@child_read])
+            # Thread.pass
+            retry
           end
-          t2.join
 
-          t3 = Thread.new do
-            # raw data should be 1 element, an array
-            raw_final_data.each do |raw_f_data|
-              # Parallel.each(raw_final_data, in_threads: 8) do |raw_f_data|
-              items_data = Oj.load(raw_f_data)
-              items_data.each do |item_data|
-                items[item_data[:id]].set_data(item_data)
-                window.remove_projectile_ids.push(item_data[:id]) if !items[item_data[:id]].is_alive
-              end
+          raw_final_data.each do |raw_data|
+            items_data = Oj.load(raw_data)
+            items_data.each do |item_data|
+              items[item_data[:id]].set_data(item_data)
+              window.remove_projectile_ids.push(item_data[:id]) if !items[item_data[:id]].is_alive
             end
-            Thread.exit
           end
-          t3.join
-
-          # final_data.each do |f_data|
-          #   # Parallel.each(raw_final_data, in_threads: 8) do |raw_f_data|
-          #   items[f_data[:id]].set_data(f_data)
-          #   window.remove_projectile_ids.push(f_data[:id]) if !items[f_data[:id]].is_alive
-          # end
 
         rescue Exception => e
           # kill sub processes if anything goes wrong

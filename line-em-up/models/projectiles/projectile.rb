@@ -528,6 +528,8 @@ module Projectiles
     def hit_objects air_object_groups, ground_object_groups#, options = {}
       # puts "PROJ hit objects"
       graphical_effects = []
+      # testing here
+      # return {graphical_effects: graphical_effects}
       if @air_to_ground
         if @distance_traveled_so_far < @ground_distance_to_travel
           return {graphical_effects: graphical_effects} 
@@ -552,10 +554,10 @@ module Projectiles
       # is_thread = options[:is_thread] || false
       if @health > 0
         object_groups.each do |group|
-          break if @health == 0
+          # break if @health == 0
           break if hit_object
           group.each do |object_id, object|
-            break if @health == 0
+            # break if @health == 0
             next if object.nil?
             next if object_id == @id
             next if object_id == @owner.id

@@ -131,7 +131,7 @@ class Hardpoint < GeneralObject
     # puts "NEW Y: #{@y}"
     # raise "old_y is not equal to y: #{old_y} - #{@y}. Angle: #{current_ship_angle}" if old_y != @y
     # puts "WAS INVALID? #{!has_valid_slot_type?}"
-    @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self, is_invalid: !has_valid_slot_type?, owner_klass: ship.class}) if @item_klass
+    @item = @item_klass.new({image_angle: @angle_from_center, hp_reference: self, is_invalid: !has_valid_slot_type?, owner_klass: ship.class}) if @item_klass #, fixed_angle_offset: @angle_offset
 
     # puts "END HARDPOINT #{@id}"
     @owner = owner
@@ -358,7 +358,7 @@ class Hardpoint < GeneralObject
       effects.each do |effect|
         @drawable_items_near_self << effect
       end
-      if attack_projectile
+      if false #attack_projectile
         destination_angle = self.class.angle_1to360(-(calc_angle(start_point, end_point) - 90))
         @drawable_items_near_self << Graphics::AngledSmoke.new(
           @current_map_pixel_x, @current_map_pixel_y, 3, destination_angle, nil, @width_scale,
@@ -450,7 +450,7 @@ class Hardpoint < GeneralObject
 
     # Update list of weapons for special cases like beans. Could iterate though an association in the future.
     # puts "ITEM HERE: #{@item.class}"
-    @item.update(mouse_x, mouse_y, self, ship_angle -@angle_offset, @current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y) if @item
+    @item.update(mouse_x, mouse_y, self, ship_angle - @angle_offset, @current_map_pixel_x, @current_map_pixel_y, attackable_location_x, attackable_location_y) if @item
     # @cooldown_wait -= 1              if @cooldown_wait > 0
     # @secondary_cooldown_wait -= 1    if @secondary_cooldown_wait > 0
     # @grapple_hook_cooldown_wait -= 1 if @grapple_hook_cooldown_wait > 0

@@ -56,7 +56,9 @@ class InnerMap
     # @graphics_setting = GraphicsSetting.get_interval_value(graphics_value)
 
 
-    @collision_counter = 0
+    @ship_collision_counter = 0
+    @projectile_collision_counter = 0
+    @projectile_update_counter = 0
     @destructable_collision_counter = 1
     @projectile_collision_manager              = AsyncProcessManager.new(ProjectileCollisionThread, 16, true, :joined_threads)
     @destructable_projectile_collision_manager = AsyncProcessManager.new(DestructableProjectileCollisionThread, 8, true, :joined_threads)
@@ -65,10 +67,14 @@ class InnerMap
     # if true #@graphics_setting == :basic
       # Maybe just wait for all threads to finish???
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true, :joined_threads)
+
+      # 50-53 FPS
       # @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :joined_threads)
+      # 48-50 FPS
       # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :processes, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
+      # 48-49 FPS
       @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :process_manager, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
-      
+
       # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :none_test, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
       # Building update needs to be joined, or else ships are updated with missing images
       @building_update_manager   = AsyncProcessManager.new(BuildingUpdateThread, 6, true, :joined_threads) # , :joined_threads
@@ -134,7 +140,7 @@ class InnerMap
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
     @ui_y = 0
-    @footer_bar = FooterBar.new(self)
+    # @footer_bar = FooterBar.new(self)
     reset_font_ui_y
 
     @key_pressed_map = {}
@@ -407,7 +413,7 @@ class InnerMap
     @font = Gosu::Font.new((10 * ((@width_scale + @height_scale) / 2.0)).to_i)
 
     @ui_y = 0
-    @footer_bar = FooterBar.new(self)
+    # @footer_bar = FooterBar.new(self)
     reset_font_ui_y
 
     @key_pressed_map = {}
@@ -502,12 +508,12 @@ class InnerMap
     elsif @exit_map_menu.active
       @exit_map_menu.onClick(element_id)
     else
-      @footer_bar.onClick(element_id)
-      if @effects.any?
-        @effects.each do |effect|
-          effect.onClick(element_id)
-        end
-      end
+      # @footer_bar.onClick(element_id)
+      # if @effects.any?
+      #   @effects.each do |effect|
+      #     effect.onClick(element_id)
+      #   end
+      # end
     end
   end
 
@@ -551,7 +557,6 @@ class InnerMap
 
   def update mouse_x, mouse_y
     # puts "@player.is_alive: #{@player.is_alive} and @player_death_logic_activated: #{@player_death_logic_activated}"
-    @add_messages.reject! {|m| @messages << m; true }
     if @player_death_logic_activated == false && !@player.is_alive
       @player_death_logic_activated = true
       activate_player_death_logic
@@ -562,61 +567,74 @@ class InnerMap
     
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
 
-
-    @add_graphical_effects.reject! do |graphical_effect|
-      @graphical_effects << graphical_effect
-      true
+    other_pids = []
+    other_pids << Thread.new do
+      @add_graphical_effects.reject! do |graphical_effect|
+        @graphical_effects << graphical_effect
+        true
+      end
+      @add_messages.reject! {|m| @messages << m; true }
     end
 
-    @add_projectiles.reject! do |projectile|
-      @projectiles[projectile.id] = projectile
-      true
+    other_pids << Thread.new do
+      @add_projectiles.reject! do |projectile|
+        # @projectiles[projectile.id] = projectile
+        true
+      end
     end
 
-    @remove_projectile_ids.reject! do |projectile_id|
-      @projectiles.delete(projectile_id)
-      true
+    other_pids << Thread.new do
+      @remove_projectile_ids.reject! do |projectile_id|
+        @projectiles.delete(projectile_id)
+        true
+      end
     end
 
-    @add_ships.reject! do |ship|
-      @ships[ship.id] = ship
-      true
+    other_pids << Thread.new do
+      @add_ships.reject! do |ship|
+        @ships[ship.id] = ship
+        true
+      end
+      @remove_ship_ids.reject! do |ship_id|
+        @ships.delete(ship_id)
+        true
+      end
     end
 
-    @remove_ship_ids.reject! do |ship_id|
-      @ships.delete(ship_id)
-      true
+    other_pids << Thread.new do
+      @add_shipwrecks.reject! do |shipwreck|
+        @shipwrecks[shipwreck.id] = shipwreck
+        true
+      end
+      @remove_shipwreck_ids.reject! do |shipwreck_id|
+        @shipwrecks.delete(shipwreck_id)
+        true
+      end
     end
 
-    @add_shipwrecks.reject! do |shipwreck|
-      @shipwrecks[shipwreck.id] = shipwreck
-      true
+    other_pids << Thread.new do
+      @add_buildings.reject! do |b|
+        @buildings[b.id] = b
+        true
+      end
+      @remove_building_ids.reject! do |b_id|
+        @buildings.delete(b_id)
+        true
+      end
     end
 
-    @remove_shipwreck_ids.reject! do |shipwreck_id|
-      @shipwrecks.delete(shipwreck_id)
-      true
+    other_pids << Thread.new do
+      @add_destructable_projectiles.reject! do |dp|
+        @destructable_projectiles[dp.id] = dp
+        true
+      end
+      @remove_destructable_projectile_ids.reject! do |dp_id|
+        @destructable_projectiles.delete(dp_id)
+        true
+      end
     end
 
-    @add_buildings.reject! do |b|
-      @buildings[b.id] = b
-      true
-    end
-
-    @remove_building_ids.reject! do |b_id|
-      @buildings.delete(b_id)
-      true
-    end
-
-    @add_destructable_projectiles.reject! do |dp|
-      @destructable_projectiles[dp.id] = dp
-      true
-    end
-
-    @remove_destructable_projectile_ids.reject! do |dp_id|
-      @destructable_projectiles.delete(dp_id)
-      true
-    end
+    other_pids.each {|p| p.join }
 
     # must be after the remove and add arrays.
     pids = []
@@ -636,25 +654,43 @@ class InnerMap
     @exit_map_menu.update
     @ship_loadout_menu.update(mouse_x, mouse_y) if @ship_loadout_menu.active
 
-    if !@game_pause && !menus_active && !@menu_open && !@menu.active
+    if !@game_pause && !menus_active# && !@menu_open && !@menu.active
       # PIDS up front and center
-      pids << @projectile_update_manager.update(self, @projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
-      if @collision_counter < 2
-        @collision_counter += 1
+      if @projectile_collision_counter < 2
+        @projectile_collision_counter += 1
       else
         pids << @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ], [@buildings])
-        @collision_counter = 0
+        @projectile_collision_counter = 0
       end
-      if @destructable_collision_counter < 2
+
+      # if @projectile_update_counter < 1
+        # @projectile_update_counter += 1
+      # else
+      if false
+        pids << @projectile_update_manager.update(self, @projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
+      end
+        # @projectile_update_counter = 0
+      # end
+
+      if @destructable_collision_counter < 4
         @destructable_collision_counter += 1
       else
         pids << @destructable_projectile_collision_manager.update(self, @destructable_projectiles, [@ships, {'player' => @player} ], [@buildings])
         @destructable_collision_counter = 0
       end
+
       pids << @destructable_projectile_update_manager.update(self, @destructable_projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
 
-      pids << @ship_update_manager.update(self, @ships, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings, {on_ground: @pointer.on_ground})
-      pids << @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
+      # if false
+        pids << @ship_update_manager.update(self, @ships, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y, @ships.merge({'player' => @player}), @buildings, {on_ground: @pointer.on_ground})
+      # end
+
+      if @ship_collision_counter < 2
+        @ship_collision_counter += 1
+      else
+        pids << @ship_collision_manager.update(self, @ships.merge({@player.id => @player}), [@ships.merge({@player.id => @player})])
+        @ship_collision_counter = 0
+      end
 
 
       @effects.reject! do |effect_group|
@@ -681,7 +717,7 @@ class InnerMap
         end
       end
 
-      @footer_bar.update
+      # @footer_bar.update
 
       if Gosu.button_down?(Gosu::KB_I) && key_id_lock(Gosu::KB_I)
         if @ship_loadout_menu.active
@@ -815,21 +851,31 @@ class InnerMap
         end
 
       end
-      if !@game_pause && !menus_active && !@menu_open && !@menu.active
+      if !@game_pause && !menus_active# && !@menu_open && !@menu.active
         pids << @shipwreck_update_manager.update(self, @shipwrecks, nil, nil, @player.current_map_pixel_x, @player.current_map_pixel_y)
       end
     end
 
-    if @fps_counter < 60
-      @fps_log << Gosu.fps if Gosu.fps < 55
-      @fps_counter += 1
-    else
-      if @fps_log.count > 0
-        puts "FPS Logger: " + @fps_log.join(', ')
-        @fps_log = []
-      end
+    # if @fps_counter < 60
+    #   @fps_log << Gosu.fps if Gosu.fps < 55
+    #   @fps_counter += 1
+    # else
+    #   puts "PROJECTILES COUNT: #{@projectiles.count}"
+    #   if @fps_log.count > 0
+    #     puts "FPS Logger: " + @fps_log.join(', ')
+    #     @fps_log = []
+    #   end
+    #   @fps_counter = 0
+    # end
+
+    if @fps_counter > 60
+      puts "FPS: #{Gosu.fps} - PROJECTILES COUNT: #{@projectiles.count}"
       @fps_counter = 0
+    else
+      @fps_counter += 1
     end
+
+
 
     pids.each {|t| t.join if t }
     return @exit_map
@@ -846,7 +892,7 @@ class InnerMap
     @menu.draw
     @exit_map_menu.draw
     @ship_loadout_menu.draw
-    @footer_bar.draw
+    # @footer_bar.draw
 
     @player.draw(@viewable_pixel_offset_x, @viewable_pixel_offset_y) if @player.is_alive && !@ship_loadout_menu.active
     # if !menus_active && !@player.is_alive
@@ -870,39 +916,39 @@ class InnerMap
     #   @font.draw("#{faction.id.upcase}: #{faction.display_factional_relation(@player.get_faction_id)}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
     # end
     # @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-    if false &&@debug
-      @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("STEAM: #{@player.ship.current_steam_capacity}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Ship count: #{@ships.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("destructable_proj: #{@destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("Momentum: #{@player.ship.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    # if false &&@debug
+    #   @font.draw("G-Effect: #{@graphical_effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("Health: #{@player.health}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("STEAM: #{@player.ship.current_steam_capacity}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("Ship count: #{@ships.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("projectiles count: #{@projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("destructable_proj: #{@destructable_projectiles.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("buildings count: #{@buildings.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("Momentum: #{@player.ship.current_momentum.to_i}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
 
-      @font.draw("Active Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @quest_data.each do |quest_key, values|
-        next if values["map_name"] != @gl_background.map_name
-        if values['state'] == 'active'
-          @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        end
-      end
-      @font.draw("Completed Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      @quest_data.each do |quest_key, values|
-        next if values["map_name"] != @gl_background.map_name
-        if values['state'] == 'complete'
-          @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        end
-      end
+    #   @font.draw("Active Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @quest_data.each do |quest_key, values|
+    #     next if values["map_name"] != @gl_background.map_name
+    #     if values['state'] == 'active'
+    #       @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #     end
+    #   end
+    #   @font.draw("Completed Quests", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   @quest_data.each do |quest_key, values|
+    #     next if values["map_name"] != @gl_background.map_name
+    #     if values['state'] == 'complete'
+    #       @font.draw("- #{quest_key}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #     end
+    #   end
 
-      if @effects.any?
-        @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-        @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
-      end
+    #   if @effects.any?
+    #     @font.draw("----------------------", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #     @font.draw("Effect: #{@effects.count}", 10, get_font_ui_y, ZOrder::UI, 1.0, 1.0, 0xff_ffff00)
+    #   end
 
-    end
-    reset_font_ui_y
+    # end
+    # reset_font_ui_y
   end
 
   def get_font_ui_y

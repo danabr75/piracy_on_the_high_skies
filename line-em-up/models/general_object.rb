@@ -506,7 +506,7 @@ class GeneralObject
     elsif angle < 0.0
       value = angle % 360.0
     end
-    return value
+    return value.round(2)
   end
   # CONFIRMED WORKING IN ALL CASES
   def self.is_angle_between_two_angles?(angle, min_angle, max_angle)
@@ -584,7 +584,7 @@ class GeneralObject
     # puts "value = angle2 - angle1"
     # puts "#{value} = #{angle2} - #{angle1}"
     value = (value + 180.0) % 360.0 - 180.0
-    return value
+    return value.round(2)
   end
 
   # 0 = GeneralObject.angle_diff(-96.59999999999935, 263.40000000000066)
