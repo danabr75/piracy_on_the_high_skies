@@ -320,7 +320,7 @@ module HardpointObjects
 
     # This section is somehwat outdated.
     def update mouse_x = nil, mouse_y = nil, object = nil, hardpoint_angle = nil, current_map_pixel_x = nil, current_map_pixel_y = nil, attackable_location_x = nil, attackable_location_y = nil
-      hardpoint_angle = hardpoint_angle.round(2)
+      # hardpoint_angle = hardpoint_angle.round(2)
      # puts "HARDPOINT OBJECT UPDATE - #{self.class.name}"
       # return true unless self.class.name == "HardpointObjects::GrapplingHookHardpoint"
       # puts [mouse_x, mouse_y, hardpoint_angle, current_map_pixel_x, current_map_pixel_y, attackable_location_x, attackable_location_y]
@@ -395,13 +395,13 @@ module HardpointObjects
               current_angle = self.class.angle_1to360(hardpoint_angle + @firing_angle_offset)
               # puts "CURRENT ANGLE WAS MADE UP OF: #{hardpoint_angle} + #{@firing_angle_offset}"
               # puts "DESTINATION AND CURRENT ANGLE: #{@destination_angle} - #{current_angle}"
-              if @destination_angle != current_angle
+              if @destination_angle.round(1) != current_angle.round(1)
                 # puts "DESIGNATION ANGLE DID NOT MATCH: #{@destination_angle} != #{current_angle}"
                 angle_diff  = GeneralObject.angle_diff(@destination_angle, current_angle)
                 # puts "ANGLED DIFF: #{angle_diff} - #{object.owner.id}" if object.owner.id != 'player'
 
                 # if angle_diff > 0.0 && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
-                if angle_diff > 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+                if angle_diff.positive? # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
                   @firing_angle_offset -= self.class::LAUNCHER_ROTATE_SPEED
 
                   @firing_angle_offset = self.class.angle_1to360(@destination_angle - hardpoint_angle) if self.class::LAUNCHER_ROTATE_SPEED > angle_diff
@@ -411,7 +411,7 @@ module HardpointObjects
                   # puts "1-@firing_angle_offset = @destination_angle - hardpoint_angle if @firing_angle_offset > @destination_angle - hardpoint_angle"
                   # puts "2-#{@firing_angle_offset} = #{@destination_angle} - #{hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle} - #{hardpoint_angle}"
                   # puts "3-#{@firing_angle_offset} = #{@destination_angle - hardpoint_angle} if #{@firing_angle_offset} > #{@destination_angle - hardpoint_angle}"
-                elsif angle_diff < 0.0 # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
+                elsif angle_diff.negative? # && angle_diff.abs > self.class::LAUNCHER_ROTATE_SPEED
                   @firing_angle_offset += self.class::LAUNCHER_ROTATE_SPEED
                   @firing_angle_offset = self.class.angle_1to360(@destination_angle - hardpoint_angle) if self.class::LAUNCHER_ROTATE_SPEED > -angle_diff
 
@@ -422,7 +422,7 @@ module HardpointObjects
                 end
               end
               # @destination_angle   = 0
-            elsif @firing_angle_offset != 0.0
+            elsif @firing_angle_offset.zero?
              # puts "NOT WITHIN ANGLE  self.class.name: #{self.class.name}"
              # puts [@destination_angle, angle_min, angle_max]
              # puts "ADJUSTING ANGLE OFFSET HERE: #{@firing_angle_offset}"

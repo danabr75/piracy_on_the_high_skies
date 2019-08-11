@@ -69,11 +69,11 @@ class InnerMap
       @ship_update_manager       = AsyncProcessManager.new(ShipUpdateThread, 6, true, :joined_threads)
 
       # 50-53 FPS
-      # @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :joined_threads)
+      @projectile_update_manager = AsyncProcessManager.new(ProjectileUpdateThread, 8, true, :joined_threads)
       # 48-50 FPS
       # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :processes, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
       # 48-49 FPS
-      @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :process_manager, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
+      # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :process_manager, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
 
       # @projectile_update_manager = AsyncProcessManager.new(Projectiles::Projectile, 8, true, :none_test, :async_update, :get_data, :set_data, "#{MODEL_DIRECTORY}/projectiles/projectile.rb")
       # Building update needs to be joined, or else ships are updated with missing images
@@ -568,29 +568,29 @@ class InnerMap
     @quest_data, @ships, @buildings, @messages, @effects = QuestInterface.update_quests(@save_file_path, @quest_data, @gl_background.map_name, @ships, @buildings, @player, @messages, @effects, self)
 
     other_pids = []
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @add_graphical_effects.reject! do |graphical_effect|
         @graphical_effects << graphical_effect
         true
       end
       @add_messages.reject! {|m| @messages << m; true }
-    end
+    # end
 
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @add_projectiles.reject! do |projectile|
-        # @projectiles[projectile.id] = projectile
+        @projectiles[projectile.id] = projectile
         true
       end
-    end
+    # end
 
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @remove_projectile_ids.reject! do |projectile_id|
         @projectiles.delete(projectile_id)
         true
       end
-    end
+    # end
 
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @add_ships.reject! do |ship|
         @ships[ship.id] = ship
         true
@@ -599,9 +599,9 @@ class InnerMap
         @ships.delete(ship_id)
         true
       end
-    end
+    # end
 
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @add_shipwrecks.reject! do |shipwreck|
         @shipwrecks[shipwreck.id] = shipwreck
         true
@@ -610,9 +610,9 @@ class InnerMap
         @shipwrecks.delete(shipwreck_id)
         true
       end
-    end
+    # end
 
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @add_buildings.reject! do |b|
         @buildings[b.id] = b
         true
@@ -621,9 +621,9 @@ class InnerMap
         @buildings.delete(b_id)
         true
       end
-    end
+    # end
 
-    other_pids << Thread.new do
+    # other_pids << Thread.new do
       @add_destructable_projectiles.reject! do |dp|
         @destructable_projectiles[dp.id] = dp
         true
@@ -632,9 +632,9 @@ class InnerMap
         @destructable_projectiles.delete(dp_id)
         true
       end
-    end
+    # end
 
-    other_pids.each {|p| p.join }
+    # other_pids.each {|p| p.join }
 
     # must be after the remove and add arrays.
     pids = []
@@ -656,20 +656,18 @@ class InnerMap
 
     if !@game_pause && !menus_active# && !@menu_open && !@menu.active
       # PIDS up front and center
-      if @projectile_collision_counter < 2
-        @projectile_collision_counter += 1
-      else
+      # if @projectile_collision_counter < 2
+      #   @projectile_collision_counter += 1
+      # else
         pids << @projectile_collision_manager.update(self, @projectiles, [@ships, @destructable_projectiles, {'player' => @player} ], [@buildings])
-        @projectile_collision_counter = 0
-      end
+        # @projectile_collision_counter = 0
+      # end
 
       # if @projectile_update_counter < 1
-        # @projectile_update_counter += 1
+      #   @projectile_update_counter += 1
       # else
-      if false
         pids << @projectile_update_manager.update(self, @projectiles, mouse_x, mouse_y, @player.current_map_pixel_x, @player.current_map_pixel_y)
-      end
-        # @projectile_update_counter = 0
+      #   @projectile_update_counter = 0
       # end
 
       if @destructable_collision_counter < 4
