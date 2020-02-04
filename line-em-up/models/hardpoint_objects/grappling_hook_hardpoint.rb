@@ -1,4 +1,5 @@
 require_relative '../projectiles/grappling_hook.rb'
+require_relative '../hardpoint_objects/hardpoint_object.rb'
 module HardpointObjects
   class GrapplingHookHardpoint < HardpointObjects::HardpointObject
     HARDPOINT_NAME = "grappling_hook_launcher"

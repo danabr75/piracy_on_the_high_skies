@@ -1,3 +1,5 @@
+require_relative 'screen_map_fixed_object.rb'
+
 class Shipwreck < ScreenMapFixedObject
 
   def initialize window, current_map_pixel_x, current_map_pixel_y, current_map_tile_x, current_map_tile_y, ship, momentum, angle, drops = [], options = {}
