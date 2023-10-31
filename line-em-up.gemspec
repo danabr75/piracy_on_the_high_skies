@@ -27,7 +27,7 @@ Gem::Specification.new do |s|
   s.license       = 'MIT'
   # s.add_development_dependency 'ocra', '1.3.10'
   s.add_development_dependency 'pry', '0.12.2'
-  s.add_development_dependency 'rmagick', '4.0.0'
+  s.add_development_dependency 'rmagick', '5.3.0'
   s.add_development_dependency 'benchmark-ips',  '2.7.2'
   s.add_development_dependency 'sourcify',  '0.5.0'
   s.add_runtime_dependency 'gosu', '0.14.5'
